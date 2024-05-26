@@ -1,0 +1,9 @@
+[package]
+name = "autumn-boot-sea-orm"
+version = "0.0.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sea-orm = "0.12.15"
