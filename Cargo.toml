@@ -8,4 +8,6 @@ members = [
     "autumn-boot-sqlx",
     "autumn-boot-sea-orm",
     "autumn-boot-sea-streamer",
+    "autumn-boot-actuator",
+    "autumn-boot-mail",
 ]
