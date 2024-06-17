@@ -1,18 +1,7 @@
-use config::init_config;
-use log::init_log;
-
-mod config;
-mod log;
-
-pub struct App;
-
-impl App {
-    pub fn new() -> Self {
-        init_log();
-        init_config();
-        App {}
-    }
+pub trait JobConfig<T> {
+    fn job(&self, jobs: T) -> Self;
 }
+
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

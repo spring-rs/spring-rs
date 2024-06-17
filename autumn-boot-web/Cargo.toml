@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 axum = "0.7.5"
+autumn-boot = { path = "../autumn-boot" }

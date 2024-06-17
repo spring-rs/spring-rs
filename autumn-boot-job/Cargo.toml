@@ -1,10 +1,9 @@
 [package]
-name = "autumn-boot"
+name = "autumn-boot-job"
 version = "0.0.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+tokio-cron-scheduler = "0.10.2"
