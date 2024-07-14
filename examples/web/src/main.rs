@@ -1,3 +1,9 @@
+// use autumn_boot::{axum::Router, web::WebBuilder, App};
+
 fn main() {
-    println!("Hello, world!");
+//     App::new().router(routers()).start()
 }
+
+// fn routers() -> Router<App> {
+//     Router::new()
+// }
