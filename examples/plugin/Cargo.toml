@@ -1,0 +1,9 @@
+[package]
+name = "config"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+autumn-boot = { path = "../../autumn-boot" }
+toml = { version = "0.8.14", features = ["parse"], default-features = false }
+serde = { version = "1.0", features = ["derive"] }

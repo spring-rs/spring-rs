@@ -15,6 +15,12 @@ pub enum AppError {
 
     #[error("{0}")]
     TomlMergeError(String),
+
+    #[error("{0}")]
+    ConfigError(String),
+
+    #[error(transparent)]
+    OtherError(#[from] anyhow::Error),
 }
 
 impl AppError {

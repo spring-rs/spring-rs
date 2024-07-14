@@ -1,4 +1,9 @@
-use crate::{config::env, error::Result};
+use crate::{
+    config::env,
+    error::{AppError, Result},
+};
+use anyhow::Context;
+use toml::Table;
 use tracing::debug;
 
 use crate::{config, plugin::Plugin};
@@ -13,8 +18,10 @@ pub struct App {
     /// The names of plugins that have been added to this app. (used to track duplicates and
     /// already-registered plugins)
     pub(crate) plugin_names: HashSet<String>,
-    /// path of config file
+    /// Path of config file
     pub(crate) config_path: PathBuf,
+    /// Configuration read from `config_path`
+    pub(crate) config: Table,
 }
 
 impl App {
@@ -29,7 +36,6 @@ impl App {
             let plugin_name = plugin.name().to_string();
             panic!("Error adding plugin {plugin_name}: : plugin was already added in application")
         }
-        plugin.build(self);
         self.plugin_names.insert(plugin.name().to_string());
         self.plugin_registry.push(Box::new(plugin));
         self
@@ -43,7 +49,69 @@ impl App {
         self.plugin_names.contains(std::any::type_name::<T>())
     }
 
-    pub fn finish(&mut self) {
+    /// The path of the configuration file, default is `./config/app.toml`.
+    /// The application automatically reads the environment configuration file
+    /// in the same directory according to the `AUTUMN_ENV` environment variable,
+    /// such as `./config/app-dev.toml`.
+    /// The environment configuration file has a higher priority and will
+    /// overwrite the configuration items of the main configuration file.
+    ///
+    /// For specific supported environments, see the [Env](./config/env) enum.
+    pub fn config_file(&mut self, config_path: &str) -> &mut Self {
+        self.config_path = Path::new(config_path).to_path_buf();
+        self
+    }
+
+    /// Get the configuration items of the plugin according to the plugin's `config_prefix`
+    pub fn get_config<T>(&mut self, plugin: impl Plugin) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let prefix = plugin.config_prefix();
+        if let Some(toml::Value::Table(table)) = self.config.get(prefix) {
+            return Ok(T::deserialize(table.to_owned()).with_context(|| {
+                format!(
+                    "Failed to deserialize the configuration of plugin {}",
+                    plugin.name()
+                )
+            })?);
+        }
+        let plugin_name = plugin.name();
+        Err(AppError::ConfigError(format!(
+            "The {} prefix configuration for the {} plugin was not found",
+            prefix, plugin_name
+        )))
+    }
+
+    /// Running
+    pub fn run(&mut self) -> Result<()> {
+        // 1. read env variable
+        let env = env::init()?;
+
+        // 2. load yaml config
+        self.config = config::load_config(self, env)?;
+
+        // 3. build plugin
+        self.build_plugins();
+
+        // 4. finish
+        self.finish();
+
+        // 5. cleanup
+        self.cleanup();
+
+        Ok(())
+    }
+
+    fn build_plugins(&mut self) {
+        let plugins = std::mem::take(&mut self.plugin_registry);
+        for plugin in &plugins {
+            plugin.build(self);
+        }
+        self.plugin_registry = plugins;
+    }
+
+    fn finish(&mut self) {
         let plugins = std::mem::take(&mut self.plugin_registry);
         for plugin in &plugins {
             plugin.finish(self);
@@ -51,29 +119,12 @@ impl App {
         self.plugin_registry = plugins;
     }
 
-    pub fn cleanup(&mut self) {
-        // plugins installed to main should see all sub-apps
+    fn cleanup(&mut self) {
         let plugins = std::mem::take(&mut self.plugin_registry);
         for plugin in &plugins {
             plugin.cleanup(self);
         }
         self.plugin_registry = plugins;
-    }
-
-    pub fn run(&mut self) -> Result<()> {
-        // 1. read env variable
-        let env = env::init()?;
-
-        // 2. load yaml config
-        config::load_config(self, env)?;
-
-        // 3. finish
-        self.finish();
-
-        // 4. cleanup
-        self.cleanup();
-
-        Ok(())
     }
 }
 
@@ -83,6 +134,7 @@ impl Default for App {
             plugin_registry: Default::default(),
             plugin_names: Default::default(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
+            config: Table::with_capacity(0),
         }
     }
 }

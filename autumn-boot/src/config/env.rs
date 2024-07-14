@@ -1,3 +1,5 @@
+use anyhow::Context;
+
 use crate::error::{AppError, Result};
 use std::{
     env,
@@ -37,7 +39,9 @@ impl Env {
     pub(crate) fn get_config_path(&self, path: &Path) -> Result<PathBuf> {
         let stem = path.file_stem().and_then(OsStr::to_str).unwrap_or("");
         let ext = path.extension().and_then(OsStr::to_str).unwrap_or("");
-        let canonicalize = path.canonicalize()?;
+        let canonicalize = path
+            .canonicalize()
+            .with_context(|| format!("canonicalize {:?} failed", path))?;
         let parent = canonicalize
             .parent()
             .ok_or_else(|| AppError::from_io(ErrorKind::NotFound, "config file path not found"))?;
@@ -50,7 +54,13 @@ impl Env {
 }
 
 pub fn init() -> Result<Env> {
-    dotenvy::dotenv()?;
+    match dotenvy::dotenv() {
+        Ok(path) => tracing::debug!(
+            "Loaded the environment variable file under the {} path",
+            path.to_str().unwrap()
+        ),
+        Err(e) => tracing::debug!("Environment variable file not found: {}", e),
+    }
 
     Ok(Env::from_env())
 }

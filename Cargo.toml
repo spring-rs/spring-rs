@@ -10,7 +10,6 @@ members = [
     "autumn-boot-sea-streamer",
     "autumn-boot-actuator",
     "autumn-boot-mail",
-    "examples/web",
-    "examples/job",
+    "examples/*",
 ]
 default-members = ["autumn-boot", "autumn-boot-*"]

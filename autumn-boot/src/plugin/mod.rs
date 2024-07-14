@@ -14,9 +14,14 @@ pub trait Plugin: Any + Send + Sync {
 
     /// Runs after all plugins are built and finished, but before the app schedule is executed.
     /// This can be useful if you have some resource that other plugins need during their build step,
-    /// but after build you want to remove it and send it to another thread.
     fn cleanup(&self, _app: &mut App) {
         // do nothing
+    }
+
+    /// Prefix used to read toml configuration.
+    /// If you need to load external configuration, you need to rewrite this method
+    fn config_prefix(&self) -> &str {
+        ""
     }
 
     /// Configures a name for the [`Plugin`] which is primarily used for checking plugin

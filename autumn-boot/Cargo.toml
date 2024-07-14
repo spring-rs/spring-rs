@@ -15,4 +15,5 @@ inventory = "0.3.15"
 dotenvy = "0.15.7"
 toml = { version = "0.8.14", features = ["parse"], default-features = false }
 thiserror = "1.0.62"
+serde = "1.0"
 serde-toml-merge = "0.3.8"
