@@ -3,10 +3,9 @@ pub mod config;
 use anyhow::Context;
 use async_trait::async_trait;
 use autumn_boot::{app::App, error::Result, plugin::Plugin};
-use axum::Router;
+use axum::Extension;
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 use std::{net::SocketAddr, path::PathBuf, str::FromStr, time::Duration};
-use tokio::task::JoinHandle;
 use tower_http::{
     catch_panic::CatchPanicLayer,
     compression::CompressionLayer,
@@ -16,6 +15,14 @@ use tower_http::{
     timeout::TimeoutLayer,
     trace::TraceLayer,
 };
+
+pub type Router = axum::Router;
+pub type AppRouter = axum::Router<AppState>;
+
+#[derive(Clone)]
+pub struct AppState {
+    //TODO
+}
 
 pub struct WebPlugin;
 
@@ -27,9 +34,37 @@ impl Plugin for WebPlugin {
             .context(format!("web plugin config load failed"))
             .expect("axum web plugin load failed");
 
-        let job = Self::serve(config)
+        // 1. collect router
+        let router = app.get_component::<Router>();
+        let mut router = match router {
+            Some(r) => Router::new().merge(r.to_owned()),
+            None => Router::new(),
+        };
+        if let Some(middlewares) = config.middlewares {
+            router = Self::apply_middleware(router, middlewares);
+        }
+
+        // 2. bind tcp listener
+        let addr = SocketAddr::from((config.binding, config.port));
+        let listener = tokio::net::TcpListener::bind(addr)
             .await
-            .expect("axum web plugin load failed");
+            .with_context(|| format!("bind tcp listener failed:{}", addr))
+            .expect("bind tcp listener failed");
+
+        tracing::info!("bind tcp listener: {}", addr);
+
+        let job = async {
+            // 3. axum server
+            tracing::info!("axum server started");
+
+            let state = AppState {}; //app.build_state();
+            router = router.layer(Extension(state));
+            axum::serve(listener, router)
+                .await
+                .context("start axum server failed")?;
+
+            Ok("axum schedule finished".to_string())
+        };
 
         app.add_scheduler(job);
     }
@@ -40,36 +75,6 @@ impl Plugin for WebPlugin {
 }
 
 impl WebPlugin {
-    async fn serve(config: WebConfig) -> Result<JoinHandle<Result<String>>> {
-        let addr = SocketAddr::from((config.binding, config.port));
-
-        // 1. collect router
-        let collect = Router::new(); //
-        let mut router = Router::new().merge(collect);
-        if let Some(middlewares) = config.middlewares {
-            router = Self::apply_middleware(router, middlewares);
-        }
-        // todo: State
-
-        // 2. bind tcp listener
-        let listener = tokio::net::TcpListener::bind(addr)
-            .await
-            .with_context(|| format!("bind tcp listener failed:{}", addr))?;
-
-        tracing::info!("bind tcp listener: {}", addr);
-
-        let job = tokio::spawn(async {
-            // 3. axum server
-            tracing::info!("axum server started");
-            axum::serve(listener, router.into_make_service())
-                .await
-                .context("start axum server failed")?;
-
-            Ok("axum schedule finished".to_string())
-        });
-        Ok(job)
-    }
-
     fn apply_middleware(router: Router, middleware: Middlewares) -> Router {
         let mut router = router;
         if let Some(catch_panic) = middleware.catch_panic {

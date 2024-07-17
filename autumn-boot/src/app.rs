@@ -1,6 +1,5 @@
 use crate::{config::env, error::Result, log};
 use anyhow::Context;
-use tokio::task::JoinHandle;
 use toml::Table;
 use tracing::debug;
 
@@ -8,10 +7,12 @@ use crate::{config, plugin::Plugin};
 use std::{
     any::{self, Any},
     collections::{HashMap, HashSet},
+    future::Future,
     path::{Path, PathBuf},
 };
 
 pub type Registry<T> = HashMap<String, Box<T>>;
+pub type Scheduler = dyn Future<Output = Result<String>> + Send;
 
 pub struct App {
     /// Plugin
@@ -23,7 +24,7 @@ pub struct App {
     /// Configuration read from `config_path`
     config: Table,
     /// task
-    schedulers: Vec<JoinHandle<Result<String>>>,
+    schedulers: Vec<Box<Scheduler>>,
 }
 
 unsafe impl Send for App {}
@@ -109,8 +110,15 @@ impl App {
         self.components.get(component_name)?.downcast_ref()
     }
 
-    pub fn add_scheduler(&mut self, scheduler: JoinHandle<Result<String>>) -> &mut Self {
-        self.schedulers.push(scheduler);
+    pub fn build_state(&self) {
+
+    }
+
+    pub fn add_scheduler<T>(&mut self, scheduler: T) -> &mut Self
+    where
+        T: Future<Output = Result<String>> + Send + 'static,
+    {
+        self.schedulers.push(Box::new(scheduler));
         self
     }
 
@@ -167,7 +175,8 @@ impl App {
 
     async fn schedule(&mut self) -> Result<()> {
         while let Some(task) = self.schedulers.pop() {
-            match task.await? {
+            let task = Box::into_pin(task);
+            match tokio::spawn(task).await? {
                 Err(e) => tracing::error!("{}", e),
                 Ok(msg) => tracing::info!("scheduled result: {}", msg),
             }
