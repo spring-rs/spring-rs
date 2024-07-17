@@ -6,7 +6,7 @@ use autumn_boot::{app::App, error::Result, plugin::Plugin};
 use axum::Router;
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 use std::{net::SocketAddr, path::PathBuf, str::FromStr, time::Duration};
-use tokio::net::TcpListener;
+use tokio::task::JoinHandle;
 use tower_http::{
     catch_panic::CatchPanicLayer,
     compression::CompressionLayer,
@@ -27,19 +27,11 @@ impl Plugin for WebPlugin {
             .context(format!("web plugin config load failed"))
             .expect("axum web plugin load failed");
 
-        let (listener, router) = Self::serve(config)
+        let job = Self::serve(config)
             .await
             .expect("axum web plugin load failed");
 
-        // 3. axum server
-        app.add_scheduler(tokio::spawn(async {
-            tracing::info!("axum server started");
-            axum::serve(listener, router.into_make_service())
-                .await
-                .context("start axum server failed")?;
-
-            Ok("axum schedule finished".to_string())
-        }));
+        app.add_scheduler(job);
     }
 
     fn config_prefix(&self) -> &str {
@@ -48,11 +40,12 @@ impl Plugin for WebPlugin {
 }
 
 impl WebPlugin {
-    async fn serve(config: WebConfig) -> Result<(TcpListener, Router)> {
+    async fn serve(config: WebConfig) -> Result<JoinHandle<Result<String>>> {
         let addr = SocketAddr::from((config.binding, config.port));
 
         // 1. collect router
-        let mut router = Router::new(); // TODO
+        let collect = Router::new(); //
+        let mut router = Router::new().merge(collect);
         if let Some(middlewares) = config.middlewares {
             router = Self::apply_middleware(router, middlewares);
         }
@@ -65,7 +58,16 @@ impl WebPlugin {
 
         tracing::info!("bind tcp listener: {}", addr);
 
-        Ok((listener, router))
+        let job = tokio::spawn(async {
+            // 3. axum server
+            tracing::info!("axum server started");
+            axum::serve(listener, router.into_make_service())
+                .await
+                .context("start axum server failed")?;
+
+            Ok("axum schedule finished".to_string())
+        });
+        Ok(job)
     }
 
     fn apply_middleware(router: Router, middleware: Middlewares) -> Router {
