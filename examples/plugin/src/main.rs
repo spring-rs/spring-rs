@@ -9,7 +9,7 @@ impl Plugin for MyPlugin {
     async fn build(&self, app: &mut autumn_boot::app::App) {
         match app.get_config::<Config>(self) {
             Ok(config) => println!("{:#?}", config),
-            Err(e) => println!("{}", e),
+            Err(e) => println!("{:?}", e),
         }
     }
 
