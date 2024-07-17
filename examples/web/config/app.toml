@@ -1,0 +1,5 @@
+[web]
+port = 8000
+
+[sqlx]
+uri = "mysql://root:xudjf23adj213@127.0.0.1:3306"

@@ -1,0 +1,14 @@
+[package]
+name = "web"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+autumn-boot = { path = "../../autumn-boot" }
+autumn-boot-web = { path = "../../autumn-boot-web" }
+autumn-boot-sqlx = { path = "../../autumn-boot-sqlx", features = [
+    "mysql",
+] }
+tokio = { workspace = true }

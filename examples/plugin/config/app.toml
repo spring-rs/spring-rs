@@ -1,0 +1,7 @@
+[my-plugin]
+a = 1
+b = true
+c.f = 11
+c.g = "hello"
+d = "world"
+e = "EA"

@@ -1,0 +1,13 @@
+[package]
+name = "plugin"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+autumn-boot = { path = "../../autumn-boot" }
+toml = { workspace = true, features = ["parse"], default-features = false }
+serde = { workspace = true, features = ["derive"] }
+tokio = { workspace = true }
+async-trait = { workspace = true }

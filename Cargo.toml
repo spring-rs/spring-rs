@@ -1,0 +1,50 @@
+[workspace]
+members = [
+    "autumn-boot",
+    "autumn-boot-web",
+    "autumn-boot-job",
+    "autumn-boot-redis",
+    "autumn-boot-sqlx",
+    "autumn-boot-sea-orm",
+    "autumn-boot-sea-streamer",
+    "autumn-boot-actuator",
+    "autumn-boot-mail",
+    "examples/*",
+]
+default-members = ["autumn-boot", "autumn-boot-*"]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["holmofy"]
+repository = "https://github.com/holmofy/autumn-boot"
+
+[workspace.dependencies]
+thiserror = "1.0.62"
+anyhow = "1.0"
+serde = "1.0"
+serde_json = "1.0"
+tokio = "1.38"
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
+tower = "0.4.13"
+tower-http = "0.5.2"
+byte-unit = "5.1.4"
+axum = "0.7.5"
+sqlx = "0.7.4"
+sea-orm = "0.12.15"
+sea-streamer = "0.5.0"
+redis = "0.25.3"
+lettre = "0.11.7"
+tokio-cron-scheduler = "0.10.2"
+inventory = "0.3.15"
+dotenvy = "0.15.7"
+toml = "0.8.14"
+serde-toml-merge = "0.3.8"
+proc-macro2 = "1.0.84"
+quote = "1.0.36"
+syn = "2.0.66"
+async-trait = "0.1.81"
+schemars = "0.8.21"
+dashmap = "6.0.1"

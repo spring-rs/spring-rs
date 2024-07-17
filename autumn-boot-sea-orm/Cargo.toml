@@ -1,0 +1,18 @@
+[package]
+name = "autumn-boot-sea-orm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sea-orm = { workspace = true }
+autumn-boot = { path = "../autumn-boot" }
+serde = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+async-trait = { workspace = true }
+schemars = { workspace = true }
