@@ -2,7 +2,7 @@ pub mod config;
 
 use anyhow::Context;
 use async_trait::async_trait;
-use autumn_boot::{app::App, error::Result, plugin::Plugin};
+use autumn_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 use config::RedisConfig;
 use redis::Client;
 
@@ -12,7 +12,7 @@ pub struct RedisPlugin;
 
 #[async_trait]
 impl Plugin for RedisPlugin {
-    async fn build(&self, app: &mut App) {
+    async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<RedisConfig>(self)
             .context(format!("redis plugin config load failed"))

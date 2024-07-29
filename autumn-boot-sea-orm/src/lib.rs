@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use anyhow::Context;
 use async_trait::async_trait;
-use autumn_boot::{error::Result, plugin::Plugin};
+use autumn_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 use config::SeaOrmConfig;
 use sea_orm::{ConnectOptions, Database};
 
@@ -13,7 +13,7 @@ pub struct SeaOrmPlugin;
 
 #[async_trait]
 impl Plugin for SeaOrmPlugin {
-    async fn build(&self, app: &mut autumn_boot::app::App) {
+    async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<SeaOrmConfig>(self)
             .context(format!("sqlx plugin config load failed"))

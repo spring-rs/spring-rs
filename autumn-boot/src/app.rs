@@ -1,24 +1,36 @@
-use crate::{config::env, error::Result, log};
+use crate::{config, plugin::Plugin};
+use crate::{
+    config::env,
+    error::Result,
+    log,
+    plugin::{component::ComponentRef, PluginRef},
+};
 use anyhow::Context;
+use dashmap::DashMap;
+use std::any::Any;
+use std::{
+    any,
+    collections::HashSet,
+    future::Future,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 use toml::Table;
 use tracing::debug;
 
-use crate::{config, plugin::Plugin};
-use std::{
-    any::{self, Any},
-    collections::{HashMap, HashSet},
-    future::Future,
-    path::{Path, PathBuf},
-};
-
-pub type Registry<T> = HashMap<String, Box<T>>;
-pub type Scheduler = dyn Future<Output = Result<String>> + Send;
+pub type Registry<T> = DashMap<String, T>;
+pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send>;
 
 pub struct App {
-    /// Plugin
-    pub(crate) plugin_registry: Registry<dyn Plugin>,
     /// Component
-    components: Registry<dyn Any>,
+    components: Registry<ComponentRef>,
+}
+
+pub struct AppBuilder {
+    /// Plugin
+    pub(crate) plugin_registry: Registry<PluginRef>,
+    /// Component
+    components: Registry<ComponentRef>,
     /// Path of config file
     pub(crate) config_path: PathBuf,
     /// Configuration read from `config_path`
@@ -27,15 +39,28 @@ pub struct App {
     schedulers: Vec<Box<Scheduler>>,
 }
 
-unsafe impl Send for App {}
-unsafe impl Sync for App {}
-
 impl App {
-    pub fn new() -> Self {
+    pub fn new() -> AppBuilder {
         log::init_log();
-        App::default()
+        AppBuilder::default()
     }
 
+    ///
+    pub fn get_component<T>(&self) -> Option<Arc<T>>
+    where
+        T: Any + Send + Sync,
+    {
+        let component_name = std::any::type_name::<T>();
+        let pair = self.components.get(component_name)?;
+        let component_ref = pair.value().clone();
+        component_ref.downcast::<T>().ok()
+    }
+}
+
+unsafe impl Send for AppBuilder {}
+unsafe impl Sync for AppBuilder {}
+
+impl AppBuilder {
     /// add plugin
     pub fn add_plugin(&mut self, plugin: impl Plugin) -> &mut Self {
         debug!("added plugin: {}", plugin.name());
@@ -43,15 +68,13 @@ impl App {
         if self.plugin_registry.contains_key(plugin.name()) {
             panic!("Error adding plugin {plugin_name}: plugin was already added in application")
         }
-        self.plugin_registry.insert(plugin_name, Box::new(plugin));
+        self.plugin_registry
+            .insert(plugin_name, PluginRef::new(plugin));
         self
     }
 
     /// Returns `true` if the [`Plugin`] has already been added.
-    pub fn is_plugin_added<T>(&self) -> bool
-    where
-        T: Plugin,
-    {
+    pub fn is_plugin_added<T: Plugin>(&self) -> bool {
         self.plugin_registry.contains_key(any::type_name::<T>())
     }
 
@@ -89,7 +112,7 @@ impl App {
     ///
     pub fn add_component<T>(&mut self, component: T) -> &mut Self
     where
-        T: Sized + Any,
+        T: any::Any + Send + Sync,
     {
         let component_name = std::any::type_name::<T>();
         debug!("added component: {}", component_name);
@@ -97,26 +120,26 @@ impl App {
             panic!("Error adding component {component_name}: component was already added in application")
         }
         let component_name = component_name.to_string();
-        self.components.insert(component_name, Box::new(component));
+        self.components
+            .insert(component_name, ComponentRef::new(component));
         self
     }
 
     ///
-    pub fn get_component<T>(&self) -> Option<&T>
+    pub fn get_component<T>(&self) -> Option<Arc<T>>
     where
-        T: Sized + Any,
+        T: Any + Send + Sync,
     {
         let component_name = std::any::type_name::<T>();
-        self.components.get(component_name)?.downcast_ref()
+        let pair = self.components.get(component_name)?;
+        let component_ref = pair.value().clone();
+        component_ref.downcast::<T>().ok()
     }
 
-    pub fn build_state(&self) {
-
-    }
-
+    ///
     pub fn add_scheduler<T>(&mut self, scheduler: T) -> &mut Self
     where
-        T: Future<Output = Result<String>> + Send + 'static,
+        T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send> + 'static,
     {
         self.schedulers.push(Box::new(scheduler));
         self
@@ -124,12 +147,17 @@ impl App {
 
     /// Running
     pub async fn run(&mut self) {
-        if let Err(e) = self.inner_run().await {
-            tracing::error!("{:?}", e);
+        match self.inner_run().await {
+            Err(e) => {
+                tracing::error!("{:?}", e);
+            }
+            Ok(_app) => {
+
+            },
         }
     }
 
-    async fn inner_run(&mut self) -> Result<()> {
+    async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. read env variable
         let env = env::init()?;
 
@@ -145,7 +173,10 @@ impl App {
 
     async fn build_plugins(&mut self) {
         let registry = std::mem::take(&mut self.plugin_registry);
-        let mut to_register = registry.values().collect::<Vec<_>>();
+        let mut to_register = registry
+            .iter()
+            .map(|e| e.value().to_owned())
+            .collect::<Vec<_>>();
         let mut registered: HashSet<String> = HashSet::new();
 
         while !to_register.is_empty() {
@@ -173,19 +204,26 @@ impl App {
         self.plugin_registry = registry;
     }
 
-    async fn schedule(&mut self) -> Result<()> {
+    async fn schedule(&mut self) -> Result<Arc<App>> {
+        let app = self.build_app();
         while let Some(task) = self.schedulers.pop() {
-            let task = Box::into_pin(task);
-            match tokio::spawn(task).await? {
+            let poll_future = task(app.clone());
+            let poll_future = Box::into_pin(poll_future);
+            match tokio::spawn(poll_future).await? {
                 Err(e) => tracing::error!("{}", e),
                 Ok(msg) => tracing::info!("scheduled result: {}", msg),
             }
         }
-        Ok(())
+        Ok(app)
+    }
+
+    fn build_app(&mut self) -> Arc<App> {
+        let components = std::mem::take(&mut self.components);
+        Arc::new(App { components })
     }
 }
 
-impl Default for App {
+impl Default for AppBuilder {
     fn default() -> Self {
         Self {
             plugin_registry: Default::default(),

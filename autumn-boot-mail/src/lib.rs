@@ -2,7 +2,7 @@ pub mod config;
 
 use anyhow::Context;
 use async_trait::async_trait;
-use autumn_boot::{app::App, error::Result, plugin::Plugin};
+use autumn_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 use config::MailerConfig;
 use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
 
@@ -11,7 +11,7 @@ pub struct MailPlugin;
 
 #[async_trait]
 impl Plugin for MailPlugin {
-    async fn build(&self, app: &mut App) {
+    async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<MailerConfig>(self)
             .context(format!("mail plugin config load failed"))

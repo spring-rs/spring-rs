@@ -2,6 +2,7 @@ pub mod config;
 
 use anyhow::Context;
 use async_trait::async_trait;
+use autumn_boot::app::AppBuilder;
 use autumn_boot::error::Result;
 use autumn_boot::plugin::Plugin;
 use config::SqlxConfig;
@@ -14,7 +15,7 @@ pub struct SqlxPlugin;
 
 #[async_trait]
 impl Plugin for SqlxPlugin {
-    async fn build(&self, app: &mut autumn_boot::app::App) {
+    async fn build(&self, app: &mut AppBuilder) {
         sqlx::any::install_default_drivers();
         let config = app
             .get_config::<SqlxConfig>(self)

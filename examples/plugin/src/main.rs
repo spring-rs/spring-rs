@@ -1,12 +1,15 @@
 use async_trait::async_trait;
-use autumn_boot::{app::App, plugin::Plugin};
+use autumn_boot::{
+    app::{App, AppBuilder},
+    plugin::Plugin,
+};
 use serde::Deserialize;
 
 struct MyPlugin;
 
 #[async_trait]
 impl Plugin for MyPlugin {
-    async fn build(&self, app: &mut autumn_boot::app::App) {
+    async fn build(&self, app: &mut AppBuilder) {
         match app.get_config::<Config>(self) {
             Ok(config) => println!("{:#?}", config),
             Err(e) => println!("{:?}", e),

@@ -1,6 +1,6 @@
 pub mod env;
 
-use crate::app::App;
+use crate::app::AppBuilder;
 use crate::error::{AppError, Result};
 use anyhow::Context;
 use env::Env;
@@ -9,7 +9,7 @@ use std::fs;
 use toml::Table;
 
 /// load toml config
-pub(crate) fn load_config(app: &App, env: Env) -> Result<Table> {
+pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {
     let main_path = app.config_path.as_path();
     let main_toml_str = fs::read_to_string(main_path)
         .with_context(|| format!("Failed to read configuration file {:?}", main_path))?;

@@ -2,10 +2,16 @@ pub mod config;
 
 use anyhow::Context;
 use async_trait::async_trait;
-use autumn_boot::{app::App, error::Result, plugin::Plugin};
-use axum::Extension;
+use autumn_boot::{
+    app::{App, AppBuilder},
+    error::Result,
+    plugin::Plugin,
+};
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
-use std::{net::SocketAddr, path::PathBuf, str::FromStr, time::Duration};
+use std::{
+    future::Future, net::SocketAddr, ops::Deref, path::PathBuf, str::FromStr, sync::Arc,
+    time::Duration,
+};
 use tower_http::{
     catch_panic::CatchPanicLayer,
     compression::CompressionLayer,
@@ -16,28 +22,51 @@ use tower_http::{
     trace::TraceLayer,
 };
 
-pub type Router = axum::Router;
-pub type AppRouter = axum::Router<AppState>;
+pub type Router = axum::Router<AppState>;
+pub type Routers = Vec<Router>;
+pub use axum::routing::method_routing::*;
+pub trait WebConfigurator {
+    fn add_router(&mut self, router: Router) -> &mut Self;
+}
+
+impl WebConfigurator for AppBuilder {
+    fn add_router(&mut self, router: Router) -> &mut Self {
+        if let Some(mut routers) = self.get_component::<Routers>() {
+            let routers = Arc::get_mut(&mut routers)
+                .expect("The add router operation can only be used in one thread");
+            routers.push(router);
+            self
+        } else {
+            self.add_component(vec![router])
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct AppState {
-    //TODO
+    app: Arc<App>,
 }
 
 pub struct WebPlugin;
 
 #[async_trait]
 impl Plugin for WebPlugin {
-    async fn build(&self, app: &mut App) {
+    async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<WebConfig>(self)
             .context(format!("web plugin config load failed"))
             .expect("axum web plugin load failed");
 
         // 1. collect router
-        let router = app.get_component::<Router>();
-        let mut router = match router {
-            Some(r) => Router::new().merge(r.to_owned()),
+        let routers = app.get_component::<Routers>();
+        let mut router: Router = match routers {
+            Some(rs) => {
+                let mut router = Router::new();
+                for r in rs.deref().into_iter() {
+                    router = router.merge(r.to_owned());
+                }
+                router
+            }
             None => Router::new(),
         };
         if let Some(middlewares) = config.middlewares {
@@ -53,17 +82,18 @@ impl Plugin for WebPlugin {
 
         tracing::info!("bind tcp listener: {}", addr);
 
-        let job = async {
-            // 3. axum server
-            tracing::info!("axum server started");
+        let job = |app: Arc<App>| {
+            Box::new(async move {
+                // 3. axum server
+                tracing::info!("axum server started");
 
-            let state = AppState {}; //app.build_state();
-            router = router.layer(Extension(state));
-            axum::serve(listener, router)
-                .await
-                .context("start axum server failed")?;
+                let router = router.with_state(AppState { app });
+                axum::serve(listener, router)
+                    .await
+                    .context("start axum server failed")?;
 
-            Ok("axum schedule finished".to_string())
+                Ok("axum schedule finished".to_string())
+            }) as Box<dyn Future<Output = Result<String>> + Send>
         };
 
         app.add_scheduler(job);
