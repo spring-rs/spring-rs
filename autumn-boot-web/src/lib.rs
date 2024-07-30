@@ -1,4 +1,6 @@
 pub mod config;
+pub mod extractor;
+pub mod error;
 
 use anyhow::Context;
 use async_trait::async_trait;
@@ -44,7 +46,7 @@ impl WebConfigurator for AppBuilder {
 
 #[derive(Clone)]
 pub struct AppState {
-    app: Arc<App>,
+    pub(crate) app: Arc<App>,
 }
 
 pub struct WebPlugin;
@@ -154,16 +156,16 @@ impl WebPlugin {
 
     fn apply_static_dir(router: Router, static_assets: StaticAssetsMiddleware) -> Router {
         if static_assets.must_exist
-            && (!PathBuf::from(&static_assets.folder.path).exists()
+            && (!PathBuf::from(&static_assets.path).exists()
                 || !PathBuf::from(&static_assets.fallback).exists())
         {
             panic!(
                 "one of the static path are not found, Folder `{}` fallback: `{}`",
-                static_assets.folder.path, static_assets.fallback
+                static_assets.path, static_assets.fallback
             );
         }
 
-        let serve_dir = ServeDir::new(static_assets.folder.path)
+        let serve_dir = ServeDir::new(static_assets.path)
             .not_found_service(ServeFile::new(static_assets.fallback));
 
         let service = if static_assets.precompressed {
@@ -173,7 +175,7 @@ impl WebPlugin {
             serve_dir
         };
 
-        router.nest_service(&static_assets.folder.uri, service)
+        router.nest_service(&static_assets.uri, service)
     }
 
     fn build_cors_middleware(cors: &config::CorsMiddleware) -> Result<CorsLayer> {

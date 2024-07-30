@@ -1,5 +1,11 @@
 [web]
 port = 8000
+[web.middlewares]
+static = { enable = true }
+compression = { enable = true }
+logger = { enable = true }
+catch_panic = { enable = true }
+timeout_request = { enable = true, timeout = 30000 }
 
 [sqlx]
 uri = "mysql://root:xudjf23adj213@127.0.0.1:3306"

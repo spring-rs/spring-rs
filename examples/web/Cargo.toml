@@ -8,7 +8,6 @@ authors.workspace = true
 [dependencies]
 autumn-boot = { path = "../../autumn-boot" }
 autumn-boot-web = { path = "../../autumn-boot-web" }
-autumn-boot-sqlx = { path = "../../autumn-boot-sqlx", features = [
-    "mysql",
-] }
+autumn-boot-sqlx = { path = "../../autumn-boot-sqlx", features = ["mysql"] }
 tokio = { workspace = true }
+anyhow = { workspace = true }

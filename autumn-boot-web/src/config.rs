@@ -46,23 +46,20 @@ pub struct Middlewares {
 pub struct StaticAssetsMiddleware {
     pub enable: bool,
     /// Check that assets must exist on disk
+    #[serde(default = "bool::default")]
     pub must_exist: bool,
-    /// Assets location
-    pub folder: FolderAssetsMiddleware,
     /// Fallback page for a case when no asset exists (404). Useful for SPA
     /// (single page app) where routes are virtual.
+    #[serde(default = "default_fallback")]
     pub fallback: String,
     /// Enable `precompressed_gzip`
     #[serde(default = "bool::default")]
     pub precompressed: bool,
-}
-
-/// Asset folder config.
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
-pub struct FolderAssetsMiddleware {
     /// Uri for the assets
+    #[serde(default = "default_assets_uri")]
     pub uri: String,
     /// Path for the assets
+    #[serde(default = "default_assets_path")]
     pub path: String,
 }
 
@@ -101,4 +98,16 @@ pub struct LimitPayloadMiddleware {
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct EnableMiddleware {
     pub enable: bool,
+}
+
+fn default_assets_path() -> String {
+    "static".to_string()
+}
+
+fn default_assets_uri() -> String {
+    "/static".to_string()
+}
+
+fn default_fallback() -> String {
+    "index.html".to_string()
 }

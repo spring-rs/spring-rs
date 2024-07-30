@@ -13,6 +13,7 @@ autumn-boot = { path = "../autumn-boot" }
 axum = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
+thiserror = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 tokio = { workspace = true, features = ["full"] }
 tower = { workspace = true, features = ["full"] }

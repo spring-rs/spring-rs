@@ -10,6 +10,7 @@ use sqlx::any::AnyPoolOptions;
 use std::time::Duration;
 
 pub type ConnectPool = sqlx::AnyPool;
+pub use sqlx as sqlx;
 
 pub struct SqlxPlugin;
 

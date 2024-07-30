@@ -151,9 +151,7 @@ impl AppBuilder {
             Err(e) => {
                 tracing::error!("{:?}", e);
             }
-            Ok(_app) => {
-
-            },
+            Ok(_app) => {}
         }
     }
 
