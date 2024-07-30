@@ -1,12 +1,10 @@
-use std::ops::Deref;
-
 use anyhow::Context;
 use autumn_boot::app::App;
-use autumn_boot_sqlx::{
+use autumn_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };
-use autumn_boot_web::{
+use autumn_web::{
     error::Result, extractor::Component, get, Router, WebConfigurator, WebPlugin,
 };
 
@@ -33,7 +31,7 @@ async fn hello_word() -> &'static str {
 
 async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {
     let version = sqlx::query("select version() as version")
-        .fetch_one(pool.deref())
+        .fetch_one(&*pool)
         .await
         .context("sqlx query failed")?
         .get("version");

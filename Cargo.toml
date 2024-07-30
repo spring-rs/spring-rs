@@ -2,24 +2,24 @@
 resolver = "2"
 members = [
     "autumn-boot",
-    "autumn-boot-web",
-    "autumn-boot-job",
-    "autumn-boot-redis",
-    "autumn-boot-sqlx",
-    "autumn-boot-sea-orm",
-    "autumn-boot-sea-streamer",
-    "autumn-boot-actuator",
-    "autumn-boot-mail",
+    "autumn-web",
+    "autumn-job",
+    "autumn-redis",
+    "autumn-sqlx",
+    "autumn-sea-orm",
+    "autumn-sea-streamer",
+    "autumn-actuator",
+    "autumn-mail",
     "examples/*",
 ]
-default-members = ["autumn-boot", "autumn-boot-*"]
+default-members = ["autumn-*"]
 
 [workspace.package]
 version = "0.0.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["holmofy"]
-repository = "https://github.com/holmofy/autumn-boot"
+repository = "https://github.com/holmofy/autumn-rs"
 
 [workspace.dependencies]
 thiserror = "1.0.62"

@@ -1,0 +1,2 @@
+[sea-orm]
+uri = "postgres://postgres:xudjf23adj213@localhost/postgres"

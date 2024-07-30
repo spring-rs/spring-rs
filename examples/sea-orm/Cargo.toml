@@ -1,5 +1,5 @@
 [package]
-name = "web"
+name = "sea-orm"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,6 +8,8 @@ authors.workspace = true
 [dependencies]
 autumn-boot = { path = "../../autumn-boot" }
 autumn-web = { path = "../../autumn-web" }
-autumn-sqlx = { path = "../../autumn-sqlx", features = ["mysql"] }
+autumn-sea-orm = { path = "../../autumn-sea-orm", features = ["postgres"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
+sea-orm = { workspace = true }
+serde = { workspace = true }
