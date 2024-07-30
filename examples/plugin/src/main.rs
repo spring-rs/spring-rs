@@ -11,7 +11,15 @@ struct MyPlugin;
 impl Plugin for MyPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         match app.get_config::<Config>(self) {
-            Ok(config) => println!("{:#?}", config),
+            Ok(config) => {
+                println!("{:#?}", config);
+                assert_eq!(config.a, 1);
+                assert_eq!(config.b, true);
+                assert_eq!(config.c.g, "hello");
+                assert_eq!(config.d, "world");
+                assert_eq!(config.e, ConfigEnum::EA);
+                println!("c.f: {}", config.c.f);
+            }
             Err(e) => println!("{:?}", e),
         }
     }
@@ -30,7 +38,7 @@ struct Config {
     e: ConfigEnum,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(PartialEq, Debug, Deserialize)]
 enum ConfigEnum {
     EA,
     EB,
