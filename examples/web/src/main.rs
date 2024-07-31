@@ -4,14 +4,11 @@ use autumn_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };
-use autumn_web::{
-    error::Result, extractor::Component, get, Router, WebConfigurator, WebPlugin,
-};
+use autumn_web::{error::Result, extractor::Component, get, Router, WebConfigurator, WebPlugin};
 
 #[tokio::main]
 async fn main() {
     App::new()
-        .config_file("/Users/holmofy/rust/autumn-boot/examples/web/config/app.toml")
         .add_plugin(SqlxPlugin)
         .add_plugin(WebPlugin)
         .add_router(router())
@@ -31,7 +28,7 @@ async fn hello_word() -> &'static str {
 
 async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {
     let version = sqlx::query("select version() as version")
-        .fetch_one(&*pool)
+        .fetch_one(&pool)
         .await
         .context("sqlx query failed")?
         .get("version");

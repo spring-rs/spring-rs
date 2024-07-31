@@ -53,7 +53,7 @@ impl App {
         let component_name = std::any::type_name::<T>();
         let pair = self.components.get(component_name)?;
         let component_ref = pair.value().clone();
-        component_ref.downcast::<T>().ok()
+        component_ref.downcast::<T>()
     }
 }
 
@@ -62,7 +62,7 @@ unsafe impl Sync for AppBuilder {}
 
 impl AppBuilder {
     /// add plugin
-    pub fn add_plugin(&mut self, plugin: impl Plugin) -> &mut Self {
+    pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
         debug!("added plugin: {}", plugin.name());
         let plugin_name = plugin.name().to_string();
         if self.plugin_registry.contains_key(plugin.name()) {
@@ -133,7 +133,7 @@ impl AppBuilder {
         let component_name = std::any::type_name::<T>();
         let pair = self.components.get(component_name)?;
         let component_ref = pair.value().clone();
-        component_ref.downcast::<T>().ok()
+        component_ref.downcast::<T>()
     }
 
     ///

@@ -1,4 +1,4 @@
-use std::{any::Any, ops::Deref, sync::Arc};
+use std::{any::Any, sync::Arc};
 
 #[derive(Clone)]
 pub struct ComponentRef(Arc<dyn Any + Send + Sync>);
@@ -11,18 +11,10 @@ impl ComponentRef {
         Self(Arc::new(component))
     }
 
-    pub fn downcast<T>(self) -> Result<Arc<T>, Arc<dyn Any + Send + Sync>>
+    pub fn downcast<T>(self) -> Option<Arc<T>>
     where
         T: Any + Send + Sync,
     {
-        self.0.downcast::<T>()
-    }
-}
-
-impl Deref for ComponentRef {
-    type Target = dyn Any;
-
-    fn deref(&self) -> &Self::Target {
-        &*self.0
+        self.0.downcast::<T>().ok()
     }
 }

@@ -20,7 +20,6 @@ use serde::Deserialize;
 #[tokio::main]
 async fn main() {
     App::new()
-        .config_file("/Users/holmofy/rust/autumn-boot/examples/sea-orm/config/app.toml")
         .add_plugin(SeaOrmPlugin)
         .add_plugin(WebPlugin)
         .add_router(router())
@@ -58,7 +57,7 @@ async fn todo_list(
         })
         .apply_if(query.size, QuerySelect::limit)
         .apply_if(offset, QuerySelect::offset)
-        .all(&*db)
+        .all(&db)
         .await
         .context("query todo list failed")?;
     Ok(Json(rows))
@@ -70,7 +69,7 @@ async fn get_todo_list(
 ) -> Result<impl IntoResponse> {
     let rows = TodoItem::find()
         .filter(todo_item::Column::ListId.eq(id))
-        .all(&*db)
+        .all(&db)
         .await
         .context("query todo list failed")?;
     Ok(Json(rows))
