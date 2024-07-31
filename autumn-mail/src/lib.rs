@@ -7,6 +7,10 @@ use config::MailerConfig;
 use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
 
 pub type Mailer = lettre::AsyncSmtpTransport<Tokio1Executor>;
+pub use lettre::AsyncTransport;
+pub use lettre::Message;
+pub use lettre::message::*;
+
 pub struct MailPlugin;
 
 #[async_trait]

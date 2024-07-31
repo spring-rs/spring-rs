@@ -4,12 +4,12 @@ use serde::Deserialize;
 /// SMTP mailer configuration structure.
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct MailerConfig {
-    pub enable: bool,
     /// SMTP host. for example: localhost, smtp.gmail.com etc.
     pub host: String,
     /// SMTP port/
     pub port: u16,
     /// Enable TLS
+    #[serde(default = "bool::default")]
     pub secure: bool,
     /// Auth SMTP server
     pub auth: Option<MailerAuth>,
