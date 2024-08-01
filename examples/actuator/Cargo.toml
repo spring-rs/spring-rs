@@ -1,0 +1,13 @@
+[package]
+name = "actuator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+autumn-boot = { path = "../../autumn-boot" }
+autumn-web = { path = "../../autumn-web" }
+autumn-actuator = { path = "../../autumn-actuator" }
+tokio = { workspace = true }
+anyhow = { workspace = true }

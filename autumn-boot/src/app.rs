@@ -55,6 +55,10 @@ impl App {
         let component_ref = pair.value().clone();
         component_ref.downcast::<T>()
     }
+
+    pub fn get_components(&self) -> Vec<String> {
+        self.components.iter().map(|e| e.key().clone()).collect()
+    }
 }
 
 unsafe impl Send for AppBuilder {}
