@@ -1,11 +1,14 @@
+mod extractor;
+
 use async_trait::async_trait;
 use autumn_boot::{app::AppBuilder, plugin::Plugin};
 use autumn_web::{
-    extractor::{App, Component},
+    extractor::Component,
     get,
     response::{IntoResponse, Json},
     Router, Routers, WebConfigurator,
 };
+use extractor::App;
 
 pub struct ActuatorPlugin;
 

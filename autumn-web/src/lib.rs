@@ -1,7 +1,8 @@
 pub mod config;
 pub mod error;
 pub mod extractor;
-pub mod response;
+pub use axum::http;
+pub use axum::response;
 pub use axum::routing::method_routing::*;
 
 use anyhow::Context;
@@ -50,7 +51,7 @@ impl WebConfigurator for AppBuilder {
 
 #[derive(Clone)]
 pub struct AppState {
-    pub(crate) app: Arc<App>,
+    pub app: Arc<App>,
 }
 
 pub struct WebPlugin;
