@@ -9,4 +9,10 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-cron-scheduler = { workspace = true }
+autumn-boot = { path = "../autumn-boot" }
+tokio-cron-scheduler = { workspace = true, features = ["signal"] }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+uuid = { workspace = true, features = ["v4"] }
+chrono = { workspace = true }

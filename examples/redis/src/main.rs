@@ -4,7 +4,7 @@ use autumn_redis::{redis::AsyncCommands, Redis, RedisPlugin};
 use autumn_web::{
     error::Result,
     extractor::{Component, Path},
-    get, post,
+    get,
     response::{IntoResponse, Json},
     Router, WebConfigurator, WebPlugin,
 };
@@ -22,8 +22,7 @@ async fn main() {
 fn router() -> Router {
     Router::new()
         .route("/", get(list_redis_key))
-        .route("/:key", get(get_content))
-        .route("/:key", post(set_content))
+        .route("/:key", get(get_content).post(set_content))
 }
 
 async fn list_redis_key(Component(mut redis): Component<Redis>) -> Result<impl IntoResponse> {

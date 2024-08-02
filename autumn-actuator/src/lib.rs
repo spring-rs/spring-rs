@@ -24,19 +24,16 @@ fn actuator_router() -> Router {
     Router::new().nest(
         "/actuator",
         Router::new()
-            .route("/health", get(health))
+            .route("/health", get("ok"))
             .route("/endpoints", get(endpoints))
             .route("/components", get(components)),
     )
 }
 
-async fn health() -> impl IntoResponse {
-    "ok"
-}
-
 async fn endpoints(Component(routers): Component<Routers>) -> impl IntoResponse {
     let mut endpoints = vec![];
-    for r in routers {
+    for _r in routers {
+        // TODO
         endpoints.push("");
     }
     Json(endpoints)

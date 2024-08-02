@@ -7,3 +7,6 @@ authors.workspace = true
 
 [dependencies]
 autumn-boot = { path = "../../autumn-boot" }
+autumn-job = { path = "../../autumn-job" }
+tokio = { workspace = true }
+anyhow = { workspace = true }

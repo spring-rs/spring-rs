@@ -1,6 +1,6 @@
 pub mod config;
-pub mod extractor;
 pub mod error;
+pub mod extractor;
 pub mod response;
 pub use axum::routing::method_routing::*;
 
@@ -35,10 +35,12 @@ pub trait WebConfigurator {
 
 impl WebConfigurator for AppBuilder {
     fn add_router(&mut self, router: Router) -> &mut Self {
-        if let Some(mut routers) = self.get_component::<Routers>() {
-            let routers = Arc::get_mut(&mut routers)
-                .expect("The add router operation can only be used in one thread");
-            routers.push(router);
+        if let Some(routers) = self.get_component::<Routers>() {
+            unsafe {
+                let raw_ptr = Arc::into_raw(routers);
+                let routers = &mut *(raw_ptr as *mut Vec<Router>);
+                routers.push(router);
+            }
             self
         } else {
             self.add_component(vec![router])
@@ -59,7 +61,7 @@ impl Plugin for WebPlugin {
         let config = app
             .get_config::<WebConfig>(self)
             .context(format!("web plugin config load failed"))
-            .expect("axum web plugin load failed");
+            .unwrap();
 
         // 1. collect router
         let routers = app.get_component::<Routers>();
@@ -82,11 +84,11 @@ impl Plugin for WebPlugin {
         let listener = tokio::net::TcpListener::bind(addr)
             .await
             .with_context(|| format!("bind tcp listener failed:{}", addr))
-            .expect("bind tcp listener failed");
+            .unwrap();
 
         tracing::info!("bind tcp listener: {}", addr);
 
-        let job = |app: Arc<App>| {
+        let scheduler = |app: Arc<App>| {
             Box::new(async move {
                 // 3. axum server
                 tracing::info!("axum server started");
@@ -100,7 +102,7 @@ impl Plugin for WebPlugin {
             }) as Box<dyn Future<Output = Result<String>> + Send>
         };
 
-        app.add_scheduler(job);
+        app.add_scheduler(scheduler);
     }
 
     fn config_prefix(&self) -> &str {

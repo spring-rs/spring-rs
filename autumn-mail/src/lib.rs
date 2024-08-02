@@ -7,9 +7,9 @@ use config::MailerConfig;
 use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
 
 pub type Mailer = lettre::AsyncSmtpTransport<Tokio1Executor>;
+pub use lettre::message::*;
 pub use lettre::AsyncTransport;
 pub use lettre::Message;
-pub use lettre::message::*;
 
 pub struct MailPlugin;
 
@@ -19,9 +19,9 @@ impl Plugin for MailPlugin {
         let config = app
             .get_config::<MailerConfig>(self)
             .context(format!("mail plugin config load failed"))
-            .expect("mail plugin load failed");
+            .unwrap();
 
-        let mailer = Self::build_mailer(&config).expect("mail plugin load failed");
+        let mailer = Self::build_mailer(&config).unwrap();
 
         app.add_component(mailer);
     }

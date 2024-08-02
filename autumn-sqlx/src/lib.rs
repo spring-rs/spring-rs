@@ -10,7 +10,7 @@ use sqlx::any::AnyPoolOptions;
 use std::time::Duration;
 
 pub type ConnectPool = sqlx::AnyPool;
-pub use sqlx as sqlx;
+pub use sqlx;
 
 pub struct SqlxPlugin;
 
@@ -21,7 +21,7 @@ impl Plugin for SqlxPlugin {
         let config = app
             .get_config::<SqlxConfig>(self)
             .context(format!("sqlx plugin config load failed"))
-            .expect("sqlx plugin load failed");
+            .unwrap();
 
         let connect_pool = Self::connect(&config)
             .await

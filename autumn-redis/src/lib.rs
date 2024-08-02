@@ -19,7 +19,7 @@ impl Plugin for RedisPlugin {
         let config = app
             .get_config::<RedisConfig>(self)
             .context(format!("redis plugin config load failed"))
-            .expect("redis plugin load failed");
+            .unwrap();
 
         let connect: Redis = Self::connect(config).await.expect("redis connect failed");
         app.add_component(connect);

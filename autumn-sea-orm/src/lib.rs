@@ -17,7 +17,7 @@ impl Plugin for SeaOrmPlugin {
         let config = app
             .get_config::<SeaOrmConfig>(self)
             .context(format!("sea-orm plugin config load failed"))
-            .expect("sea-orm plugin load failed");
+            .unwrap();
 
         let conn = Self::connect(&config)
             .await
