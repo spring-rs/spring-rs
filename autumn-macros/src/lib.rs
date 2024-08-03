@@ -65,7 +65,6 @@ mod nest;
 mod route;
 
 use proc_macro::TokenStream;
-use route::Method;
 
 /// Creates resource handler, allowing multiple HTTP method guards.
 ///
@@ -134,10 +133,41 @@ pub fn routes(_: TokenStream, input: TokenStream) -> TokenStream {
     route::with_methods(input)
 }
 
-#[proc_macro_attribute]
-pub fn get(args: TokenStream, input: TokenStream) -> TokenStream {
-    route::with_method(Some(Method::Get), args, input)
+macro_rules! method_macro {
+    ($variant:ident, $method:ident) => {
+        ///
+        /// # Syntax
+        /// ```plain
+        #[doc = concat!("#[", stringify!($method), r#"("path"[, attributes])]"#)]
+        /// ```
+        ///
+        /// # Attributes
+        /// - `"path"`: Raw literal string with path for which to register handler.
+        ///
+        /// # Examples
+        /// ```
+        /// # use autumn_web::response::IntoResponse;
+        #[doc = concat!("# use autumn_macros::", stringify!($method), ";")]
+        #[doc = concat!("#[", stringify!($method), r#"("/")]"#)]
+        /// async fn example() -> impl IntoResponse {
+        ///     "hello world"
+        /// }
+        /// ```
+        #[proc_macro_attribute]
+        pub fn $method(args: TokenStream, input: TokenStream) -> TokenStream {
+            route::with_method(Some(route::Method::$variant), args, input)
+        }
+    };
 }
+
+method_macro!(Get, get);
+method_macro!(Post, post);
+method_macro!(Put, put);
+method_macro!(Delete, delete);
+method_macro!(Head, head);
+method_macro!(Options, options);
+method_macro!(Trace, trace);
+method_macro!(Patch, patch);
 
 /// Prepends a path prefix to all handlers using routing macros inside the attached module.
 ///
