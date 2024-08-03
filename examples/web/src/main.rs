@@ -1,16 +1,9 @@
-use anyhow::Context;
 use autumn_boot::app::App;
-use autumn_macros::{get, route, routes};
-use autumn_sqlx::{
-    sqlx::{self, Row},
-    ConnectPool, SqlxPlugin,
-};
+use autumn_macros::{nest, route, routes};
+use autumn_sqlx::SqlxPlugin;
 use autumn_web::{
-    error::Result,
-    extractor::{Component, Path},
-    handler::TypeRouter,
-    response::IntoResponse,
-    Router, WebConfigurator, WebPlugin,
+    extractor::Path, handler::TypeRouter, response::IntoResponse, Router, WebConfigurator,
+    WebPlugin,
 };
 
 #[tokio::main]
@@ -27,7 +20,7 @@ fn router() -> Router {
     Router::new()
         .typed_route(hello_word)
         .typed_route(hello)
-        .typed_route(sqlx_request_handler)
+        .typed_route(sql::sqlx_request_handler)
 }
 
 #[routes]
@@ -42,12 +35,24 @@ async fn hello(Path(name): Path<String>) -> impl IntoResponse {
     format!("hello {name}")
 }
 
-#[get("/sql")]
-async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {
-    let version = sqlx::query("select version() as version")
-        .fetch_one(&pool)
-        .await
-        .context("sqlx query failed")?
-        .get("version");
-    Ok(version)
+#[nest("/sql")]
+mod sql {
+    use anyhow::Context;
+    use autumn_macros::get;
+    use autumn_sqlx::{
+        sqlx::{self, Row},
+        ConnectPool,
+    };
+    use autumn_web::error::Result;
+    use autumn_web::extractor::Component;
+
+    #[get("/version")]
+    pub async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {
+        let version = sqlx::query("select version() as version")
+            .fetch_one(&pool)
+            .await
+            .context("sqlx query failed")?
+            .get("version");
+        Ok(version)
+    }
 }
