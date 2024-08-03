@@ -13,8 +13,8 @@ async fn main() {
         .add_plugin(JobPlugin)
         .add_plugin(SqlxPlugin)
         .add_job(Job::cron("1/10 * * * * *").run(cron_job))
-        .add_job(Job::fix_delay(6).run(fix_delay_job))
-        .add_job(Job::fix_rate(6).run(fix_rate_job))
+        .add_job(Job::fix_delay(5).run(fix_delay_job))
+        .add_job(Job::fix_rate(5).run(fix_rate_job))
         .run()
         .await;
 

@@ -2,11 +2,16 @@ use std::{sync::Arc, time::Duration};
 
 use anyhow::Context;
 use autumn_boot::app::App;
+use uuid::Uuid;
 
-use crate::handler::{BoxedHandler, Handler};
+use crate::{
+    handler::{BoxedHandler, Handler},
+    JobScheduler,
+};
 
 #[derive(Clone)]
 enum Trigger {
+    OneShot(u64),
     FixedDelay(u64),
     FixedRate(u64),
     Cron(String),
@@ -23,6 +28,11 @@ pub struct JobBuilder {
 }
 
 impl Job {
+    pub fn one_shot(delay_seconds: u64) -> JobBuilder {
+        JobBuilder {
+            trigger: Trigger::OneShot(delay_seconds),
+        }
+    }
     /// TODO: tokio-cron-scheduler not support
     pub fn fix_delay(seconds: u64) -> JobBuilder {
         JobBuilder {
@@ -42,33 +52,39 @@ impl Job {
     pub(crate) fn build(self, app: Arc<App>) -> tokio_cron_scheduler::Job {
         let handler = self.handler;
         match self.trigger {
-            // TODO
-            Trigger::FixedDelay(seconds) => tokio_cron_scheduler::Job::new_repeated_async(
+            Trigger::OneShot(seconds) => tokio_cron_scheduler::Job::new_one_shot_async(
                 Duration::from_secs(seconds),
                 move |job_id, jobs| {
                     let handler = handler.clone();
                     let app = app.clone();
                     Box::pin(async move { handler.call(job_id, jobs, app).await })
+                },
+            ),
+            // TODO
+            Trigger::FixedDelay(seconds) => tokio_cron_scheduler::Job::new_repeated_async(
+                Duration::from_secs(seconds),
+                move |job_id, jobs| {
+                    Box::pin(Self::call(handler.clone(), job_id, jobs, app.clone()))
                 },
             ),
             Trigger::FixedRate(seconds) => tokio_cron_scheduler::Job::new_repeated_async(
                 Duration::from_secs(seconds),
                 move |job_id, jobs| {
-                    let handler = handler.clone();
-                    let app = app.clone();
-                    Box::pin(async move { handler.call(job_id, jobs, app).await })
+                    Box::pin(Self::call(handler.clone(), job_id, jobs, app.clone()))
                 },
             ),
             Trigger::Cron(schedule) => {
                 tokio_cron_scheduler::Job::new_async(schedule.as_str(), move |job_id, jobs| {
-                    let handler = handler.clone();
-                    let app = app.clone();
-                    Box::pin(async move { handler.call(job_id, jobs, app).await })
+                    Box::pin(Self::call(handler.clone(), job_id, jobs, app.clone()))
                 })
             }
         }
         .context("build job failed")
         .unwrap()
+    }
+
+    async fn call(handler: BoxedHandler, job_id: Uuid, jobs: JobScheduler, app: Arc<App>) {
+        handler.call(job_id, jobs, app).await
     }
 }
 

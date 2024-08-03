@@ -9,7 +9,7 @@ authors.workspace = true
 autumn-boot = { path = "../../autumn-boot" }
 autumn-job = { path = "../../autumn-job" }
 autumn-sqlx = { path = "../../autumn-sqlx", features = [
-    "mysql",
+    "postgres",
     "with-chrono",
 ] }
 tokio = { workspace = true }

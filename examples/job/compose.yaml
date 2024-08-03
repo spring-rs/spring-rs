@@ -1,9 +1,9 @@
 version: "3"
 
 services:
-  mysql:
-    image: mysql:8.0.31
+  postgres:
+    image: postgres:15.3-alpine
     environment:
-      - MYSQL_ROOT_PASSWORD=xudjf23adj213
+      - POSTGRES_PASSWORD=xudjf23adj213
     ports:
-      - 3306:3306
+      - 5432:5432
