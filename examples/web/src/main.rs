@@ -1,10 +1,17 @@
 use anyhow::Context;
 use autumn_boot::app::App;
+use autumn_macros::{get, route, routes};
 use autumn_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };
-use autumn_web::{error::Result, extractor::Component, get, Router, WebConfigurator, WebPlugin};
+use autumn_web::{
+    error::Result,
+    extractor::{Component, Path},
+    handler::TypeRouter,
+    response::IntoResponse,
+    Router, WebConfigurator, WebPlugin,
+};
 
 #[tokio::main]
 async fn main() {
@@ -18,14 +25,24 @@ async fn main() {
 
 fn router() -> Router {
     Router::new()
-        .route("/", get(hello_word))
-        .route("/sql", get(sqlx_request_handler))
+        .typed_route(hello_word)
+        .typed_route(hello)
+        .typed_route(sqlx_request_handler)
 }
 
-async fn hello_word() -> &'static str {
+#[routes]
+#[get("/")]
+#[get("/hello_world")]
+async fn hello_word() -> impl IntoResponse {
     "hello word"
 }
 
+#[route("/hello/:name", method = "GET", method = "POST")]
+async fn hello(Path(name): Path<String>) -> impl IntoResponse {
+    format!("hello {name}")
+}
+
+#[get("/sql")]
 async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {
     let version = sqlx::query("select version() as version")
         .fetch_one(&pool)

@@ -2,7 +2,7 @@ use anyhow::Context;
 use autumn_boot::app::App;
 use autumn_job::{extractor::Component, job::Job, JobConfigurator, JobPlugin};
 use autumn_sqlx::{
-    sqlx::{self, types::chrono::NaiveDateTime, Row},
+    sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };
 use std::time::{Duration, SystemTime};
@@ -22,7 +22,7 @@ async fn main() {
 }
 
 async fn cron_job(Component(db): Component<ConnectPool>) {
-    let time: NaiveDateTime = sqlx::query("select now() as time")
+    let time: String = sqlx::query("select now() as time")
         .fetch_one(&db)
         .await
         .context("query failed")
