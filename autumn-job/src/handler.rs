@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::extractor::FromApp;
+use crate::{extractor::FromApp, Jobs};
 use autumn_boot::app::App;
 use std::pin::Pin;
 use uuid::Uuid;
@@ -15,7 +15,7 @@ pub trait Handler<T>: Clone + Send + Sized + 'static {
     type Future: Future<Output = ()> + Send + 'static;
 
     /// Call the handler with the given request.
-    fn call(self, job_id: Uuid, jobs: JobScheduler, app: Arc<App>) -> Self::Future;
+    fn call(self, job_id: Uuid, scheduler: JobScheduler, app: Arc<App>) -> Self::Future;
 }
 
 /// no args handler impl
@@ -26,7 +26,7 @@ where
 {
     type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-    fn call(self, _job_id: Uuid, _jobs: JobScheduler, _app: Arc<App>) -> Self::Future {
+    fn call(self, _job_id: Uuid, _scheduler: JobScheduler, _app: Arc<App>) -> Self::Future {
         Box::pin(async move {
             self().await;
         })
@@ -68,10 +68,10 @@ macro_rules! impl_handler {
         {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-            fn call(self, job_id: Uuid, jobs: JobScheduler, app: Arc<App>) -> Self::Future {
+            fn call(self, job_id: Uuid, scheduler: JobScheduler, app: Arc<App>) -> Self::Future {
                 Box::pin(async move {
                     $(
-                        let $ty = $ty::from_app(&job_id, &jobs, &app).await;
+                        let $ty = $ty::from_app(&job_id, &scheduler, &app).await;
                     )*
 
                     self($($ty,)*).await;
@@ -110,10 +110,10 @@ impl BoxedHandler {
     pub(crate) fn call(
         self,
         job_id: Uuid,
-        jobs: JobScheduler,
+        scheduler: JobScheduler,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-        self.0.into_inner().unwrap().call(job_id, jobs, app)
+        self.0.into_inner().unwrap().call(job_id, scheduler, app)
     }
 }
 
@@ -123,7 +123,7 @@ pub(crate) trait ErasedHandler: Send {
     fn call(
         self: Box<Self>,
         job_id: Uuid,
-        jobs: JobScheduler,
+        scheduler: JobScheduler,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
@@ -157,9 +157,26 @@ where
     fn call(
         self: Box<Self>,
         job_id: Uuid,
-        jobs: JobScheduler,
+        scheduler: JobScheduler,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-        (self.caller)(self.handler, job_id, jobs, app)
+        (self.caller)(self.handler, job_id, scheduler, app)
+    }
+}
+
+/// TypeHandler is used to configure the autumn-macro marked job handler
+///
+
+pub trait TypedHandler: Clone {
+    fn install_job(self, jobs: &mut Jobs) -> &mut Jobs;
+}
+
+pub trait TypedJob {
+    fn typed_job<H: TypedHandler>(self: &mut Self, handler: H) -> &mut Self;
+}
+
+impl TypedJob for Jobs {
+    fn typed_job<H: TypedHandler>(self: &mut Self, handler: H) -> &mut Self {
+        handler.install_job(self)
     }
 }

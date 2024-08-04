@@ -1,5 +1,7 @@
 use crate::Router;
 
+
+/// TypeHandler is used to configure the autumn-macro marked route handler
 pub trait TypedHandler: Clone {
     fn install_route(self, router: Router) -> Router;
 }

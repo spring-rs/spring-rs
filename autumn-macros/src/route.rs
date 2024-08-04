@@ -210,6 +210,13 @@ impl Route {
             ));
         }
 
+        if ast.sig.asyncness.is_none() {
+            return Err(syn::Error::new_spanned(
+                ast.sig.fn_token,
+                "only support async fn",
+            ));
+        }
+
         Ok(Self {
             name,
             args: vec![args],

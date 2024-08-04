@@ -61,6 +61,7 @@
 //! }
 //! ```
 
+mod job;
 mod nest;
 mod route;
 
@@ -232,3 +233,37 @@ fn input_and_compile_error(mut item: TokenStream, err: syn::Error) -> TokenStrea
     item.extend(compile_err);
     item
 }
+
+/// Job
+///
+macro_rules! job_macro {
+    ($variant:ident, $job_type:ident, $example:literal) => {
+        ///
+        /// # Syntax
+        /// ```plain
+        #[doc = concat!("#[", stringify!($job_type), "(", $example, ")]")]
+        /// ```
+        ///
+        /// # Attributes
+        /// - `"path"`: Raw literal string with path for which to register handler.
+        ///
+        /// # Examples
+        /// ```
+        /// # use autumn_web::response::IntoResponse;
+        #[doc = concat!("# use autumn_macros::", stringify!($job_type), ";")]
+        #[doc = concat!("#[", stringify!($job_type), "(", $example, ")]")]
+        /// async fn example() -> impl IntoResponse {
+        ///     "hello world"
+        /// }
+        /// ```
+        #[proc_macro_attribute]
+        pub fn $job_type(args: TokenStream, input: TokenStream) -> TokenStream {
+            job::with_job(job::JobType::$variant, args, input)
+        }
+    };
+}
+
+job_macro!(OneShot, one_shot, 60);
+job_macro!(FixDelay, fix_delay, 60);
+job_macro!(FixRate, fix_rate, 60);
+job_macro!(Cron, cron, "1/10 * * * * *");

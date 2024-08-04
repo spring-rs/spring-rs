@@ -1,6 +1,7 @@
 use anyhow::Context;
 use autumn_boot::app::App;
-use autumn_job::{extractor::Component, job::Job, JobConfigurator, JobPlugin};
+use autumn_job::{extractor::Component, handler::TypedJob, JobConfigurator, JobPlugin, Jobs};
+use autumn_macros::{cron, fix_delay, fix_rate};
 use autumn_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
@@ -11,16 +12,23 @@ use std::time::{Duration, SystemTime};
 async fn main() {
     App::new()
         .add_plugin(JobPlugin)
-        .add_plugin(SqlxPlugin)
-        .add_job(Job::cron("1/10 * * * * *").run(cron_job))
-        .add_job(Job::fix_delay(5).run(fix_delay_job))
-        .add_job(Job::fix_rate(5).run(fix_rate_job))
+        // .add_plugin(SqlxPlugin)
+        .add_jobs(jobs())
         .run()
         .await;
 
     tokio::time::sleep(Duration::from_secs(100)).await;
 }
 
+fn jobs() -> Jobs {
+    Jobs::new()
+        // .typed_job(cron_job)
+        .typed_job(fix_delay_job)
+        .typed_job(fix_rate_job)
+        .to_owned()
+}
+
+#[cron("1/10 * * * * *")]
 async fn cron_job(Component(db): Component<ConnectPool>) {
     let time: String = sqlx::query("select now() as time")
         .fetch_one(&db)
@@ -31,10 +39,12 @@ async fn cron_job(Component(db): Component<ConnectPool>) {
     println!("cron scheduled: {:?}", time)
 }
 
+#[fix_delay(5)]
 async fn fix_delay_job() {
     println!("fix delay scheduled: {:?}", SystemTime::now())
 }
 
+#[fix_rate(5)]
 async fn fix_rate_job() {
     tokio::time::sleep(Duration::from_secs(10)).await;
     println!("fix rate scheduled: {:?}", SystemTime::now())
