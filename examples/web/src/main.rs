@@ -1,5 +1,4 @@
-use autumn_boot::app::App;
-use autumn_macros::{nest, route, routes};
+use autumn::{nest, route, routes, App};
 use autumn_sqlx::SqlxPlugin;
 use autumn_web::{
     extractor::Path, handler::TypeRouter, response::IntoResponse, Router, WebConfigurator,
@@ -38,7 +37,7 @@ async fn hello(Path(name): Path<String>) -> impl IntoResponse {
 #[nest("/sql")]
 mod sql {
     use anyhow::Context;
-    use autumn_macros::get;
+    use autumn::get;
     use autumn_sqlx::{
         sqlx::{self, Row},
         ConnectPool,

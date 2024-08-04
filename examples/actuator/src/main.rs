@@ -1,5 +1,5 @@
 use autumn_actuator::ActuatorPlugin;
-use autumn_boot::app::App;
+use autumn::App;
 use autumn_web::WebPlugin;
 
 #[tokio::main]

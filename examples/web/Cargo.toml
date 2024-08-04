@@ -6,9 +6,8 @@ license.workspace = true
 authors.workspace = true
 
 [dependencies]
-autumn-boot = { path = "../../autumn-boot" }
+autumn = { path = "../../autumn" }
 autumn-web = { path = "../../autumn-web" }
-autumn-macros = { path = "../../autumn-macros" }
 autumn-sqlx = { path = "../../autumn-sqlx", features = ["mysql"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }

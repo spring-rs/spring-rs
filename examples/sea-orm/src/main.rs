@@ -1,7 +1,7 @@
 mod entities;
 
 use anyhow::Context;
-use autumn_boot::app::App;
+use autumn::App;
 use autumn_sea_orm::{DbConn, SeaOrmPlugin};
 use autumn_web::{
     error::Result,

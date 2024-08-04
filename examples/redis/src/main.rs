@@ -1,5 +1,5 @@
 use anyhow::Context;
-use autumn_boot::app::App;
+use autumn::App;
 use autumn_redis::{redis::AsyncCommands, Redis, RedisPlugin};
 use autumn_web::{
     error::Result,

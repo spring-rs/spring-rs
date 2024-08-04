@@ -1,5 +1,5 @@
 use anyhow::Context;
-use autumn_boot::app::App;
+use autumn::App;
 use autumn_mail::{header::ContentType, AsyncTransport, MailPlugin, Mailer, Message};
 use autumn_web::{
     error::Result,

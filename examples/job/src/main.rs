@@ -1,7 +1,7 @@
 use anyhow::Context;
-use autumn_boot::app::App;
+use autumn::App;
+use autumn::{cron, fix_delay, fix_rate};
 use autumn_job::{extractor::Component, handler::TypedJob, JobConfigurator, JobPlugin, Jobs};
-use autumn_macros::{cron, fix_delay, fix_rate};
 use autumn_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
@@ -12,7 +12,7 @@ use std::time::{Duration, SystemTime};
 async fn main() {
     App::new()
         .add_plugin(JobPlugin)
-        // .add_plugin(SqlxPlugin)
+        .add_plugin(SqlxPlugin)
         .add_jobs(jobs())
         .run()
         .await;
@@ -22,7 +22,7 @@ async fn main() {
 
 fn jobs() -> Jobs {
     Jobs::new()
-        // .typed_job(cron_job)
+        .typed_job(cron_job)
         .typed_job(fix_delay_job)
         .typed_job(fix_rate_job)
         .to_owned()
