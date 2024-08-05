@@ -207,27 +207,6 @@ pub fn nest(args: TokenStream, input: TokenStream) -> TokenStream {
     nest::with_nest(args, input)
 }
 
-/// Marks async main function as the autumn.rs system entry-point.
-///
-/// # Examples
-/// ```
-/// #[autumn::main]
-/// async fn main() {
-///     App::new().run().await
-/// }
-/// ```
-#[proc_macro_attribute]
-pub fn main(_: TokenStream, item: TokenStream) -> TokenStream {
-    // let mut output: TokenStream = (quote! {
-    //     #[::actix_web::rt::main(system = "::actix_web::rt::System")]
-    // })
-    // .into();
-
-    // output.extend(item);
-    // output
-    item
-}
-
 fn input_and_compile_error(mut item: TokenStream, err: syn::Error) -> TokenStream {
     let compile_err = TokenStream::from(err.to_compile_error());
     item.extend(compile_err);
