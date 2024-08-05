@@ -11,8 +11,8 @@ use sea_streamer::{
     kafka::{KafkaConnectOptions, KafkaStreamer},
     redis::{RedisConnectOptions, RedisStreamer},
     stdio::{StdioConnectOptions, StdioStreamer},
-    ConnectOptions, SeaConnectOptions, SeaConsumerOptions, SeaProducerOptions, SeaStreamer,
-    Streamer, StreamerUri,
+    ConnectOptions, ConsumerOptions, SeaConnectOptions, SeaConsumerOptions, SeaProducerOptions,
+    SeaStreamer, Streamer, StreamerUri,
 };
 use serde::Deserialize;
 
@@ -57,7 +57,6 @@ impl StreamConfig {
 
     pub fn consumer_options(&self) -> SeaConsumerOptions {
         let mut consumer_options = SeaConsumerOptions::default();
-
         #[cfg(feature = "kafka")]
         if let Some(kafka) = &self.kafka {
             consumer_options.set_kafka_consumer_options(|opts| kafka.fill_consumer_options(opts));
