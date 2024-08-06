@@ -6,8 +6,8 @@ license.workspace = true
 authors.workspace = true
 
 [dependencies]
-autumn = { path = "../../autumn" }
-autumn-web = { path = "../../autumn-web" }
-autumn-actuator = { path = "../../autumn-actuator" }
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+spring-actuator = { path = "../../spring-actuator" }
 tokio = { workspace = true }
 anyhow = { workspace = true }

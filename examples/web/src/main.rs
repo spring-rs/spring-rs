@@ -1,6 +1,6 @@
-use autumn::{nest, route, routes, App};
-use autumn_sqlx::SqlxPlugin;
-use autumn_web::{
+use spring::{nest, route, routes, App};
+use spring_sqlx::SqlxPlugin;
+use spring_web::{
     extractor::Path, handler::TypeRouter, response::IntoResponse, Router, WebConfigurator,
     WebPlugin,
 };
@@ -37,13 +37,13 @@ async fn hello(Path(name): Path<String>) -> impl IntoResponse {
 #[nest("/sql")]
 mod sql {
     use anyhow::Context;
-    use autumn::get;
-    use autumn_sqlx::{
+    use spring::get;
+    use spring_sqlx::{
         sqlx::{self, Row},
         ConnectPool,
     };
-    use autumn_web::error::Result;
-    use autumn_web::extractor::Component;
+    use spring_web::error::Result;
+    use spring_web::extractor::Component;
 
     #[get("/version")]
     pub async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {

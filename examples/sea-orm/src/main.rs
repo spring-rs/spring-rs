@@ -1,9 +1,9 @@
 mod entities;
 
 use anyhow::Context;
-use autumn::App;
-use autumn_sea_orm::{DbConn, SeaOrmPlugin};
-use autumn_web::{
+use spring::App;
+use spring_sea_orm::{DbConn, SeaOrmPlugin};
+use spring_web::{
     error::Result,
     extractor::{Component, Path, Query},
     get,

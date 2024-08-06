@@ -1,27 +1,27 @@
 [workspace]
 resolver = "2"
 members = [
-    "autumn",
-    "autumn-boot",
-    "autumn-macros",
-    "autumn-web",
-    "autumn-job",
-    "autumn-redis",
-    "autumn-sqlx",
-    "autumn-sea-orm",
-    "autumn-sea-streamer",
-    "autumn-actuator",
-    "autumn-mail",
+    "spring",
+    "spring-boot",
+    "spring-macros",
+    "spring-web",
+    "spring-job",
+    "spring-redis",
+    "spring-sqlx",
+    "spring-sea-orm",
+    "spring-sea-streamer",
+    "spring-actuator",
+    "spring-mail",
     "examples/*",
 ]
-default-members = ["autumn-*"]
+default-members = ["spring-*"]
 
 [workspace.package]
 version = "0.0.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["holmofy"]
-repository = "https://github.com/holmofy/autumn-rs"
+repository = "https://github.com/holmofy/spring-rs"
 
 [workspace.dependencies]
 thiserror = "1.0.62"

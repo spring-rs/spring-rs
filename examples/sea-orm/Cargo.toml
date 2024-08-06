@@ -6,9 +6,9 @@ license.workspace = true
 authors.workspace = true
 
 [dependencies]
-autumn = { path = "../../autumn" }
-autumn-web = { path = "../../autumn-web" }
-autumn-sea-orm = { path = "../../autumn-sea-orm", features = ["postgres"] }
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+spring-sea-orm = { path = "../../spring-sea-orm", features = ["postgres"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 sea-orm = { workspace = true }

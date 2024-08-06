@@ -1,6 +1,6 @@
-use autumn_actuator::ActuatorPlugin;
-use autumn::App;
-use autumn_web::WebPlugin;
+use spring_actuator::ActuatorPlugin;
+use spring::App;
+use spring_web::WebPlugin;
 
 #[tokio::main]
 async fn main() {

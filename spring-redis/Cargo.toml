@@ -1,0 +1,16 @@
+[package]
+name = "spring-redis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+spring-boot = { path = "../spring-boot" }
+serde = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+async-trait = { workspace = true }
+redis = { workspace = true, features = ["connection-manager", "tokio-comp"] }
+schemars = { workspace = true }
