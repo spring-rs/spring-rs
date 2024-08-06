@@ -1,0 +1,32 @@
+name: Publish
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "*/src/*"
+      - "Cargo.toml"
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      msg:
+        required: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependency
+        run: cargo install cargo-workspaces
+      - name: Build
+        run: cargo build --workspace --verbose
+      - name: Run tests
+        run: cargo test --workspace --verbose
+      - name: Run Publish
+        run: cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}}
