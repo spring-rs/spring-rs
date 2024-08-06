@@ -7,16 +7,6 @@
 //! explicit imports. Check the latest [spring.rs attributes docs] to see which macros
 //! are re-exported.
 //!
-//! # Runtime Setup
-//! Used for setting up the spring.rs async runtime. See [macro@main] macro docs.
-//!
-//! ```
-//! #[spring_macros::main] // or `#[spring::main]` in spring.rs Web apps
-//! async fn main() {
-//!     App::new().run().await
-//! }
-//! ```
-//!
 //! # Single Method Handler
 //! There is a macro to set up a handler for each of the most common HTTP methods that also define
 //! additional guards and route-specific middleware.
@@ -76,22 +66,14 @@ use proc_macro::TokenStream;
 ///
 /// # Attributes
 /// - `"path"`: Raw literal string with path for which to register handler.
-/// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the function
-///   name of handler is used.
 /// - `method = "HTTP_METHOD"`: Registers HTTP method to provide guard for. Upper-case string,
 ///   "GET", "POST" for example.
-/// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
-/// - `wrap = "Middleware"`: Registers a resource middleware.
-///
-/// # Notes
-/// Function name can be specified as any expression that is going to be accessible to the generate
-/// code, e.g `my_guard` or `my_module::my_guard`.
 ///
 /// # Examples
 /// ```
 /// # use spring_web::response::IntoResponse;
 /// # use spring_macros::route;
-/// #[route("/test", method = "GET", method = "HEAD", method = "CUSTOM")]
+/// #[route("/test", method = "GET", method = "HEAD")]
 /// async fn example() -> impl IntoResponse {
 ///     "hello world"
 /// }
@@ -230,7 +212,7 @@ macro_rules! job_macro {
         /// ```
         /// # use spring_web::response::IntoResponse;
         #[doc = concat!("# use spring_macros::", stringify!($job_type), ";")]
-        #[doc = concat!("#[", stringify!($job_type), "(", $example, ")]")]
+        #[doc = concat!("#[", stringify!($job_type), "(", stringify!($example), ")]")]
         /// async fn example() -> impl IntoResponse {
         ///     "hello world"
         /// }
