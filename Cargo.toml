@@ -16,7 +16,7 @@ members = [
 default-members = ["spring-*"]
 
 [workspace.package]
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["holmofy"]
@@ -35,9 +35,9 @@ tower-http = "0.5.2"
 byte-unit = "5.1.4"
 axum = "0.7.5"
 sqlx = "0.7.4"
-sea-orm = "0.12.15"
+sea-orm = "0.0.2"
 sea-streamer = "0.5.0"
-redis = "0.26.0"
+redis = "0.0.2"
 lettre = "0.11.7"
 tokio-cron-scheduler = "0.10.2"
 inventory = "0.3.15"
