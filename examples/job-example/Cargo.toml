@@ -1,5 +1,5 @@
 [package]
-name = "redis"
+name = "job-example"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -7,7 +7,10 @@ authors.workspace = true
 
 [dependencies]
 spring = { path = "../../spring" }
-spring-web = { path = "../../spring-web" }
-spring-redis = { path = "../../spring-redis" }
+spring-job = { path = "../../spring-job" }
+spring-sqlx = { path = "../../spring-sqlx", features = [
+    "postgres",
+    "with-chrono",
+] }
 tokio = { workspace = true }
 anyhow = { workspace = true }

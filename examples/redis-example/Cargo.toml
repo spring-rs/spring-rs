@@ -1,5 +1,5 @@
 [package]
-name = "web"
+name = "redis-example"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,6 +8,6 @@ authors.workspace = true
 [dependencies]
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
-spring-sqlx = { path = "../../spring-sqlx", features = ["mysql"] }
+spring-redis = { path = "../../spring-redis" }
 tokio = { workspace = true }
 anyhow = { workspace = true }

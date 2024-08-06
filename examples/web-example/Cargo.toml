@@ -1,5 +1,5 @@
 [package]
-name = "mail"
+name = "web-example"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,6 +8,6 @@ authors.workspace = true
 [dependencies]
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
-spring-mail = { path = "../../spring-mail" }
+spring-sqlx = { path = "../../spring-sqlx", features = ["mysql"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
