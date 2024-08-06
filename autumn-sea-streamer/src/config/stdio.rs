@@ -26,6 +26,10 @@ impl OptionsFiller for StdioOptions {
     fn fill_producer_options(&self, opts: &mut Self::ProducerOptsType) {
         todo!()
     }
+    
+    fn default_consumer_options(&self) -> sea_streamer::SeaConsumerOptions {
+        todo!()
+    }
 }
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]

@@ -3,16 +3,9 @@ pub mod kafka;
 pub mod redis;
 pub mod stdio;
 
-use std::time::Duration;
-
 use schemars::JsonSchema;
 use sea_streamer::{
-    file::{FileConnectOptions, FileStreamer},
-    kafka::{KafkaConnectOptions, KafkaStreamer},
-    redis::{RedisConnectOptions, RedisStreamer},
-    stdio::{StdioConnectOptions, StdioStreamer},
-    ConnectOptions, ConsumerOptions, SeaConnectOptions, SeaConsumerOptions, SeaProducerOptions,
-    SeaStreamer, Streamer, StreamerUri,
+    ConsumerMode, ConsumerOptions, SeaConnectOptions, SeaConsumerOptions, SeaProducerOptions,
 };
 use serde::Deserialize;
 
@@ -55,30 +48,30 @@ impl StreamConfig {
         connect_options
     }
 
-    pub fn consumer_options(&self) -> SeaConsumerOptions {
-        let mut consumer_options = SeaConsumerOptions::default();
+    pub fn consumer_options(&self, mut consumer_options: SeaConsumerOptions) -> SeaConsumerOptions {
         #[cfg(feature = "kafka")]
         if let Some(kafka) = &self.kafka {
-            consumer_options.set_kafka_consumer_options(|opts| kafka.fill_consumer_options(opts));
+            consumer_options.set_kafka_consumer_options(|opts| kafka.fill_consumer_options(opts))
         }
         #[cfg(feature = "redis")]
         if let Some(redis) = &self.redis {
-            consumer_options.set_redis_consumer_options(|opts| redis.fill_consumer_options(opts));
+            consumer_options.set_redis_consumer_options(|opts| redis.fill_consumer_options(opts))
         }
         #[cfg(feature = "stdio")]
         if let Some(stdio) = &self.stdio {
-            consumer_options.set_stdio_consumer_options(|opts| stdio.fill_consumer_options(opts));
+            consumer_options.set_stdio_consumer_options(|opts| stdio.fill_consumer_options(opts))
         }
         #[cfg(feature = "file")]
         if let Some(file) = &self.file {
-            consumer_options.set_file_consumer_options(|opts| file.fill_consumer_options(opts));
+            consumer_options.set_file_consumer_options(|opts| file.fill_consumer_options(opts))
         }
         consumer_options
     }
 
-    pub fn producer_options(&self) -> SeaProducerOptions {
-        let mut producer_options = SeaProducerOptions::default();
-
+    pub fn fill_producer_options(
+        &self,
+        mut producer_options: SeaProducerOptions,
+    ) -> SeaProducerOptions {
         #[cfg(feature = "kafka")]
         if let Some(kafka) = &self.kafka {
             producer_options.set_kafka_producer_options(|opts| kafka.fill_producer_options(opts));
@@ -106,4 +99,16 @@ pub(crate) trait OptionsFiller {
     fn fill_connect_options(&self, opts: &mut Self::ConnectOptsType);
     fn fill_consumer_options(&self, opts: &mut Self::ConsumerOptsType);
     fn fill_producer_options(&self, opts: &mut Self::ProducerOptsType);
+    fn default_consumer_options(&self) -> SeaConsumerOptions;
+}
+
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[serde(remote = "ConsumerMode")]
+pub(crate) enum ConsumerModeRef {
+    /// This is the 'vanilla' stream consumer. It does not auto-commit, and thus only consumes messages from now on.
+    RealTime,
+    /// When the process restarts, it will resume the stream from the previous committed sequence.
+    Resumable,
+    /// You should assign a consumer group manually. The load-balancing mechanism is implementation-specific.
+    LoadBalanced,
 }
