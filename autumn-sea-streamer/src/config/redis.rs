@@ -1,17 +1,15 @@
-use std::time::Duration;
-
-use crate::config::ConsumerModeRef;
+#![allow(warnings, unused)]
 
 use super::OptionsFiller;
+use crate::config::ConsumerModeRef;
 use schemars::JsonSchema;
 use sea_streamer::redis::{
     AutoCommit, AutoStreamReset, RedisConnectOptions, RedisConsumerOptions, RedisProducerOptions,
     ShardOwnership,
 };
-use sea_streamer::{
-    ConnectOptions as ConnectOptionsTrait, ConsumerMode, ConsumerOptions as ConsumerOptionsTrait,
-};
+use sea_streamer::{ConnectOptions as ConnectOptionsTrait, ConsumerId, ConsumerMode};
 use serde::Deserialize;
+use std::time::Duration;
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
 pub struct RedisOptions {
@@ -38,29 +36,45 @@ impl OptionsFiller for RedisOptions {
         }
     }
 
-    fn default_consumer_options(&self) -> sea_streamer::SeaConsumerOptions {
-        match &self.consumer {
-            Some(consumer) => consumer.mode,
-            None => ConsumerMode::default(),
-        };
-        todo!()
-    }
-
     fn fill_consumer_options(&self, opts: &mut Self::ConsumerOptsType) {
         if let Some(consumer) = &self.consumer {
-            // if let Some(group_id) = consumer.group_id {
-                // opts.set_customer_group(CustomerGroup::new(group_id));
-            // }
+            if let Some(consumer_id) = &consumer.consumer_id {
+                opts.set_consumer_id(ConsumerId::new(consumer_id));
+            }
+            opts.set_consumer_timeout(consumer.consumer_timeout);
+            opts.set_auto_stream_reset(consumer.auto_stream_reset);
+            opts.set_auto_commit(consumer.auto_commit);
+            opts.set_auto_commit_interval(consumer.auto_commit_interval);
+            opts.set_auto_stream_reset(consumer.auto_stream_reset);
+            opts.set_auto_claim_interval(consumer.auto_claim_interval);
+            opts.set_auto_claim_idle(consumer.auto_claim_idle);
+            opts.set_batch_size(consumer.batch_size);
+            opts.set_shard_ownership(consumer.shard_ownership);
+            opts.set_mkstream(consumer.mkstream);
         }
     }
 
     fn fill_producer_options(&self, opts: &mut Self::ProducerOptsType) {
         todo!()
     }
+
+    fn default_consumer_mode(&self) -> Option<ConsumerMode> {
+        match &self.consumer {
+            Some(consumer) => Some(consumer.mode),
+            None => None,
+        }
+    }
+
+    fn default_consumer_group_id(&self) -> Option<String> {
+        match &self.consumer {
+            Some(consumer) => consumer.group_id.clone(),
+            None => None,
+        }
+    }
 }
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
-pub struct ConnectOptions {
+struct ConnectOptions {
     db: u32,
     username: Option<String>,
     password: Option<String>,
@@ -70,7 +84,7 @@ pub struct ConnectOptions {
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
-pub struct ConsumerOptions {
+struct ConsumerOptions {
     #[serde(with = "ConsumerModeRef")]
     mode: ConsumerMode,
     group_id: Option<String>,
@@ -93,7 +107,7 @@ pub struct ConsumerOptions {
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 #[serde(remote = "AutoStreamReset")]
 /// Where to start streaming from if there is no priori state.
-pub enum AutoStreamResetRef {
+enum AutoStreamResetRef {
     /// Use `0` as ID, which is the earliest message.
     Earliest,
     /// Use `$` as ID, which is the latest message.
@@ -103,7 +117,7 @@ pub enum AutoStreamResetRef {
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 #[serde(remote = "AutoCommit")]
 /// The auto ack / commit mechanism.
-pub enum AutoCommitRef {
+enum AutoCommitRef {
     /// `XREAD` with `NOACK`. This acknowledges messages as soon as they are fetched.
     /// In the event of service restart, this will likely result in messages being skipped.
     Immediate,
@@ -125,7 +139,7 @@ pub enum AutoCommitRef {
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 #[serde(remote = "ShardOwnership")]
 /// The shard ownership model.
-pub enum ShardOwnershipRef {
+enum ShardOwnershipRef {
     /// Consumers in the same group share the same shard
     Shared,
     /// Consumers claim ownership of a shard
@@ -135,4 +149,4 @@ pub enum ShardOwnershipRef {
 }
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
-pub struct ProducerOptions {}
+struct ProducerOptions {}

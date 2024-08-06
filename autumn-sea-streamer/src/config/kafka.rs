@@ -1,11 +1,12 @@
-use crate::config::ConsumerModeRef;
+#![allow(warnings, unused)]
 
 use super::OptionsFiller;
+use crate::config::ConsumerModeRef;
 use schemars::JsonSchema;
 use sea_streamer::kafka::{
     KafkaConnectOptions, KafkaConsumerOptions, KafkaProducerOptions, SaslMechanism,
 };
-use sea_streamer::{ConnectOptions as ConnectOptionsTrait, ConsumerGroup, ConsumerMode};
+use sea_streamer::{ConnectOptions as ConnectOptionsTrait, ConsumerMode};
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -62,19 +63,8 @@ impl OptionsFiller for KafkaOptions {
         }
     }
 
-    fn default_consumer_options(&self) -> sea_streamer::SeaConsumerOptions {
-        match &self.consumer {
-            Some(consumer) => consumer.mode,
-            None => ConsumerMode::default(),
-        };
-        todo!()
-    }
-
     fn fill_consumer_options(&self, opts: &mut Self::ConsumerOptsType) {
         if let Some(consumer) = &self.consumer {
-            if let Some(group_id) = &consumer.group_id {
-                opts.set_group_id(ConsumerGroup::new(group_id));
-            }
             if let Some(session_timeout) = consumer.session_timeout {
                 opts.set_session_timeout(session_timeout);
             }
@@ -135,6 +125,20 @@ impl OptionsFiller for KafkaOptions {
             }
         }
     }
+
+    fn default_consumer_mode(&self) -> Option<ConsumerMode> {
+        match &self.consumer {
+            Some(consumer) => Some(consumer.mode),
+            None => None,
+        }
+    }
+
+    fn default_consumer_group_id(&self) -> Option<String> {
+        match &self.consumer {
+            Some(consumer) => consumer.group_id.clone(),
+            None => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
@@ -185,7 +189,7 @@ struct ConsumerOptions {
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
-pub enum AutoOffsetReset {
+enum AutoOffsetReset {
     /// Automatically reset the offset to the earliest offset.
     Earliest,
     /// Automatically reset the offset to the latest offset.
@@ -202,7 +206,7 @@ struct ProducerOptions {
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
-pub enum CompressionType {
+enum CompressionType {
     None,
     Gzip,
     Snappy,

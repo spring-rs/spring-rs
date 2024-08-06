@@ -11,7 +11,7 @@ use autumn_boot::{
 };
 use job::Job;
 use std::ops::Deref;
-use std::{future::Future, sync::Arc};
+use std::sync::Arc;
 
 #[derive(Clone, Default)]
 pub struct Jobs(Vec<Job>);
@@ -86,55 +86,47 @@ pub struct JobPlugin;
 #[async_trait]
 impl Plugin for JobPlugin {
     async fn build(&self, app: &mut AppBuilder) {
-        let scheduler = |app: Arc<App>| {
-            Box::new(async move {
-                let jobs = app.get_component::<Jobs>();
-
-                if jobs.is_none() {
-                    let msg = "No tasks are registered, so the task scheduler does not start.";
-                    tracing::info!(msg);
-                    return Ok(msg.to_string());
-                }
-
-                let jobs = jobs.unwrap();
-
-                let mut sched = JobScheduler::new()
-                    .await
-                    .context("job init failed")
-                    .unwrap();
-
-                for job in jobs.deref().iter() {
-                    sched
-                        .add(job.to_owned().build(app.clone()))
-                        .await
-                        .context("add job failed")
-                        .unwrap();
-                }
-
-                sched.shutdown_on_ctrl_c();
-
-                // Add code to be run during/after shutdown
-                sched.set_shutdown_handler(Box::new(|| {
-                    Box::pin(async move {
-                        println!("Shut down done");
-                    })
-                }));
-
-                // Start the scheduler
-                sched
-                    .start()
-                    .await
-                    .context("job scheduler start failed")
-                    .unwrap();
-
-                Ok("job schedule finished".to_string())
-            }) as Box<dyn Future<Output = Result<String>> + Send>
-        };
-
-        app.add_scheduler(scheduler);
+        app.add_scheduler(|app: Arc<App>| Box::new(Self::schedule(app)));
     }
 
     fn config_prefix(&self) -> &str {
         "job"
+    }
+}
+
+impl JobPlugin {
+    async fn schedule(app: Arc<App>) -> Result<String> {
+        let jobs = app.get_component::<Jobs>();
+
+        if jobs.is_none() {
+            let msg = "No tasks are registered, so the task scheduler does not start.";
+            tracing::info!(msg);
+            return Ok(msg.to_string());
+        }
+
+        let jobs = jobs.unwrap();
+
+        let mut sched = JobScheduler::new().await.context("job init failed")?;
+
+        for job in jobs.deref().iter() {
+            sched
+                .add(job.to_owned().build(app.clone()))
+                .await
+                .context("add job failed")?;
+        }
+
+        sched.shutdown_on_ctrl_c();
+
+        // Add code to be run during/after shutdown
+        sched.set_shutdown_handler(Box::new(|| {
+            Box::pin(async move {
+                println!("Shut down done");
+            })
+        }));
+
+        // Start the scheduler
+        sched.start().await.context("job scheduler start failed")?;
+
+        Ok("job schedule finished".to_string())
     }
 }

@@ -1,6 +1,12 @@
+#![allow(warnings, unused)]
+
 use super::OptionsFiller;
+use crate::config::ConsumerModeRef;
 use schemars::JsonSchema;
-use sea_streamer::stdio::{StdioConnectOptions, StdioConsumerOptions, StdioProducerOptions};
+use sea_streamer::{
+    stdio::{StdioConnectOptions, StdioConsumerOptions, StdioProducerOptions},
+    ConsumerMode,
+};
 use serde::Deserialize;
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
@@ -16,27 +22,41 @@ impl OptionsFiller for StdioOptions {
     type ProducerOptsType = StdioProducerOptions;
 
     fn fill_connect_options(&self, opts: &mut Self::ConnectOptsType) {
-        todo!()
+        if let Some(connect) = &self.connect {
+            opts.set_loopback(connect.loopback);
+        }
     }
 
-    fn fill_consumer_options(&self, opts: &mut Self::ConsumerOptsType) {
-        todo!()
+    fn fill_consumer_options(&self, _opts: &mut Self::ConsumerOptsType) {}
+
+    fn fill_producer_options(&self, _opts: &mut Self::ProducerOptsType) {}
+
+    fn default_consumer_mode(&self) -> Option<ConsumerMode> {
+        match &self.consumer {
+            Some(consumer) => Some(consumer.mode),
+            None => None,
+        }
     }
 
-    fn fill_producer_options(&self, opts: &mut Self::ProducerOptsType) {
-        todo!()
-    }
-    
-    fn default_consumer_options(&self) -> sea_streamer::SeaConsumerOptions {
-        todo!()
+    fn default_consumer_group_id(&self) -> Option<String> {
+        match &self.consumer {
+            Some(consumer) => consumer.group_id.clone(),
+            None => None,
+        }
     }
 }
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
-pub struct ConnectOptions {}
+struct ConnectOptions {
+    loopback: bool,
+}
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
-pub struct ProducerOptions {}
+struct ConsumerOptions {
+    #[serde(with = "ConsumerModeRef")]
+    mode: ConsumerMode,
+    group_id: Option<String>,
+}
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
-pub struct ConsumerOptions {}
+struct ProducerOptions {}

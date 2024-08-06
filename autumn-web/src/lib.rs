@@ -15,10 +15,7 @@ use autumn_boot::{
     plugin::Plugin,
 };
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
-use std::{
-    future::Future, net::SocketAddr, ops::Deref, path::PathBuf, str::FromStr, sync::Arc,
-    time::Duration,
-};
+use std::{net::SocketAddr, ops::Deref, path::PathBuf, str::FromStr, sync::Arc, time::Duration};
 use tower_http::{
     catch_panic::CatchPanicLayer,
     compression::CompressionLayer,
@@ -84,30 +81,9 @@ impl Plugin for WebPlugin {
             router = Self::apply_middleware(router, middlewares);
         }
 
-        // 2. bind tcp listener
         let addr = SocketAddr::from((config.binding, config.port));
-        let listener = tokio::net::TcpListener::bind(addr)
-            .await
-            .with_context(|| format!("bind tcp listener failed:{}", addr))
-            .unwrap();
 
-        tracing::info!("bind tcp listener: {}", addr);
-
-        let scheduler = |app: Arc<App>| {
-            Box::new(async move {
-                // 3. axum server
-                tracing::info!("axum server started");
-
-                let router = router.with_state(AppState { app });
-                axum::serve(listener, router)
-                    .await
-                    .context("start axum server failed")?;
-
-                Ok("axum schedule finished".to_string())
-            }) as Box<dyn Future<Output = Result<String>> + Send>
-        };
-
-        app.add_scheduler(scheduler);
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(addr, router, app)));
     }
 
     fn config_prefix(&self) -> &str {
@@ -116,6 +92,24 @@ impl Plugin for WebPlugin {
 }
 
 impl WebPlugin {
+    async fn schedule(addr: SocketAddr, router: Router, app: Arc<App>) -> Result<String> {
+        // 2. bind tcp listener
+        let listener = tokio::net::TcpListener::bind(addr)
+            .await
+            .with_context(|| format!("bind tcp listener failed:{}", addr))?;
+        tracing::info!("bind tcp listener: {}", addr);
+
+        // 3. axum server
+        let router = router.with_state(AppState { app });
+
+        tracing::info!("axum server started");
+        axum::serve(listener, router)
+            .await
+            .context("start axum server failed")?;
+
+        Ok("axum schedule finished".to_string())
+    }
+
     fn apply_middleware(router: Router, middleware: Middlewares) -> Router {
         let mut router = router;
         if let Some(catch_panic) = middleware.catch_panic {
