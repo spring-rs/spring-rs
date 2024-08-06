@@ -2,8 +2,8 @@
 
 ## 0.0.0 - 2024.7.15
 
-Initial implementation of autumn-boot plugin system
+Initial implementation of spring-boot plugin system
 
 ### Added
 
-- [Plugin System](https://github.com/holmofy/autumn-boot/pull/2)
+- [Plugin System](https://github.com/holmofy/spring-boot/pull/2)

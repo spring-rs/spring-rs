@@ -1,7 +1,7 @@
 use anyhow::Context;
-use autumn::App;
-use autumn_mail::{header::ContentType, AsyncTransport, MailPlugin, Mailer, Message};
-use autumn_web::{
+use spring::App;
+use spring_mail::{header::ContentType, AsyncTransport, MailPlugin, Mailer, Message};
+use spring_web::{
     error::Result,
     extractor::Component,
     get,

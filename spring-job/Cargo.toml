@@ -1,0 +1,16 @@
+[package]
+name = "spring-job"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+spring-boot = { path = "../spring-boot" }
+tokio-cron-scheduler = { workspace = true, features = ["signal"] }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+uuid = { workspace = true, features = ["v4"] }
+chrono = { workspace = true }

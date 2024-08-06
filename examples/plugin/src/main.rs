@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use autumn_boot::{
+use spring_boot::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };

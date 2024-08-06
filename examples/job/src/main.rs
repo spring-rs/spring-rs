@@ -1,8 +1,8 @@
 use anyhow::Context;
-use autumn::App;
-use autumn::{cron, fix_delay, fix_rate};
-use autumn_job::{extractor::Component, handler::TypedJob, JobConfigurator, JobPlugin, Jobs};
-use autumn_sqlx::{
+use spring::App;
+use spring::{cron, fix_delay, fix_rate};
+use spring_job::{extractor::Component, handler::TypedJob, JobConfigurator, JobPlugin, Jobs};
+use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };

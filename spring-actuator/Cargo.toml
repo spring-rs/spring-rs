@@ -1,0 +1,18 @@
+[package]
+name = "spring-actuator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+spring-boot = { path = "../spring-boot" }
+spring-web = { path = "../spring-web" }
+tracing = { workspace = true, features = ["log"] }
+async-trait = { workspace = true }
+serde = { workspace = true }
+schemars = { workspace = true }
+anyhow = { workspace = true }
