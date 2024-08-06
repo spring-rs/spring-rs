@@ -214,7 +214,7 @@ macro_rules! job_macro {
         #[doc = concat!("# use spring_macros::", stringify!($job_type), ";")]
         #[doc = concat!("#[", stringify!($job_type), "(", stringify!($example), ")]")]
         /// async fn example() {
-        ///     "hello world"
+        ///     println!("hello world");
         /// }
         /// ```
         #[proc_macro_attribute]
