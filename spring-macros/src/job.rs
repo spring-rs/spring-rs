@@ -148,6 +148,8 @@ impl ToTokens for Job {
 
             impl ::spring_job::handler::TypedHandler for #name {
                 fn install_job(self, __jobs: &mut ::spring_job::Jobs) -> &mut ::spring_job::Jobs {
+                    use ::spring_job::JobConfigurator;
+                    use ::spring_job::job::JobBuilder;
                     #ast
                     #register_stream
                 }
