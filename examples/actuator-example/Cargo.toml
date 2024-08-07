@@ -1,6 +1,6 @@
 [package]
 name = "actuator-example"
-version.workspace = true
+version = "0.0.4"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
