@@ -1,16 +1,15 @@
 pub mod config;
-
+pub extern crate sqlx;
 use anyhow::Context;
 use async_trait::async_trait;
+use config::SqlxConfig;
 use spring_boot::app::AppBuilder;
 use spring_boot::error::Result;
 use spring_boot::plugin::Plugin;
-use config::SqlxConfig;
 use sqlx::any::AnyPoolOptions;
 use std::time::Duration;
 
 pub type ConnectPool = sqlx::AnyPool;
-pub use sqlx;
 
 pub struct SqlxPlugin;
 
