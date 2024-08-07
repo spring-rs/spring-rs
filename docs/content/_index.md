@@ -1,15 +1,15 @@
 +++
-title = "Modern Documentation Theme"
+title = "spring-rs"
 
 
 # The homepage contents
 [extra]
-lead = '<b>AdiDoks</b> is a modern documentation theme, which is a port of the Hugo theme <a href="https://github.com/h-enk/">Doks</a> for Zola.'
+lead = "<b>spring-rs</b> is a microservice framework written in rust inspired by java's spring-boot"
 url = "/docs/getting-started/introduction/"
 url_button = "Get started"
-repo_version = "GitHub v0.1.0"
+repo_version = "GitHub v0.0.4"
 repo_license = "Open-source MIT License."
-repo_url = "https://github.com/aaranxu/adidoks"
+repo_url = "https://github.com/spring-rs/spring-rs"
 
 # Menu items
 [[extra.menu.main]]
@@ -25,27 +25,26 @@ url = "/blog/"
 weight = 20
 
 [[extra.list]]
-title = "Security aware"
-content = 'Get A+ scores on <a href="https://observatory.mozilla.org/analyze/adidoks.org">Mozilla Observatory</a> out of the box. Easily change the default Security Headers to suit your needs.'
+title = "⚡️ High performance ⚡️"
+content = 'Benefiting from the awesome rust language, <b>spring-rs</b> has the ultimate performance comparable to C/C++'
 
 [[extra.list]]
-title = "Fast by default ⚡️"
-content = 'Get 100 scores on <a href="https://googlechrome.github.io/lighthouse/viewer/?gist=7731347bb8ce999eff7428a8e763b637">Google Lighthouse</a> by default. Doks removes unused css, prefetches links, and lazy loads images.'
+title = "🛡️ High security 🛡️"
+content = 'Compared to C/C++, the Rust language used by <b>spring-rs</b> provides memory safety and thread safety.'
 
 [[extra.list]]
-title = "SEO-ready"
-content = "Use sensible defaults for structured data, open graph, and Twitter cards. Or easily change the SEO settings to your liking."
+title = "🔨 Lightweight 🔨"
+content = "The core code of spring-rs does not exceed 5,000 lines, and the binary size of the release version packaged in rust is also small."
 
 [[extra.list]]
-title = "Full text search"
-content = "Search your Doks site with FlexSearch. Easily customize index settings and search options to your liking."
+title = "🔧 Easy to use 🔧"
+content = "<b>spring-rs</b> provides a clear and concise API and optional Procedural Macros to simplify development."
 
 [[extra.list]]
-title = "Page layouts"
-content = "Build pages with a landing page, blog, or documentation layout. Add custom sections and components to suit your needs."
+title = "🔌 Highly extensible 🔌"
+content = "<b>spring-rs</b> uses a highly extensible plug-in model, and users can customize plug-ins to extend program capabilities."
 
 [[extra.list]]
-title = "Dark mode"
-content = "Switch to a low-light UI with the click of a button. Change colors with variables to match your branding."
-
+title = "⚙️ Highly configurable ⚙️"
+content = "<b>spring-rs</b> uses toml to configure applications and plug-ins to improve application flexibility."
 +++
