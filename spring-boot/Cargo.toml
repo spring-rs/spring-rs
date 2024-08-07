@@ -1,5 +1,6 @@
 [package]
 name = "spring-boot"
+description= "rust microservice framework like spring boot in java"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

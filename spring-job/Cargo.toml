@@ -1,5 +1,6 @@
 [package]
 name = "spring-job"
+description= "rust microservice framework"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
