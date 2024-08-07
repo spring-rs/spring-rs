@@ -30,7 +30,7 @@ fn jobs() -> Jobs {
 
 #[cron("1/10 * * * * *")]
 async fn cron_job(Component(db): Component<ConnectPool>) {
-    let time: String = sqlx::query("select now() as time")
+    let time: String = sqlx::query("select DATE_FORMAT(now(),'%Y-%m-%d %H:%i:%s') as time")
         .fetch_one(&db)
         .await
         .context("query failed")
@@ -41,11 +41,17 @@ async fn cron_job(Component(db): Component<ConnectPool>) {
 
 #[fix_delay(5)]
 async fn fix_delay_job() {
-    println!("fix delay scheduled: {:?}", SystemTime::now())
+    let now = SystemTime::now();
+    let datetime: sqlx::types::chrono::DateTime<sqlx::types::chrono::Local>  = now.into();
+    let formatted_time = datetime.format("%Y-%m-%d %H:%M:%S");
+    println!("fix delay scheduled: {:?}", formatted_time)
 }
 
 #[fix_rate(5)]
 async fn fix_rate_job() {
     tokio::time::sleep(Duration::from_secs(10)).await;
-    println!("fix rate scheduled: {:?}", SystemTime::now())
+    let now = SystemTime::now();
+    let datetime: sqlx::types::chrono::DateTime<sqlx::types::chrono::Local>  = now.into();
+    let formatted_time = datetime.format("%Y-%m-%d %H:%M:%S");
+    println!("fix rate scheduled: {:?}", formatted_time)
 }
