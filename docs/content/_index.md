@@ -10,6 +10,7 @@ url_button = "Get started"
 repo_version = "GitHub v0.0.4"
 repo_license = "Open-source MIT License."
 repo_url = "https://github.com/spring-rs/spring-rs"
+logo = "logo.svg"
 
 # Menu items
 [[extra.menu.main]]
