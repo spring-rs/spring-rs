@@ -16,7 +16,7 @@ members = [
 default-members = ["spring-*"]
 
 [workspace.package]
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["holmofy"]
