@@ -65,6 +65,7 @@ impl TryFrom<&syn::LitStr> for Method {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct RouteArgs {
     pub(crate) path: LitStr,
     pub(crate) options: Punctuated<syn::MetaNameValue, Token![,]>,
