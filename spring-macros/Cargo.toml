@@ -1,7 +1,7 @@
 [package]
 name = "spring-macros"
-description= "rust microservice framework"
-version = "0.0.4"
+description = "rust microservice framework"
+version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -16,6 +16,6 @@ quote = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
-spring-web = { path = "../spring-web" }
-spring-job = { path = "../spring-job" }
-spring-boot = { path = "../spring-boot" }
+spring-web = { path = "../spring-web", version = "0.0.4" }
+spring-job = { path = "../spring-job", version = "0.0.4" }
+spring-boot = { path = "../spring-boot", version = "0.0.4" }

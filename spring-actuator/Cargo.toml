@@ -1,7 +1,7 @@
 [package]
 name = "spring-actuator"
-description= "rust microservice framework"
-version = "0.0.4"
+description = "rust microservice framework"
+version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -10,8 +10,8 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-spring-boot = { path = "../spring-boot" }
-spring-web = { path = "../spring-web" }
+spring-boot = { path = "../spring-boot", version = "0.0.4" }
+spring-web = { path = "../spring-web", version = "0.0.4" }
 tracing = { workspace = true, features = ["log"] }
 async-trait = { workspace = true }
 serde = { workspace = true }

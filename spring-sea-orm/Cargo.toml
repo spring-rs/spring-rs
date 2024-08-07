@@ -1,14 +1,14 @@
 [package]
 name = "spring-sea-orm"
-description= "rust microservice framework"
-version = "0.0.4"
+description = "rust microservice framework"
+version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot" }
+spring-boot = { path = "../spring-boot", version = "0.0.4" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }

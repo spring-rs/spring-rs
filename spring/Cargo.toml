@@ -1,15 +1,15 @@
 [package]
 name = "spring"
-description= "rust microservice framework"
-version = "0.0.4"
+description = "rust microservice framework"
+version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot" }
-spring-macros = { path = "../spring-macros" }
+spring-boot = { path = "../spring-boot", version = "0.0.4" }
+spring-macros = { path = "../spring-macros", version = "0.0.4" }
 
 [features]
 default = []

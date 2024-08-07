@@ -1,7 +1,7 @@
 [package]
 name = "spring-mail"
-description= "rust microservice framework"
-version = "0.0.4"
+description = "rust microservice framework"
+version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 
 [dependencies]
 lettre = { workspace = true, features = ["tokio1-native-tls", "serde"] }
-spring-boot = { path = "../spring-boot" }
+spring-boot = { path = "../spring-boot", version = "0.0.4" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
