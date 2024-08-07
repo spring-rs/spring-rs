@@ -23,7 +23,7 @@ time = { version = "0.3.36", default-features = false, optional = true }
 uuid = { version = "1", default-features = false, optional = true }
 
 [features]
-default = ["runtime-tokio-native-tls"]
+default = ["runtime-tokio-native-tls", "sqlx/default"]
 postgres = ["sqlx/postgres"]
 mysql = ["sqlx/mysql"]
 sqlite = ["sqlx/sqlite"]
