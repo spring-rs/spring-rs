@@ -1,13 +1,17 @@
 # The URL the site will be built for
 base_url = "https://spring-rs.github.io"
 title = "spring-rs"
-theme = "adidoks"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
-
+default_language = "en"
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = true
 minify_html = true
+
+[languages.zh]
+
+[languages.zh.translations]
+
 
 [search]
 # Whether to include the title of the page/section in the index
@@ -30,8 +34,7 @@ github = "https://github.com/spring-rs/spring-rs"
 ## JSON-LD
 [extra.schema]
 type = "Organization"
-logo = "logo-doks.png"
-twitter = "https://twitter.com/aaranxu"
+logo = "logo.svg"
 linked_in = ""
 github = "https://github.com/spring-rs/spring-rs"
 section = "blog" # see config.extra.main~url

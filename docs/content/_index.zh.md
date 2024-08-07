@@ -7,7 +7,7 @@ title = "spring-rs"
 lead = 'spring-rs是rust编写的微服务框架，与java生态的spring-boot类似'
 url = "/docs/getting-started/introduction/"
 url_button = "快速上手"
-repo_version = "GitHub v0.1.0"
+repo_version = "GitHub v0.0.4"
 repo_license = "Open-source MIT License."
 repo_url = "https://github.com/spring-rs/spring-rs"
 
