@@ -31,7 +31,7 @@ macro_rules! job_args_parse {
         }
 
         $(
-            #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+            #[derive(Clone, PartialEq, Eq, Hash)]
             struct $name($trigger_type);
 
             impl syn::parse::Parse for $name {
