@@ -1,6 +1,7 @@
 # The URL the site will be built for
 base_url = "https://spring-rs.github.io"
 title = "spring-rs"
+description = "spring-rs is a microservice framework written in rust inspired by java's spring-boot"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 default_language = "en"
@@ -9,7 +10,7 @@ build_search_index = true
 minify_html = true
 
 [languages.zh]
-
+description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
 [languages.zh.translations]
 
 
@@ -37,7 +38,7 @@ type = "Organization"
 logo = "logo.svg"
 linked_in = ""
 github = "https://github.com/spring-rs/spring-rs"
-section = "blog" # see config.extra.main~url
+section = "blog"                                  # see config.extra.main~url
 ## Sitelinks Search Box
 site_links_search_box = false
 
