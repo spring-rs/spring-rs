@@ -8,11 +8,6 @@ default_language = "en"
 build_search_index = true
 minify_html = true
 
-[languages.zh]
-
-[languages.zh.translations]
-
-
 [search]
 # Whether to include the title of the page/section in the index
 include_title = true
@@ -35,7 +30,6 @@ github = "https://github.com/spring-rs/spring-rs"
 [extra.schema]
 type = "Organization"
 logo = "logo.svg"
-linked_in = ""
 github = "https://github.com/spring-rs/spring-rs"
 section = "blog" # see config.extra.main~url
 ## Sitelinks Search Box
@@ -68,3 +62,9 @@ weight = 10
 name = "Code of Conduct"
 url = "/docs/contributing/code-of-conduct/"
 weight = 20
+
+
+[languages.zh]
+base_url = "https://spring-rs.github.io/zh"
+[languages.zh.translations]
+

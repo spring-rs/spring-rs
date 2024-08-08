@@ -5,7 +5,7 @@ title = "spring-rs"
 # The homepage contents
 [extra]
 lead = 'spring-rs是rust编写的微服务框架，与java生态的spring-boot类似'
-url = "/docs/getting-started/introduction/"
+url = "/zh/docs/getting-started/introduction/"
 url_button = "快速上手"
 repo_version = "GitHub v0.0.4"
 repo_license = "Open-source MIT License."
@@ -16,7 +16,7 @@ logo = "logo.svg"
 [[extra.menu.main]]
 name = "文档"
 section = "docs"
-url = "/docs/getting-started/introduction/"
+url = "/zh/docs/getting-started/introduction/"
 weight = 10
 
 [[extra.menu.main]]

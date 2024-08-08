@@ -14,7 +14,7 @@ anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 async-trait = { workspace = true }
 schemars = { workspace = true }
-sqlx = { workspace = true, default-features = false, optional = true }
+sqlx = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 rust_decimal = { version = "1", default-features = false, optional = true }
 bigdecimal = { version = "0.3", default-features = false, optional = true }
