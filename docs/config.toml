@@ -1,5 +1,4 @@
 # The URL the site will be built for
-base_url = "https://spring-rs.github.io"
 title = "spring-rs"
 description = "spring-rs is a microservice framework written in rust inspired by java's spring-boot"
 # Whether to automatically compile all Sass files in the sass directory
@@ -58,6 +57,5 @@ url = "/docs/contributing/code-of-conduct/"
 weight = 20
 
 [languages.zh]
-base_url = "https://spring-rs.github.io/zh"
 description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
 [languages.zh.translations]
