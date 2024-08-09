@@ -170,7 +170,9 @@
     width: auto !important;
   }
 
-  .algolia-autocomplete .algolia-docsearch-suggestion .algolia-docsearch-suggestion--subcategory-column::after {
+  .algolia-autocomplete
+    .algolia-docsearch-suggestion
+    .algolia-docsearch-suggestion--subcategory-column::after {
     content: "|";
     margin-right: 0.25rem;
   }
@@ -265,4 +267,10 @@
 .navbar .menu-btn:checked ~ .menu-icon:not(.steps) .navicon::before,
 .navbar .menu-btn:checked ~ .menu-icon:not(.steps) .navicon::after {
   top: 0;
+}
+
+li.nav-item.dropdown:hover > .dropdown-menu {
+  display: block;
+  position: absolute;
+  right: 0;
 }
