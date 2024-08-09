@@ -9,14 +9,6 @@ default_language = "en"
 build_search_index = true
 minify_html = true
 
-<<<<<<< HEAD
-=======
-[languages.zh]
-description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
-[languages.zh.translations]
-
-
->>>>>>> c7d6e2b14835ccff243cdbffa0c637f4c81bf0c3
 [search]
 # Whether to include the title of the page/section in the index
 include_title = true
