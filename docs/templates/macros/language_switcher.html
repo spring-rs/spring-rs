@@ -1,0 +1,23 @@
+<li class="nav-item dropdown">
+    <a class="nav-link" href="#">
+        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"><path d="M549.12 643.2l-108.373333-107.093333 1.28-1.28c74.24-82.773333 127.146667-177.92 158.293333-278.613334H725.333333V170.666667H426.666667V85.333333h-85.333334v85.333334H42.666667v84.906666h476.586666A673.834667 673.834667 0 0 1 384 484.266667a672.853333 672.853333 0 0 1-98.56-142.933334h-85.333333c31.146667 69.546667 73.813333 135.253333 127.146666 194.56L110.293333 750.293333 170.666667 810.666667l213.333333-213.333334 132.693333 132.693334 32.426667-86.826667zM789.333333 426.666667h-85.333333l-192 512h85.333333l48-128h202.666667L896 938.666667h85.333333l-192-512z m-112 298.666666L746.666667 540.373333 816 725.333333h-138.666667z"></path></svg>
+    </a>
+    <div class="dropdown-menu">
+        {%- for lcode, ldetails in config.languages -%}
+            {%- if 'zh' == lcode -%}
+                {% set language_name = '中文' %}
+            {%- elif lcode == 'en' -%}
+                {% set language_name = 'English' %}
+            {%- endif -%}
+        {%- if lang == lcode -%}
+        <a class="dropdown-item" href="#">{{ language_name }}</a>
+        {%- elif lcode == config.default_language -%}
+        <a class="dropdown-item" href="{{ current_url | replace(from='/' ~ lang ~ '/', to = '/') }}">{{ language_name}}</a>
+        {%- elif lang == config.default_language -%}
+        <a class="dropdown-item" href="{{ config.base_url }}/{{ lcode }}{{ current_path | default(value=" /") | safe }}">{{ language_name }}</a>
+        {%- else -%}
+        <a class="dropdown-item" href="{{ current_url | replace(from='/' ~ lang ~ '/', to='/' ~ lcode ~ '/') }}">{{language_name }}</a>
+        {%- endif -%}
+        {%- endfor -%}
+    </div>
+</li>

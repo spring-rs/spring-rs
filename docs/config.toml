@@ -1,0 +1,63 @@
+# The URL the site will be built for
+base_url = "https://spring-rs.github.io"
+title = "spring-rs"
+description = "spring-rs is a microservice framework written in rust inspired by java's spring-boot"
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+default_language = "en"
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = true
+minify_html = true
+
+[search]
+# Whether to include the title of the page/section in the index
+include_title = true
+# Whether to include the description of the page/section in the index
+include_description = false
+# Whether to include the rendered content of the page/section in the index
+include_content = true
+
+[markdown]
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+highlight_code = true
+
+[extra]
+author = "holmofy"
+github = "https://github.com/spring-rs/spring-rs"
+
+
+## JSON-LD
+[extra.schema]
+type = "Organization"
+logo = "logo.svg"
+github = "https://github.com/spring-rs/spring-rs"
+section = "blog"                                  # see config.extra.main~url
+## Sitelinks Search Box
+site_links_search_box = false
+
+[[extra.menu.social]]
+name = "GitHub"
+pre = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>'
+url = "https://github.com/spring-rs/spring-rs"
+post = "v0.1.0"
+weight = 20
+
+# Footer contents
+[extra.footer]
+info = 'Released under the MIT License. Powered by <a href="https://github.com/holmofy">holmofy</a>'
+
+[[extra.footer.nav]]
+name = "Privacy"
+url = "/privacy-policy/"
+weight = 10
+
+[[extra.footer.nav]]
+name = "Code of Conduct"
+url = "/docs/contributing/code-of-conduct/"
+weight = 20
+
+[languages.zh]
+base_url = "https://spring-rs.github.io/zh"
+description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
+[languages.zh.translations]

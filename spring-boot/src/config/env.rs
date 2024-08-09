@@ -21,7 +21,7 @@ pub enum Env {
 
 impl Env {
     pub fn from_env() -> Self {
-        match env::var("spring_ENV") {
+        match env::var("SPRING_ENV") {
             Ok(var) => Self::from_str(var),
             Err(_) => Self::Dev,
         }
