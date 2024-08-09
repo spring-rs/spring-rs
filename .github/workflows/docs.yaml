@@ -19,8 +19,9 @@ jobs:
     name: zola deploy
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: zbrox/zola-deploy-action
-      uses: zbrox/zola-deploy-action@master
+    - name: Checkout main
+      uses: actions/checkout@v4
+    - name: zola deploy
+      uses: zbrox/zola-deploy-action@v0.19.1
       env:
-        TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
