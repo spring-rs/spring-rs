@@ -1,1 +1,1 @@
-![Logo](docs/logo.svg)
+![Logo](docs/static/logo.svg)
