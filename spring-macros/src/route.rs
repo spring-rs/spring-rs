@@ -153,7 +153,7 @@ impl Args {
             } else {
                 return Err(syn::Error::new_spanned(
                     nv.path,
-                    "Unknown attribute key is specified; allowed: guard, method and wrap",
+                    "Unknown attribute key is specified; allowed: method",
                 ));
             }
         }

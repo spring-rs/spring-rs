@@ -54,6 +54,7 @@
 mod job;
 mod nest;
 mod route;
+mod auto;
 
 use proc_macro::TokenStream;
 
@@ -228,3 +229,10 @@ job_macro!(OneShot, one_shot, 60);
 job_macro!(FixDelay, fix_delay, 60);
 job_macro!(FixRate, fix_rate, 60);
 job_macro!(Cron, cron, "1/10 * * * * *");
+
+///
+/// 
+#[proc_macro_attribute]
+pub fn auto_config(args: TokenStream, input: TokenStream) -> TokenStream {
+    auto::config(args, input)
+}
