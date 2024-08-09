@@ -1,6 +1,7 @@
 # The URL the site will be built for
 base_url = "https://spring-rs.github.io"
 title = "spring-rs"
+description = "spring-rs is a microservice framework written in rust inspired by java's spring-boot"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 default_language = "en"
@@ -8,6 +9,14 @@ default_language = "en"
 build_search_index = true
 minify_html = true
 
+<<<<<<< HEAD
+=======
+[languages.zh]
+description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
+[languages.zh.translations]
+
+
+>>>>>>> c7d6e2b14835ccff243cdbffa0c637f4c81bf0c3
 [search]
 # Whether to include the title of the page/section in the index
 include_title = true
@@ -56,10 +65,7 @@ name = "Code of Conduct"
 url = "/docs/contributing/code-of-conduct/"
 weight = 20
 
-[languages.en.translations]
-language_name = "English"
 [languages.zh]
 base_url = "https://spring-rs.github.io/zh"
-language_name = "中文"
+description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
 [languages.zh.translations]
-language_name = "中文"

@@ -1,6 +1,6 @@
 +++
 title = "Docs"
-description = "Documentation for spring-rs, a microservices framework written in Rust"
+description = "The documents of the spring-rs"
 sort_by = "weight"
 weight = 1
 template = "docs/section.html"
