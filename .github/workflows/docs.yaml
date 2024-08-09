@@ -7,6 +7,8 @@ on:
       - "docs/**"
   pull_request:
     branches: ["master"]
+    paths:
+      - "docs/**"
   workflow_dispatch:
     inputs:
       msg:
