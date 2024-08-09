@@ -24,4 +24,5 @@ jobs:
     - name: zola deploy
       uses: shalzz/zola-deploy-action@v0.19.1
       env:
+        BUILD_DIR: ./docs/
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
