@@ -45,6 +45,7 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="msvalidate.01" content="9BE3AFA1A1AE6AF5B38F990F208A4EE1" />
 {% endif %}
 {% if current_url %}
 	{% set page_url = current_url %}
@@ -259,6 +260,28 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', '{{config.extra.ganalytics}}');
+</script>
+{% endif %}
+
+{% if config.extra.baidu_analytics %}
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?2fd7792d4246d07ebbd9db04334ac94d";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+{% endif %}
+
+{% if config.extra.ms_clarity_analytics %}
+<script type="text/javascript">
+  (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "nl0r1el6gp");
 </script>
 {% endif %}
 {% endmacro %}

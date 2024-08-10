@@ -25,7 +25,8 @@ highlight_code = true
 [extra]
 author = "holmofy"
 github = "https://github.com/spring-rs/spring-rs"
-
+baidu_analytics = true
+ms_clarity_analytics = true
 
 ## JSON-LD
 [extra.schema]
