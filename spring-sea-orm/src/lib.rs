@@ -1,12 +1,11 @@
 pub mod config;
 
-use std::time::Duration;
-
 use anyhow::Context;
-use async_trait::async_trait;
-use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 use config::SeaOrmConfig;
 use sea_orm::{ConnectOptions, Database};
+use spring_boot::async_trait;
+use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
+use std::time::Duration;
 
 pub type DbConn = sea_orm::DbConn;
 pub struct SeaOrmPlugin;

@@ -1,6 +1,7 @@
 mod extractor;
 
-use async_trait::async_trait;
+use extractor::App;
+use spring_boot::async_trait;
 use spring_boot::{app::AppBuilder, plugin::Plugin};
 use spring_web::{
     extractor::Component,
@@ -8,7 +9,6 @@ use spring_web::{
     response::{IntoResponse, Json},
     Router, Routers, WebConfigurator,
 };
-use extractor::App;
 
 pub struct ActuatorPlugin;
 

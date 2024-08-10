@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-sqlx = { version="0.0.4", features = ["mysql"] }
+spring-sqlx = { version = "0.0.5", features = ["mysql"] }
 ```
 
 可以替换`postgres`、`mysql`、`sqlite`feature来选择合适的数据库驱动。
@@ -31,7 +31,7 @@ pub type ConnectPool = sqlx::AnyPool;
 
 ## 提取插件注册的Component
 
-上面的`SqlxPlugin`插件为我们自动注册了一个Sqlx连接池组件，我们可以使用`Component`从AppState中提取这个连接池，[`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)是一个axum的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)。
+`SqlxPlugin`插件为我们自动注册了一个Sqlx连接池组件，我们可以使用`Component`从AppState中提取这个连接池，[`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)是一个axum的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)。
 
 ```rust
 use spring::get;
@@ -50,3 +50,5 @@ async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String
     Ok(version)
 }
 ```
+
+完整代码参考[`sqlx-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/sqlx-example)

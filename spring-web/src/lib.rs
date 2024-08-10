@@ -8,13 +8,13 @@ pub use axum::routing;
 pub use axum::routing::method_routing::*;
 
 use anyhow::Context;
-use async_trait::async_trait;
+use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 use spring_boot::{
     app::{App, AppBuilder},
+    async_trait,
     error::Result,
     plugin::Plugin,
 };
-use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 use std::{net::SocketAddr, ops::Deref, path::PathBuf, str::FromStr, sync::Arc, time::Duration};
 use tower_http::{
     catch_panic::CatchPanicLayer,

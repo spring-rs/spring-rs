@@ -16,6 +16,6 @@ quote = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
-spring-web = { path = "../spring-web", version = "0.0.4" }
-spring-job = { path = "../spring-job", version = "0.0.4" }
-spring-boot = { path = "../spring-boot", version = "0.0.4" }
+spring-web = { path = "../spring-web", version = "0.0.5" }
+spring-job = { path = "../spring-job", version = "0.0.5" }
+spring-boot = { path = "../spring-boot", version = "0.0.5" }

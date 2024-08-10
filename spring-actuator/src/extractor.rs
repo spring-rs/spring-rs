@@ -1,6 +1,6 @@
 use std::{ops::Deref, sync::Arc};
 
-use async_trait::async_trait;
+use spring_boot::async_trait;
 use spring_web::{
     extractor::FromRequestParts,
     http::{request::Parts, StatusCode},

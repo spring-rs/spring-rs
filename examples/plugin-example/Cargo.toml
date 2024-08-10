@@ -7,7 +7,5 @@ authors.workspace = true
 
 [dependencies]
 spring-boot = { path = "../../spring-boot" }
-toml = { workspace = true, features = ["parse"] }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true }
-async-trait = { workspace = true }

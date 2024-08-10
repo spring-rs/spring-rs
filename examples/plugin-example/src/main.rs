@@ -1,9 +1,9 @@
-use async_trait::async_trait;
+use serde::Deserialize;
+use spring_boot::async_trait;
 use spring_boot::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };
-use serde::Deserialize;
 
 struct MyPlugin;
 

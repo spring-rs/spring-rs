@@ -1,6 +1,12 @@
 [![crates.io](https://img.shields.io/crates/v/spring-job.svg)](https://crates.io/crates/spring-job)
 [![Documentation](https://docs.rs/spring-job/badge.svg)](https://docs.rs/spring-job)
 
+## 依赖
+
+```toml
+spring-job = { version = "0.0.5" }
+```
+
 ## API接口
 
 App实现了[JobConfigurator](https://docs.rs/spring-job/latest/spring_job/trait.JobConfigurator.html)特征，可以通过该特征配置调度任务：

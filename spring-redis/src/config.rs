@@ -7,6 +7,15 @@ pub struct RedisConfig {
     /// <redis://127.0.0.1/>
     pub uri: String,
 
+    /// The new connection will time out operations after `response_timeout` has passed.
+    pub response_timeout: Option<u64>,
+
+    /// Each connection attempt to the server will time out after `connection_timeout`.
+    pub connection_timeout: Option<u64>,
+
+    /// number_of_retries times, with an exponentially increasing delay
+    pub number_of_retries: Option<usize>,
+
     /// The resulting duration is calculated by taking the base to the `n`-th power,
     /// where `n` denotes the number of past attempts.
     pub exponent_base: Option<u64>,
@@ -16,15 +25,6 @@ pub struct RedisConfig {
     /// For example, using a factor of `1000` will make each delay in units of seconds.
     pub factor: Option<u64>,
 
-    /// number_of_retries times, with an exponentially increasing delay
-    pub number_of_retries: Option<usize>,
-
     /// Apply a maximum delay between connection attempts. The delay between attempts won't be longer than max_delay milliseconds.
     pub max_delay: Option<u64>,
-
-    /// The new connection will time out operations after `response_timeout` has passed.
-    pub response_timeout: Option<u64>,
-
-    /// Each connection attempt to the server will time out after `connection_timeout`.
-    pub connection_timeout: Option<u64>,
 }

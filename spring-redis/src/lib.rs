@@ -1,13 +1,12 @@
 pub mod config;
-use std::time::Duration;
-
-pub use redis;
 
 use anyhow::Context;
-use async_trait::async_trait;
-use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 use config::RedisConfig;
+pub use redis;
 use redis::{aio::ConnectionManagerConfig, Client};
+use spring_boot::async_trait;
+use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
+use std::time::Duration;
 
 pub type Redis = redis::aio::ConnectionManager;
 

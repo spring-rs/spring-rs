@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.4" }
+spring-boot = { path = "../spring-boot", version = "0.0.5" }
 axum = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
@@ -18,5 +18,4 @@ tokio = { workspace = true, features = ["full"] }
 tower = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true }
-async-trait = { workspace = true }
 schemars = { workspace = true }

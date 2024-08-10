@@ -3,16 +3,16 @@ pub mod handler;
 pub mod job;
 
 use anyhow::Context;
-use async_trait::async_trait;
+use job::Job;
+use spring_boot::async_trait;
 use spring_boot::error::Result;
 use spring_boot::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };
-use job::Job;
-use uuid::Uuid;
 use std::ops::Deref;
 use std::sync::Arc;
+use uuid::Uuid;
 
 #[derive(Clone, Default)]
 pub struct Jobs(Vec<Job>);

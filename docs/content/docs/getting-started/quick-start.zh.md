@@ -23,11 +23,11 @@ top = false
 ```toml
 [dependencies]
 # spring提供了核心的插件系统和有用的过程宏
-spring = "0.0.4"
+spring = "0.0.5"
 # 如果你准备写web应用就添加spring-web
-spring-web = "0.0.4"
+spring-web = "0.0.5"
 # 如果应用需要和数据库交互就添加spring-sqlx
-spring-sqlx = { version="0.0.4", features = ["mysql"] }
+spring-sqlx = { version="0.0.5", features = ["mysql"] }
 # spring-rs项目默认使用tokio异步运行时
 tokio = "1"
 ```

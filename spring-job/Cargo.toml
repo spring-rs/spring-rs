@@ -8,9 +8,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.4" }
+spring-boot = { path = "../spring-boot", version = "0.0.5" }
 tokio-cron-scheduler = { workspace = true, features = ["signal"] }
-async-trait = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 uuid = { workspace = true, features = ["v4"] }

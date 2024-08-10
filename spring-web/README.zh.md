@@ -1,6 +1,12 @@
 [![crates.io](https://img.shields.io/crates/v/spring-web.svg)](https://crates.io/crates/spring-web)
 [![Documentation](https://docs.rs/spring-web/badge.svg)](https://docs.rs/spring-web)
 
+## 依赖
+
+```toml
+spring-web = { version = "0.0.5" }
+```
+
 ## 配置项
 
 ```toml
@@ -102,3 +108,5 @@ async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String
     Ok(version)
 }
 ```
+
+完整代码参考[`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)

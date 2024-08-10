@@ -1,8 +1,7 @@
-use async_trait::async_trait;
-use spring_boot::app::App;
-use std::ops::{Deref, DerefMut};
-
 use crate::{JobId, JobScheduler};
+use spring_boot::app::App;
+use spring_boot::async_trait;
+use std::ops::{Deref, DerefMut};
 
 #[async_trait]
 pub trait FromApp {

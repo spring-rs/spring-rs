@@ -1,15 +1,15 @@
 pub mod config;
 
 use anyhow::Context;
-use async_trait::async_trait;
-use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 use config::MailerConfig;
-use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
-
-pub type Mailer = lettre::AsyncSmtpTransport<Tokio1Executor>;
 pub use lettre::message::*;
 pub use lettre::AsyncTransport;
 pub use lettre::Message;
+use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
+use spring_boot::async_trait;
+use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
+
+pub type Mailer = lettre::AsyncSmtpTransport<Tokio1Executor>;
 
 pub struct MailPlugin;
 
