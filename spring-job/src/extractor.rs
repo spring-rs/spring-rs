@@ -1,12 +1,12 @@
 use async_trait::async_trait;
 use spring_boot::app::App;
-use uuid::Uuid;
+use std::ops::{Deref, DerefMut};
 
-use crate::JobScheduler;
+use crate::{JobId, JobScheduler};
 
 #[async_trait]
 pub trait FromApp {
-    async fn from_app(job_id: &Uuid, scheduler: &JobScheduler, app: &App) -> Self;
+    async fn from_app(job_id: &JobId, scheduler: &JobScheduler, app: &App) -> Self;
 }
 
 pub struct Component<T>(pub T);
@@ -16,7 +16,7 @@ impl<T> FromApp for Component<T>
 where
     T: Clone + Send + Sync + 'static,
 {
-    async fn from_app(_job_id: &Uuid, _scheduler: &JobScheduler, app: &App) -> Self {
+    async fn from_app(_job_id: &JobId, _scheduler: &JobScheduler, app: &App) -> Self {
         match app.get_component::<T>() {
             Some(component) => Component(T::clone(&component)),
             None => panic!(
@@ -27,20 +27,30 @@ where
     }
 }
 
-pub struct JobId(pub Uuid);
+impl<T> Deref for Component<T> {
+    type Target = T;
 
-#[async_trait]
-impl FromApp for JobId {
-    async fn from_app(job_id: &Uuid, _scheduler: &JobScheduler, _app: &App) -> Self {
-        JobId(job_id.clone())
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
-pub struct Scheduler(pub JobScheduler);
+impl<T> DerefMut for Component<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 #[async_trait]
-impl FromApp for Scheduler {
-    async fn from_app(_job_id: &Uuid, scheduler: &JobScheduler, _app: &App) -> Self {
-        Scheduler(scheduler.clone())
+impl FromApp for JobId {
+    async fn from_app(job_id: &JobId, _scheduler: &JobScheduler, _app: &App) -> Self {
+        job_id.clone()
+    }
+}
+
+#[async_trait]
+impl FromApp for JobScheduler {
+    async fn from_app(_job_id: &JobId, scheduler: &JobScheduler, _app: &App) -> Self {
+        scheduler.clone()
     }
 }

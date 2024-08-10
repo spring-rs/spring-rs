@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use axum::{
     async_trait,
     http::{request::Parts, StatusCode},
@@ -24,5 +26,19 @@ where
                 "server component not found",
             )),
         }
+    }
+}
+
+impl<T> Deref for Component<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for Component<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

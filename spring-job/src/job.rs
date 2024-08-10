@@ -1,13 +1,10 @@
-use std::{sync::Arc, time::Duration};
-
-use anyhow::Context;
-use spring_boot::app::App;
-use uuid::Uuid;
-
 use crate::{
     handler::{BoxedHandler, Handler},
-    JobScheduler,
+    JobId, JobScheduler,
 };
+use anyhow::Context;
+use spring_boot::app::App;
+use std::{sync::Arc, time::Duration};
 
 #[derive(Clone)]
 enum Trigger {
@@ -83,7 +80,7 @@ impl Job {
         .unwrap()
     }
 
-    async fn call(handler: BoxedHandler, job_id: Uuid, jobs: JobScheduler, app: Arc<App>) {
+    async fn call(handler: BoxedHandler, job_id: JobId, jobs: JobScheduler, app: Arc<App>) {
         handler.call(job_id, jobs, app).await
     }
 }

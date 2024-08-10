@@ -1,12 +1,10 @@
+use crate::{extractor::FromApp, JobId, Jobs};
+use spring_boot::app::App;
+use std::pin::Pin;
 use std::{
     future::Future,
     sync::{Arc, Mutex},
 };
-
-use crate::{extractor::FromApp, Jobs};
-use spring_boot::app::App;
-use std::pin::Pin;
-use uuid::Uuid;
 
 use crate::JobScheduler;
 
@@ -15,7 +13,7 @@ pub trait Handler<T>: Clone + Send + Sized + 'static {
     type Future: Future<Output = ()> + Send + 'static;
 
     /// Call the handler with the given request.
-    fn call(self, job_id: Uuid, scheduler: JobScheduler, app: Arc<App>) -> Self::Future;
+    fn call(self, job_id: JobId, scheduler: JobScheduler, app: Arc<App>) -> Self::Future;
 }
 
 /// no args handler impl
@@ -26,7 +24,7 @@ where
 {
     type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-    fn call(self, _job_id: Uuid, _scheduler: JobScheduler, _app: Arc<App>) -> Self::Future {
+    fn call(self, _job_id: JobId, _scheduler: JobScheduler, _app: Arc<App>) -> Self::Future {
         Box::pin(async move {
             self().await;
         })
@@ -68,7 +66,7 @@ macro_rules! impl_handler {
         {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-            fn call(self, job_id: Uuid, scheduler: JobScheduler, app: Arc<App>) -> Self::Future {
+            fn call(self, job_id: JobId, scheduler: JobScheduler, app: Arc<App>) -> Self::Future {
                 Box::pin(async move {
                     $(
                         let $ty = $ty::from_app(&job_id, &scheduler, &app).await;
@@ -109,7 +107,7 @@ impl BoxedHandler {
 
     pub(crate) fn call(
         self,
-        job_id: Uuid,
+        job_id: JobId,
         scheduler: JobScheduler,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
@@ -122,7 +120,7 @@ pub(crate) trait ErasedHandler: Send {
 
     fn call(
         self: Box<Self>,
-        job_id: Uuid,
+        job_id: JobId,
         scheduler: JobScheduler,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
@@ -131,7 +129,7 @@ pub(crate) trait ErasedHandler: Send {
 pub(crate) struct MakeErasedHandler<H> {
     pub(crate) handler: H,
     pub(crate) caller:
-        fn(H, Uuid, JobScheduler, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>,
+        fn(H, JobId, JobScheduler, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>,
 }
 
 impl<H> Clone for MakeErasedHandler<H>
@@ -156,7 +154,7 @@ where
 
     fn call(
         self: Box<Self>,
-        job_id: Uuid,
+        job_id: JobId,
         scheduler: JobScheduler,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {

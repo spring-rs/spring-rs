@@ -45,4 +45,4 @@ async fn hello(Path(name): Path<String>) -> impl IntoResponse {
 
 `spring-rs`使用插件的方式整合了rust生态中流行的几个框架，并提供了过程宏来简化开发。
 
-对`spring-rs`感兴趣的可以[点击这里](/docs/)快速上手。
+对`spring-rs`感兴趣的可以[点击这里](/zh/docs/getting-started/quick-start/)快速上手。

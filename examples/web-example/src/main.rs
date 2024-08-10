@@ -20,6 +20,7 @@ fn router() -> Router {
         .typed_route(hello_word)
         .typed_route(hello)
         .typed_route(sql::sqlx_request_handler)
+        .typed_route(sql::sqlx_time_handler)
 }
 
 #[routes]
@@ -36,6 +37,8 @@ async fn hello(Path(name): Path<String>) -> impl IntoResponse {
 
 #[nest("/sql")]
 mod sql {
+    use std::ops::Deref;
+
     use anyhow::Context;
     use spring::get;
     use spring_sqlx::{
@@ -53,5 +56,15 @@ mod sql {
             .context("sqlx query failed")?
             .get("version");
         Ok(version)
+    }
+
+    #[get("/now")]
+    pub async fn sqlx_time_handler(pool: Component<ConnectPool>) -> Result<String> {
+        let time = sqlx::query("select DATE_FORMAT(now(),'%Y-%m-%d %H:%i:%s') as time")
+            .fetch_one(pool.deref())
+            .await
+            .context("sqlx query failed")?
+            .get("time");
+        Ok(time)
     }
 }

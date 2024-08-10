@@ -10,6 +10,7 @@ use spring_boot::{
     plugin::Plugin,
 };
 use job::Job;
+use uuid::Uuid;
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -46,6 +47,7 @@ impl Deref for Jobs {
     }
 }
 
+pub type JobId = Uuid;
 pub type JobScheduler = tokio_cron_scheduler::JobScheduler;
 
 pub trait JobConfigurator {
