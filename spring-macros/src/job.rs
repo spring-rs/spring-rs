@@ -143,17 +143,18 @@ impl ToTokens for Job {
         let stream = quote! {
             #(#doc_attributes)*
             #[allow(non_camel_case_types, missing_docs)]
-            #[derive(Clone)]
             #vis struct #name;
 
-            impl ::spring_job::handler::TypedHandler for #name {
-                fn install_job(self, __jobs: &mut ::spring_job::Jobs) -> &mut ::spring_job::Jobs {
+            impl ::spring_job::handler::TypedHandlerFactory for #name {
+                fn install_job(&self, mut __jobs: ::spring_job::Jobs) -> ::spring_job::Jobs {
                     use ::spring_job::JobConfigurator;
                     use ::spring_job::job::JobBuilder;
                     #ast
                     #register_stream
                 }
             }
+
+            ::spring_job::submit_typed_handler!(#name);
         };
 
         output.extend(stream);

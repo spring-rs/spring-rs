@@ -25,7 +25,6 @@ App实现了[JobConfigurator](https://docs.rs/spring-job/latest/spring_job/trait
 +fn jobs() -> Jobs {
 +   Jobs::new()
 +       .typed_job(cron_job)
-+       .to_owned()
 +}
 
 +#[cron("1/10 * * * * *")]

@@ -1,4 +1,4 @@
-use spring::{nest, route, routes, App};
+use spring::{auto_config, nest, route, routes, App};
 use spring_sqlx::SqlxPlugin;
 use spring_web::{
     extractor::Path, handler::TypeRouter, response::IntoResponse, Router, WebConfigurator,
@@ -6,6 +6,7 @@ use spring_web::{
 };
 
 #[tokio::main]
+// #[auto_config]
 async fn main() {
     App::new()
         .add_plugin(SqlxPlugin)

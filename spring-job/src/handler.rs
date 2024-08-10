@@ -5,8 +5,8 @@ use std::{
     future::Future,
     sync::{Arc, Mutex},
 };
-
 use crate::JobScheduler;
+pub use inventory::submit;
 
 pub trait Handler<T>: Clone + Send + Sized + 'static {
     /// The type of future calling this handler returns.
@@ -165,16 +165,35 @@ where
 /// TypeHandler is used to configure the spring-macro marked job handler
 ///
 
-pub trait TypedHandler: Clone {
-    fn install_job(self, jobs: &mut Jobs) -> &mut Jobs;
+pub trait TypedHandlerFactory: Send + Sync + 'static {
+    fn install_job(&self, jobs: Jobs) -> Jobs;
 }
 
 pub trait TypedJob {
-    fn typed_job<H: TypedHandler>(self: &mut Self, handler: H) -> &mut Self;
+    fn typed_job<F: TypedHandlerFactory>(self, factory: F) -> Self;
 }
 
 impl TypedJob for Jobs {
-    fn typed_job<H: TypedHandler>(self: &mut Self, handler: H) -> &mut Self {
-        handler.install_job(self)
+    fn typed_job<F: TypedHandlerFactory>(self, factory: F) -> Self {
+        factory.install_job(self)
     }
+}
+
+inventory::collect!(&'static dyn TypedHandlerFactory);
+
+#[macro_export]
+macro_rules! submit_typed_handler {
+    ($ty:ident) => {
+        ::spring_job::handler::submit! {
+            &$ty as &dyn ::spring_job::handler::TypedHandlerFactory
+        }
+    };
+}
+
+pub fn auto_jobs() -> Jobs {
+    let mut jobs = Jobs::new();
+    for factory in inventory::iter::<&dyn TypedHandlerFactory> {
+        jobs = factory.install_job(jobs);
+    }
+    jobs
 }

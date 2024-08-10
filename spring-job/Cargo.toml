@@ -14,3 +14,4 @@ anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 uuid = { workspace = true, features = ["v4"] }
 chrono = { workspace = true }
+inventory = { workspace = true }

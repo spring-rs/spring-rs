@@ -286,17 +286,18 @@ impl ToTokens for Route {
         let stream = quote! {
             #(#doc_attributes)*
             #[allow(non_camel_case_types, missing_docs)]
-            #[derive(Clone)]
             #vis struct #name;
 
-            impl ::spring_web::handler::TypedHandler for #name {
-                fn install_route(self, mut __router: ::spring_web::Router) -> ::spring_web::Router{
+            impl ::spring_web::handler::TypedHandlerFactory for #name {
+                fn install_route(&self, mut __router: ::spring_web::Router) -> ::spring_web::Router{
                     #ast
                     #registrations
 
                     __router
                 }
             }
+
+            ::spring_web::submit_typed_handler!(#name);
         };
 
         output.extend(stream);

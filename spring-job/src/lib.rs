@@ -24,18 +24,23 @@ impl Jobs {
     fn single(job: Job) -> Self {
         Self(vec![job])
     }
-}
 
-impl JobConfigurator for Jobs {
-    fn add_job(&mut self, job: Job) -> &mut Self {
+    pub fn add_job(mut self, job: Job) -> Self {
         self.0.push(job);
         self
     }
-    fn add_jobs(&mut self, jobs: Jobs) -> &mut Self {
+
+    pub fn add_jobs(mut self, jobs: Jobs) -> Self {
         for job in jobs.0 {
             self.0.push(job);
         }
         self
+    }
+
+    fn merge(&mut self, jobs: Jobs) {
+        for job in jobs.0 {
+            self.0.push(job);
+        }
     }
 }
 
@@ -74,7 +79,7 @@ impl JobConfigurator for AppBuilder {
             unsafe {
                 let raw_ptr = Arc::into_raw(jobs);
                 let jobs = &mut *(raw_ptr as *mut Jobs);
-                jobs.add_jobs(new_jobs);
+                jobs.merge(new_jobs);
             }
             self
         } else {
