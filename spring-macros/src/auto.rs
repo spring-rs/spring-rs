@@ -1,12 +1,9 @@
+use crate::input_and_compile_error;
 use proc_macro::TokenStream;
 use quote::quote;
 use quote::ToTokens;
-use syn::Expr;
-use syn::ExprCall;
-use syn::ExprMethodCall;
+use syn::{Expr, ExprCall, ExprMethodCall};
 use syn::{ItemFn, Stmt, Token};
-
-use crate::input_and_compile_error;
 
 struct ConfigArgs {
     route: bool,
@@ -15,21 +12,30 @@ struct ConfigArgs {
 
 impl syn::parse::Parse for ConfigArgs {
     fn parse(args: syn::parse::ParseStream) -> syn::Result<Self> {
-        let opts = args.parse_terminated(syn::MetaList::parse, Token![,])?;
         let mut route = false;
         let mut job = false;
-        for meta in opts {
-            if meta.path.is_ident("route") {
-                route = true;
-            } else if meta.path.is_ident("job") {
-                job = true;
-            } else {
-                return Err(syn::Error::new_spanned(
-                    meta.path,
-                    "Unknown attribute key is specified; allowed: route, job and stream",
+
+        while !args.is_empty() {
+            let ident = args.parse::<syn::Ident>().map_err(|mut err| {
+                err.combine(syn::Error::new(
+                    err.span(),
+                    r#"invalid auto config, expected #[auto_config(Configurator)]"#,
                 ));
+
+                err
+            })?;
+            if ident == "WebConfigurator" {
+                route = true;
             }
+            if ident == "JobConfigurator" {
+                job = true;
+            }
+            if !args.peek(Token![,]) {
+                break;
+            }
+            args.parse::<Token![,]>()?;
         }
+
         Ok(ConfigArgs { route, job })
     }
 }
@@ -47,61 +53,99 @@ impl AppConfig {
 
 impl ToTokens for AppConfig {
     fn to_tokens(&self, output: &mut proc_macro2::TokenStream) {
+        let args = &self.args;
         let mut input_fn = self.ast.clone();
 
-        // 遍历语句，寻找包含 `App::new()` 的语句
-        // for stmt in &mut input_fn.block.stmts {
-        //     if let Stmt::Expr(
-        //         Expr::Call(ExprCall {
-        //             attrs,
-        //             func,
-        //             paren_token,
-        //             args,
-        //         }),
-        //         _,
-        //     ) = stmt
-        //     {
-        //         eprintln!("{:?}", stmt);
-        //         if let Expr::Path(path) = &**func {
-        //             // 确保我们匹配 `App::new()` 调用
-        //             if path.path.is_ident("new")
-        //                 && path
-        //                     .path
-        //                     .segments
-        //                     .first()
-        //                     .map_or(false, |seg| seg.ident == "App")
-        //             {
-        //                 let add_router_call: ExprMethodCall = syn::parse_quote! {
-        //                     .add_router(::spring_web::handler::auto_router())
-        //                 };
-        //                 // 构造新的调用链，保留原有的属性
-        //                 let new_expr = Expr::MethodCall(ExprMethodCall {
-        //                     attrs: Vec::new(), // 没有附加属性，因此使用空向量
-        //                     receiver: Box::new(Expr::Call(ExprCall {
-        //                         func: func.clone(),
-        //                         args: args.clone(),
-        //                         attrs: attrs.clone(), // 保留原有的属性
-        //                         paren_token: paren_token.clone(),
-        //                     })),
-        //                     method: add_router_call.method.clone(),
-        //                     turbofish: None, // 没有 turbofish 运算符
-        //                     args: add_router_call.args.clone(),
-        //                     paren_token: add_router_call.paren_token,
-        //                     dot_token: add_router_call.dot_token,
-        //                 });
-
-        //                 // 将新的表达式替换原有的表达式
-        //                 *stmt = Stmt::Expr(new_expr, None); // `None` 表示没有尾随分号
-        //             }
-        //         }
-        //     }
-        // }
+        input_fn.block.stmts = input_fn
+            .block
+            .stmts
+            .into_iter()
+            .map(|stmt| process_stmt(stmt, args))
+            .collect();
 
         // 生成输出的TokenStream
         output.extend(quote! {
             #input_fn
         });
     }
+}
+
+fn process_stmt(stmt: Stmt, args: &ConfigArgs) -> Stmt {
+    match stmt {
+        Stmt::Expr(expr, semi) => Stmt::Expr(process_expr(expr, args), semi),
+        other => other,
+    }
+}
+
+fn process_expr(expr: Expr, args: &ConfigArgs) -> Expr {
+    match expr {
+        // Handle method calls
+        Expr::MethodCall(mut method_call) => {
+            method_call.receiver = Box::new(process_expr(*method_call.receiver, args));
+            Expr::MethodCall(method_call)
+        }
+        // Handle function calls
+        Expr::Call(mut call) => {
+            call.func = Box::new(process_expr(*call.func, args));
+
+            // Clone the function for later use to avoid partial move
+            if let Expr::Path(ref expr_path) = *call.func {
+                if is_app_new_call(&expr_path.path) {
+                    // Modify the call to add the router with parameter
+                    return add_method_call(call, args);
+                }
+            }
+
+            Expr::Call(call)
+        }
+        // Handle await expressions
+        Expr::Await(mut expr_await) => {
+            expr_await.base = Box::new(process_expr(*expr_await.base, args));
+            Expr::Await(expr_await)
+        }
+        // For all other expressions, return as is
+        other => other,
+    }
+}
+
+fn add_method_call(call: ExprCall, args: &ConfigArgs) -> Expr {
+    let mut expr = Expr::Call(call);
+    if args.route {
+        expr = Expr::MethodCall(ExprMethodCall {
+            attrs: vec![],
+            receiver: Box::new(expr),
+            dot_token: Default::default(),
+            method: syn::parse_quote!(add_router),
+            turbofish: None,
+            paren_token: Default::default(),
+            args: {
+                let mut punctuated = syn::punctuated::Punctuated::new();
+                punctuated.push(syn::parse_quote!(::spring_web::handler::auto_router()));
+                punctuated
+            },
+        });
+    }
+    if args.job {
+        expr = Expr::MethodCall(ExprMethodCall {
+            attrs: vec![],
+            receiver: Box::new(expr),
+            dot_token: Default::default(),
+            method: syn::parse_quote!(add_jobs),
+            turbofish: None,
+            paren_token: Default::default(),
+            args: {
+                let mut punctuated = syn::punctuated::Punctuated::new();
+                punctuated.push(syn::parse_quote!(::spring_job::handler::auto_jobs()));
+                punctuated
+            },
+        });
+    }
+    expr
+}
+
+fn is_app_new_call(path: &syn::Path) -> bool {
+    // Check if the path corresponds to `App::new`
+    path.segments.len() == 2 && path.segments[0].ident == "App" && path.segments[1].ident == "new"
 }
 
 pub(crate) fn config(args: TokenStream, input: TokenStream) -> TokenStream {

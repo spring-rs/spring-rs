@@ -33,6 +33,21 @@ App实现了[JobConfigurator](https://docs.rs/spring-job/latest/spring_job/trait
 +}
 ```
 
+你也可以使用`auto_config`宏来实现自动配置，这个过程宏会自动将被过程宏标记的调度任务注册进app中：
+
+```diff
++#[auto_config(JobConfigurator)]
+ #[tokio::main]
+ async fn main() {
+     App::new()
+         .add_plugin(JobPlugin)
+         .add_plugin(SqlxPlugin)
+-        .add_jobs(jobs())
+         .run()
+         .await
+}
+```
+
 ## 提取插件注册的Component
 
 上面的`SqlxPlugin`插件为我们自动注册了一个Sqlx连接池组件，我们可以使用`Component`从App中提取这个连接池。需要注意`spring-job`的[`Component`](https://docs.rs/spring-job/latest/spring_job/extractor/struct.Component.html)和`spring-web`的[`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)虽然实现原理类似，但这两个extractor归属不同的crate下。

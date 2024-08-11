@@ -62,6 +62,21 @@ App实现了[WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait
 +}
 ```
 
+你也可以使用`auto_config`宏来实现自动配置，这个过程宏会自动将被过程宏标记的路由注册进app中：
+
+```diff
++#[auto_config(WebConfigurator)]
+ #[tokio::main]
+ async fn main() {
+     App::new()
+         .add_plugin(SqlxPlugin)
+         .add_plugin(WebPlugin)
+-        .add_router(router())
+         .run()
+         .await
+}
+```
+
 ## 属性宏
 
 上面例子中的[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html)是一个属性宏，spring提供了八个标准HTTP METHOD的过程宏：`get`、`post`、`patch`、`put`、`delete`、`head`、`trace`、`options`。

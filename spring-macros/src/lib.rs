@@ -51,10 +51,10 @@
 //! }
 //! ```
 
+mod auto;
 mod job;
 mod nest;
 mod route;
-mod auto;
 
 use proc_macro::TokenStream;
 
@@ -230,8 +230,19 @@ job_macro!(FixDelay, fix_delay, 60);
 job_macro!(FixRate, fix_rate, 60);
 job_macro!(Cron, cron, "1/10 * * * * *");
 
+/// Auto config
+/// ```rust
+/// #[auto_config(WebConfigurator, JobConfigurator)]
+/// #[tokio::main]
+/// async fn main() {
+///     App::new()
+///        .add_plugin(SqlxPlugin)
+///        .add_plugin(WebPlugin)
+///        .run()
+///        .await
+/// }
+/// ```
 ///
-/// 
 #[proc_macro_attribute]
 pub fn auto_config(args: TokenStream, input: TokenStream) -> TokenStream {
     auto::config(args, input)
