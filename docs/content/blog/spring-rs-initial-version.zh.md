@@ -17,6 +17,7 @@ use spring_web::{
     Router, WebConfigurator, WebPlugin,
 };
 
+#[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
@@ -24,12 +25,6 @@ async fn main() {
         .add_router(router())
         .run()
         .await
-}
-
-fn router() -> Router {
-    Router::new()
-        .typed_route(hello_word)
-        .typed_route(hello)
 }
 
 #[get("/")]

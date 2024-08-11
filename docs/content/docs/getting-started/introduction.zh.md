@@ -16,16 +16,16 @@ top = false
 
 使用spring-rs的前提是，您已熟悉rust基本语法和cargo依赖包管理工具的使用。
 
-如果这些你都已了解，点击这个[Quick Start →](../quick-start/)，它介绍了如何快速上手**spring-rs**。
+如果这些你都已了解，点击这个[Quick Start →](/zh/docs/getting-started/quick-start/)，它介绍了如何快速上手**spring-rs**。
 
 ## 支持的插件
 
-* [x] `spring-web`(基于[`axum`](https://github.com/tokio-rs/axum)实现)
-* [x] `spring-sqlx`(整合了[`sqlx`](https://github.com/launchbadge/sqlx))
-* [x] `spring-sea-orm`(整合了[`sea-orm`](https://www.sea-ql.org/SeaORM/))
-* [x] `spring-redis`(整合了[`redis`](https://github.com/redis-rs/redis-rs))
-* [x] `spring-mail`(整合了[`lettre`](https://github.com/lettre/lettre))
-* [x] `spring-job`(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
+* [x] [`spring-web`](/zh/docs/plugins/spring-web/)(基于[`axum`](https://github.com/tokio-rs/axum)实现)
+* [x] [`spring-sqlx`](/zh/docs/plugins/spring-sqlx/)(整合了[`sqlx`](https://github.com/launchbadge/sqlx))
+* [x] [`spring-sea-orm`](/zh/docs/plugins/spring-sea-orm/)(整合了[`sea-orm`](https://www.sea-ql.org/SeaORM/))
+* [x] [`spring-redis`](/zh/docs/plugins/spring-redis/)(整合了[`redis`](https://github.com/redis-rs/redis-rs))
+* [x] [`spring-mail`](/zh/docs/plugins/spring-mail/)(整合了[`lettre`](https://github.com/lettre/lettre))
+* [x] [`spring-job`](/zh/docs/plugins/spring-job/)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
 * [ ] `spring-actuator`(提供简单的健康检查和系统诊断接口)
 * [ ] `spring-stream`(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现消息处理)
 
