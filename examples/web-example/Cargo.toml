@@ -9,5 +9,10 @@ authors.workspace = true
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
 spring-sqlx = { path = "../../spring-sqlx", features = ["mysql"] }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["full", "tracing"] }
 anyhow = { workspace = true }
+
+# benchmark compare
+axum = { workspace = true }
+actix-web = "4"
+ntex = { version = "2.0", features = ["tokio"] }
