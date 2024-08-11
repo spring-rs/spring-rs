@@ -25,13 +25,27 @@ App实现了[JobConfigurator](https://docs.rs/spring-job/latest/spring_job/trait
 +fn jobs() -> Jobs {
 +   Jobs::new()
 +       .typed_job(cron_job)
-+       .to_owned()
 +}
 
 +#[cron("1/10 * * * * *")]
 +async fn cron_job() {
 +    println!("cron scheduled: {:?}", SystemTime::now())
 +}
+```
+
+你也可以使用`auto_config`宏来实现自动配置，这个过程宏会自动将被过程宏标记的调度任务注册进app中：
+
+```diff
++#[auto_config(JobConfigurator)]
+ #[tokio::main]
+ async fn main() {
+     App::new()
+         .add_plugin(JobPlugin)
+         .add_plugin(SqlxPlugin)
+-        .add_jobs(jobs())
+         .run()
+         .await
+}
 ```
 
 ## 提取插件注册的Component

@@ -19,3 +19,4 @@ tower = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true }
 schemars = { workspace = true }
+inventory = { workspace = true }
