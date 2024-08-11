@@ -28,6 +28,7 @@ top = false
 * [x] [`spring-job`](/zh/docs/plugins/spring-job/)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
 * [ ] `spring-actuator`(提供简单的健康检查和系统诊断接口)
 * [ ] `spring-stream`(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现消息处理)
+* [ ] `spring-opentelemetry`(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
 
 ## 贡献
 
