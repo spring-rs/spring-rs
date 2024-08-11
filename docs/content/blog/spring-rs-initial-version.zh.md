@@ -22,7 +22,6 @@ use spring_web::{
 async fn main() {
     App::new()
         .add_plugin(WebPlugin)
-        .add_router(router())
         .run()
         .await
 }
