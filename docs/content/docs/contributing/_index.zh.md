@@ -1,6 +1,6 @@
 +++
-title = "Contributing"
-description = "Find out how to contribute to AdiDoks."
+title = "贡献"
+description = "了解如何为spring-rs社区作出贡献"
 template = "docs/section.zh.html"
 sort_by = "weight"
 weight = 4
