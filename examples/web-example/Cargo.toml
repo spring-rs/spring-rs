@@ -16,3 +16,4 @@ anyhow = { workspace = true }
 axum = { workspace = true }
 actix-web = "4"
 ntex = { version = "2.0", features = ["tokio"] }
+sqlx = { workspace = true, features = ["mysql"] }

@@ -9,3 +9,4 @@ timeout_request = { enable = true, timeout = 30000 }
 
 [sqlx]
 uri = "mysql://root:xudjf23adj213@127.0.0.1:3306"
+min_connections = 10
