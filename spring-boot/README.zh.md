@@ -42,6 +42,7 @@ impl Plugin for MyPlugin {
     }
 }
 
+/// 插件的配置
 #[derive(Debug, Deserialize)]
 struct Config {
     a: u32,
