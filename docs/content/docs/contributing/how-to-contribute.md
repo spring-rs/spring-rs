@@ -2,7 +2,7 @@
 title = "How to Contribute"
 description = "Contribute to AdiDoks, improve documentation, or submit to showcase."
 draft = false
-weight = 410
+weight = 21
 sort_by = "weight"
 template = "docs/page.html"
 

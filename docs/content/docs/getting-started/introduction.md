@@ -2,7 +2,7 @@
 title = "Introduction"
 description = "AdiDoks is a Zola theme helping you build modern documentation websites, which is a port of the Hugo theme Doks for Zola."
 draft = false
-weight = 10
+weight = 2
 sort_by = "weight"
 template = "docs/page.html"
 

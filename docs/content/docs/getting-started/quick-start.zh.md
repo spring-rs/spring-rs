@@ -2,7 +2,7 @@
 title = "快速上手"
 description = "一个页面介绍如何快速上手spring-rs"
 draft = false
-weight = 11
+weight = 3
 sort_by = "weight"
 template = "docs/page.html"
 

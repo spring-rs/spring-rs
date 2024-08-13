@@ -2,7 +2,7 @@
 title = "spring-sqlx Plugin"
 description = "sqlx插件如何使用"
 draft = false
-weight = 22
+weight = 13
 sort_by = "weight"
 template = "docs/page.html"
 

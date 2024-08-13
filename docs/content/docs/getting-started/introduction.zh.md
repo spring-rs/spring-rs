@@ -2,7 +2,7 @@
 title = "介绍"
 description = "spring-rs是一个rust编写的微服务框架，类似于java生态的springboot"
 draft = false
-weight = 10
+weight = 2
 sort_by = "weight"
 template = "docs/page.html"
 

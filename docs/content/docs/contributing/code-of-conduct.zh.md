@@ -2,7 +2,7 @@
 title = "Code of Conduct"
 description = "Contributor Covenant Code of Conduct."
 draft = false
-weight = 420
+weight = 22
 sort_by = "weight"
 template = "docs/page.html"
 
