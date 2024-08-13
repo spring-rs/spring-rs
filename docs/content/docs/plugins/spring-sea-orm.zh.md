@@ -2,7 +2,7 @@
 title = "spring-sea-orm插件"
 description = "sea-orm插件如何使用"
 draft = false
-weight = 30
+weight = 23
 sort_by = "weight"
 template = "docs/page.html"
 
