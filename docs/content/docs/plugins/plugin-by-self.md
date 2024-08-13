@@ -1,6 +1,6 @@
 +++
-title = "编写自己的插件"
-description = "如何编写自己的插件"
+title = "Writing your own plugins"
+description = "How to write your own plugins"
 draft = false
 weight = 30
 sort_by = "weight"
