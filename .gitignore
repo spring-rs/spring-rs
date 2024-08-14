@@ -29,3 +29,7 @@ rust-project.json
 !.vscode/*.code-snippets
 
 docs/public
+
+### flamegraph
+perf*
+flamegraph.svg
