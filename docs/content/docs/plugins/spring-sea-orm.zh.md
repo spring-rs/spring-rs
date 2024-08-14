@@ -7,7 +7,9 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "spring-web是基于axum实现"
+lead = "spring-sea-orm是针对<a href='https://github.com/SeaQL/sea-orm' target='_blank'>sea-orm</a>的自动装配"
 toc = true
 top = false
 +++
+
+{{ include(path="../../spring-sea-orm/README.zh.md") }}

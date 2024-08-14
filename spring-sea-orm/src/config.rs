@@ -31,18 +31,6 @@ pub struct SeaOrmConfig {
 
     /// Set the timeout for acquiring a connection
     pub acquire_timeout: Option<u64>,
-
-    /// Truncate database when application loads. It will delete data from your
-    /// tables. Commonly used in `test`.
-    #[serde(default)]
-    pub dangerously_truncate: bool,
-
-    /// Recreate schema when application loads. Use it when you want to reset
-    /// your database *and* structure (drop), this also deletes all of the data.
-    /// Useful when you're just sketching out your project and trying out
-    /// various things in development.
-    #[serde(default)]
-    pub dangerously_recreate: bool,
 }
 
 fn default_min_connections() -> u32 {

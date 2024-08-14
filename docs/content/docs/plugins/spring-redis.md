@@ -1,13 +1,15 @@
 +++
 title = "spring-redis Plugin"
-description = "redis插件如何使用"
+description = "How to use the spring-redis plugin"
 draft = false
 weight = 15
 sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "spring-web是基于axum实现"
+lead = "spring-redis is an automatic assembly for <a href='https://github.com/redis-rs/redis-rs' target='_blank'>redis-rs</a>"
 toc = true
 top = false
 +++
+
+{{ include(path="../../spring-redis/README.md") }}

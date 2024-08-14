@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "spring-sqlx是基于<a href='https://github.com/launchbadge/sqlx' target='_blank'>sqlx</a>实现"
+lead = "spring-sqlx是针对<a href='https://github.com/launchbadge/sqlx' target='_blank'>sqlx</a>的自动装配"
 toc = true
 top = false
 +++

@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "spring-mail是基于<a href='https://github.com/lettre/lettre' target='_blank'>lettre</a>实现"
+lead = "spring-mail是针对<a href='https://github.com/lettre/lettre' target='_blank'>lettre</a>的自动装配"
 toc = true
 top = false
 +++

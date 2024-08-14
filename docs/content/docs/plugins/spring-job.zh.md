@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "spring-job是基于<a href='https://github.com/mvniekerk/tokio-cron-scheduler' target='_blank'>tokio-cron-scheduler</a>实现"
+lead = "spring-job是基于<a href='https://github.com/mvniekerk/tokio-cron-scheduler' target='_blank'>tokio-cron-scheduler</a>实现的"
 toc = true
 top = false
 +++

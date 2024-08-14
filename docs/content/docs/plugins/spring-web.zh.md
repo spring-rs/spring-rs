@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "spring-web是基于<a href='https://github.com/tokio-rs/axum' target='_blank'>axum</a>实现"
+lead = "spring-web是基于<a href='https://github.com/tokio-rs/axum' target='_blank'>axum</a>实现的"
 toc = true
 top = false
 +++
