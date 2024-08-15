@@ -8,7 +8,7 @@ pub(crate) struct LogPlugin;
 
 impl Configurable for LogPlugin {
     fn config_prefix(&self) -> &str {
-        "log"
+        "logger"
     }
 }
 
