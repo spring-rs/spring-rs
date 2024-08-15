@@ -1,8 +1,9 @@
+use crate::config::Configurable;
+use crate::log::LogPlugin;
 use crate::{config, plugin::Plugin};
 use crate::{
     config::env,
     error::Result,
-    log,
     plugin::{component::ComponentRef, PluginRef},
 };
 use anyhow::Context;
@@ -27,6 +28,7 @@ pub struct App {
 }
 
 pub struct AppBuilder {
+    pub(crate) tracing_registry: tracing_subscriber::Registry,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
@@ -41,8 +43,9 @@ pub struct AppBuilder {
 
 impl App {
     pub fn new() -> AppBuilder {
-        log::init_log();
-        AppBuilder::default()
+        let mut app_builder = AppBuilder::default();
+        LogPlugin.build(&mut app_builder);
+        app_builder
     }
 
     ///
@@ -96,7 +99,7 @@ impl AppBuilder {
     }
 
     /// Get the configuration items of the plugin according to the plugin's `config_prefix`
-    pub fn get_config<T>(&self, plugin: &impl Plugin) -> Result<T>
+    pub fn get_config<T>(&self, plugin: &impl Configurable) -> Result<T>
     where
         T: serde::de::DeserializeOwned,
     {
@@ -107,8 +110,8 @@ impl AppBuilder {
         };
         return Ok(T::deserialize(table.to_owned()).with_context(|| {
             format!(
-                "Failed to deserialize the configuration of plugin {}",
-                plugin.name()
+                "Failed to deserialize the configuration of prefix \"{}\"",
+                prefix
             )
         })?);
     }
@@ -228,6 +231,7 @@ impl AppBuilder {
 impl Default for AppBuilder {
     fn default() -> Self {
         Self {
+            tracing_registry: tracing_subscriber::registry(),
             plugin_registry: Default::default(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
             config: Default::default(),

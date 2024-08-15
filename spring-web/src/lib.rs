@@ -9,6 +9,7 @@ pub use axum::routing::method_routing::*;
 
 use anyhow::Context;
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
+use spring_boot::config::Configurable;
 use spring_boot::{
     app::{App, AppBuilder},
     async_trait,
@@ -55,6 +56,8 @@ pub struct AppState {
     pub app: Arc<App>,
 }
 
+#[derive(Configurable)]
+#[config_prefix = "web"]
 pub struct WebPlugin;
 
 #[async_trait]
@@ -84,10 +87,6 @@ impl Plugin for WebPlugin {
         let addr = SocketAddr::from((config.binding, config.port));
 
         app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(addr, router, app)));
-    }
-
-    fn config_prefix(&self) -> &str {
-        "web"
     }
 }
 

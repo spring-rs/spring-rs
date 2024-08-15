@@ -5,6 +5,7 @@ pub mod job;
 use anyhow::Context;
 use job::Job;
 use spring_boot::async_trait;
+use spring_boot::config::Configurable;
 use spring_boot::error::Result;
 use spring_boot::{
     app::{App, AppBuilder},
@@ -94,10 +95,6 @@ pub struct JobPlugin;
 impl Plugin for JobPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         app.add_scheduler(|app: Arc<App>| Box::new(Self::schedule(app)));
-    }
-
-    fn config_prefix(&self) -> &str {
-        "job"
     }
 }
 

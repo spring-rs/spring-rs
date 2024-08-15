@@ -7,10 +7,13 @@ pub use lettre::AsyncTransport;
 pub use lettre::Message;
 use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
 use spring_boot::async_trait;
+use spring_boot::config::Configurable;
 use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
 
 pub type Mailer = lettre::AsyncSmtpTransport<Tokio1Executor>;
 
+#[derive(Configurable)]
+#[config_prefix = "mail"]
 pub struct MailPlugin;
 
 #[async_trait]
@@ -24,10 +27,6 @@ impl Plugin for MailPlugin {
         let mailer = Self::build_mailer(&config).unwrap();
 
         app.add_component(mailer);
-    }
-
-    fn config_prefix(&self) -> &str {
-        "mail"
     }
 }
 

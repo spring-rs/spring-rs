@@ -2,6 +2,7 @@ mod extractor;
 
 use extractor::App;
 use spring_boot::async_trait;
+use spring_boot::config::Configurable;
 use spring_boot::{app::AppBuilder, plugin::Plugin};
 use spring_web::{
     extractor::Component,
@@ -10,16 +11,14 @@ use spring_web::{
     Router, Routers, WebConfigurator,
 };
 
+#[derive(Configurable)]
+#[config_prefix = "actuator"]
 pub struct ActuatorPlugin;
 
 #[async_trait]
 impl Plugin for ActuatorPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         app.add_router(actuator_router());
-    }
-
-    fn config_prefix(&self) -> &str {
-        "actuator"
     }
 }
 

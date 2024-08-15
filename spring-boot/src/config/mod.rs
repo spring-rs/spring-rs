@@ -5,8 +5,15 @@ use crate::error::{AppError, Result};
 use anyhow::Context;
 use env::Env;
 use serde_toml_merge::merge_tables;
+pub use spring_macros::Configurable;
 use std::fs;
 use toml::Table;
+
+pub trait Configurable {
+    /// Prefix used to read toml configuration.
+    /// If you need to load external configuration, you need to rewrite this method
+    fn config_prefix(&self) -> &str;
+}
 
 /// load toml config
 pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {

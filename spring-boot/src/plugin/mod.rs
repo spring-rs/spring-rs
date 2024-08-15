@@ -12,10 +12,6 @@ pub trait Plugin: Any + Send + Sync {
     /// Configures the [`App`] to which this plugin is added.
     async fn build(&self, app: &mut AppBuilder);
 
-    /// Prefix used to read toml configuration.
-    /// If you need to load external configuration, you need to rewrite this method
-    fn config_prefix(&self) -> &str;
-
     /// Configures a name for the [`Plugin`] which is primarily used for checking plugin
     /// uniqueness and debugging.
     fn name(&self) -> &str {

@@ -4,6 +4,7 @@ use anyhow::Context;
 use config::SqlxConfig;
 use spring_boot::app::AppBuilder;
 use spring_boot::async_trait;
+use spring_boot::config::Configurable;
 use spring_boot::error::Result;
 use spring_boot::plugin::Plugin;
 use sqlx::any::AnyPoolOptions;
@@ -11,6 +12,8 @@ use std::time::Duration;
 
 pub type ConnectPool = sqlx::AnyPool;
 
+#[derive(Configurable)]
+#[config_prefix = "sqlx"]
 pub struct SqlxPlugin;
 
 #[async_trait]
@@ -29,10 +32,6 @@ impl Plugin for SqlxPlugin {
         tracing::info!("sqlx connection success");
 
         app.add_component(connect_pool);
-    }
-
-    fn config_prefix(&self) -> &str {
-        "sqlx"
     }
 }
 

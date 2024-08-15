@@ -52,11 +52,13 @@
 //! ```
 
 mod auto;
+mod config;
 mod job;
 mod nest;
 mod route;
 
 use proc_macro::TokenStream;
+use syn::DeriveInput;
 
 /// Creates resource handler, allowing multiple HTTP method guards.
 ///
@@ -246,4 +248,14 @@ job_macro!(Cron, cron, "1/10 * * * * *");
 #[proc_macro_attribute]
 pub fn auto_config(args: TokenStream, input: TokenStream) -> TokenStream {
     auto::config(args, input)
+}
+
+/// Configurable Plugin
+#[proc_macro_derive(Configurable, attributes(config_prefix))]
+pub fn derive_config(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input as DeriveInput);
+
+    config::expand_derive(input)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
 }

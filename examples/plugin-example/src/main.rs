@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use spring_boot::async_trait;
+use spring_boot::config::Configurable;
 use spring_boot::{
     app::{App, AppBuilder},
     plugin::Plugin,
@@ -23,7 +24,9 @@ impl Plugin for MyPlugin {
             Err(e) => println!("{:?}", e),
         }
     }
+}
 
+impl Configurable for MyPlugin {
     fn config_prefix(&self) -> &str {
         "my-plugin"
     }
