@@ -55,11 +55,11 @@ impl Env {
 
 pub fn init() -> Result<Env> {
     match dotenvy::dotenv() {
-        Ok(path) => tracing::debug!(
+        Ok(path) => log::debug!(
             "Loaded the environment variable file under the path: \"{}\"",
             path.to_str().unwrap()
         ),
-        Err(e) => tracing::debug!("Environment variable file not found: {}", e),
+        Err(e) => log::debug!("Environment variable file not found: {}", e),
     }
 
     Ok(Env::from_env())

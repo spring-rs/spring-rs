@@ -17,7 +17,6 @@ use std::{
     sync::Arc,
 };
 use toml::Table;
-use tracing::debug;
 
 pub type Registry<T> = DashMap<String, T>;
 pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send>;
@@ -43,9 +42,7 @@ pub struct AppBuilder {
 
 impl App {
     pub fn new() -> AppBuilder {
-        let mut app_builder = AppBuilder::default();
-        LogPlugin.build(&mut app_builder);
-        app_builder
+        AppBuilder::default()
     }
 
     ///
@@ -70,7 +67,7 @@ unsafe impl Sync for AppBuilder {}
 impl AppBuilder {
     /// add plugin
     pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
-        debug!("added plugin: {}", plugin.name());
+        log::debug!("added plugin: {}", plugin.name());
         let plugin_name = plugin.name().to_string();
         if self.plugin_registry.contains_key(plugin.name()) {
             panic!("Error adding plugin {plugin_name}: plugin was already added in application")
@@ -122,7 +119,7 @@ impl AppBuilder {
         T: any::Any + Send + Sync,
     {
         let component_name = std::any::type_name::<T>();
-        debug!("added component: {}", component_name);
+        log::debug!("added component: {}", component_name);
         if self.components.contains_key(component_name) {
             panic!("Error adding component {component_name}: component was already added in application")
         }
@@ -156,7 +153,7 @@ impl AppBuilder {
     pub async fn run(&mut self) {
         match self.inner_run().await {
             Err(e) => {
-                tracing::error!("{:?}", e);
+                log::error!("{:?}", e);
             }
             Ok(_app) => {}
         }
@@ -169,10 +166,13 @@ impl AppBuilder {
         // 2. load yaml config
         self.config = config::load_config(self, env)?;
 
-        // 3. build plugin
+        // 3. load LogPlugin
+        LogPlugin.build(self);
+
+        // 4. build plugin
         self.build_plugins().await;
 
-        // 4. schedule
+        // 5. schedule
         self.schedule().await
     }
 
@@ -193,7 +193,7 @@ impl AppBuilder {
                 if deps.iter().all(|dep| registered.contains(*dep)) {
                     plugin.build(self).await;
                     registered.insert(plugin.name().to_string());
-                    tracing::info!("{} plugin registered", plugin.name());
+                    log::info!("{} plugin registered", plugin.name());
                     progress = true;
                 } else {
                     next_round.push(plugin);
@@ -215,8 +215,8 @@ impl AppBuilder {
             let poll_future = task(app.clone());
             let poll_future = Box::into_pin(poll_future);
             match tokio::spawn(poll_future).await? {
-                Err(e) => tracing::error!("{}", e),
-                Ok(msg) => tracing::info!("scheduled result: {}", msg),
+                Err(e) => log::error!("{}", e),
+                Ok(msg) => log::info!("scheduled result: {}", msg),
             }
         }
         Ok(app)

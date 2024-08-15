@@ -20,7 +20,7 @@ pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {
     let main_path = app.config_path.as_path();
     let config_file = fs::read_to_string(main_path);
     if let Err(e) = config_file {
-        tracing::warn!("Failed to read configuration file {:?}: {}", main_path, e);
+        log::warn!("Failed to read configuration file {:?}: {}", main_path, e);
         return Ok(Table::new());
     }
 
@@ -46,7 +46,7 @@ pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {
                 })?
         }
         Err(_) => {
-            tracing::debug!("{:?} config not found", env);
+            log::debug!("{:?} config not found", env);
             main_table
         }
     };

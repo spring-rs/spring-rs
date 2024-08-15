@@ -5,7 +5,6 @@ pub mod job;
 use anyhow::Context;
 use job::Job;
 use spring_boot::async_trait;
-use spring_boot::config::Configurable;
 use spring_boot::error::Result;
 use spring_boot::{
     app::{App, AppBuilder},
