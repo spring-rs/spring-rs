@@ -52,9 +52,12 @@ pub(crate) struct LoggerFileAppender {
     pub level: LogLevel,
     pub format: Format,
     pub rotation: Rotation,
-    pub dir: Option<String>,
-    pub filename_prefix: Option<String>,
-    pub filename_suffix: Option<String>,
+    #[serde(default = "default_dir")]
+    pub dir: String,
+    #[serde(default = "default_prefix")]
+    pub filename_prefix: String,
+    #[serde(default = "default_suffix")]
+    pub filename_suffix: String,
     pub max_log_files: usize,
 }
 
@@ -69,4 +72,16 @@ pub(crate) enum Rotation {
     Daily,
     #[serde(rename = "never")]
     Never,
+}
+
+fn default_dir() -> String {
+    "./logs".to_string()
+}
+
+fn default_prefix() -> String {
+    "app".to_string()
+}
+
+fn default_suffix() -> String {
+    ".log".to_string()
 }
