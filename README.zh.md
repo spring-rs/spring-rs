@@ -2,6 +2,14 @@
     <img src="docs/static/logo.svg" alt="Logo"/>
     <h3>spring-rs是rust编写的微服务框架</h3>
     <p><a href="./README.md">English</a> ｜ 中文</p>
+    <p>
+        <a href="https://crates.io/crates/spring">
+            <img src="https://img.shields.io/crates/v/spring.svg" alt="crates.io"/>
+        </a>
+        <a href="https://docs.rs/spring">
+            <img src="https://docs.rs/spring/badge.svg" alt="Documentation"/>
+        </a>
+    </p>
 </div>
 
 <b>spring-rs</b>是一个rust编写的微服务框架，类似于java生态的SpringBoot。<b>spring-rs</b>提供了易于扩展的插件系统，用于整合rust社区的优秀项目，例如axum、sqlx、sea-orm等。
