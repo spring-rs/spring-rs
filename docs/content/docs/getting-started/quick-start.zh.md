@@ -46,8 +46,8 @@ use spring_web::{
 };
 
 // 主函数入口
-#[tokio::main]
 #[auto_config(WebConfigurator)]   // 自动扫描web router
+#[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(SqlxPlugin)  // 添加插件

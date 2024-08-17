@@ -46,8 +46,8 @@ use spring_web::{
 };
 
 // Main function entry
-#[tokio::main]
 #[auto_config(WebConfigurator)]   // auto config web router
+#[tokio::main]
 async fn main() {
     App::new()
     .add_plugin(SqlxPlugin) // Add plug-in
