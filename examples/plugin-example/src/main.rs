@@ -6,6 +6,8 @@ use spring_boot::{
     plugin::Plugin,
 };
 
+#[derive(Configurable)]
+#[config_prefix = "my-plugin"]
 struct MyPlugin;
 
 #[async_trait]
@@ -23,12 +25,6 @@ impl Plugin for MyPlugin {
             }
             Err(e) => println!("{:?}", e),
         }
-    }
-}
-
-impl Configurable for MyPlugin {
-    fn config_prefix(&self) -> &str {
-        "my-plugin"
     }
 }
 

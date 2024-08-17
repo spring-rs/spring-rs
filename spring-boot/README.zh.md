@@ -35,8 +35,10 @@ impl Plugin for MyPlugin {
             Err(e) => println!("{:?}", e),
         }
     }
+}
 
-    /// 配置项的前缀
+/// 定义插件的配置前缀
+impl Configurable for MyPlugin {
     fn config_prefix(&self) -> &str {
         "my-plugin"
     }
@@ -48,6 +50,16 @@ struct Config {
     a: u32,
     b: bool,
 }
+```
+
+实现`Configurable`特征有个简写的方式：
+
+```rust
+/// 可以使用派生宏实现Configurable特征，使用config_prefix属性宏定义toml文件中配置的前缀
+/// 如果插件不需要读取配置，可以不派生Configurable特征
+#[derive(Configurable)]
+#[config_prefix = "my-plugin"]
+struct MyPlugin;
 ```
 
 完整代码参考[`plugin-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/plugin-example)，也可以参考自带的其他插件代码。

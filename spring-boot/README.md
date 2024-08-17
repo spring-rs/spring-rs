@@ -50,4 +50,13 @@ struct Config {
 }
 ```
 
+You can use the derive macro to implement the Configurable trait:
+
+```rust
+/// Use the `config_prefix` attr macro to define the prefix configured in the toml file
+#[derive(Configurable)]
+#[config_prefix = "my-plugin"]
+struct MyPlugin;
+```
+
 For the complete code, refer to [`plugin-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/plugin-example), or refer to other built-in plugin codes.
