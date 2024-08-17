@@ -32,4 +32,4 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --verbose
       - name: Run Publish
-        run: cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}}
+        run: cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}} --allow-dirty
