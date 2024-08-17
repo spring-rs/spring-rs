@@ -5,6 +5,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub(crate) struct LoggerConfig {
+    #[serde(default)]
     pub enable: bool,
 
     /// Enable nice display of backtraces, in development this should be on.
@@ -15,11 +16,13 @@ pub(crate) struct LoggerConfig {
     /// Set the logger level.
     ///
     /// * options: `trace` | `debug` | `info` | `warn` | `error`
+    #[serde(default)]
     pub level: LogLevel,
 
     /// Set the logger format.
     ///
     /// * options: `compact` | `pretty` | `json`
+    #[serde(default)]
     pub format: Format,
 
     /// Override our custom tracing filter.
@@ -64,7 +67,7 @@ impl Display for LogLevel {
                 Self::Off => "off",
                 Self::Trace => "trace",
                 Self::Debug => "debug",
-                Self::Info => "debug",
+                Self::Info => "info",
                 Self::Warn => "warn",
                 Self::Error => "error",
             }
@@ -86,8 +89,11 @@ pub(crate) enum Format {
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub(crate) struct LoggerFileAppender {
     pub enable: bool,
+    #[serde(default = "default_true")]
     pub non_blocking: bool,
+    #[serde(default)]
     pub format: Format,
+    #[serde(default)]
     pub rotation: Rotation,
     #[serde(default = "default_dir")]
     pub dir: String,
@@ -95,6 +101,7 @@ pub(crate) struct LoggerFileAppender {
     pub filename_prefix: String,
     #[serde(default = "default_suffix")]
     pub filename_suffix: String,
+    #[serde(default = "default_max_log_files")]
     pub max_log_files: usize,
 }
 
@@ -103,9 +110,9 @@ pub(crate) enum Rotation {
     #[serde(rename = "minutely")]
     Minutely,
     #[serde(rename = "hourly")]
-    #[default]
     Hourly,
     #[serde(rename = "daily")]
+    #[default]
     Daily,
     #[serde(rename = "never")]
     Never,
@@ -120,7 +127,15 @@ fn default_prefix() -> String {
 }
 
 fn default_suffix() -> String {
-    ".log".to_string()
+    "log".to_string()
+}
+
+fn default_max_log_files() -> usize {
+    365
+}
+
+fn default_true() -> bool {
+    true
 }
 
 impl Into<tracing_appender::rolling::Rotation> for Rotation {

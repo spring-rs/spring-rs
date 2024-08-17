@@ -4,7 +4,6 @@ use crate::{app::AppBuilder, config::Configurable};
 use config::{Format, LogLevel, LoggerConfig};
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
-use tracing_log::LogTracer;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -23,8 +22,6 @@ impl Configurable for LogPlugin {
 
 impl LogPlugin {
     pub(crate) fn build(&self, app: &mut AppBuilder) {
-        LogTracer::init().expect("init tracing_log faile");
-
         let registry = std::mem::take(&mut app.tracing_registry);
 
         let config = app

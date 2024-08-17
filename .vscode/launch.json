@@ -1,0 +1,340 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring"
+                ],
+                "filter": {
+                    "name": "spring",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_boot'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-boot"
+                ],
+                "filter": {
+                    "name": "spring_boot",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_job'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-job"
+                ],
+                "filter": {
+                    "name": "spring_job",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_web'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-web"
+                ],
+                "filter": {
+                    "name": "spring_web",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_redis'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-redis"
+                ],
+                "filter": {
+                    "name": "spring_redis",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_sqlx'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-sqlx"
+                ],
+                "filter": {
+                    "name": "spring_sqlx",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_sea_orm'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-sea-orm"
+                ],
+                "filter": {
+                    "name": "spring_sea_orm",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'spring_actuator'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=spring-actuator"
+                ],
+                "filter": {
+                    "name": "spring_actuator",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'actuator-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=actuator-example",
+                    "--package=actuator-example"
+                ],
+                "filter": {
+                    "name": "actuator-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/actuator-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'job-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=job-example",
+                    "--package=job-example"
+                ],
+                "filter": {
+                    "name": "job-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/job-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'mail-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=mail-example",
+                    "--package=mail-example"
+                ],
+                "filter": {
+                    "name": "mail-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/mail-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'plugin-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=plugin-example",
+                    "--package=plugin-example"
+                ],
+                "filter": {
+                    "name": "plugin-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/plugin-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'redis-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=redis-example",
+                    "--package=redis-example"
+                ],
+                "filter": {
+                    "name": "redis-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/redis-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'sea-orm-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=sea-orm-example",
+                    "--package=sea-orm-example"
+                ],
+                "filter": {
+                    "name": "sea-orm-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/sea-orm-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'web-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=web-example",
+                    "--package=web-example"
+                ],
+                "filter": {
+                    "name": "web-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/web-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'native-axum'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=native-axum",
+                    "--package=web-example"
+                ],
+                "filter": {
+                    "name": "native-axum",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/web-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'native-ntex'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=native-ntex",
+                    "--package=web-example"
+                ],
+                "filter": {
+                    "name": "native-ntex",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/web-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'native-actix'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=native-actix",
+                    "--package=web-example"
+                ],
+                "filter": {
+                    "name": "native-actix",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/web-example"
+        },
+    ]
+}

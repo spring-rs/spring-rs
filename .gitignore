@@ -33,3 +33,4 @@ docs/public
 ### flamegraph
 perf*
 flamegraph.svg
+logs/
