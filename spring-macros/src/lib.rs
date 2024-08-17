@@ -233,20 +233,22 @@ job_macro!(FixRate, fix_rate, 60);
 job_macro!(Cron, cron, "1/10 * * * * *");
 
 /// Auto config
-/// ```rust
-/// use spring_macros::auto_config;
-/// use spring_web::{WebPlugin, WebConfigurator};
-/// use spring_job::{JobPlugin, JobConfigurator};
-/// use spring_boot::app::App;
-/// #[auto_config(WebConfigurator, JobConfigurator)]
-/// #[tokio::main]
-/// async fn main() {
-///     App::new()
-///        .add_plugin(WebPlugin)
-///        .add_plugin(JobPlugin)
-///        .run()
-///        .await
-/// }
+/// ```diff
+///  use spring_macros::auto_config;
+///  use spring_web::{WebPlugin, WebConfigurator};
+///  use spring_job::{JobPlugin, JobConfigurator};
+///  use spring_boot::app::App;
+/// +#[auto_config(WebConfigurator, JobConfigurator)]
+///  #[tokio::main]
+///  async fn main() {
+///      App::new()
+///         .add_plugin(WebPlugin)
+///         .add_plugin(JobPlugin)
+/// -       .add_router(router())
+/// -       .add_jobs(jobs())
+///         .run()
+///         .await
+///  }
 /// ```
 ///
 #[proc_macro_attribute]
