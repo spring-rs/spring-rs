@@ -12,6 +12,8 @@ spring-redis = { version = "0.0.5" }
 ```toml
 [redis]
 uri = "redis://127.0.0.1/"        # redis 数据库地址
+
+# 下面都是可选配置
 connection_timeout = 10000        # 连接超时时间，单位毫秒
 response_timeout = 1000           # 响应超时时间，单位毫秒
 number_of_retries = 6             # 重试次数，间隔时间按指数增长

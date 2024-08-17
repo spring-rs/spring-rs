@@ -16,7 +16,7 @@ sea-orm = { version = "1.0" }    # 主要为了适配sea-orm-cli生成的entity�
 [sea-orm]
 uri = "postgres://root:123456@localhost:5432/pg_db"  # 数据库地址
 min_connections = 1                                  # 连接池的最小连接数，默认值为1
-max_connections = 10                                 # 连接池的最小连接数，默认值为10
+max_connections = 10                                 # 连接池的最大连接数，默认值为10
 acquire_timeout = 30000                              # 占用连接超时时间，单位毫秒，默认30s
 idle_timeout = 600000                                # 连接空闲时间，单位毫秒，默认10min
 connect_timeout = 1800000                            # 连接的最大存活时间，单位毫秒，默认30min
