@@ -1,6 +1,6 @@
 +++
 title = "spring-rs初始版本发布"
-description = "Introducing Doks, a Hugo theme helping you build modern documentation websites that are secure, fast, and SEO-ready — by default."
+description = "经过一个月的沉淀，我用rust编写了一个类似于spring-boot的微服务框架。下面是一个最简单的web应用的例子"
 date = 2024-08-04T09:19:42+00:00
 updated = 2024-08-04T09:19:42+00:00
 draft = false

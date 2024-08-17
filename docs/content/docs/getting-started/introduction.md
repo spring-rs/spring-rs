@@ -1,15 +1,39 @@
 +++
 title = "Introduction"
-description = "AdiDoks is a Zola theme helping you build modern documentation websites, which is a port of the Hugo theme Doks for Zola."
+description = "spring-rs is a microservice framework written in rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in rust community, such as axum, sqlx, sea-orm, etc."
 draft = false
 weight = 2
 sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = 'AdiDoks is a Zola theme helping you build modern documentation websites, which is a port of the Hugo theme <a href="https://github.com/h-enk/doks">Doks</a> for Zola.'
+lead = 'spring-rs is a microservice framework written in rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in rust community, such as axum, sqlx, sea-orm, etc.'
 toc = true
 top = false
 +++
 
-TODO
+## Quick Start
+
+The premise of using spring-rs is that you are familiar with the basic syntax of rust and the usage of cargo dependency package management tool.
+
+If you already know these prerequisites, click this [Quick Start →](/docs/getting-started/quick-start/), which introduces how to quickly get started with **spring-rs**.
+
+## Supported plugins
+
+* [x] [`spring-web`](/docs/plugins/spring-web/)(Based on [`axum`](https://github.com/tokio-rs/axum))
+* [x] [`spring-sqlx`](/docs/plugins/spring-sqlx/)(Integrated with [`sqlx`](https://github.com/launchbadge/sqlx))
+* [x] [`spring-sea-orm`](/docs/plugins/spring-sea-orm/)(Integrated with [`sea-orm`](https://www.sea-ql.org/SeaORM/))
+* [x] [`spring-redis`](/docs/plugins/spring-redis/)(Integrated with [`redis`](https://github.com/redis-rs/redis-rs))
+* [x] [`spring-mail`](/docs/plugins/spring-mail/)(integrated with [`lettre`](https://github.com/lettre/lettre))
+* [x] [`spring-job`](/docs/plugins/spring-job/)(integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
+* [ ] `spring-actuator`(provides a simple health check and system diagnostic interface)
+* [ ] `spring-stream`(integrated with [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing)
+* [ ] `spring-opentelemetry`(integrated with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing)
+
+## Contribution
+
+We also welcome community experts to contribute their own plugins. [Contributing →](https://github.com/spring-rs/spring-rs)
+
+## Help
+
+Click here to view common problems encountered when using `spring-rs` [Help →](../../help/faq/)

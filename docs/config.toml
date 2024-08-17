@@ -49,13 +49,8 @@ weight = 20
 info = 'Released under the MIT License. Powered by <a href="https://github.com/holmofy">holmofy</a>'
 
 [[extra.footer.nav]]
-name = "Privacy"
-url = "/privacy-policy/"
-weight = 10
-
-[[extra.footer.nav]]
 name = "Code of Conduct"
-url = "/docs/contributing/code-of-conduct/"
+url = "https://www.rust-lang.org/policies/code-of-conduct"
 weight = 20
 
 [languages.zh]

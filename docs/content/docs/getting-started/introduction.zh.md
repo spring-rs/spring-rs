@@ -32,7 +32,7 @@ top = false
 
 ## 贡献
 
-也欢迎社区的大牛贡献自己的插件。 [Contributing →](../../contributing/how-to-contribute/)
+也欢迎社区的大牛贡献自己的插件。 [Contributing →](https://github.com/spring-rs/spring-rs)
 
 ## 帮助
 
