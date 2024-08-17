@@ -6,7 +6,7 @@
 
 <b>spring-rs</b> is a microservice framework written in rust, similar to SpringBoot in java. <b>spring-rs</b> provides an easily extensible plug-in system for integrating excellent projects in the rust community, such as axum, sqlx, sea-orm, etc.
 
-Compared with springboot in java, spring-rs has higher performance and lower memory usage, allowing you to completely get rid of the bloated JVM and travel light.
+Compared with SpringBoot in java, spring-rs has higher performance and lower memory usage, allowing you to completely get rid of the bloated JVM and travel light.
 
 ## Example
 
