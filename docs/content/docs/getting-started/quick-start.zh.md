@@ -35,7 +35,7 @@ tokio = "1"
 ## 编写代码
 
 ```rust
-use spring::{nest, route, routes, App};
+use spring::{nest, route, routes, auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin
@@ -47,20 +47,13 @@ use spring_web::{
 
 // 主函数入口
 #[tokio::main]
+#[auto_config(WebConfigurator)]   // 自动扫描web router
 async fn main() {
     App::new()
         .add_plugin(SqlxPlugin)  // 添加插件
         .add_plugin(WebPlugin)
-        .add_router(router())    // 配置web router
         .run()
         .await
-}
-
-fn router() -> Router {
-    Router::new()
-        .typed_route(hello_word) // 使用typed_route方法直接注册路由
-        .typed_route(hello)
-        .typed_route(sqlx_request_handler)
 }
 
 // get宏指定Http Method和请求路径。spring-rs还提供了post、delete、patch等其他标准http method宏

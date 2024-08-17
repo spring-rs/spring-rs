@@ -35,7 +35,7 @@ tokio = "1"
 ## Write code
 
 ```rust
-use spring::{nest, route, routes, App};
+use spring::{nest, route, routes, auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin
@@ -47,6 +47,7 @@ use spring_web::{
 
 // Main function entry
 #[tokio::main]
+#[auto_config(WebConfigurator)]   // auto config web router
 async fn main() {
     App::new()
     .add_plugin(SqlxPlugin) // Add plug-in
@@ -54,13 +55,6 @@ async fn main() {
     .add_router(router()) // Configure web router
     .run()
     .await
-}
-
-fn router() -> Router {
-    Router::new()
-    .typed_route(hello_word) // Use typed_route method to directly register routes
-    .typed_route(hello)
-    .typed_route(sqlx_request_handler)
 }
 
 // The get macro specifies the Http Method and request path. 
