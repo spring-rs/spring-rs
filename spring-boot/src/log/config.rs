@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub(crate) struct LoggerConfig {
-    #[serde(default)]
+    #[serde(default = "default_true")]
     pub enable: bool,
 
     /// Enable nice display of backtraces, in development this should be on.
@@ -32,6 +32,7 @@ pub(crate) struct LoggerConfig {
     pub override_filter: Option<String>,
 
     /// Set this if you want to write log to file
+    #[serde(rename = "file")]
     pub file_appender: Option<LoggerFileAppender>,
 }
 

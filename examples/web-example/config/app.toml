@@ -15,5 +15,5 @@ min_connections = 10
 enable = true
 level = "info"
 
-[logger.file_appender]
+[logger.file]
 enable = true
