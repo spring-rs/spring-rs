@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-web = { version = "0.0.5" }
+spring-web = { version = "0.0.6" }
 ```
 
 ## 配置项

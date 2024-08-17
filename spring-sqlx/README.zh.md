@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-sqlx = { version = "0.0.5", features = ["mysql"] }
+spring-sqlx = { version = "0.0.6", features = ["mysql"] }
 ```
 
 可以替换`postgres`、`mysql`、`sqlite`feature来选择合适的数据库驱动。

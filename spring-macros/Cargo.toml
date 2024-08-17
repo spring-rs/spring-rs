@@ -17,6 +17,6 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 tokio = { workspace = true }
-spring-web = { path = "../spring-web", version = "0.0.5" }
-spring-job = { path = "../spring-job", version = "0.0.5" }
-spring-boot = { path = "../spring-boot", version = "0.0.5" }
+spring-web = { path = "../spring-web", version = "0.0.6" }
+spring-job = { path = "../spring-job", version = "0.0.6" }
+spring-boot = { path = "../spring-boot", version = "0.0.6" }
