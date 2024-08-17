@@ -27,6 +27,7 @@ author = "holmofy"
 github = "https://github.com/spring-rs/spring-rs"
 baidu_analytics = true
 ms_clarity_analytics = true
+is_netlify = true
 
 ## JSON-LD
 [extra.schema]

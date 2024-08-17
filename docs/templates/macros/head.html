@@ -11,9 +11,11 @@
 
 {% macro favicons() %}
   <meta name="theme-color" content="{{ config.extra.theme_color | default(value="#fff") }}">
+  <meta name="msapplication-TileColor" content="#2b5797">
   <link rel="apple-touch-icon" sizes="180x180" href="{{ get_url(path="apple-touch-icon.png") | safe }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ get_url(path="favicon-32x32.png") | safe }}">
   <link rel="icon" type="image/png" sizes="16x16" href="{{ get_url(path="favicon-16x16.png") | safe }}">
+  <link rel="mask-icon" href="{{ get_url(path="safari-pinned-tab.svg") | safe }}" color="#5bbad5">
   {% if not config.extra.is_netlify %}
     <link rel="manifest" href="{{ get_url(path="site.webmanifest") | safe }}" crossorigin>
   {% endif %}
