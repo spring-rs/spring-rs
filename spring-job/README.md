@@ -32,7 +32,7 @@ App implements the [JobConfigurator](https://docs.rs/spring-job/latest/spring_jo
 +}
 ```
 
-You can also use the `auto_config` macro to implement automatic configuration. This process macro will automatically register the scheduled tasks marked by the process macro into the app:
+You can also use the `auto_config` macro to implement automatic configuration. This process macro will automatically register the scheduled tasks marked by the Procedural Macro into the app:
 
 ```diff
 +#[auto_config(JobConfigurator)]
