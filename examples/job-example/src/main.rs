@@ -1,30 +1,23 @@
 use anyhow::Context;
-use spring::App;
+use spring::{auto_config, App};
 use spring::{cron, fix_delay, fix_rate};
-use spring_job::{extractor::Component, handler::TypedJob, JobConfigurator, JobPlugin, Jobs};
+use spring_job::{extractor::Component, JobConfigurator, JobPlugin};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };
 use std::time::{Duration, SystemTime};
 
+#[auto_config(JobConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(JobPlugin)
         .add_plugin(SqlxPlugin)
-        .add_jobs(jobs())
         .run()
         .await;
 
     tokio::time::sleep(Duration::from_secs(100)).await;
-}
-
-fn jobs() -> Jobs {
-    Jobs::new()
-        .typed_job(cron_job)
-        .typed_job(fix_delay_job)
-        .typed_job(fix_rate_job)
 }
 
 #[cron("1/10 * * * * *")]

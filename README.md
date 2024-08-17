@@ -21,8 +21,8 @@ use spring_web::{
     WebPlugin,
 };
 
-#[tokio::main]
 #[auto_config(WebConfigurator)]
+#[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(SqlxPlugin)
