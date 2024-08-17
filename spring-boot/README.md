@@ -35,8 +35,10 @@ impl Plugin for MyPlugin {
             Err(e) => println!("{:?}", e),
         }
     }
+}
 
-    /// Configuration item prefix
+/// Configuration item prefix
+impl Configurable for MyPlugin {
     fn config_prefix(&self) -> &str {
         "my-plugin"
     }
