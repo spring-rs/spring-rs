@@ -52,7 +52,6 @@ async fn main() {
     App::new()
     .add_plugin(SqlxPlugin) // Add plug-in
     .add_plugin(WebPlugin)
-    .add_router(router()) // Configure web router
     .run()
     .await
 }
