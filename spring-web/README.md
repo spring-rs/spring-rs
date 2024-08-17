@@ -61,7 +61,7 @@ App implements the [WebConfigurator](https://docs.rs/spring-web/latest/spring_we
 +}
 ```
 
-You can also use the `auto_config` macro to implement automatic configuration. This process macro will automatically register the routes marked by the process macro into the app:
+You can also use the `auto_config` macro to implement automatic configuration. This process macro will automatically register the routes marked by the Procedural Macro into the app:
 
 ```diff
 +#[auto_config(WebConfigurator)]
