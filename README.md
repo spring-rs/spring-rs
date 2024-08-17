@@ -1,6 +1,6 @@
-<div style="text-align:center">
-![Logo](docs/static/logo.svg)
-<h3>spring-rs is microservice framework written in rust</h3>
+<div align="center">
+    <img src="docs/static/logo.svg" alt="Logo"/>
+    <h3>spring-rs is microservice framework written in rust</h3>
 </div>
 
 <b>spring-rs</b> is a microservice framework written in rust, similar to springboot in java. <b>spring-rs</b> provides an easily extensible plug-in system for integrating excellent projects in the rust community, such as axum, sqlx, sea-orm, etc.
