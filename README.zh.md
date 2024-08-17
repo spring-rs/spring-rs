@@ -1,7 +1,7 @@
 <div align="center">
     <img src="docs/static/logo.svg" alt="Logo"/>
     <h3>spring-rs是rust编写的微服务框架</h3>
-    <div><a href="./README.md">English</a> ｜ 中文</div>
+    <p><a href="./README.md">English</a> ｜ 中文</p>
 </div>
 
 <b>spring-rs</b>是一个rust编写的微服务框架，类似于java生态的springboot。<b>spring-rs</b>提供了易于扩展的插件系统，用于整合rust社区的优秀项目，例如axum、sqlx、sea-orm等。
