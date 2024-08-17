@@ -18,13 +18,15 @@ pub trait Configurable {
 /// load toml config
 pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {
     let main_path = app.config_path.as_path();
-    let config_file = fs::read_to_string(main_path);
-    if let Err(e) = config_file {
-        log::warn!("Failed to read configuration file {:?}: {}", main_path, e);
-        return Ok(Table::new());
-    }
+    let config_file_content = fs::read_to_string(main_path);
+    let main_toml_str = match config_file_content {
+        Err(e) => {
+            log::warn!("Failed to read configuration file {:?}: {}", main_path, e);
+            return Ok(Table::new());
+        }
+        Ok(content) => content,
+    };
 
-    let main_toml_str = config_file.unwrap();
     let main_table = toml::from_str::<Table>(main_toml_str.as_str())
         .with_context(|| format!("Failed to parse the toml file at path {:?}", main_path))?;
 

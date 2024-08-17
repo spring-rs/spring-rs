@@ -56,8 +56,8 @@ impl Env {
 pub fn init() -> Result<Env> {
     match dotenvy::dotenv() {
         Ok(path) => log::debug!(
-            "Loaded the environment variable file under the path: \"{}\"",
-            path.to_str().unwrap()
+            "Loaded the environment variable file under the path: \"{:?}\"",
+            path
         ),
         Err(e) => log::debug!("Environment variable file not found: {}", e),
     }

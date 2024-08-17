@@ -65,8 +65,7 @@ impl Plugin for WebPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<WebConfig>(self)
-            .context(format!("web plugin config load failed"))
-            .unwrap();
+            .expect("web plugin config load failed");
 
         // 1. collect router
         let routers = app.get_component::<Routers>();

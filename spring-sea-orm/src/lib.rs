@@ -19,8 +19,7 @@ impl Plugin for SeaOrmPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<SeaOrmConfig>(self)
-            .context(format!("sea-orm plugin config load failed"))
-            .unwrap();
+            .expect("sea-orm plugin config load failed");
 
         let conn = Self::connect(&config)
             .await

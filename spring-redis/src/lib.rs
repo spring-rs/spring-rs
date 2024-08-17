@@ -20,8 +20,7 @@ impl Plugin for RedisPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<RedisConfig>(self)
-            .context(format!("redis plugin config load failed"))
-            .unwrap();
+            .expect("redis plugin config load failed");
 
         let connect: Redis = Self::connect(config).await.expect("redis connect failed");
         app.add_component(connect);

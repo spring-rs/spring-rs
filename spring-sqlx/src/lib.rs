@@ -22,8 +22,7 @@ impl Plugin for SqlxPlugin {
         sqlx::any::install_default_drivers();
         let config = app
             .get_config::<SqlxConfig>(self)
-            .context(format!("sqlx plugin config load failed"))
-            .unwrap();
+            .expect("sqlx plugin config load failed");
 
         let connect_pool = Self::connect(&config)
             .await

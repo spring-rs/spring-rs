@@ -1,13 +1,34 @@
+use std::fmt::Display;
+
 use schemars::JsonSchema;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub(crate) struct LoggerConfig {
     pub enable: bool,
+
+    /// Enable nice display of backtraces, in development this should be on.
+    /// Turn it off in performance sensitive production deployments.
+    #[serde(default)]
     pub pretty_backtrace: bool,
+
+    /// Set the logger level.
+    ///
+    /// * options: `trace` | `debug` | `info` | `warn` | `error`
     pub level: LogLevel,
+
+    /// Set the logger format.
+    ///
+    /// * options: `compact` | `pretty` | `json`
     pub format: Format,
+
+    /// Override our custom tracing filter.
+    ///
+    /// Set this to your own filter if you want to see traces from internal
+    /// libraries. See more [here](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/filter/struct.EnvFilter.html#directives)
     pub override_filter: Option<String>,
+
+    /// Set this if you want to write log to file
     pub file_appender: Option<LoggerFileAppender>,
 }
 
@@ -34,6 +55,23 @@ pub(crate) enum LogLevel {
     Error,
 }
 
+impl Display for LogLevel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Off => "off",
+                Self::Trace => "trace",
+                Self::Debug => "debug",
+                Self::Info => "debug",
+                Self::Warn => "warn",
+                Self::Error => "error",
+            }
+        )
+    }
+}
+
 #[derive(Debug, Default, Clone, JsonSchema, Deserialize)]
 pub(crate) enum Format {
     #[serde(rename = "compact")]
@@ -49,7 +87,6 @@ pub(crate) enum Format {
 pub(crate) struct LoggerFileAppender {
     pub enable: bool,
     pub non_blocking: bool,
-    pub level: LogLevel,
     pub format: Format,
     pub rotation: Rotation,
     #[serde(default = "default_dir")]
@@ -84,4 +121,15 @@ fn default_prefix() -> String {
 
 fn default_suffix() -> String {
     ".log".to_string()
+}
+
+impl Into<tracing_appender::rolling::Rotation> for Rotation {
+    fn into(self) -> tracing_appender::rolling::Rotation {
+        match self {
+            Self::Minutely => tracing_appender::rolling::Rotation::MINUTELY,
+            Self::Hourly => tracing_appender::rolling::Rotation::HOURLY,
+            Self::Daily => tracing_appender::rolling::Rotation::DAILY,
+            Self::Never => tracing_appender::rolling::Rotation::NEVER,
+        }
+    }
 }

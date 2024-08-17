@@ -21,10 +21,9 @@ impl Plugin for MailPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<MailerConfig>(self)
-            .context(format!("mail plugin config load failed"))
-            .unwrap();
+            .expect("mail plugin config load failed");
 
-        let mailer = Self::build_mailer(&config).unwrap();
+        let mailer = Self::build_mailer(&config).expect("build mail plugin failed");
 
         app.add_component(mailer);
     }

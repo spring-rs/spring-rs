@@ -1,10 +1,8 @@
 mod config;
 
-use std::sync::OnceLock;
-
 use crate::{app::AppBuilder, config::Configurable};
-use anyhow::Context;
-use config::{Format, LogLevel, LoggerConfig, Rotation};
+use config::{Format, LogLevel, LoggerConfig};
+use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_log::LogTracer;
 use tracing_subscriber::filter::EnvFilter;
@@ -25,19 +23,26 @@ impl Configurable for LogPlugin {
 
 impl LogPlugin {
     pub(crate) fn build(&self, app: &mut AppBuilder) {
-        LogTracer::init().context("init tracing_log faile").unwrap();
+        LogTracer::init().expect("init tracing_log faile");
 
         let registry = std::mem::take(&mut app.tracing_registry);
 
         let config = app
             .get_config::<LoggerConfig>(self)
-            .context("tracing plugin config load failed")
-            .unwrap();
+            .expect("tracing plugin config load failed");
 
-        let layers = build_logger_layers(config);
+        if config.pretty_backtrace {
+            std::env::set_var("RUST_BACKTRACE", "1");
+            log::warn!(
+                "pretty backtraces are enabled (this is great for development but has a runtime cost for production. disable with `logger.pretty_backtrace` in your config)"
+            );
+        }
+
+        let layers = build_logger_layers(&config);
 
         if !layers.is_empty() {
-            registry.with(layers).init();
+            let env_filter = init_env_filter(config.override_filter, &config.level);
+            registry.with(layers).with(env_filter).init();
         }
     }
 }
@@ -45,56 +50,39 @@ impl LogPlugin {
 // Keep nonblocking file appender work guard
 static NONBLOCKING_WORK_GUARD_KEEP: OnceLock<WorkerGuard> = OnceLock::new();
 
-fn build_logger_layers(config: LoggerConfig) -> Vec<Box<dyn Layer<Registry> + Sync + Send>> {
+fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + Sync + Send>> {
     let mut layers = Vec::new();
 
-    if let Some(file_appender_config) = config.file_appender.as_ref() {
-        if file_appender_config.enable {
-            let mut rolling_builder = tracing_appender::rolling::Builder::default()
-                .max_log_files(file_appender_config.max_log_files)
-                .filename_prefix(&file_appender_config.filename_prefix)
-                .filename_suffix(&file_appender_config.filename_suffix);
-
-            rolling_builder = match file_appender_config.rotation {
-                Rotation::Minutely => {
-                    rolling_builder.rotation(tracing_appender::rolling::Rotation::MINUTELY)
-                }
-                Rotation::Hourly => {
-                    rolling_builder.rotation(tracing_appender::rolling::Rotation::HOURLY)
-                }
-                Rotation::Daily => {
-                    rolling_builder.rotation(tracing_appender::rolling::Rotation::DAILY)
-                }
-                Rotation::Never => {
-                    rolling_builder.rotation(tracing_appender::rolling::Rotation::NEVER)
-                }
-            };
-
-            let file_appender = rolling_builder
-                .build(&file_appender_config.dir)
+    if let Some(file_config) = &config.file_appender {
+        if file_config.enable {
+            let file_appender = tracing_appender::rolling::Builder::default()
+                .max_log_files(file_config.max_log_files)
+                .filename_prefix(&file_config.filename_prefix)
+                .filename_suffix(&file_config.filename_suffix)
+                .rotation(file_config.rotation.clone().into())
+                .build(&file_config.dir)
                 .expect("logger file appender initialization failed");
 
-            let file_appender_layer = if file_appender_config.non_blocking {
+            let file_appender_layer = if file_config.non_blocking {
                 let (non_blocking_file_appender, work_guard) =
                     tracing_appender::non_blocking(file_appender);
                 NONBLOCKING_WORK_GUARD_KEEP.set(work_guard).unwrap();
-                init_fmt_layer(non_blocking_file_appender, &config.format, false)
+                build_fmt_layer(non_blocking_file_appender, &file_config.format, false)
             } else {
-                init_fmt_layer(file_appender, &config.format, false)
+                build_fmt_layer(file_appender, &file_config.format, false)
             };
             layers.push(file_appender_layer);
         }
     }
 
     if config.enable {
-        let stdout_layer = init_fmt_layer(std::io::stdout, &config.format, true);
-        layers.push(stdout_layer);
+        layers.push(build_fmt_layer(std::io::stdout, &config.format, true));
     }
 
     return layers;
 }
 
-fn init_fmt_layer<W2>(
+fn build_fmt_layer<W2>(
     make_writer: W2,
     format: &Format,
     ansi: bool,
@@ -121,6 +109,12 @@ where
     }
 }
 
-fn init_env_filter(override_filter: Option<&String>, level: &LogLevel) -> EnvFilter {
-    EnvFilter::try_from_default_env().context("").unwrap()
+fn init_env_filter(override_filter: Option<String>, level: &LogLevel) -> EnvFilter {
+    EnvFilter::try_from_default_env()
+        .or_else(|_| {
+            // user wanted a specific filter, don't care about our internal whitelist
+            // or, if no override give them the default whitelisted filter (most common)
+            EnvFilter::try_new(override_filter.unwrap_or(format!("{level}")))
+        })
+        .expect("logger initialization failed")
 }
