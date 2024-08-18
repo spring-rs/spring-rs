@@ -25,8 +25,8 @@ use spring_sqlx::{
     ConnectPool, SqlxPlugin
 };
 use spring_web::{
-    extractor::Path, handler::TypeRouter, response::IntoResponse, Router, WebConfigurator,
-    WebPlugin,
+    error::Result, extractor::Path, handler::TypeRouter, response::IntoResponse, Router, 
+    WebConfigurator, WebPlugin,
 };
 
 #[auto_config(WebConfigurator)]
