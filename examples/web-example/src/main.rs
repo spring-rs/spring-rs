@@ -15,8 +15,8 @@ async fn main() {
 #[routes]
 #[get("/")]
 #[get("/hello_world")]
-async fn hello_word() -> impl IntoResponse {
-    "hello word"
+async fn hello_world() -> impl IntoResponse {
+    "hello world"
 }
 
 #[route("/hello/:name", method = "GET", method = "POST")]

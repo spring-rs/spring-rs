@@ -58,8 +58,8 @@ async fn main() {
 
 // get宏指定Http Method和请求路径。spring-rs还提供了post、delete、patch等其他标准http method宏
 #[get("/")]
-async fn hello_word() -> impl IntoResponse {
-    "hello word"
+async fn hello_world() -> impl IntoResponse {
+    "hello world"
 }
 
 // 也可以使用route宏指定Http Method和请求路径。Path从HTTP请求中提取请求路径中的参数

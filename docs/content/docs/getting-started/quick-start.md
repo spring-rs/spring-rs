@@ -59,8 +59,8 @@ async fn main() {
 // The get macro specifies the Http Method and request path. 
 // spring-rs also provides other standard http method macros such as post, delete, patch, etc.
 #[get("/")]
-async fn hello_word() -> impl IntoResponse {
-    "hello word"
+async fn hello_world() -> impl IntoResponse {
+    "hello world"
 }
 
 // You can also use the route macro to specify the Http Method and request path. 
