@@ -19,15 +19,16 @@ Compared with SpringBoot in java, spring-rs has higher performance and lower mem
 ## Example
 
 ```rust
-use spring::{nest, route, routes, auto_config, App};
+use spring::{get, nest, route, routes, auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin
 };
 use spring_web::{
-    error::Result, extractor::Path, handler::TypeRouter, response::IntoResponse, Router, 
+    error::Result, extractor::{Path, Component}, handler::TypeRouter, response::IntoResponse, Router,
     WebConfigurator, WebPlugin,
 };
+use anyhow::Context;
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
