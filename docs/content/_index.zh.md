@@ -4,7 +4,7 @@ title = "spring-rs"
 
 # The homepage contents
 [extra]
-lead = 'spring-rs是rust编写的微服务框架，与java生态的spring-boot类似'
+lead = 'spring-rs是Rust编写的微服务框架，与java生态的spring-boot类似'
 url = "/zh/docs/getting-started/introduction/"
 url_button = "快速上手"
 repo_version = "GitHub v0.0.6"
@@ -31,7 +31,7 @@ content = '得益于出色的Rust语言，<b>spring-rs</b>拥有与c/c++媲美�
 
 [[extra.list]]
 title = "🛡️ 高安全性 🛡️"
-content = '相比C/C++，<b>spring-rs</b>使用的rust语言提供了内存安全和线程安全的能力'
+content = '相比C/C++，<b>spring-rs</b>使用的Rust语言提供了内存安全和线程安全的能力'
 
 [[extra.list]]
 title = "🔨 轻量级 🔨"

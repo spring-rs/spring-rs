@@ -55,5 +55,5 @@ url = "https://www.rust-lang.org/policies/code-of-conduct"
 weight = 20
 
 [languages.zh]
-description = "spring-rs是rust编写的微服务框架，与java生态的spring-boot类似"
+description = "spring-rs是Rust编写的微服务框架，与java生态的spring-boot类似"
 [languages.zh.translations]

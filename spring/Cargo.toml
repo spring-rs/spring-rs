@@ -1,6 +1,6 @@
 [package]
 name = "spring"
-description = "rust microservice framework"
+description = "Rust microservice framework"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

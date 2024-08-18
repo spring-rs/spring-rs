@@ -13,6 +13,6 @@ top = false
 +++
 
 ![lettre Repo stars](https://img.shields.io/github/stars/lettre/lettre) ![downloads](https://img.shields.io/crates/d/lettre.svg)
-Lettre is the most popular mail client in rust and supports asynchronous API. spring-mail mainly uses its tokio asynchronous API.
+Lettre is the most popular mail client in Rust and supports asynchronous API. spring-mail mainly uses its tokio asynchronous API.
 
 {{ include(path="../../spring-mail/README.md") }}

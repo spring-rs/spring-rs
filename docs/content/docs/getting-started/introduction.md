@@ -1,20 +1,20 @@
 +++
 title = "Introduction"
-description = "spring-rs is a microservice framework written in rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in rust community, such as axum, sqlx, sea-orm, etc."
+description = "spring-rs is a microservice framework written in Rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in Rust community, such as axum, sqlx, sea-orm, etc."
 draft = false
 weight = 2
 sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = 'spring-rs is a microservice framework written in rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in rust community, such as axum, sqlx, sea-orm, etc.'
+lead = 'spring-rs is a microservice framework written in Rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in Rust community, such as axum, sqlx, sea-orm, etc.'
 toc = true
 top = false
 +++
 
 ## Quick Start
 
-The premise of using spring-rs is that you are familiar with the basic syntax of rust and the usage of cargo dependency package management tool.
+The premise of using spring-rs is that you are familiar with the basic syntax of Rust and the usage of cargo dependency package management tool.
 
 If you already know these prerequisites, click this [Quick Start →](/docs/getting-started/quick-start/), which introduces how to quickly get started with **spring-rs**.
 

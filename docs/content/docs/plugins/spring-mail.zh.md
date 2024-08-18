@@ -14,7 +14,7 @@ top = false
 
 
 ![lettre Repo stars](https://img.shields.io/github/stars/lettre/lettre) ![downloads](https://img.shields.io/crates/d/lettre.svg)
-lettre是rust最流行的邮件客户端，并且支持异步API。spring-mail主要使用它的tokio异步API。
+lettre是Rust最流行的邮件客户端，并且支持异步API。spring-mail主要使用它的tokio异步API。
 
 
 {{ include(path="../../spring-mail/README.zh.md") }}
