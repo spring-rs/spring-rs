@@ -5,9 +5,8 @@ pub mod processor;
 use anyhow::Context;
 use config::StreamConfig;
 use processor::Processor;
-use sea_streamer::export::futures::stream;
 use sea_streamer::{
-    Buffer, Consumer as _, Message as _, Producer as _, SeaConsumer, SeaMessage, SeaProducer,
+    Consumer as _, Message as _, Producer as _, SeaConsumer, SeaProducer,
     SeaProducerOptions, SeaStreamer, StreamKey, Streamer as _, StreamerUri,
 };
 use spring_boot::async_trait;
