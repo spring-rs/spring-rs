@@ -1,0 +1,22 @@
+[package]
+name = "spring-stream"
+description = "rust microservice framework"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+spring-boot = { path = "../spring-boot" }
+sea-streamer = { workspace = true }
+serde = { workspace = true }
+schemars = { workspace = true }
+anyhow = { workspace = true }
+
+[features]
+default = ["sea-streamer/runtime-tokio", "sea-streamer/socket"]
+kafka = ["sea-streamer/kafka"]
+redis = ["sea-streamer/redis"]
+file = ["sea-streamer/file"]
+stdio = ["sea-streamer/stdio"]
