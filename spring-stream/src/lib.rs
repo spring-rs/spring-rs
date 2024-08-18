@@ -1,12 +1,16 @@
 mod config;
+mod handler;
+pub mod processor;
 
 use anyhow::Context;
-use spring_boot::async_trait;
 use config::StreamConfig;
+use processor::Processor;
+use sea_streamer::export::futures::stream;
 use sea_streamer::{
-    Consumer, Message, Producer, SeaMessage, SeaProducerOptions, SeaStreamer, StreamKey, Streamer,
-    StreamerUri,
+    Buffer, Consumer as _, Message as _, Producer as _, SeaConsumer, SeaMessage, SeaProducer,
+    SeaProducerOptions, SeaStreamer, StreamKey, Streamer as _, StreamerUri,
 };
+use spring_boot::async_trait;
 use spring_boot::config::Configurable;
 use spring_boot::error::Result;
 use spring_boot::{
@@ -14,6 +18,26 @@ use spring_boot::{
     plugin::Plugin,
 };
 use std::{str::FromStr, sync::Arc};
+
+pub trait StreamConfigurator {
+    fn add_stream_processor(&mut self, router: impl Processor) -> &mut Self;
+}
+
+impl StreamConfigurator for AppBuilder {
+    fn add_stream_processor(&mut self, router: impl Processor) -> &mut Self {
+        // if let Some(routers) = self.get_component::<Routers>() {
+        //     unsafe {
+        //         let raw_ptr = Arc::into_raw(routers);
+        //         let routers = &mut *(raw_ptr as *mut Vec<Router>);
+        //         routers.push(router);
+        //     }
+        //     self
+        // } else {
+        //     self.add_component(vec![router])
+        // }
+        self
+    }
+}
 
 #[derive(Configurable)]
 #[config_prefix = "stream"]
@@ -32,6 +56,31 @@ impl Plugin for StreamPlugin {
 
 impl StreamPlugin {
     async fn schedule(config: StreamConfig, app: Arc<App>) -> Result<String> {
+        let streamer = Streamer::new(config, app).await?;
+        let consumer = streamer.create_consumer(&[""]).await?;
+        let producer = streamer.create_producer("").await?;
+        // async fn process(msg: SeaMessage) -> String {
+        //     msg.message().as_str()
+        // }
+        loop {
+            let message = consumer.next().await.with_context(|| format!(""))?;
+            // let message = process(message).await?;
+            eprintln!("{:?}", message);
+            producer
+                .send(message.message())
+                .with_context(|| format!(""))?; // send is non-blocking
+        }
+    }
+}
+
+pub struct Streamer {
+    streamer: SeaStreamer,
+    config: StreamConfig,
+    app: Arc<App>,
+}
+
+impl Streamer {
+    async fn new(config: StreamConfig, app: Arc<App>) -> Result<Self> {
         let uri = StreamerUri::from_str(config.uri.as_str())
             .with_context(|| format!("parse stream server \"{}\" failed", config.uri))?;
 
@@ -39,33 +88,41 @@ impl StreamPlugin {
             .await
             .with_context(|| format!("connect stream server \"{}\" failed", config.uri))?;
 
-        let consumer_options = config.new_consumer_options(None, None);
-        let producer_options = SeaProducerOptions::default();
-        let consumer_options = config.fill_consumer_options(consumer_options);
-        let producer_options = config.fill_producer_options(producer_options);
-        let consumer_stream_key = "";
-        let consumer_stream_key = StreamKey::new(consumer_stream_key)
-            .with_context(|| format!("stream key \"{}\" is valid", consumer_stream_key))?;
-        let producer_stream_key = "";
-        let producer_stream_key = StreamKey::new(producer_stream_key)
-            .with_context(|| format!("stream key \"{}\" is valid", producer_stream_key))?;
+        Ok(Self {
+            streamer,
+            config,
+            app,
+        })
+    }
 
-        let consumer = streamer
-            .create_consumer(&[consumer_stream_key], consumer_options)
+    pub async fn create_consumer(&self, stream_keys: &[&'static str]) -> Result<SeaConsumer> {
+        let consumer_options = self.config.new_consumer_options(None, None);
+        let consumer_options = self.config.fill_consumer_options(consumer_options);
+        let mut consumer_stream_keys = Vec::with_capacity(stream_keys.len());
+        for key in stream_keys {
+            consumer_stream_keys.push(
+                StreamKey::new(*key)
+                    .with_context(|| format!("consumer stream key \"{}\" is valid", key))?,
+            );
+        }
+        Ok(self
+            .streamer
+            .create_consumer(&consumer_stream_keys, consumer_options)
             .await
-            .with_context(|| format!(""))?;
-        let producer = streamer
+            .with_context(|| format!(""))?)
+    }
+
+    pub async fn create_producer(&self, stream_key: &'static str) -> Result<SeaProducer> {
+        let producer_options = SeaProducerOptions::default();
+        let producer_options = self.config.fill_producer_options(producer_options);
+
+        let producer_stream_key = StreamKey::new(stream_key)
+            .with_context(|| format!("producer stream key \"{}\" is valid", stream_key))?;
+
+        Ok(self
+            .streamer
             .create_producer(producer_stream_key, producer_options)
             .await
-            .with_context(|| format!(""))?;
-
-        loop {
-            let message: SeaMessage = consumer.next().await.with_context(|| format!(""))?;
-            // let message = process(message).await?;
-            // eprintln!("{message}");
-            producer
-                .send(message.message())
-                .with_context(|| format!(""))?; // send is non-blocking
-        }
+            .with_context(|| format!(""))?)
     }
 }

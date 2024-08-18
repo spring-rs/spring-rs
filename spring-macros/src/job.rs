@@ -63,6 +63,7 @@ macro_rules! job_args_parse {
         )+
     };
 }
+
 #[rustfmt::skip]
 job_args_parse!(
     OneShot, LitInt, one_shot, u64, 
