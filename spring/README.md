@@ -1,5 +1,25 @@
 <b>spring-rs</b> is a microservice framework written in rust, similar to SpringBoot in java. <b>spring-rs</b> provides an easily extensible plug-in system for integrating excellent projects in the rust community, such as axum, sqlx, sea-orm, etc.
 
+## Example
+
+```rust
+use spring::{get, auto_config, App};
+use spring_web::{response::IntoResponse, WebConfigurator, WebPlugin};
+
+#[auto_config(WebConfigurator)]
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(WebPlugin)
+        .run()
+        .await
+}
+
+#[get("/")]
+async fn hello_world() -> impl IntoResponse {
+    "hello world"
+}
+```
 
 ## Supported plugins
 
