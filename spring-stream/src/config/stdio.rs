@@ -35,9 +35,9 @@ impl OptionsFiller for StdioOptions {
         // no ops
     }
 
-    fn default_consumer_mode(&self) -> Option<ConsumerMode> {
+    fn default_consumer_mode(&self) -> Option<&ConsumerMode> {
         match &self.consumer {
-            Some(consumer) => Some(consumer.mode),
+            Some(consumer) => Some(&consumer.mode),
             None => None,
         }
     }

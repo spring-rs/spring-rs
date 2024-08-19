@@ -10,6 +10,8 @@ use sea_streamer::{
 };
 use serde::Deserialize;
 
+use crate::consumer::ConsumerOpts;
+
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct StreamConfig {
     /// streamer uri
@@ -49,64 +51,38 @@ impl StreamConfig {
         connect_options
     }
 
-    pub fn new_consumer_options(
-        &self,
-        mode: Option<ConsumerMode>,
-        group_id: Option<String>,
-    ) -> SeaConsumerOptions {
+    pub fn new_consumer_options(&self, ConsumerOpts(opts): ConsumerOpts) -> SeaConsumerOptions {
+        let mode = opts.mode().ok();
+        let group = opts.consumer_group().ok();
         #[cfg(feature = "kafka")]
         if let Some(kafka) = &self.kafka {
-            return kafka.new_consumer_options(mode, group_id);
+            let mut consumer_options = kafka.new_consumer_options(mode, group);
+            consumer_options.set_kafka_consumer_options(|opts| kafka.fill_consumer_options(opts));
+            return consumer_options;
         }
         #[cfg(feature = "redis")]
         if let Some(redis) = &self.redis {
-            return redis.new_consumer_options(mode, group_id);
+            let mut consumer_options = redis.new_consumer_options(mode, group);
+            consumer_options.set_redis_consumer_options(|opts| redis.fill_consumer_options(opts));
+            return consumer_options;
         }
         #[cfg(feature = "stdio")]
         if let Some(stdio) = &self.stdio {
-            return stdio.new_consumer_options(mode, group_id);
+            let mut consumer_options = stdio.new_consumer_options(mode, group);
+            consumer_options.set_stdio_consumer_options(|opts| stdio.fill_consumer_options(opts));
+            return consumer_options;
         }
         #[cfg(feature = "file")]
         if let Some(file) = &self.file {
-            return file.new_consumer_options(mode, group_id);
+            let mut consumer_options = file.new_consumer_options(mode, group);
+            consumer_options.set_file_consumer_options(|opts| file.fill_consumer_options(opts));
+            return consumer_options;
         }
-        let mut consumer_options = match mode {
-            Some(mode) => SeaConsumerOptions::new(mode),
-            None => SeaConsumerOptions::default(),
-        };
-        if let Some(group_id) = group_id {
-            let _ = consumer_options.set_consumer_group(ConsumerGroup::new(group_id));
-        }
-        consumer_options
+        opts
     }
 
-    pub fn fill_consumer_options(
-        &self,
-        mut consumer_options: SeaConsumerOptions,
-    ) -> SeaConsumerOptions {
-        #[cfg(feature = "kafka")]
-        if let Some(kafka) = &self.kafka {
-            consumer_options.set_kafka_consumer_options(|opts| kafka.fill_consumer_options(opts))
-        }
-        #[cfg(feature = "redis")]
-        if let Some(redis) = &self.redis {
-            consumer_options.set_redis_consumer_options(|opts| redis.fill_consumer_options(opts))
-        }
-        #[cfg(feature = "stdio")]
-        if let Some(stdio) = &self.stdio {
-            consumer_options.set_stdio_consumer_options(|opts| stdio.fill_consumer_options(opts))
-        }
-        #[cfg(feature = "file")]
-        if let Some(file) = &self.file {
-            consumer_options.set_file_consumer_options(|opts| file.fill_consumer_options(opts))
-        }
-        consumer_options
-    }
-
-    pub fn fill_producer_options(
-        &self,
-        mut producer_options: SeaProducerOptions,
-    ) -> SeaProducerOptions {
+    pub fn new_producer_options(&self) -> SeaProducerOptions {
+        let mut producer_options = SeaProducerOptions::default();
         #[cfg(feature = "kafka")]
         if let Some(kafka) = &self.kafka {
             producer_options.set_kafka_producer_options(|opts| kafka.fill_producer_options(opts));
@@ -137,20 +113,24 @@ pub(crate) trait OptionsFiller {
 
     fn new_consumer_options(
         &self,
-        mode: Option<ConsumerMode>,
-        group_id: Option<String>,
+        mode: Option<&ConsumerMode>,
+        group_id: Option<&ConsumerGroup>,
     ) -> SeaConsumerOptions {
-        let mode = mode
-            .or_else(|| self.default_consumer_mode())
-            .unwrap_or_default();
-        let group_id = group_id.or_else(|| self.default_consumer_group_id());
+        let mode = match mode.or_else(|| self.default_consumer_mode()) {
+            Some(mode) => mode.to_owned(),
+            None => ConsumerMode::default(),
+        };
         let mut opts = SeaConsumerOptions::new(mode);
+        let group_id = match group_id {
+            Some(group) => Some(group.name().to_string()),
+            None => self.default_consumer_group_id(),
+        };
         if let Some(group_id) = group_id {
             let _ = opts.set_consumer_group(ConsumerGroup::new(group_id));
         }
         opts
     }
-    fn default_consumer_mode(&self) -> Option<ConsumerMode>;
+    fn default_consumer_mode(&self) -> Option<&ConsumerMode>;
     fn default_consumer_group_id(&self) -> Option<String>;
 }
 

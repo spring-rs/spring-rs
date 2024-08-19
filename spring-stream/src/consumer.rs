@@ -1,7 +1,7 @@
 use crate::handler::{BoxedHandler, Handler};
 use sea_streamer::{
     file::FileConsumerOptions, kafka::KafkaConsumerOptions, redis::RedisConsumerOptions,
-    stdio::StdioConsumerOptions, ConsumerMode,
+    stdio::StdioConsumerOptions, ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumerOptions,
 };
 
 #[derive(Default)]
@@ -21,74 +21,65 @@ impl Consumers {
 }
 
 pub struct Consumer {
-    opts: ConsumerOpts,
-    handler: BoxedHandler,
+    pub(crate) stream_keys: &'static [&'static str],
+    pub(crate) opts: ConsumerOpts,
+    pub(crate) handler: BoxedHandler,
 }
 
-#[derive(Default)]
-pub struct ConsumerOpts {
-    stream_keys: &'static [&'static str],
-    mode: Option<ConsumerMode>,
-    group_id: Option<String>,
-    kafka_consumer_options: Option<Box<dyn FnOnce(&mut KafkaConsumerOptions) + Send + Sync>>,
-    redis_consumer_options: Option<Box<dyn FnOnce(&mut RedisConsumerOptions) + Send + Sync>>,
-    stdio_consumer_options: Option<Box<dyn FnOnce(&mut StdioConsumerOptions) + Send + Sync>>,
-    file_consumer_options: Option<Box<dyn FnOnce(&mut FileConsumerOptions) + Send + Sync>>,
-}
+pub struct ConsumerOpts(pub(crate) SeaConsumerOptions);
 
 impl Consumer {
-    pub fn consume(stream_keys: &'static [&'static str]) -> ConsumerOpts {
-        ConsumerOpts {
-            stream_keys,
-            ..ConsumerOpts::default()
-        }
+    pub fn mode(mode: ConsumerMode) -> ConsumerOpts {
+        ConsumerOpts(SeaConsumerOptions::new(mode))
     }
 }
 
 impl ConsumerOpts {
-    pub fn mode(mut self, mode: ConsumerMode) -> Self {
-        self.mode = Some(mode);
-        self
-    }
     pub fn group_id(mut self, group_id: &'static str) -> Self {
-        self.group_id = Some(group_id.to_string());
+        self.0.set_consumer_group(ConsumerGroup::new(group_id));
         self
     }
-    pub fn kafka_consumer_options<F>(mut self, fill_opts: F) -> Self
+
+    pub fn kafka_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut KafkaConsumerOptions) + Send + Sync + 'static,
+        F: FnOnce(&mut KafkaConsumerOptions) -> () + Send + Sync + 'static,
     {
-        self.kafka_consumer_options = Some(Box::new(fill_opts));
+        self.0.set_kafka_consumer_options(func);
         self
     }
-    pub fn redis_consumer_options<F>(mut self, fill_opts: F) -> Self
+
+    pub fn redis_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut RedisConsumerOptions) + Send + Sync + 'static,
+        F: FnOnce(&mut RedisConsumerOptions) -> () + Send + Sync + 'static,
     {
-        self.redis_consumer_options = Some(Box::new(fill_opts));
+        self.0.set_redis_consumer_options(func);
         self
     }
-    pub fn stdio_consumer_options<F>(mut self, fill_opts: F) -> Self
+
+    pub fn stdio_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut StdioConsumerOptions) + Send + Sync + 'static,
+        F: FnOnce(&mut StdioConsumerOptions) -> () + Send + Sync + 'static,
     {
-        self.stdio_consumer_options = Some(Box::new(fill_opts));
+        self.0.set_stdio_consumer_options(func);
         self
     }
-    pub fn file_consumer_options<F>(mut self, fill_opts: F) -> Self
+
+    pub fn file_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut FileConsumerOptions) + Send + Sync + 'static,
+        F: FnOnce(&mut FileConsumerOptions) -> () + Send + Sync + 'static,
     {
-        self.file_consumer_options = Some(Box::new(fill_opts));
+        self.0.set_file_consumer_options(func);
         self
     }
-    pub fn run<H, A>(self, handler: H) -> Consumer
+
+    pub fn consume<H, A>(self, stream_keys: &'static [&'static str], handler: H) -> Consumer
     where
         H: Handler<A> + Sync,
         A: 'static,
     {
         Consumer {
             handler: BoxedHandler::from_handler(handler),
+            stream_keys,
             opts: self,
         }
     }
