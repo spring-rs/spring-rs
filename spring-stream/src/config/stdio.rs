@@ -27,9 +27,13 @@ impl OptionsFiller for StdioOptions {
         }
     }
 
-    fn fill_consumer_options(&self, _opts: &mut Self::ConsumerOptsType) {}
+    fn fill_consumer_options(&self, _opts: &mut Self::ConsumerOptsType) {
+        // no ops
+    }
 
-    fn fill_producer_options(&self, _opts: &mut Self::ProducerOptsType) {}
+    fn fill_producer_options(&self, _opts: &mut Self::ProducerOptsType) {
+        // no ops
+    }
 
     fn default_consumer_mode(&self) -> Option<ConsumerMode> {
         match &self.consumer {

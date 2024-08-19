@@ -1,13 +1,14 @@
 mod config;
+pub mod consumer;
 mod handler;
-pub mod processor;
 
 use anyhow::Context;
 use config::StreamConfig;
-use processor::Processor;
+use consumer::Consumers;
+pub use sea_streamer::ConsumerMode;
 use sea_streamer::{
-    Consumer as _, Message as _, Producer as _, SeaConsumer, SeaProducer,
-    SeaProducerOptions, SeaStreamer, StreamKey, Streamer as _, StreamerUri,
+    Consumer as _, Message as _, Producer as _, SeaConsumer, SeaProducer, SeaProducerOptions,
+    SeaStreamer, StreamKey, Streamer as _, StreamerUri,
 };
 use spring_boot::async_trait;
 use spring_boot::config::Configurable;
@@ -19,22 +20,21 @@ use spring_boot::{
 use std::{str::FromStr, sync::Arc};
 
 pub trait StreamConfigurator {
-    fn add_stream_processor(&mut self, router: impl Processor) -> &mut Self;
+    fn add_consumer(&mut self, consumers: Consumers) -> &mut Self;
 }
 
 impl StreamConfigurator for AppBuilder {
-    fn add_stream_processor(&mut self, router: impl Processor) -> &mut Self {
-        // if let Some(routers) = self.get_component::<Routers>() {
-        //     unsafe {
-        //         let raw_ptr = Arc::into_raw(routers);
-        //         let routers = &mut *(raw_ptr as *mut Vec<Router>);
-        //         routers.push(router);
-        //     }
-        //     self
-        // } else {
-        //     self.add_component(vec![router])
-        // }
-        self
+    fn add_consumer(&mut self, new_consumers: Consumers) -> &mut Self {
+        if let Some(consumers) = self.get_component::<Consumers>() {
+            unsafe {
+                let raw_ptr = Arc::into_raw(consumers);
+                let consumers = &mut *(raw_ptr as *mut Consumers);
+                consumers.merge(new_consumers);
+            }
+            self
+        } else {
+            self.add_component(new_consumers)
+        }
     }
 }
 
@@ -108,10 +108,14 @@ impl Streamer {
             .streamer
             .create_consumer(&consumer_stream_keys, consumer_options)
             .await
-            .with_context(|| format!(""))?)
+            .with_context(|| format!("create stream consumer failed: {:?}", stream_keys))?)
     }
 
-    pub async fn create_producer(&self, stream_key: &'static str) -> Result<SeaProducer> {
+    pub fn send() {
+        todo!()
+    }
+
+    async fn create_producer(&self, stream_key: &'static str) -> Result<SeaProducer> {
         let producer_options = SeaProducerOptions::default();
         let producer_options = self.config.fill_producer_options(producer_options);
 
@@ -122,6 +126,6 @@ impl Streamer {
             .streamer
             .create_producer(producer_stream_key, producer_options)
             .await
-            .with_context(|| format!(""))?)
+            .with_context(|| format!("create stream producer failed: {:?}", stream_key))?)
     }
 }
