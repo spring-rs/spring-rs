@@ -13,7 +13,7 @@ members = [
     "spring-mail",
     "examples/*",
 ]
-default-members = ["spring", "spring-*"]
+default-members = ["spring"]
 exclude = ["examples/*"]
 
 [workspace.package]
