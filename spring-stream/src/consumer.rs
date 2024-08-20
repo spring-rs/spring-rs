@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::handler::{BoxedHandler, Handler};
 use sea_streamer::{
     file::FileConsumerOptions, kafka::KafkaConsumerOptions, redis::RedisConsumerOptions,
@@ -20,12 +22,21 @@ impl Consumers {
     }
 }
 
+impl Deref for Consumers {
+    type Target = Vec<Consumer>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub struct Consumer {
     pub(crate) stream_keys: &'static [&'static str],
     pub(crate) opts: ConsumerOpts,
     pub(crate) handler: BoxedHandler,
 }
 
+#[derive(Clone)]
 pub struct ConsumerOpts(pub(crate) SeaConsumerOptions);
 
 impl Consumer {
@@ -36,7 +47,7 @@ impl Consumer {
 
 impl ConsumerOpts {
     pub fn group_id(mut self, group_id: &'static str) -> Self {
-        self.0.set_consumer_group(ConsumerGroup::new(group_id));
+        let _ = self.0.set_consumer_group(ConsumerGroup::new(group_id));
         self
     }
 

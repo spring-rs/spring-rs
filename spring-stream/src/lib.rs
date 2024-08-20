@@ -5,10 +5,10 @@ mod handler;
 use anyhow::Context;
 use config::StreamConfig;
 use consumer::{Consumer, ConsumerOpts, Consumers};
+use handler::BoxedHandler;
 pub use sea_streamer::ConsumerMode;
 use sea_streamer::{
-    Consumer as _, Message as _, Producer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey,
-    Streamer as _, StreamerUri,
+    Consumer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey, Streamer as _, StreamerUri,
 };
 use spring_boot::async_trait;
 use spring_boot::config::Configurable;
@@ -17,6 +17,7 @@ use spring_boot::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };
+use std::ops::Deref;
 use std::{str::FromStr, sync::Arc};
 
 pub trait StreamConfigurator {
@@ -49,27 +50,39 @@ impl Plugin for StreamPlugin {
             .get_config::<StreamConfig>(self)
             .expect("sea-streamer plugin config load failed");
 
-        app.add_scheduler(|app: Arc<App>| Box::new(Self::schedule(config, app)));
+        let streamer = Streamer::new(config).await.expect("create streamer failed");
+
+        if let Some(consumers) = app.get_component::<Consumers>() {
+            for Consumer {
+                stream_keys,
+                opts,
+                handler,
+            } in consumers.deref().iter()
+            {
+                let consumer = streamer
+                    .create_consumer(stream_keys, opts.clone())
+                    .await
+                    .expect("create stream consumer faile");
+                let handler = handler.clone();
+                app.add_scheduler(|app: Arc<App>| Box::new(Self::schedule(consumer, handler, app)));
+            }
+        } else {
+            tracing::info!("not consumer be registry");
+        }
+        app.add_component(streamer);
     }
-}
-async fn process() {
-    println!("ok");
 }
 
 impl StreamPlugin {
-    async fn schedule(config: StreamConfig, app: Arc<App>) -> Result<String> {
-        let streamer = Streamer::new(config, app).await?;
-        let c = Consumer::mode(ConsumerMode::RealTime).consume(&["key"], process);
-        let consumer = streamer.create_consumer(c.stream_keys, c.opts).await?;
-        let producer = streamer.create_producer("").await?;
-
+    async fn schedule(
+        consumer: SeaConsumer,
+        handler: BoxedHandler,
+        app: Arc<App>,
+    ) -> Result<String> {
         loop {
             let message = consumer.next().await.with_context(|| format!(""))?;
-            // c.handler.
+            // handler();
             eprintln!("{:?}", message);
-            producer
-                .send(message.message())
-                .with_context(|| format!(""))?; // send is non-blocking
         }
     }
 }
@@ -77,11 +90,10 @@ impl StreamPlugin {
 pub struct Streamer {
     streamer: SeaStreamer,
     config: StreamConfig,
-    app: Arc<App>,
 }
 
 impl Streamer {
-    async fn new(config: StreamConfig, app: Arc<App>) -> Result<Self> {
+    async fn new(config: StreamConfig) -> Result<Self> {
         let uri = StreamerUri::from_str(config.uri.as_str())
             .with_context(|| format!("parse stream server \"{}\" failed", config.uri))?;
 
@@ -89,11 +101,7 @@ impl Streamer {
             .await
             .with_context(|| format!("connect stream server \"{}\" failed", config.uri))?;
 
-        Ok(Self {
-            streamer,
-            config,
-            app,
-        })
+        Ok(Self { streamer, config })
     }
 
     pub async fn create_consumer(

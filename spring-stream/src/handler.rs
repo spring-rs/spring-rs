@@ -23,6 +23,7 @@ where
     }
 }
 
+#[derive(Clone)]
 pub struct BoxedHandler {}
 
 impl BoxedHandler {

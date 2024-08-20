@@ -13,6 +13,7 @@ sea-streamer = { workspace = true }
 serde = { workspace = true }
 schemars = { workspace = true }
 anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
 
 [features]
 default = ["sea-streamer/runtime-tokio", "sea-streamer/socket"]
