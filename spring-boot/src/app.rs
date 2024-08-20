@@ -41,11 +41,12 @@ pub struct AppBuilder {
 }
 
 impl App {
+    #[allow(clippy::new_ret_no_self)]
     pub fn new() -> AppBuilder {
         AppBuilder::default()
     }
 
-    ///
+    /// Get the component of the specified type
     pub fn get_component<T>(&self) -> Option<Arc<T>>
     where
         T: Any + Send + Sync,
@@ -105,15 +106,15 @@ impl AppBuilder {
             Some(toml::Value::Table(table)) => table.to_owned(),
             _ => Table::new(),
         };
-        return Ok(T::deserialize(table.to_owned()).with_context(|| {
+        Ok(T::deserialize(table.to_owned()).with_context(|| {
             format!(
                 "Failed to deserialize the configuration of prefix \"{}\"",
                 prefix
             )
-        })?);
+        })?)
     }
 
-    ///
+    /// Add component to the registry
     pub fn add_component<T>(&mut self, component: T) -> &mut Self
     where
         T: any::Any + Send + Sync,
@@ -129,7 +130,7 @@ impl AppBuilder {
         self
     }
 
-    ///
+    /// Get the component of the specified type
     pub fn get_component<T>(&self) -> Option<Arc<T>>
     where
         T: Any + Send + Sync,
@@ -140,7 +141,7 @@ impl AppBuilder {
         component_ref.downcast::<T>()
     }
 
-    ///
+    /// Add a scheduled task
     pub fn add_scheduler<T>(&mut self, scheduler: T) -> &mut Self
     where
         T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send> + 'static,

@@ -267,12 +267,12 @@ impl ToTokens for Route {
         let vis = &ast.vis;
 
         let registrations: TokenStream2 = args
-            .into_iter()
+            .iter()
             .map(|args| {
                 let Args { path, methods } = args;
 
                 let method_binder = methods
-                    .into_iter()
+                    .iter()
                     .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
 
                 quote! {

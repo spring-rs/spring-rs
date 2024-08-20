@@ -43,7 +43,7 @@ impl<T> DerefMut for Component<T> {
 #[async_trait]
 impl FromApp for JobId {
     async fn from_app(job_id: &JobId, _scheduler: &JobScheduler, _app: &App) -> Self {
-        job_id.clone()
+        *job_id
     }
 }
 

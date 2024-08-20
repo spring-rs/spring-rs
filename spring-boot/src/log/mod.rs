@@ -76,7 +76,7 @@ fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + S
         layers.push(build_fmt_layer(std::io::stdout, &config.format, true));
     }
 
-    return layers;
+    layers
 }
 
 fn build_fmt_layer<W2>(

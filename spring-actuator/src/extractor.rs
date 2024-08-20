@@ -1,11 +1,10 @@
-use std::{ops::Deref, sync::Arc};
-
 use spring_boot::async_trait;
 use spring_web::{
     extractor::FromRequestParts,
     http::{request::Parts, StatusCode},
     AppState,
 };
+use std::{ops::Deref, sync::Arc};
 
 pub(crate) struct App(Arc<spring_boot::app::App>);
 
@@ -22,6 +21,6 @@ impl Deref for App {
     type Target = spring_boot::app::App;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }

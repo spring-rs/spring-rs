@@ -72,7 +72,7 @@ impl Plugin for WebPlugin {
         let mut router: Router = match routers {
             Some(rs) => {
                 let mut router = Router::new();
-                for r in rs.deref().into_iter() {
+                for r in rs.deref().iter() {
                     router = router.merge(r.to_owned());
                 }
                 router
@@ -229,8 +229,12 @@ impl WebPlugin {
     fn build_body_limit_middleware(
         limit_payload: LimitPayloadMiddleware,
     ) -> Result<RequestBodyLimitLayer> {
-        let limit =
-            byte_unit::Byte::from_str(&limit_payload.body_limit).with_context(|| format!(""))?;
+        let limit = byte_unit::Byte::from_str(&limit_payload.body_limit).with_context(|| {
+            format!(
+                "parse limit payload str failed: {}",
+                &limit_payload.body_limit
+            )
+        })?;
 
         Ok(RequestBodyLimitLayer::new(limit.as_u64() as usize))
     }

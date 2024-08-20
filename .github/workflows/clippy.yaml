@@ -1,0 +1,22 @@
+name: Clippy Lint
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v3
+
+      - name: Install Rust stable with Clippy
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings

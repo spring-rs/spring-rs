@@ -1,6 +1,5 @@
-use anyhow::Context;
-
 use crate::error::{AppError, Result};
+use anyhow::Context;
 use std::{
     env,
     ffi::OsStr,
@@ -22,12 +21,12 @@ pub enum Env {
 impl Env {
     pub fn from_env() -> Self {
         match env::var("SPRING_ENV") {
-            Ok(var) => Self::from_str(var),
+            Ok(var) => Self::from_string(var),
             Err(_) => Self::Dev,
         }
     }
 
-    pub fn from_str(str: String) -> Self {
+    pub fn from_string(str: String) -> Self {
         match str {
             str if str.eq_ignore_ascii_case("dev") => Self::Dev,
             str if str.eq_ignore_ascii_case("test") => Self::Test,
