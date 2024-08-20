@@ -32,6 +32,11 @@ async fn read_file(Component(op): Component<Op>) -> impl IntoResponse {
     (StatusCode::OK, String::from_utf8(bf.to_vec()).unwrap())
 }
 
+#[get("/info")]
+async fn stat_file(Component(op): Component<Op>) -> impl IntoResponse {
+    (StatusCode::OK, format!("{:?}", op.info()))
+}
+
 #[post("/write")]
 async fn write_file(Component(op): Component<Op>) -> impl IntoResponse {
     match op.write(FILE_NAME, "Hello, World!").await {

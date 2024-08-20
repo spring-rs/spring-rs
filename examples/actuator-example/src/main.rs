@@ -1,5 +1,5 @@
-use spring_actuator::ActuatorPlugin;
 use spring::App;
+use spring_actuator::ActuatorPlugin;
 use spring_web::WebPlugin;
 
 #[tokio::main]

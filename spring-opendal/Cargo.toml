@@ -13,6 +13,14 @@ serde = "1.0"
 schemars = "0.8.21"
 anyhow = "1.0"
 
+[dependencies.prometheus]
+version = "0.13.4"
+optional = true
+
+[dependencies.prometheus-client]
+version = "0.22.3"
+optional = true
+
 [features]
 services-all = [
     "services-azblob",
@@ -127,3 +135,18 @@ services-tikv = ["opendal/services-tikv"]
 services-upyun = ["opendal/services-upyun"]
 services-vercel-artifacts = ["opendal/services-vercel-artifacts"]
 services-yandex-disk = ["opendal/services-yandex-disk"]
+
+# Batch layer provided by opendal.
+layers-chaos = ["opendal/layers-chaos"]
+layers-metrics = ["opendal/layers-metrics"]
+layers-mime-guess = ["opendal/layers-mime-guess"]
+layers-prometheus = ["opendal/layers-prometheus", "dep:prometheus"]
+layers-prometheus-client = ["opendal/layers-prometheus-client", "dep:prometheus-client"]
+layers-fastrace = ["opendal/layers-fastrace"]
+layers-tracing = ["opendal/layers-tracing"]
+layers-otel-trace = ["opendal/layers-otel-trace"]
+layers-throttle = ["opendal/layers-throttle"]
+layers-await-tree = ["opendal/layers-await-tree"]
+layers-async-backtrace = ["opendal/layers-async-backtrace"]
+layers-blocking = ["opendal/layers-blocking"]
+layers-dtrace = ["opendal/layers-dtrace"]

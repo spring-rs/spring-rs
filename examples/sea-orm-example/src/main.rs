@@ -1,6 +1,12 @@
 mod entities;
 
 use anyhow::Context;
+use entities::{
+    prelude::{TodoItem, TodoList},
+    todo_item, todo_list,
+};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait};
+use serde::Deserialize;
 use spring::App;
 use spring_sea_orm::{DbConn, SeaOrmPlugin};
 use spring_web::{
@@ -10,12 +16,6 @@ use spring_web::{
     response::{IntoResponse, Json},
     Router, WebConfigurator, WebPlugin,
 };
-use entities::{
-    prelude::{TodoItem, TodoList},
-    todo_item, todo_list,
-};
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait};
-use serde::Deserialize;
 
 #[tokio::main]
 async fn main() {

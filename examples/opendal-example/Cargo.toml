@@ -11,3 +11,4 @@ spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
 spring-opendal = { path = "../../spring-opendal", features = ["services-fs"] }
 tokio = { workspace = true, features = ["full", "tracing"] }
+serde_json = "1.0.125"
