@@ -9,7 +9,8 @@ use consumer::{Consumer, ConsumerOpts, Consumers};
 use handler::BoxedHandler;
 pub use sea_streamer::ConsumerMode;
 use sea_streamer::{
-    Consumer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey, Streamer as _, StreamerUri,
+    Buffer, Consumer as _, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer,
+    StreamKey, Streamer as _, StreamerUri,
 };
 use spring_boot::async_trait;
 use spring_boot::config::Configurable;
@@ -70,7 +71,13 @@ impl Plugin for StreamPlugin {
         } else {
             tracing::info!("not consumer be registry");
         }
+        let producer = streamer
+            .create_generic_producer()
+            .await
+            .expect("create producer failed");
+
         app.add_component(streamer);
+        app.add_component(producer);
     }
 }
 
@@ -124,20 +131,33 @@ impl Streamer {
             .with_context(|| format!("create stream consumer failed: {:?}", stream_keys))?)
     }
 
-    pub fn send() {
-        todo!()
-    }
-
-    async fn create_producer(&self, stream_key: &'static str) -> Result<SeaProducer> {
+    async fn create_generic_producer(&self) -> Result<Producer> {
         let producer_options = self.config.new_producer_options();
+        let producer = self
+            .streamer
+            .create_generic_producer(producer_options)
+            .await
+            .context("create stream generic producer failed")?;
+        Ok(Producer(producer))
+    }
+}
 
+pub struct Producer(SeaProducer);
+
+impl Producer {
+    pub async fn send_to<S: Buffer>(&self, stream_key: &str, payload: S) -> Result<MessageHeader> {
         let producer_stream_key = StreamKey::new(stream_key)
             .with_context(|| format!("producer stream key \"{}\" is valid", stream_key))?;
 
-        Ok(self
-            .streamer
-            .create_producer(producer_stream_key, producer_options)
+        let header = self
+            .0
+            .send_to(&producer_stream_key, payload)
+            .with_context(|| format!("send to stream key failed:{stream_key}"))?
             .await
-            .with_context(|| format!("create stream producer failed: {:?}", stream_key))?)
+            .with_context(|| {
+                format!("await response for sending stream key failed:{stream_key}")
+            })?;
+
+        Ok(header)
     }
 }
