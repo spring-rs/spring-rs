@@ -1,16 +1,6 @@
 name: Publish
 
 on:
-  push:
-    branches: ["master"]
-    paths:
-      - "*/src/*"
-      - "Cargo.toml"
-  pull_request:
-    branches: ["master"]
-    paths:
-      - "*/src/*"
-      - "Cargo.toml"
   workflow_dispatch:
     inputs:
       msg:
