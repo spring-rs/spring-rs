@@ -1,6 +1,7 @@
 mod config;
 pub mod consumer;
 mod handler;
+mod extractor;
 
 use anyhow::Context;
 use config::StreamConfig;
