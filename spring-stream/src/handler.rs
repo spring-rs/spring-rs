@@ -1,5 +1,7 @@
 use crate::extractor::FromMsg;
-use std::{future::Future, pin::Pin};
+use sea_streamer::SeaMessage;
+use spring_boot::app::App;
+use std::{future::Future, pin::Pin, sync::Arc};
 
 pub trait Handler<T>: Clone + Send + Sized + 'static {
     /// The type of future calling this handler returns.
@@ -85,5 +87,14 @@ impl BoxedHandler {
     {
         // TODO
         Self {}
+    }
+
+    pub(crate) fn call(
+        &self,
+        msg: SeaMessage,
+        app: Arc<App>,
+    ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
+        // TODO
+        todo!()
     }
 }

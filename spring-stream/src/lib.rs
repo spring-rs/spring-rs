@@ -1,7 +1,7 @@
 mod config;
 pub mod consumer;
-mod handler;
 mod extractor;
+mod handler;
 
 use anyhow::Context;
 use config::StreamConfig;
@@ -82,8 +82,7 @@ impl StreamPlugin {
     ) -> Result<String> {
         loop {
             let message = consumer.next().await.with_context(|| format!(""))?;
-            // handler();
-            eprintln!("{:?}", message);
+            handler.call(message, app.clone()).await;
         }
     }
 }
