@@ -1,4 +1,3 @@
-[workspace]
 [package]
 name = "spring-opendal"
 description = ""
@@ -61,8 +60,7 @@ services-all = [
     "services-vercel-artifacts",
     "services-mongodb",
     "services-gridfs",
-#    spring-sea-orm have conflict dep
-#    "services-sqlite",
+    "services-sqlite",
     "services-libsql",
     "services-alluxio",
     "services-b2",

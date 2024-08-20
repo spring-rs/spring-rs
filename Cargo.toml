@@ -12,9 +12,10 @@ members = [
     "spring-actuator",
     "spring-mail",
     "examples/*",
+    "spring-opendal"
 ]
-default-members = ["spring"]
-exclude = ["examples/*"]
+default-members = ["spring", "spring-*"]
+exclude = ["/examples"]
 
 [workspace.package]
 version = "0.0.6"
@@ -37,8 +38,8 @@ tower = "0.4.13"
 tower-http = "0.5.2"
 byte-unit = "5.1.4"
 axum = "0.7.5"
-sqlx = "0.7.4"
-sea-orm = "1.0"
+sqlx = "0.8"
+sea-orm = "1.1.0-rc.1"
 sea-streamer = "0.5.0"
 redis = "0.26.1"
 lettre = "0.11.7"
@@ -55,3 +56,10 @@ schemars = "0.8.21"
 dashmap = "6.0.1"
 uuid = "1"
 chrono = "0.4"
+
+# sea-orm and sqlx's [libsqlite3-sys](https://github.com/rusqlite/rusqlite/tree/master/libsqlite3-sys) version conflict with openDAL
+# this is should remove when the sqlx stable version release
+[patch.crates-io]
+sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "6f2905695b9606b5f51b40ce10af63ac9e696bb8" }
+[patch.rsproxy]
+sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "6f2905695b9606b5f51b40ce10af63ac9e696bb8" }
