@@ -124,4 +124,6 @@ async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String
 }
 ```
 
+axum也提供了其他的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)，这些都被reexport到了[`spring_web::extractor`](https://docs.rs/spring-web/latest/spring_web/extractor/index.html)下。
+
 完整代码参考[`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)
