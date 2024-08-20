@@ -9,6 +9,8 @@ use spring_boot::app::AppBuilder;
 use spring_boot::async_trait;
 use spring_boot::plugin::Plugin;
 
+pub type Op = opendal::Operator;
+
 #[derive(Configurable)]
 #[config_prefix = "opendal"]
 pub struct OpenDALPlugin;
