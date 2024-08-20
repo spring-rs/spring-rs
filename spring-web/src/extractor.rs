@@ -9,6 +9,7 @@ use crate::AppState;
 
 pub use axum::extract::*;
 
+/// Extract the components registered by the plugin from AppState
 pub struct Component<T>(pub T);
 
 #[async_trait]
