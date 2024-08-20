@@ -7,8 +7,8 @@ license = "MIT"
 authors = ["Lemon"]
 
 [dependencies]
+opendal = { workspace = true }
 spring-boot = { path = "../spring-boot", version = "0.0.6" }
-opendal = { version = "0.49.1", default-features = true }
 serde = "1.0"
 schemars = "0.8.21"
 anyhow = "1.0"
@@ -60,7 +60,8 @@ services-all = [
     "services-vercel-artifacts",
     "services-mongodb",
     "services-gridfs",
-    "services-sqlite",
+    # sea-orm and sqlx's [libsqlite3-sys](https://github.com/rusqlite/rusqlite/tree/master/libsqlite3-sys) version conflict with openDAL
+    #    "services-sqlite",
     "services-libsql",
     "services-alluxio",
     "services-b2",
@@ -119,7 +120,7 @@ services-rocksdb = ["opendal/services-rocksdb"]
 services-seafile = ["opendal/services-seafile"]
 services-sftp = ["opendal/services-sftp"]
 services-sled = ["opendal/services-sled"]
-services-sqlite = ["opendal/services-sqlite"]
+#services-sqlite = ["opendal/services-sqlite"]
 services-supabase = ["opendal/services-supabase"]
 services-swift = ["opendal/services-swift"]
 services-tikv = ["opendal/services-tikv"]

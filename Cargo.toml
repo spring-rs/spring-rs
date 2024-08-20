@@ -56,10 +56,4 @@ schemars = "0.8.21"
 dashmap = "6.0.1"
 uuid = "1"
 chrono = "0.4"
-
-# sea-orm and sqlx's [libsqlite3-sys](https://github.com/rusqlite/rusqlite/tree/master/libsqlite3-sys) version conflict with openDAL
-# this is should remove when the sqlx stable version release
-[patch.crates-io]
-sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "6f2905695b9606b5f51b40ce10af63ac9e696bb8" }
-[patch.rsproxy]
-sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "6f2905695b9606b5f51b40ce10af63ac9e696bb8" }
+opendal = "0.49"
