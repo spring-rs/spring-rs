@@ -139,6 +139,7 @@ fn default_true() -> bool {
     true
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<tracing_appender::rolling::Rotation> for Rotation {
     fn into(self) -> tracing_appender::rolling::Rotation {
         match self {

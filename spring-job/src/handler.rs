@@ -1,12 +1,12 @@
+use crate::JobScheduler;
 use crate::{extractor::FromApp, JobId, Jobs};
+pub use inventory::submit;
 use spring_boot::app::App;
 use std::pin::Pin;
 use std::{
     future::Future,
     sync::{Arc, Mutex},
 };
-use crate::JobScheduler;
-pub use inventory::submit;
 
 pub trait Handler<T>: Clone + Send + Sized + 'static {
     /// The type of future calling this handler returns.
@@ -126,10 +126,12 @@ pub(crate) trait ErasedHandler: Send {
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
 
+type SchedulerCaller<H> =
+    fn(H, JobId, JobScheduler, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>;
+
 pub(crate) struct MakeErasedHandler<H> {
     pub(crate) handler: H,
-    pub(crate) caller:
-        fn(H, JobId, JobScheduler, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>,
+    pub(crate) caller: SchedulerCaller<H>,
 }
 
 impl<H> Clone for MakeErasedHandler<H>

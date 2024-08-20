@@ -13,7 +13,7 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
         }
     };
 
-    Ok(output.into())
+    Ok(output)
 }
 
 fn get_prefix(input: &syn::DeriveInput) -> syn::Result<syn::LitStr> {
