@@ -5,10 +5,12 @@ on:
     branches: ["master"]
     paths:
       - "docs/**"
+      - "*.md"
   pull_request:
     branches: ["master"]
     paths:
       - "docs/**"
+      - "*.md"
   workflow_dispatch:
     inputs:
       msg:
