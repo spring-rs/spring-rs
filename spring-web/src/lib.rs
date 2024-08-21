@@ -2,17 +2,14 @@ pub mod config;
 pub mod error;
 pub mod extractor;
 pub mod handler;
-pub use axum::http;
-pub use axum::response;
-pub use axum::routing;
-pub use axum::routing::method_routing::*;
+pub use axum;
+pub use spring_boot::async_trait;
 
 use anyhow::Context;
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 use spring_boot::config::Configurable;
 use spring_boot::{
     app::{App, AppBuilder},
-    async_trait,
     error::Result,
     plugin::Plugin,
 };

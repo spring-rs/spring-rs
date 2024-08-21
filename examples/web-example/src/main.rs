@@ -1,6 +1,16 @@
-use spring::{auto_config, nest, route, routes, App};
+mod jwt;
+use anyhow::Context;
+use axum::http::StatusCode;
+use jwt::Claims;
+use serde::Deserialize;
+use spring::{auto_config, nest, post, route, routes, App};
 use spring_sqlx::SqlxPlugin;
-use spring_web::{extractor::Path, response::IntoResponse, WebConfigurator, WebPlugin};
+use spring_web::{
+    axum::response::IntoResponse,
+    error::Result,
+    extractor::{Json, Path},
+    WebConfigurator, WebPlugin,
+};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -22,6 +32,33 @@ async fn hello_world() -> impl IntoResponse {
 #[route("/hello/:name", method = "GET", method = "POST")]
 async fn hello(Path(name): Path<String>) -> impl IntoResponse {
     format!("hello {name}")
+}
+
+#[derive(Deserialize)]
+struct LoginCredentials {
+    username: String,
+    password: String,
+}
+
+#[post("/login")]
+async fn login(Json(credentials): Json<LoginCredentials>) -> Result<impl IntoResponse> {
+    let LoginCredentials { username, password } = credentials;
+    if username == "root" && password == "admin" {
+        let mock_user_id = 1000;
+        let jwt_token = jwt::encode(Claims::new(mock_user_id)).context("jwt encode failed")?;
+        Ok((StatusCode::OK, jwt_token))
+    } else {
+        Ok((
+            StatusCode::BAD_REQUEST,
+            format!("{username} login failed: username or password are incorrect"),
+        ))
+    }
+}
+
+#[post("/user-info")]
+async fn protected_user_info(claims: Claims) -> impl IntoResponse {
+    let user_id = claims.uid;
+    format!("get user info of id#{user_id}")
 }
 
 #[nest("/sql")]

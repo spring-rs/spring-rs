@@ -5,9 +5,9 @@ use spring_boot::async_trait;
 use spring_boot::config::Configurable;
 use spring_boot::{app::AppBuilder, plugin::Plugin};
 use spring_web::{
+    axum::response::{IntoResponse, Json},
+    axum::routing::get,
     extractor::Component,
-    get,
-    response::{IntoResponse, Json},
     Router, Routers, WebConfigurator,
 };
 

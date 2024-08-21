@@ -1,35 +1,30 @@
 use anyhow::Context;
-use spring::App;
+use spring::{auto_config, get, post, App};
 use spring_redis::{redis::AsyncCommands, Redis, RedisPlugin};
 use spring_web::{
+    axum::response::{IntoResponse, Json},
     error::Result,
     extractor::{Component, Path},
-    get,
-    response::{IntoResponse, Json},
-    Router, WebConfigurator, WebPlugin,
+    WebConfigurator, WebPlugin,
 };
 
+#[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(RedisPlugin)
         .add_plugin(WebPlugin)
-        .add_router(router())
         .run()
         .await
 }
 
-fn router() -> Router {
-    Router::new()
-        .route("/", get(list_redis_key))
-        .route("/:key", get(get_content).post(set_content))
-}
-
+#[get("/")]
 async fn list_redis_key(Component(mut redis): Component<Redis>) -> Result<impl IntoResponse> {
     let keys: Vec<String> = redis.keys("*").await.context("redis request failed")?;
     Ok(Json(keys))
 }
 
+#[get("/:key")]
 async fn get_content(
     Component(mut redis): Component<Redis>,
     Path(key): Path<String>,
@@ -38,6 +33,7 @@ async fn get_content(
     Ok(v)
 }
 
+#[post("/:key")]
 async fn set_content(
     Component(mut redis): Component<Redis>,
     Path(key): Path<String>,
