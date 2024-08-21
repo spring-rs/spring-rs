@@ -1,1 +1,1 @@
-* [opendal](#)
+* [opendal](#doc-url): intro to opendal plugin
