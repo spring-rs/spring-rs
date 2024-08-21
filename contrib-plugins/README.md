@@ -8,7 +8,7 @@ spring-rs, providing native support for all types of storage systems, including 
 services, file storage services, and many more.
 
 For specific examples, please refer to
-the [with-spring-web](spring-opendal/examples/with-spring-web) project.
+the [with-spring-web](https://github.com/spring-rs/spring-rs/tree/master/contrib-plugins/spring-opendal/examples/with-spring-web) project.
 
 - Run the example
 
