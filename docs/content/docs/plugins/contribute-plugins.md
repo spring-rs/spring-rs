@@ -1,5 +1,5 @@
 +++
-title = "Plugins contributed by the community"
+title = "Community contributed plugins"
 description = "Plugins contributed by the community"
 draft = false
 weight = 20

@@ -1,1 +1,1 @@
-* [opendal](#doc-url): 简单的介绍一下opendal插件
+* [opendal](#doc-url): 简单的介绍一下插件
