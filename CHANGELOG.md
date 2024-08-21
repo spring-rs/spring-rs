@@ -2,6 +2,8 @@
 
 ## 0.0.7 - 2024.8.21
 
+[#19](https://github.com/spring-rs/spring-rs/pull/19)
+
 * spring-web add KnownWebError
 * jwt login example
 
