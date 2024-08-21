@@ -12,10 +12,9 @@ members = [
     "spring-actuator",
     "spring-mail",
     "examples/*",
-    "spring-opendal"
 ]
 default-members = ["spring", "spring-*"]
-exclude = ["/examples"]
+exclude = ["examples/**"]
 
 [workspace.package]
 version = "0.0.7"
@@ -56,4 +55,3 @@ schemars = "0.8.21"
 dashmap = "6.0.1"
 uuid = "1"
 chrono = "0.4"
-opendal = "0.49"

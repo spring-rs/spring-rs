@@ -1,14 +1,14 @@
 use spring::{auto_config, get, post, App};
 use spring_opendal::{Op, OpenDALPlugin};
 use spring_web::extractor::Component;
-use spring_web::http::StatusCode;
-use spring_web::response::IntoResponse;
+use spring_web::{axum::http::StatusCode, axum::response::IntoResponse};
 use spring_web::{WebConfigurator, WebPlugin};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
+        .config_file("./examples/with-spring-web/app.toml")
         .add_plugin(WebPlugin)
         .add_plugin(OpenDALPlugin)
         .run()

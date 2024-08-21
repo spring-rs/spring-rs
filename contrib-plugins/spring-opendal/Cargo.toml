@@ -1,22 +1,23 @@
+[workspace]
+
 [package]
 name = "spring-opendal"
-description = ""
+description = "OpenDAL plugin for spring-rs"
 version = "0.0.1"
 edition = "2021"
 license = "MIT"
 authors = ["Lemon"]
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.7" }
+spring-boot = { path = "../../spring-boot", version = "0.0.7" }
 schemars = "0.8.21"
 serde = "1.0"
 anyhow = "1.0"
-
-opendal = { workspace = true }
-log = { workspace = true }
+opendal = "0.49"
+log = "0.4"
 
 # Optional dependencies.
-tokio = { workspace = true, optional = true, features = ["full"] }
+tokio = { version = "1.38", optional = true }
 once_cell = "1.19.0"
 
 [dependencies.prometheus]
@@ -169,3 +170,11 @@ required-features = ["services-memory", "layers-blocking", "test-layers"]
 
 [dev-dependencies]
 test-log = "*"
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+serde_json = "1.0.125"
+tokio = "1.38"
+
+[[example]]
+name = "with-spring-web"
+required-features = ["services-fs"]
