@@ -14,7 +14,7 @@ members = [
     "examples/*",
 ]
 default-members = ["spring", "spring-*"]
-exclude = ["examples/*"]
+exclude = ["/examples"]
 
 [workspace.package]
 version = "0.0.7"
