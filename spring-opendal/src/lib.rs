@@ -1,4 +1,4 @@
-mod config;
+pub mod config;
 
 use crate::config::*;
 use anyhow::Result;
@@ -41,6 +41,7 @@ impl OpenDALPlugin {
 
         if let Some(layers) = config.layers {
             for layer in layers {
+                log::debug!("layer-{} enable", layer);
                 match layer {
                     #[cfg(feature = "layers-chaos")]
                     Layers::Chaos { error_ratio } => {
@@ -110,7 +111,19 @@ impl OpenDALPlugin {
                     }
                     #[cfg(feature = "layers-blocking")]
                     Layers::Blocking => {
-                        op = op.layer(opendal::layers::BlockingLayer::create()?);
+                        if !cfg!(feature = "test-layers") && op.info().native_capability().blocking {
+                            log::warn!("Blocking layer is not necessary for this operator");
+                            continue;
+                        }
+                        match tokio::runtime::Handle::try_current() {
+                            Ok(handle) => {
+                                let _guard = handle.enter();
+                                op = op.layer(opendal::layers::BlockingLayer::create()?);
+                            }
+                            Err(e) => {
+                                log::error!("{}", e);
+                            }
+                        }
                     }
                     #[cfg(all(target_os = "linux", feature = "layers-dtrace"))]
                     Layers::Dtrace => {
@@ -118,7 +131,7 @@ impl OpenDALPlugin {
                     }
                     #[allow(unreachable_patterns)]
                     _ => {
-                        panic!("Maybe you forgotten to enable the feature!");
+                        panic!("Maybe you forgotten to enable the [services-{}] feature!", layer);
                     }
                 }
             }

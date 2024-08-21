@@ -1,6 +1,7 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct OpenDALConfig {
@@ -35,4 +36,25 @@ pub enum Layers {
     AsyncBacktrace,
     Blocking,
     Dtrace,
+}
+
+impl Display for Layers {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let lf = match self {
+            Layers::Chaos { .. } => "chaos",
+            Layers::Metrics => "metrics",
+            Layers::MimeGuess => "mimeGuess",
+            Layers::Prometheus { .. } => "prometheus",
+            Layers::PrometheusClient => "prometheus-client",
+            Layers::Fastrace => "fastrace",
+            Layers::Tracing => "tracing",
+            Layers::OtelTrace => "otel-trace",
+            Layers::Throttle { .. } => "throttle",
+            Layers::AwaitTree => "awaitTree",
+            Layers::AsyncBacktrace => "async-backtrace",
+            Layers::Blocking => "blocking",
+            Layers::Dtrace => "dtrace",
+        };
+        write!(f, "{}", lf)
+    }
 }

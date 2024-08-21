@@ -7,11 +7,17 @@ license = "MIT"
 authors = ["Lemon"]
 
 [dependencies]
-opendal = { workspace = true }
 spring-boot = { path = "../spring-boot", version = "0.0.6" }
-serde = "1.0"
 schemars = "0.8.21"
+serde = "1.0"
 anyhow = "1.0"
+
+opendal = { workspace = true }
+log = { workspace = true }
+
+# Optional dependencies.
+tokio = { workspace = true, optional = true, features = ["full"] }
+once_cell = "1.19.0"
 
 [dependencies.prometheus]
 version = "0.13.4"
@@ -69,6 +75,7 @@ services-all = [
     "services-mongodb",
     "services-gridfs",
     # sea-orm and sqlx's [libsqlite3-sys](https://github.com/rusqlite/rusqlite/tree/master/libsqlite3-sys) version conflict with openDAL
+    # FIXME: reenable it when the sea-orm 1.1.0 release
     #    "services-sqlite",
     "services-libsql",
     "services-alluxio",
@@ -148,5 +155,17 @@ layers-otel-trace = ["opendal/layers-otel-trace"]
 layers-throttle = ["opendal/layers-throttle"]
 layers-await-tree = ["opendal/layers-await-tree"]
 layers-async-backtrace = ["opendal/layers-async-backtrace"]
-layers-blocking = ["opendal/layers-blocking"]
+layers-blocking = ["opendal/layers-blocking", "dep:tokio"]
 layers-dtrace = ["opendal/layers-dtrace"]
+
+# This is flag for testing, you should never use it in production.
+test-layers = []
+
+[[test]]
+# cargo test --test blocking --features="services-memory layers-blocking test-layers" -- --nocapture
+name = "blocking"
+path = "tests/layers/blocking.rs"
+required-features = ["services-memory", "layers-blocking", "test-layers"]
+
+[dev-dependencies]
+test-log = "*"
