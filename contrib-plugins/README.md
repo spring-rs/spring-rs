@@ -1,0 +1,1 @@
+* [opendal](#doc-url): intro to opendal plugin

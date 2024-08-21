@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-macros = { path = "../spring-macros", version = "0.0.6" }
+spring-macros = { path = "../spring-macros", version = "0.0.7" }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }

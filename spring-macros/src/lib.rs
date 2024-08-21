@@ -14,7 +14,7 @@
 //! See docs for: [GET], [POST], [PATCH], [PUT], [DELETE], [HEAD], [CONNECT], [OPTIONS], [TRACE]
 //!
 //! ```
-//! # use spring_web::response::IntoResponse;
+//! # use spring_web::axum::response::IntoResponse;
 //! # use spring_macros::get;
 //! #[get("/test")]
 //! async fn get_handler() -> impl IntoResponse {
@@ -27,7 +27,7 @@
 //! it should respond to. See [macro@route] macro docs.
 //!
 //! ```
-//! # use spring_web::response::IntoResponse;
+//! # use spring_web::axum::response::IntoResponse;
 //! # use spring_macros::route;
 //! #[route("/test", method = "GET", method = "HEAD")]
 //! async fn get_and_head_handler() -> impl IntoResponse {
@@ -40,7 +40,7 @@
 //! delegates those to the macros for the individual methods. See [macro@routes] macro docs.
 //!
 //! ```
-//! # use spring_web::response::IntoResponse;
+//! # use spring_web::axum::response::IntoResponse;
 //! # use spring_macros::routes;
 //! #[routes]
 //! #[get("/test")]
@@ -74,7 +74,7 @@ use syn::DeriveInput;
 ///
 /// # Examples
 /// ```
-/// # use spring_web::response::IntoResponse;
+/// # use spring_web::axum::response::IntoResponse;
 /// # use spring_macros::route;
 /// #[route("/test", method = "GET", method = "HEAD")]
 /// async fn example() -> impl IntoResponse {
@@ -104,7 +104,7 @@ pub fn route(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// # Examples
 /// ```
-/// # use spring_web::response::IntoResponse;
+/// # use spring_web::axum::response::IntoResponse;
 /// # use spring_macros::routes;
 /// #[routes]
 /// #[get("/test")]
@@ -132,7 +132,7 @@ macro_rules! method_macro {
         ///
         /// # Examples
         /// ```
-        /// # use spring_web::response::IntoResponse;
+        /// # use spring_web::axum::response::IntoResponse;
         #[doc = concat!("# use spring_macros::", stringify!($method), ";")]
         #[doc = concat!("#[", stringify!($method), r#"("/")]"#)]
         /// async fn example() -> impl IntoResponse {
@@ -175,7 +175,7 @@ method_macro!(Patch, patch);
 ///
 /// ```
 /// # use spring_macros::{nest, get};
-/// # use spring_web::response::IntoResponse;
+/// # use spring_web::axum::response::IntoResponse;
 /// #[nest("/api")]
 /// mod api {
 ///     # use super::*;
@@ -213,7 +213,7 @@ macro_rules! job_macro {
         ///
         /// # Examples
         /// ```
-        /// # use spring_web::response::IntoResponse;
+        /// # use spring_web::axum::response::IntoResponse;
         #[doc = concat!("# use spring_macros::", stringify!($job_type), ";")]
         #[doc = concat!("#[", stringify!($job_type), "(", stringify!($example), ")]")]
         /// async fn example() {

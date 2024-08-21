@@ -1,28 +1,24 @@
 use anyhow::Context;
-use spring::App;
+use spring::{auto_config, get, App};
 use spring_mail::{header::ContentType, AsyncTransport, MailPlugin, Mailer, Message};
 use spring_web::{
+    axum::response::{IntoResponse, Json},
     error::Result,
     extractor::Component,
-    get,
-    response::{IntoResponse, Json},
-    Router, WebConfigurator, WebPlugin,
+    WebConfigurator, WebPlugin,
 };
 
+#[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(MailPlugin)
         .add_plugin(WebPlugin)
-        .add_router(router())
         .run()
         .await
 }
 
-fn router() -> Router {
-    Router::new().route("/send", get(send_mail))
-}
-
+#[get("/send")]
 async fn send_mail(Component(mailer): Component<Mailer>) -> Result<impl IntoResponse> {
     let email = Message::builder()
         .from("NoBody <nobody@domain.tld>".parse().unwrap())
