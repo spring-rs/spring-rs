@@ -7,7 +7,7 @@ license = "MIT"
 authors = ["Lemon"]
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.6" }
+spring-boot = { path = "../spring-boot", version = "0.0.7" }
 schemars = "0.8.21"
 serde = "1.0"
 anyhow = "1.0"
