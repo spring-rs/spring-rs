@@ -1,7 +1,7 @@
 use axum_extra::headers::authorization::Bearer;
 use axum_extra::headers::Authorization;
 use axum_extra::TypedHeader;
-use jsonwebtoken::{errors::Result, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -12,6 +12,7 @@ use spring_web::axum::response::IntoResponse;
 use spring_web::axum::response::Response;
 use spring_web::axum::Json;
 use spring_web::axum::RequestPartsExt;
+use spring_web::error::WebError;
 use spring_web::extractor::FromRequestParts;
 
 lazy_static! {
@@ -57,14 +58,14 @@ where
             .await
             .map_err(|_| AuthError::InvalidToken)?;
         // Decode the user data
-        let claims = decode(bearer.token()).map_err(|_| AuthError::InvalidToken)?;
+        let claims = decode(bearer.token())?;
 
         Ok(claims)
     }
 }
 
 #[derive(Debug)]
-enum AuthError {
+pub enum AuthError {
     WrongCredentials,
     MissingCredentials,
     TokenCreation,
@@ -86,15 +87,23 @@ impl IntoResponse for AuthError {
     }
 }
 
+impl Into<WebError> for AuthError {
+    fn into(self) -> WebError {
+        todo!()
+    }
+}
+
 /// JWT encode
-pub fn encode(claims: Claims) -> Result<String> {
+pub fn encode(claims: Claims) -> Result<String, AuthError> {
     jsonwebtoken::encode::<Claims>(&Header::new(Algorithm::RS256), &claims, &ENCODE_KEY)
+        .map_err(|_| AuthError::TokenCreation)
 }
 
 /// JWT decode
-pub fn decode(token: &str) -> Result<Claims> {
+pub fn decode(token: &str) -> Result<Claims, AuthError> {
     let mut validation = Validation::new(Algorithm::RS256);
     validation.set_issuer(&[ISSUER]);
     jsonwebtoken::decode::<Claims>(&token, &DECODE_KEY, &validation)
         .map(|token_data| token_data.claims)
+        .map_err(|_| AuthError::InvalidToken)
 }

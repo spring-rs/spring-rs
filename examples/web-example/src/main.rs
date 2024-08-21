@@ -1,6 +1,6 @@
 mod jwt;
-use anyhow::Context;
 use axum::http::StatusCode;
+use jwt::AuthError;
 use jwt::Claims;
 use serde::Deserialize;
 use spring::{auto_config, nest, post, route, routes, App};
@@ -45,7 +45,7 @@ async fn login(Json(credentials): Json<LoginCredentials>) -> Result<impl IntoRes
     let LoginCredentials { username, password } = credentials;
     if username == "root" && password == "admin" {
         let mock_user_id = 1000;
-        let jwt_token = jwt::encode(Claims::new(mock_user_id)).context("jwt encode failed")?;
+        let jwt_token = jwt::encode(Claims::new(mock_user_id))?;
         Ok((StatusCode::OK, jwt_token))
     } else {
         Ok((
