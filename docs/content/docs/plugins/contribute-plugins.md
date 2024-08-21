@@ -1,0 +1,15 @@
++++
+title = "Plugins contributed by the community"
+description = "Plugins contributed by the community"
+draft = false
+weight = 20
+sort_by = "weight"
+template = "docs/page.html"
+
+[extra]
+lead = ""
+toc = true
+top = false
++++
+
+{{ include(path="../../contrib-plugins/README.md") }}
