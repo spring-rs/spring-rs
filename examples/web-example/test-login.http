@@ -1,0 +1,25 @@
+### login error
+POST http://localhost:8000/login
+Content-Type: application/json
+
+{
+    "username": "root",
+    "password": "error password"
+}
+
+### login success
+POST http://localhost:8000/login
+Content-Type: application/json
+
+{
+    "username": "root",
+    "password": "correct_password"
+}
+
+### access protected api without jwt token
+GET http://localhost:8000/user-info
+
+
+### access protected api without correct token
+GET http://localhost:8000/user-info
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOjEwMDAsImV4cCI6MzI4MjgyNDI5NjF9.BF7kf27OrmvdeyxABw0I8xQU_rwQUj_lotPWdf_KCMlQot3Ln9xcHvGUj4037Qd0jxv2ol0nvUmbig9_XWu2JW6cinVWrlMjzT3oiotg_IGASBDtN_LVXNLGF4Wlkdh0003FrgTNtpfH3bDzLZ4gYQPooAC75ojSQ97dmd5SQQ4jYnz62XhufWAa7CJA-9lkzdVgKpsYWHKYiT4xoN244D4PUzNnsA0sFAUmqY75-otVdjFIGzqjmxlLXZoduqm6TeGOOA-iUK1zZ0kAimV-5ks1Hub_awm_gqLispWQOiKZrG-JtKILjetT8-QlWswLIZ4a7n62cOppRqF1Z-jpKA

@@ -4,15 +4,10 @@ use axum_extra::TypedHeader;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use spring_web::async_trait;
 use spring_web::axum::http::request::Parts;
-use spring_web::axum::http::StatusCode;
-use spring_web::axum::response::IntoResponse;
-use spring_web::axum::response::Response;
-use spring_web::axum::Json;
 use spring_web::axum::RequestPartsExt;
-use spring_web::error::WebError;
+use spring_web::error::{KnownWebError, Result, WebError};
 use spring_web::extractor::FromRequestParts;
 
 lazy_static! {
@@ -24,19 +19,17 @@ lazy_static! {
             .expect("private key parse failed");
 }
 
-const ISSUER: &'static str = "Spring-RS web-example";
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
     pub uid: i64,
-    iss: String,
+    exp: u64,
 }
 
 impl Claims {
     pub fn new(uid: i64) -> Self {
         Self {
             uid,
-            iss: String::from(ISSUER),
+            exp: jsonwebtoken::get_current_timestamp() + 360 * 24 * 60 * 60 * 1000,
         }
     }
 }
@@ -46,7 +39,7 @@ impl<S> FromRequestParts<S> for Claims
 where
     S: Send + Sync,
 {
-    type Rejection = AuthError;
+    type Rejection = WebError;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -56,7 +49,7 @@ where
         let TypedHeader(Authorization(bearer)) = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
-            .map_err(|_| AuthError::InvalidToken)?;
+            .map_err(|_| KnownWebError::bad_request("invalid token"))?;
         // Decode the user data
         let claims = decode(bearer.token())?;
 
@@ -64,46 +57,23 @@ where
     }
 }
 
-#[derive(Debug)]
-pub enum AuthError {
-    WrongCredentials,
-    MissingCredentials,
-    TokenCreation,
-    InvalidToken,
-}
-
-impl IntoResponse for AuthError {
-    fn into_response(self) -> Response {
-        let (status, error_message) = match self {
-            AuthError::WrongCredentials => (StatusCode::UNAUTHORIZED, "Wrong credentials"),
-            AuthError::MissingCredentials => (StatusCode::BAD_REQUEST, "Missing credentials"),
-            AuthError::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "Token creation error"),
-            AuthError::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token"),
-        };
-        let body = Json(json!({
-            "error": error_message,
-        }));
-        (status, body).into_response()
-    }
-}
-
-impl Into<WebError> for AuthError {
-    fn into(self) -> WebError {
-        todo!()
-    }
-}
-
 /// JWT encode
-pub fn encode(claims: Claims) -> Result<String, AuthError> {
-    jsonwebtoken::encode::<Claims>(&Header::new(Algorithm::RS256), &claims, &ENCODE_KEY)
-        .map_err(|_| AuthError::TokenCreation)
+pub fn encode(claims: Claims) -> Result<String> {
+    let header = Header::new(Algorithm::RS256);
+
+    let token = jsonwebtoken::encode::<Claims>(&header, &claims, &ENCODE_KEY)
+        .map_err(|_| KnownWebError::internal_server_error("Token created error"))?;
+
+    Ok(token)
 }
 
 /// JWT decode
-pub fn decode(token: &str) -> Result<Claims, AuthError> {
-    let mut validation = Validation::new(Algorithm::RS256);
-    validation.set_issuer(&[ISSUER]);
-    jsonwebtoken::decode::<Claims>(&token, &DECODE_KEY, &validation)
-        .map(|token_data| token_data.claims)
-        .map_err(|_| AuthError::InvalidToken)
+pub fn decode(token: &str) -> Result<Claims> {
+    let validation = Validation::new(Algorithm::RS256);
+    let token_data =
+        jsonwebtoken::decode::<Claims>(&token, &DECODE_KEY, &validation).map_err(|e| {
+            tracing::error!("{:?}", e);
+            KnownWebError::bad_request("invalid token")
+        })?;
+    Ok(token_data.claims)
 }
