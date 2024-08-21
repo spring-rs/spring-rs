@@ -1,36 +1,29 @@
 mod entities;
 
 use anyhow::Context;
-use spring::App;
-use spring_sea_orm::{DbConn, SeaOrmPlugin};
-use spring_web::{
-    error::Result,
-    extractor::{Component, Path, Query},
-    get,
-    response::{IntoResponse, Json},
-    Router, WebConfigurator, WebPlugin,
-};
 use entities::{
     prelude::{TodoItem, TodoList},
     todo_item, todo_list,
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait};
 use serde::Deserialize;
+use spring::{auto_config, get, App};
+use spring_sea_orm::{DbConn, SeaOrmPlugin};
+use spring_web::{
+    axum::response::{IntoResponse, Json},
+    error::Result,
+    extractor::{Component, Path, Query},
+    WebConfigurator, WebPlugin,
+};
 
+#[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(SeaOrmPlugin)
         .add_plugin(WebPlugin)
-        .add_router(router())
         .run()
         .await
-}
-
-fn router() -> Router {
-    Router::new()
-        .route("/", get(todo_list))
-        .route("/:id", get(get_todo_list))
 }
 
 #[derive(Deserialize)]
@@ -46,7 +39,8 @@ impl TodoListQuery {
     }
 }
 
-async fn todo_list(
+#[get("/")]
+async fn get_todo_list(
     Component(db): Component<DbConn>,
     Query(query): Query<TodoListQuery>,
 ) -> Result<impl IntoResponse> {
@@ -63,7 +57,8 @@ async fn todo_list(
     Ok(Json(rows))
 }
 
-async fn get_todo_list(
+#[get("/:id")]
+async fn get_todo_list_items(
     Component(db): Component<DbConn>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse> {

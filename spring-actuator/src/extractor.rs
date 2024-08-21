@@ -1,7 +1,7 @@
 use spring_boot::async_trait;
 use spring_web::{
+    axum::http::{request::Parts, StatusCode},
     extractor::FromRequestParts,
-    http::{request::Parts, StatusCode},
     AppState,
 };
 use std::{ops::Deref, sync::Arc};

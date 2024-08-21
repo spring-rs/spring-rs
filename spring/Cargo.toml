@@ -8,8 +8,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.6" }
-spring-macros = { path = "../spring-macros", version = "0.0.6" }
+spring-boot = { path = "../spring-boot", version = "0.0.7" }
+spring-macros = { path = "../spring-macros", version = "0.0.7" }
 
 [features]
 default = []
