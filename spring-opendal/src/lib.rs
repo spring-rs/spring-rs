@@ -111,7 +111,8 @@ impl OpenDALPlugin {
                     }
                     #[cfg(feature = "layers-blocking")]
                     Layers::Blocking => {
-                        if !cfg!(feature = "test-layers") && op.info().native_capability().blocking {
+                        if !cfg!(feature = "test-layers") && op.info().native_capability().blocking
+                        {
                             log::warn!("Blocking layer is not necessary for this operator");
                             continue;
                         }
@@ -131,7 +132,10 @@ impl OpenDALPlugin {
                     }
                     #[allow(unreachable_patterns)]
                     _ => {
-                        panic!("Maybe you forgotten to enable the [services-{}] feature!", layer);
+                        panic!(
+                            "Maybe you forgotten to enable the [services-{}] feature!",
+                            layer
+                        );
                     }
                 }
             }
