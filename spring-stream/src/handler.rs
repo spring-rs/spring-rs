@@ -66,13 +66,14 @@ macro_rules! impl_handler {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
             fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future {
-                Box::pin(async move {
+                let future_handler = async move {
                     $(
                         let $ty = $ty::from_msg(&msg, &app).await;
                     )*
 
                     self($($ty,)*).await;
-                })
+                };
+                Box::pin(future_handler)
             }
         }
     };
