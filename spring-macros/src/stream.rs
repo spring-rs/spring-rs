@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use syn::{Ident, LitStr, Token};
+use syn::{punctuated::Punctuated, Ident, LitStr, MetaNameValue, Token};
 
 use crate::input_and_compile_error;
 
@@ -25,12 +25,7 @@ impl TryFrom<LitStr> for ConsumerMode {
 #[derive(Default)]
 struct StreamListenerArgs {
     topics: Vec<LitStr>,
-    mode: Option<ConsumerMode>,
-    group_id: Option<LitStr>,
-    file_consumer_options: Option<Ident>,
-    stdio_consumer_options: Option<Ident>,
-    redis_consumer_options: Option<Ident>,
-    kafka_consumer_options: Option<Ident>,
+    opts: ConsumerOpts,
 }
 
 impl syn::parse::Parse for StreamListenerArgs {
@@ -63,6 +58,31 @@ impl syn::parse::Parse for StreamListenerArgs {
 
         let pairs = args.parse_terminated(syn::MetaNameValue::parse, Token![,])?;
 
+        Ok(Self {
+            topics,
+            opts: ConsumerOpts::new(pairs)?,
+        })
+    }
+}
+
+#[derive(Default)]
+struct ConsumerOpts {
+    mode: Option<ConsumerMode>,
+    group_id: Option<LitStr>,
+    file_consumer_options: Option<Ident>,
+    stdio_consumer_options: Option<Ident>,
+    redis_consumer_options: Option<Ident>,
+    kafka_consumer_options: Option<Ident>,
+}
+
+impl ConsumerOpts {
+    fn new(pairs: Punctuated<MetaNameValue, Token![,]>) -> syn::Result<Self> {
+        let mut mode = None;
+        let mut group_id = None;
+        let mut file_consumer_options = None;
+        let mut stdio_consumer_options = None;
+        let mut redis_consumer_options = None;
+        let mut kafka_consumer_options = None;
         for pair in pairs {
             if pair.path.is_ident("mode") {
                 if let syn::Expr::Lit(syn::ExprLit {
@@ -70,12 +90,24 @@ impl syn::parse::Parse for StreamListenerArgs {
                     ..
                 }) = pair.value
                 {
-                    let mode = ConsumerMode::try_from(lit)?;
+                    mode = Some(ConsumerMode::try_from(lit)?);
                 } else {
                 }
+            } else if pair.path.is_ident("group_id") {
+            } else if pair.path.is_ident("file_consumer_options") {
+            } else if pair.path.is_ident("stdio_consumer_options") {
+            } else if pair.path.is_ident("redis_consumer_options") {
+            } else if pair.path.is_ident("kafka_consumer_options") {
             }
         }
-        todo!()
+        Ok(Self {
+            mode,
+            group_id,
+            file_consumer_options,
+            stdio_consumer_options,
+            redis_consumer_options,
+            kafka_consumer_options,
+        })
     }
 }
 
