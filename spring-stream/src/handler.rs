@@ -1,14 +1,18 @@
 use crate::extractor::FromMsg;
 use sea_streamer::SeaMessage;
 use spring_boot::app::App;
-use std::{future::Future, pin::Pin, sync::Arc};
+use std::{
+    future::Future,
+    pin::Pin,
+    sync::{Arc, Mutex},
+};
 
 pub trait Handler<T>: Clone + Send + Sized + 'static {
     /// The type of future calling this handler returns.
     type Future: Future<Output = ()> + Send + 'static;
 
     /// Call the handler with the given request.
-    fn call(self) -> Self::Future;
+    fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future;
 }
 
 /// no args handler impl
@@ -19,7 +23,7 @@ where
 {
     type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-    fn call(self) -> Self::Future {
+    fn call(self, _msg: SeaMessage, _app: Arc<App>) -> Self::Future {
         Box::pin(async move {
             self().await;
         })
@@ -61,10 +65,10 @@ macro_rules! impl_handler {
         {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-            fn call(self) -> Self::Future {
+            fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future {
                 Box::pin(async move {
                     $(
-                        let $ty = $ty::from_msg().await;
+                        let $ty = $ty::from_msg(&msg, &app).await;
                     )*
 
                     self($($ty,)*).await;
@@ -76,8 +80,13 @@ macro_rules! impl_handler {
 
 all_the_tuples!(impl_handler);
 
-#[derive(Clone)]
-pub struct BoxedHandler {}
+pub(crate) struct BoxedHandler(Mutex<Box<dyn ErasedHandler>>);
+
+impl Clone for BoxedHandler {
+    fn clone(&self) -> Self {
+        Self(Mutex::new(self.0.lock().unwrap().clone_box()))
+    }
+}
 
 impl BoxedHandler {
     pub(crate) fn from_handler<H, T>(handler: H) -> Self
@@ -85,16 +94,65 @@ impl BoxedHandler {
         H: Handler<T> + Sync,
         T: 'static,
     {
-        // TODO
-        Self {}
+        Self(Mutex::new(Box::new(MakeErasedHandler {
+            handler,
+            caller: |handler, msg, app| {
+                Box::pin(async move {
+                    H::call(handler, msg, app).await;
+                })
+            },
+        })))
     }
 
     pub(crate) fn call(
-        &self,
+        self,
         msg: SeaMessage,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-        // TODO
-        todo!()
+        self.0.into_inner().unwrap().call(msg, app)
+    }
+}
+
+pub(crate) trait ErasedHandler: Send {
+    fn clone_box(&self) -> Box<dyn ErasedHandler>;
+
+    fn call(
+        self: Box<Self>,
+        msg: SeaMessage,
+        app: Arc<App>,
+    ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
+}
+
+pub(crate) struct MakeErasedHandler<H> {
+    pub(crate) handler: H,
+    pub(crate) caller: fn(H, SeaMessage, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>,
+}
+
+impl<H> Clone for MakeErasedHandler<H>
+where
+    H: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            handler: self.handler.clone(),
+            caller: self.caller,
+        }
+    }
+}
+
+impl<H> ErasedHandler for MakeErasedHandler<H>
+where
+    H: Clone + Send + Sync + 'static,
+{
+    fn clone_box(&self) -> Box<dyn ErasedHandler> {
+        Box::new(self.clone())
+    }
+
+    fn call(
+        self: Box<Self>,
+        msg: SeaMessage,
+        app: Arc<App>,
+    ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
+        (self.caller)(self.handler, msg, app)
     }
 }

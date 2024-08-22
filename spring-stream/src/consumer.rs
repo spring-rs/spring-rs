@@ -1,10 +1,15 @@
 use std::ops::Deref;
 
 use crate::handler::{BoxedHandler, Handler};
-use sea_streamer::{
-    file::FileConsumerOptions, kafka::KafkaConsumerOptions, redis::RedisConsumerOptions,
-    stdio::StdioConsumerOptions, ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumerOptions,
-};
+#[cfg(feature = "file")]
+use sea_streamer::file::FileConsumerOptions;
+#[cfg(feature = "kafka")]
+use sea_streamer::kafka::KafkaConsumerOptions;
+#[cfg(feature = "redis")]
+use sea_streamer::redis::RedisConsumerOptions;
+#[cfg(feature = "stdio")]
+use sea_streamer::stdio::StdioConsumerOptions;
+use sea_streamer::{ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumerOptions};
 
 #[derive(Default)]
 pub struct Consumers(Vec<Consumer>);
@@ -50,7 +55,7 @@ impl ConsumerOpts {
         let _ = self.0.set_consumer_group(ConsumerGroup::new(group_id));
         self
     }
-
+    #[cfg(feature = "kafka")]
     pub fn kafka_consumer_options<F>(mut self, func: F) -> Self
     where
         F: FnOnce(&mut KafkaConsumerOptions) -> () + Send + Sync + 'static,
@@ -58,7 +63,7 @@ impl ConsumerOpts {
         self.0.set_kafka_consumer_options(func);
         self
     }
-
+    #[cfg(feature = "redis")]
     pub fn redis_consumer_options<F>(mut self, func: F) -> Self
     where
         F: FnOnce(&mut RedisConsumerOptions) -> () + Send + Sync + 'static,
@@ -66,7 +71,7 @@ impl ConsumerOpts {
         self.0.set_redis_consumer_options(func);
         self
     }
-
+    #[cfg(feature = "stdio")]
     pub fn stdio_consumer_options<F>(mut self, func: F) -> Self
     where
         F: FnOnce(&mut StdioConsumerOptions) -> () + Send + Sync + 'static,
@@ -74,7 +79,7 @@ impl ConsumerOpts {
         self.0.set_stdio_consumer_options(func);
         self
     }
-
+    #[cfg(feature = "file")]
     pub fn file_consumer_options<F>(mut self, func: F) -> Self
     where
         F: FnOnce(&mut FileConsumerOptions) -> () + Send + Sync + 'static,

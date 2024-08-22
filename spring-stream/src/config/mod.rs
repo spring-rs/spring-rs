@@ -1,6 +1,10 @@
+#[cfg(feature = "file")]
 pub mod file;
+#[cfg(feature = "kafka")]
 pub mod kafka;
+#[cfg(feature = "redis")]
 pub mod redis;
+#[cfg(feature = "stdio")]
 pub mod stdio;
 
 use schemars::JsonSchema;

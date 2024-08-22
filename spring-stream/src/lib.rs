@@ -89,7 +89,7 @@ impl StreamPlugin {
     ) -> Result<String> {
         loop {
             let message = consumer.next().await.with_context(|| format!(""))?;
-            handler.call(message, app.clone()).await;
+            handler.clone().call(message, app.clone()).await;
         }
     }
 }
