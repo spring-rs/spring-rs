@@ -66,14 +66,16 @@ macro_rules! impl_handler {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
             fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future {
-                let future_handler = async move {
+                let _future_handler = async move {
                     $(
                         let $ty = $ty::from_msg(&msg, &app).await;
                     )*
 
                     self($($ty,)*).await;
                 };
-                Box::pin(future_handler)
+                // Box::pin(future_handler)
+                
+                Box::pin(async { println!("called") })
             }
         }
     };
@@ -97,10 +99,11 @@ impl BoxedHandler {
     {
         Self(Mutex::new(Box::new(MakeErasedHandler {
             handler,
-            caller: |handler, msg, app| {
-                Box::pin(async move {
-                    H::call(handler, msg, app).await;
-                })
+            caller: |_handler, _msg, _app| {
+                // Box::pin(async move {
+                //     H::call(handler, msg, app).await;
+                // })
+                Box::pin(async { println!("called") })
             },
         })))
     }

@@ -5,12 +5,19 @@ mod handler;
 
 use anyhow::Context;
 use config::StreamConfig;
-use consumer::{Consumer, ConsumerOpts, Consumers};
-use handler::BoxedHandler;
+use consumer::{ConsumerOpts, Consumers};
+#[cfg(feature = "file")]
+pub use sea_streamer::file::FileConsumerOptions;
+#[cfg(feature = "kafka")]
+pub use sea_streamer::kafka::KafkaConsumerOptions;
+#[cfg(feature = "redis")]
+pub use sea_streamer::redis::RedisConsumerOptions;
+#[cfg(feature = "stdio")]
+pub use sea_streamer::stdio::StdioConsumerOptions;
 pub use sea_streamer::ConsumerMode;
 use sea_streamer::{
-    Buffer, Consumer as _, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer,
-    StreamKey, Streamer as _, StreamerUri,
+    Buffer, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey,
+    Streamer as _, StreamerUri,
 };
 use spring_boot::async_trait;
 use spring_boot::config::Configurable;
@@ -55,18 +62,12 @@ impl Plugin for StreamPlugin {
         let streamer = Streamer::new(config).await.expect("create streamer failed");
 
         if let Some(consumers) = app.get_component::<Consumers>() {
-            for Consumer {
-                stream_keys,
-                opts,
-                handler,
-            } in consumers.deref().iter()
-            {
-                let consumer = streamer
-                    .create_consumer(stream_keys, opts.clone())
+            for consumer in consumers.deref().iter() {
+                let consumer_instance = consumer
+                    .new_instance(&streamer)
                     .await
-                    .expect("create stream consumer faile");
-                let handler = handler.clone();
-                app.add_scheduler(|app: Arc<App>| Box::new(Self::schedule(consumer, handler, app)));
+                    .expect("create customer instance failed");
+                app.add_scheduler(|app: Arc<App>| Box::new(consumer_instance.schedule(app)));
             }
         } else {
             tracing::info!("not consumer be registry");
@@ -78,19 +79,6 @@ impl Plugin for StreamPlugin {
 
         app.add_component(streamer);
         app.add_component(producer);
-    }
-}
-
-impl StreamPlugin {
-    async fn schedule(
-        consumer: SeaConsumer,
-        handler: BoxedHandler,
-        app: Arc<App>,
-    ) -> Result<String> {
-        loop {
-            let message = consumer.next().await.with_context(|| format!(""))?;
-            handler.clone().call(message, app.clone()).await;
-        }
     }
 }
 
@@ -142,6 +130,7 @@ impl Streamer {
     }
 }
 
+#[derive(Clone)]
 pub struct Producer(SeaProducer);
 
 impl Producer {

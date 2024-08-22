@@ -1,6 +1,8 @@
-use std::ops::Deref;
-
-use crate::handler::{BoxedHandler, Handler};
+use crate::{
+    handler::{BoxedHandler, Handler},
+    Streamer,
+};
+use anyhow::Context;
 #[cfg(feature = "file")]
 use sea_streamer::file::FileConsumerOptions;
 #[cfg(feature = "kafka")]
@@ -9,12 +11,19 @@ use sea_streamer::kafka::KafkaConsumerOptions;
 use sea_streamer::redis::RedisConsumerOptions;
 #[cfg(feature = "stdio")]
 use sea_streamer::stdio::StdioConsumerOptions;
-use sea_streamer::{ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumerOptions};
+use sea_streamer::Consumer as _;
+use sea_streamer::{ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumer, SeaConsumerOptions};
+use spring_boot::{app::App, error::Result};
+use std::{ops::Deref, sync::Arc};
 
 #[derive(Default)]
 pub struct Consumers(Vec<Consumer>);
 
 impl Consumers {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn add_consumer(mut self, consumer: Consumer) -> Self {
         self.0.push(consumer);
         self
@@ -47,6 +56,16 @@ pub struct ConsumerOpts(pub(crate) SeaConsumerOptions);
 impl Consumer {
     pub fn mode(mode: ConsumerMode) -> ConsumerOpts {
         ConsumerOpts(SeaConsumerOptions::new(mode))
+    }
+
+    pub(crate) async fn new_instance(&self, streamer: &Streamer) -> Result<ConsumerInstance> {
+        let consumer = streamer
+            .create_consumer(self.stream_keys, self.opts.clone())
+            .await?;
+        Ok(ConsumerInstance {
+            consumer,
+            handler: self.handler.clone(),
+        })
     }
 }
 
@@ -97,6 +116,24 @@ impl ConsumerOpts {
             handler: BoxedHandler::from_handler(handler),
             stream_keys,
             opts: self,
+        }
+    }
+}
+
+pub(crate) struct ConsumerInstance {
+    consumer: SeaConsumer,
+    handler: BoxedHandler,
+}
+
+impl ConsumerInstance {
+    pub async fn schedule(self, app: Arc<App>) -> Result<String> {
+        let ConsumerInstance { consumer, handler } = self;
+        loop {
+            let message = consumer
+                .next()
+                .await
+                .with_context(|| format!("consumer poll msg failed"))?;
+            BoxedHandler::call(handler.clone(), message, app.clone()).await;
         }
     }
 }

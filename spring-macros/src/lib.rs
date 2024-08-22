@@ -56,6 +56,7 @@ mod config;
 mod job;
 mod nest;
 mod route;
+mod stream;
 
 use proc_macro::TokenStream;
 use syn::DeriveInput;
@@ -264,4 +265,9 @@ pub fn derive_config(input: TokenStream) -> TokenStream {
     config::expand_derive(input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
+}
+
+#[proc_macro_attribute]
+pub fn stream_listener(args: TokenStream, input: TokenStream) -> TokenStream {
+    stream::listener(args, input)
 }
