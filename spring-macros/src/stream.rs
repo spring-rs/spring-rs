@@ -1,8 +1,7 @@
-use proc_macro::TokenStream;
-use quote::ToTokens;
-use syn::{punctuated::Punctuated, ItemFn, LitStr, MetaNameValue, Token};
-
 use crate::input_and_compile_error;
+use proc_macro::TokenStream;
+use quote::{quote, ToTokens};
+use syn::{punctuated::Punctuated, ItemFn, LitStr, MetaNameValue, Path, Token};
 
 enum ConsumerMode {
     /// This is the 'vanilla' stream consumer. It does not auto-commit, and thus only consumes messages from now on.
@@ -31,6 +30,41 @@ struct StreamListenerArgs {
     topics: Vec<LitStr>,
     opts: ConsumerOpts,
 }
+impl StreamListenerArgs {
+    fn build_token_stream(&self, name: &syn::Ident) -> proc_macro2::TokenStream {
+        let mut tokens = proc_macro2::TokenStream::new();
+        let Self { topics, opts } = self;
+        if let Some(mode) = &opts.mode {
+            match mode {
+                ConsumerMode::RealTime=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::ConsumerMode::RealTime)}),
+                ConsumerMode::Resumable=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::ConsumerMode::Resumable)}),
+                ConsumerMode::LoadBalanced=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::ConsumerMode::LoadBalanced)}),
+            }
+        } else {
+            tokens.extend(quote! {::spring_stream::consumer::Consumer::default()});
+        }
+        if let Some(group_id) = &opts.group_id {
+            tokens.extend(quote! {.group_id(#group_id)})
+        }
+
+        if let Some(fn_opts) = &opts.file_consumer_options {
+            tokens.extend(quote! {.file_consumer_options(#fn_opts)})
+        }
+        if let Some(fn_opts) = &opts.stdio_consumer_options {
+            tokens.extend(quote! {.stdio_consumer_options(#fn_opts)})
+        }
+        if let Some(fn_opts) = &opts.redis_consumer_options {
+            tokens.extend(quote! {.redis_consumer_options(#fn_opts)})
+        }
+        if let Some(fn_opts) = &opts.kafka_consumer_options {
+            tokens.extend(quote! {.kafka_consumer_options(#fn_opts)})
+        }
+
+        tokens.extend(quote! {.consume(&[#(#topics),*], #name)});
+
+        tokens
+    }
+}
 
 impl syn::parse::Parse for StreamListenerArgs {
     fn parse(args: syn::parse::ParseStream) -> syn::Result<Self> {
@@ -39,7 +73,7 @@ impl syn::parse::Parse for StreamListenerArgs {
             let topic = args.parse::<LitStr>().map_err(|mut err| {
                 err.combine(syn::Error::new(
                     err.span(),
-                    r#"invalid stream definition, expected #[stream_listener("<topic>", "<topic>", mode="<mode>")]"#,
+                    r#"invalid stream definition, expected #[stream_listener("<topic>", "<topic2>", [attributes..])]"#,
                 ));
 
                 err
@@ -73,10 +107,10 @@ impl syn::parse::Parse for StreamListenerArgs {
 struct ConsumerOpts {
     mode: Option<ConsumerMode>,
     group_id: Option<LitStr>,
-    file_consumer_options: Option<LitStr>,
-    stdio_consumer_options: Option<LitStr>,
-    redis_consumer_options: Option<LitStr>,
-    kafka_consumer_options: Option<LitStr>,
+    file_consumer_options: Option<Path>,
+    stdio_consumer_options: Option<Path>,
+    redis_consumer_options: Option<Path>,
+    kafka_consumer_options: Option<Path>,
 }
 
 impl ConsumerOpts {
@@ -115,36 +149,40 @@ impl ConsumerOpts {
                     ));
                 }
             } else if pair.path.is_ident("file_consumer_options") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit),
-                    ..
-                }) = pair.value
-                {
-                    file_consumer_options = Some(lit)
+                if let syn::Expr::Path(syn::ExprPath { path, .. }) = pair.value {
+                    file_consumer_options = Some(path)
+                } else {
+                    return Err(syn::Error::new_spanned(
+                        pair.path,
+                        "file_consumer_options must be function path",
+                    ));
                 }
             } else if pair.path.is_ident("stdio_consumer_options") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit),
-                    ..
-                }) = pair.value
-                {
-                    stdio_consumer_options = Some(lit)
+                if let syn::Expr::Path(syn::ExprPath { path, .. }) = pair.value {
+                    stdio_consumer_options = Some(path)
+                } else {
+                    return Err(syn::Error::new_spanned(
+                        pair.path,
+                        "stdio_consumer_options must be function path",
+                    ));
                 }
             } else if pair.path.is_ident("redis_consumer_options") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit),
-                    ..
-                }) = pair.value
-                {
-                    redis_consumer_options = Some(lit)
+                if let syn::Expr::Path(syn::ExprPath { path, .. }) = pair.value {
+                    redis_consumer_options = Some(path)
+                } else {
+                    return Err(syn::Error::new_spanned(
+                        pair.path,
+                        "redis_consumer_options must be function path",
+                    ));
                 }
             } else if pair.path.is_ident("kafka_consumer_options") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit),
-                    ..
-                }) = pair.value
-                {
-                    kafka_consumer_options = Some(lit)
+                if let syn::Expr::Path(syn::ExprPath { path, .. }) = pair.value {
+                    kafka_consumer_options = Some(path)
+                } else {
+                    return Err(syn::Error::new_spanned(
+                        pair.path,
+                        "kafka_consumer_options must be function path",
+                    ));
                 }
             } else {
                 return Err(syn::Error::new_spanned(
@@ -208,13 +246,41 @@ impl StreamListener {
 }
 
 impl ToTokens for StreamListener {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        todo!()
+    fn to_tokens(&self, output: &mut proc_macro2::TokenStream) {
+        let Self {
+            name,
+            ast,
+            args,
+            doc_attributes,
+        } = self;
+
+        #[allow(unused_variables)] // used when force-pub feature is disabled
+        let vis = &ast.vis;
+
+        let consumer_builder_stream = args.build_token_stream(name);
+        eprintln!("{}", consumer_builder_stream);
+        let stream = quote! {
+            #(#doc_attributes)*
+            #[allow(non_camel_case_types, missing_docs)]
+            #vis struct #name;
+
+            impl ::spring_stream::handler::TypedHandlerFactory for #name {
+                fn install_consumer(&self, mut consumers: ::spring_stream::Consumers) -> ::spring_stream::Consumers {
+                    use ::spring_stream::StreamConfigurator;
+                    #ast
+
+                    consumers.add_consumer(#consumer_builder_stream)
+                }
+            }
+
+            ::spring_stream::submit_typed_handler!(#name);
+        };
+
+        output.extend(stream);
     }
 }
 
 pub(crate) fn listener(args: TokenStream, input: TokenStream) -> TokenStream {
-    eprintln!("{:#?}", args);
     let args: StreamListenerArgs = match syn::parse(args) {
         Ok(config) => config,
         Err(e) => return input_and_compile_error(input, e),

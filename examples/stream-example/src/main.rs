@@ -1,10 +1,9 @@
 use anyhow::Context;
 use serde_json::json;
 use spring::{auto_config, get, stream_listener, App};
-use spring_stream::consumer::{Consumer, Consumers};
-use spring_stream::{
-    ConsumerMode, FileConsumerOptions, Producer, StreamConfigurator, StreamPlugin,
-};
+use spring_stream::consumer::Consumers;
+use spring_stream::handler::TypedConsumer;
+use spring_stream::{FileConsumerOptions, Producer, StreamConfigurator, StreamPlugin};
 use spring_web::error::Result;
 use spring_web::{
     axum::response::{IntoResponse, Json},
@@ -25,12 +24,7 @@ async fn main() {
 }
 
 fn consumers() -> Consumers {
-    Consumers::new().add_consumer(
-        Consumer::mode(ConsumerMode::RealTime)
-            .group_id("group_id")
-            .file_consumer_options(fill_file_consumer_options)
-            .consume(&["stream topic"], listen_topic_do_something),
-    )
+    Consumers::new().typed_consumer(listen_topic_do_something)
 }
 
 #[get("/")]
@@ -45,7 +39,13 @@ async fn send_msg(Component(producer): Component<Producer>) -> Result<impl IntoR
     Ok(Json(json! {seq}))
 }
 
-#[stream_listener("topic", "topic2", mode = "RealTime", group_id = "groupId", file_consumer_options = "fill_file_consumer_options")]
+#[stream_listener(
+    "topic",
+    "topic2",
+    mode = "RealTime",
+    group_id = "groupId",
+    file_consumer_options = fill_file_consumer_options
+)]
 async fn listen_topic_do_something() {
     println!("do something");
 }

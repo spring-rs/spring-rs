@@ -1,11 +1,11 @@
 mod config;
 pub mod consumer;
-mod extractor;
-mod handler;
+pub mod extractor;
+pub mod handler;
 
 use anyhow::Context;
 use config::StreamConfig;
-use consumer::{ConsumerOpts, Consumers};
+pub use consumer::{ConsumerOpts, Consumers};
 #[cfg(feature = "file")]
 pub use sea_streamer::file::FileConsumerOptions;
 #[cfg(feature = "kafka")]

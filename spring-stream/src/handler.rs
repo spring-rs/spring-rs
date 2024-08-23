@@ -1,4 +1,5 @@
-use crate::extractor::FromMsg;
+use crate::{consumer::Consumers, extractor::FromMsg};
+pub use inventory::submit;
 use sea_streamer::SeaMessage;
 use spring_boot::app::App;
 use std::{
@@ -74,7 +75,7 @@ macro_rules! impl_handler {
                     self($($ty,)*).await;
                 };
                 // Box::pin(future_handler)
-                
+
                 Box::pin(async { println!("called") })
             }
         }
@@ -159,4 +160,39 @@ where
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
         (self.caller)(self.handler, msg, app)
     }
+}
+
+/// TypeHandler is used to configure the spring-macro marked stream_listener handler
+///
+pub trait TypedHandlerFactory: Send + Sync + 'static {
+    fn install_consumer(&self, jobs: Consumers) -> Consumers;
+}
+
+pub trait TypedConsumer {
+    fn typed_consumer<F: TypedHandlerFactory>(self, factory: F) -> Self;
+}
+
+impl TypedConsumer for Consumers {
+    fn typed_consumer<F: TypedHandlerFactory>(self, factory: F) -> Self {
+        factory.install_consumer(self)
+    }
+}
+
+inventory::collect!(&'static dyn TypedHandlerFactory);
+
+#[macro_export]
+macro_rules! submit_typed_handler {
+    ($ty:ident) => {
+        ::spring_stream::handler::submit! {
+            &$ty as &dyn ::spring_stream::handler::TypedHandlerFactory
+        }
+    };
+}
+
+pub fn auto_consumers() -> Consumers {
+    let mut consumers = Consumers::new();
+    for factory in inventory::iter::<&dyn TypedHandlerFactory> {
+        consumers = factory.install_consumer(consumers);
+    }
+    consumers
 }
