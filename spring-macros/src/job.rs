@@ -76,7 +76,7 @@ pub(crate) struct Job {
     /// Name of the handler function being annotated.
     name: syn::Ident,
 
-    /// Args passed to routing macro.
+    /// Args passed to job macro.
     args: JobArgs,
 
     /// AST of the handler function being annotated.
