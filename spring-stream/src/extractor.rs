@@ -1,6 +1,6 @@
+use sea_streamer::Buffer;
 use sea_streamer::Message;
 use sea_streamer::MessageHeader;
-use sea_streamer::Payload;
 use sea_streamer::SeaMessage;
 use sea_streamer::SeqNo;
 use sea_streamer::ShardId;
@@ -61,12 +61,20 @@ impl FromMsg for SharedMessage {
     }
 }
 
+#[cfg(feature = "json")]
 pub struct Json<T>(pub T);
 
+#[cfg(feature = "json")]
 #[async_trait]
-impl<T> FromMsg for Json<T> {
+impl<T> FromMsg for Json<T>
+where
+    T: serde::de::DeserializeOwned,
+{
     async fn from_msg(msg: &SeaMessage, _app: &App) -> Self {
-        // msg.message().as_str()
-        todo!()
+        let value = msg
+            .message()
+            .deserialize_json()
+            .expect("stream message parse as json failed");
+        Json(value)
     }
 }

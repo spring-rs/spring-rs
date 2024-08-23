@@ -19,6 +19,7 @@ use sea_streamer::{
     Buffer, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey,
     Streamer as _, StreamerUri,
 };
+use serde::Serialize;
 use spring_boot::async_trait;
 use spring_boot::config::Configurable;
 use spring_boot::error::Result;
@@ -134,6 +135,16 @@ impl Streamer {
 pub struct Producer(SeaProducer);
 
 impl Producer {
+    #[cfg(feature = "json")]
+    pub async fn send_json<T: Serialize>(
+        &self,
+        stream_key: &str,
+        payload: T,
+    ) -> Result<MessageHeader> {
+        let json = serde_json::to_string(&payload).context("json serialize failed")?;
+        self.send_to(stream_key, json.as_str()).await
+    }
+
     pub async fn send_to<S: Buffer>(&self, stream_key: &str, payload: S) -> Result<MessageHeader> {
         let producer_stream_key = StreamKey::new(stream_key)
             .with_context(|| format!("producer stream key \"{}\" is valid", stream_key))?;
