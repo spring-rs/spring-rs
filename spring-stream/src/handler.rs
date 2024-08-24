@@ -1,10 +1,10 @@
-use crate::JobScheduler;
-use crate::{extractor::FromApp, JobId, Jobs};
+use crate::{consumer::Consumers, extractor::FromMsg};
 pub use inventory::submit;
+use sea_streamer::SeaMessage;
 use spring_boot::app::App;
-use std::pin::Pin;
 use std::{
     future::Future,
+    pin::Pin,
     sync::{Arc, Mutex},
 };
 
@@ -13,21 +13,19 @@ pub trait Handler<T>: Clone + Send + Sized + 'static {
     type Future: Future<Output = ()> + Send + 'static;
 
     /// Call the handler with the given request.
-    fn call(self, job_id: JobId, scheduler: JobScheduler, app: Arc<App>) -> Self::Future;
+    fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future;
 }
 
 /// no args handler impl
 impl<F, Fut> Handler<()> for F
 where
     F: FnOnce() -> Fut + Clone + Send + 'static,
-    Fut: Future<Output = ()> + Send,
+    Fut: Future<Output = ()> + Send + 'static,
 {
     type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-    fn call(self, _job_id: JobId, _scheduler: JobScheduler, _app: Arc<App>) -> Self::Future {
-        Box::pin(async move {
-            self().await;
-        })
+    fn call(self, _msg: SeaMessage, _app: Arc<App>) -> Self::Future {
+        Box::pin(self())
     }
 }
 
@@ -61,19 +59,16 @@ macro_rules! impl_handler {
         impl<F, Fut, $($ty,)*> Handler<($($ty,)*)> for F
         where
             F: FnOnce($($ty,)*) -> Fut + Clone + Send + 'static,
-            Fut: Future<Output = ()> + Send,
-            $( $ty: FromApp + Send, )*
+            Fut: Future<Output = ()> + Send + 'static,
+            $( $ty: FromMsg + Send, )*
         {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
-            fn call(self, job_id: JobId, scheduler: JobScheduler, app: Arc<App>) -> Self::Future {
-                Box::pin(async move {
-                    $(
-                        let $ty = $ty::from_app(&job_id, &scheduler, &app).await;
-                    )*
-
-                    self($($ty,)*).await;
-                })
+            fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future {
+                $(
+                    let $ty = $ty::from_msg(&msg, &app);
+                )*
+                Box::pin(self($($ty,)*))
             }
         }
     };
@@ -97,17 +92,16 @@ impl BoxedHandler {
     {
         Self(Mutex::new(Box::new(MakeErasedHandler {
             handler,
-            caller: |handler, job_id, jobs, app| Box::pin(H::call(handler, job_id, jobs, app)),
+            caller: |handler, msg, app| Box::pin(H::call(handler, msg, app)),
         })))
     }
 
     pub(crate) fn call(
         self,
-        job_id: JobId,
-        scheduler: JobScheduler,
+        msg: SeaMessage,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-        self.0.into_inner().unwrap().call(job_id, scheduler, app)
+        self.0.into_inner().unwrap().call(msg, app)
     }
 }
 
@@ -116,14 +110,12 @@ pub(crate) trait ErasedHandler: Send {
 
     fn call(
         self: Box<Self>,
-        job_id: JobId,
-        scheduler: JobScheduler,
+        msg: SeaMessage,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
 
-type HandlerCaller<H> =
-    fn(H, JobId, JobScheduler, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>;
+type HandlerCaller<H> = fn(H, SeaMessage, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 
 pub(crate) struct MakeErasedHandler<H> {
     pub(crate) handler: H,
@@ -152,28 +144,26 @@ where
 
     fn call(
         self: Box<Self>,
-        job_id: JobId,
-        scheduler: JobScheduler,
+        msg: SeaMessage,
         app: Arc<App>,
     ) -> Pin<Box<dyn Future<Output = ()> + Send>> {
-        (self.caller)(self.handler, job_id, scheduler, app)
+        (self.caller)(self.handler, msg, app)
     }
 }
 
-/// TypeHandler is used to configure the spring-macro marked job handler
+/// TypeHandler is used to configure the spring-macro marked stream_listener handler
 ///
-
 pub trait TypedHandlerFactory: Send + Sync + 'static {
-    fn install_job(&self, jobs: Jobs) -> Jobs;
+    fn install_consumer(&self, jobs: Consumers) -> Consumers;
 }
 
-pub trait TypedJob {
-    fn typed_job<F: TypedHandlerFactory>(self, factory: F) -> Self;
+pub trait TypedConsumer {
+    fn typed_consumer<F: TypedHandlerFactory>(self, factory: F) -> Self;
 }
 
-impl TypedJob for Jobs {
-    fn typed_job<F: TypedHandlerFactory>(self, factory: F) -> Self {
-        factory.install_job(self)
+impl TypedConsumer for Consumers {
+    fn typed_consumer<F: TypedHandlerFactory>(self, factory: F) -> Self {
+        factory.install_consumer(self)
     }
 }
 
@@ -182,16 +172,16 @@ inventory::collect!(&'static dyn TypedHandlerFactory);
 #[macro_export]
 macro_rules! submit_typed_handler {
     ($ty:ident) => {
-        ::spring_job::handler::submit! {
-            &$ty as &dyn ::spring_job::handler::TypedHandlerFactory
+        ::spring_stream::handler::submit! {
+            &$ty as &dyn ::spring_stream::handler::TypedHandlerFactory
         }
     };
 }
 
-pub fn auto_jobs() -> Jobs {
-    let mut jobs = Jobs::new();
+pub fn auto_consumers() -> Consumers {
+    let mut consumers = Consumers::new();
     for factory in inventory::iter::<&dyn TypedHandlerFactory> {
-        jobs = factory.install_job(jobs);
+        consumers = factory.install_consumer(consumers);
     }
-    jobs
+    consumers
 }

@@ -63,6 +63,7 @@ macro_rules! job_args_parse {
         )+
     };
 }
+
 #[rustfmt::skip]
 job_args_parse!(
     OneShot, LitInt, one_shot, u64, 
@@ -75,7 +76,7 @@ pub(crate) struct Job {
     /// Name of the handler function being annotated.
     name: syn::Ident,
 
-    /// Args passed to routing macro.
+    /// Args passed to job macro.
     args: JobArgs,
 
     /// AST of the handler function being annotated.

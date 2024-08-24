@@ -14,7 +14,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use uuid::Uuid;
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct Jobs(Vec<Job>);
 
 impl Jobs {
@@ -101,13 +101,14 @@ impl JobPlugin {
     async fn schedule(app: Arc<App>) -> Result<String> {
         let jobs = app.get_component::<Jobs>();
 
-        if jobs.is_none() {
-            let msg = "No tasks are registered, so the task scheduler does not start.";
-            tracing::info!(msg);
-            return Ok(msg.to_string());
-        }
-
-        let jobs = jobs.unwrap();
+        let jobs = match jobs {
+            None => {
+                let msg = "No tasks are registered, so the task scheduler does not start.";
+                tracing::info!(msg);
+                return Ok(msg.to_string());
+            }
+            Some(jobs) => jobs,
+        };
 
         let mut sched = JobScheduler::new().await.context("job init failed")?;
 
@@ -123,7 +124,7 @@ impl JobPlugin {
         // Add code to be run during/after shutdown
         sched.set_shutdown_handler(Box::new(|| {
             Box::pin(async move {
-                println!("Shut down done");
+                tracing::info!("Shut down done");
             })
         }));
 
