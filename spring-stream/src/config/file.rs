@@ -28,10 +28,18 @@ impl OptionsFiller for FileOptions {
                 CreateFileOption::Never => opts.set_create_if_not_exists(false),
                 CreateFileOption::CreateIfNotExists => opts.set_create_if_not_exists(true),
             };
-            let _ = opts.set_beacon_interval(connect.beacon_interval * 1024);
             opts.set_end_with_eos(connect.end_with_eos);
-            opts.set_file_size_limit(connect.file_size_limit);
-            opts.set_prefetch_message(connect.prefetch_message);
+            if let Some(beacon_interval) = connect.beacon_interval {
+                let _ = opts.set_beacon_interval(beacon_interval * 1024);
+            }
+            if let Some(file_size_limit) = connect.file_size_limit {
+                opts.set_file_size_limit(file_size_limit);
+            }
+            if let Some(prefetch_message) = connect.prefetch_message {
+                opts.set_prefetch_message(prefetch_message);
+            }
+        } else {
+            opts.create_if_not_exists();
         }
     }
 
@@ -64,16 +72,18 @@ impl OptionsFiller for FileOptions {
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 struct ConnectOptions {
     create_file: CreateFileOption,
+    #[serde(default)]
     end_with_eos: bool,
-    beacon_interval: u32,
-    file_size_limit: u64,
-    prefetch_message: usize,
+    beacon_interval: Option<u32>,
+    file_size_limit: Option<u64>,
+    prefetch_message: Option<usize>,
 }
 
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
 enum CreateFileOption {
     /// File must already exists
     Never,
+    #[default]
     CreateIfNotExists,
     /// Fail if the file already exists
     Always,

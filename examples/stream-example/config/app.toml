@@ -1,5 +1,0 @@
-[stream]
-uri = "file://./stream"
-
-[logger]
-level = "debug"

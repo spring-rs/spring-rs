@@ -4,8 +4,8 @@ use super::OptionsFiller;
 use crate::config::ConsumerModeRef;
 use schemars::JsonSchema;
 use sea_streamer::redis::{
-    AutoCommit, AutoStreamReset, RedisConnectOptions, RedisConsumerOptions, RedisProducerOptions,
-    ShardOwnership,
+    AutoCommit, AutoStreamReset, PseudoRandomSharder, RedisConnectOptions, RedisConsumerOptions,
+    RedisProducerOptions, RoundRobinSharder, ShardOwnership,
 };
 use sea_streamer::{ConnectOptions as ConnectOptionsTrait, ConsumerId, ConsumerMode};
 use serde::Deserialize;
@@ -29,7 +29,9 @@ impl OptionsFiller for RedisOptions {
             opts.set_username(connect.username.clone());
             opts.set_password(connect.password.clone());
             opts.set_enable_cluster(connect.enable_cluster);
-            opts.set_disable_hostname_verification(connect.disable_hostname_verification);
+            if let Some(disable_hostname_verification) = connect.disable_hostname_verification {
+                opts.set_disable_hostname_verification(disable_hostname_verification);
+            }
             if let Some(timeout) = connect.timeout {
                 let _ = opts.set_timeout(timeout);
             }
@@ -55,7 +57,18 @@ impl OptionsFiller for RedisOptions {
     }
 
     fn fill_producer_options(&self, opts: &mut Self::ProducerOptsType) {
-        todo!()
+        if let Some(ProducerOptions {
+            sharder_algo: Some(sharder_algo),
+            num_shards,
+        }) = &self.producer
+        {
+            match sharder_algo {
+                Sharder::PseudoRandom => {
+                    opts.set_sharder(PseudoRandomSharder::new(*num_shards as u64))
+                }
+                Sharder::RoundRobin => opts.set_sharder(RoundRobinSharder::new(*num_shards)),
+            };
+        }
     }
 
     fn default_consumer_mode(&self) -> Option<&ConsumerMode> {
@@ -79,8 +92,9 @@ struct ConnectOptions {
     username: Option<String>,
     password: Option<String>,
     timeout: Option<Duration>,
+    #[serde(default)]
     enable_cluster: bool,
-    disable_hostname_verification: bool,
+    disable_hostname_verification: Option<bool>,
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
@@ -149,4 +163,18 @@ enum ShardOwnershipRef {
 }
 
 #[derive(Default, Debug, Clone, JsonSchema, Deserialize)]
-struct ProducerOptions {}
+struct ProducerOptions {
+    sharder_algo: Option<Sharder>,
+    #[serde(default = "default_num_shards")]
+    num_shards: u32,
+}
+
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+enum Sharder {
+    RoundRobin,
+    PseudoRandom,
+}
+
+fn default_num_shards() -> u32 {
+    16
+}

@@ -1,0 +1,5 @@
+[stream]
+uri = "file://./stream"
+
+[stream.file]
+connect = { create_file = "CreateIfNotExists" }

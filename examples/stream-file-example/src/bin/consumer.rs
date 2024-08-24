@@ -5,7 +5,7 @@ use spring_stream::extractor::Json;
 use spring_stream::file::AutoStreamReset;
 use spring_stream::handler::TypedConsumer;
 use spring_stream::{file::FileConsumerOptions, StreamConfigurator, StreamPlugin};
-use stream_example::Payload;
+use stream_file_example::Payload;
 
 #[tokio::main]
 async fn main() {

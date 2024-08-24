@@ -54,6 +54,11 @@ pub struct Consumer {
 pub struct ConsumerOpts(pub(crate) SeaConsumerOptions);
 
 impl Consumer {
+    #[allow(clippy::should_implement_trait)]
+    pub fn default() -> ConsumerOpts {
+        ConsumerOpts(Default::default())
+    }
+
     pub fn mode(mode: ConsumerMode) -> ConsumerOpts {
         ConsumerOpts(SeaConsumerOptions::new(mode))
     }
