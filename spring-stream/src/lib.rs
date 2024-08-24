@@ -70,6 +70,10 @@ impl Plugin for StreamPlugin {
                     .await
                     .expect("create customer instance failed");
                 app.add_scheduler(|app: Arc<App>| Box::new(consumer_instance.schedule(app)));
+                tracing::info!(
+                    "register scheduler for \"{:?}\" stream consumer",
+                    consumer.stream_keys
+                );
             }
         } else {
             tracing::info!("not consumer be registry");

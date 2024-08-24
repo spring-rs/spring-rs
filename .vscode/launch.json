@@ -172,6 +172,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/actuator-example"
         },
         {
@@ -190,6 +193,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/job-example"
         },
         {
@@ -208,6 +214,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/mail-example"
         },
         {
@@ -226,6 +235,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/plugin-example"
         },
         {
@@ -244,6 +256,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/redis-example"
         },
         {
@@ -262,6 +277,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/sea-orm-example"
         },
         {
@@ -280,6 +298,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/web-example"
         },
         {
@@ -298,6 +319,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/web-example"
         },
         {
@@ -316,6 +340,9 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/web-example"
         },
         {
@@ -334,7 +361,31 @@
                 }
             },
             "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
             "cwd": "${workspaceFolder}/examples/web-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'stream-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=stream-example",
+                    "--package=stream-example"
+                ],
+                "filter": {
+                    "name": "stream-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/stream-example"
         },
     ]
 }
