@@ -97,11 +97,7 @@ impl BoxedHandler {
     {
         Self(Mutex::new(Box::new(MakeErasedHandler {
             handler,
-            caller: |handler, job_id, jobs, app| {
-                Box::pin(async move {
-                    H::call(handler, job_id, jobs, app).await;
-                })
-            },
+            caller: |handler, job_id, jobs, app| Box::pin(H::call(handler, job_id, jobs, app)),
         })))
     }
 
