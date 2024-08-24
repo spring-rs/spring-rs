@@ -60,5 +60,3 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
     Ok(version)
 }
 ```
-
-![star history](https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Date)
