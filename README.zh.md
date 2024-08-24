@@ -61,3 +61,12 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 ```
 
 ![star history](https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Date)
+
+## 请作者喝杯茶
+
+<table>
+<tr>
+<td><img src="docs/static/sponsor-wechat.jpg" alt="微信"/></td>
+<td><img src="docs/static/sponsor-alipay.jpg" alt="支付宝"/></td>
+</tr>
+</table>
