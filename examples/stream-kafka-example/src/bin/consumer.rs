@@ -28,5 +28,5 @@ async fn listen_topic_do_something(topic: StreamKey, Json(payload): Json<Payload
 }
 
 fn fill_kafka_consumer_options(opts: &mut KafkaConsumerOptions) {
-    // todo
+    opts.set_enable_auto_offset_store(true);
 }
