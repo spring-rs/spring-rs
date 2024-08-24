@@ -258,7 +258,6 @@ impl ToTokens for StreamListener {
         let vis = &ast.vis;
 
         let consumer_builder_stream = args.build_token_stream(name);
-        eprintln!("{}", consumer_builder_stream);
         let stream = quote! {
             #(#doc_attributes)*
             #[allow(non_camel_case_types, missing_docs)]

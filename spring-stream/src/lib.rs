@@ -19,6 +19,7 @@ use sea_streamer::{
     Buffer, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey,
     Streamer as _, StreamerUri,
 };
+#[cfg(feature = "json")]
 use serde::Serialize;
 use spring_boot::async_trait;
 use spring_boot::config::Configurable;

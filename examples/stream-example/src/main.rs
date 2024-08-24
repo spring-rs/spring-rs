@@ -54,8 +54,6 @@ struct Payload {
 #[stream_listener(
     "topic",
     "topic2",
-    mode = "RealTime",
-    group_id = "groupId",
     file_consumer_options = fill_file_consumer_options
 )]
 async fn listen_topic_do_something(JsonExtract(payload): JsonExtract<Payload>) {

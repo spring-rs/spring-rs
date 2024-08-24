@@ -20,14 +20,12 @@ pub trait Handler<T>: Clone + Send + Sized + 'static {
 impl<F, Fut> Handler<()> for F
 where
     F: FnOnce() -> Fut + Clone + Send + 'static,
-    Fut: Future<Output = ()> + Send,
+    Fut: Future<Output = ()> + Send + 'static,
 {
     type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
     fn call(self, _msg: SeaMessage, _app: Arc<App>) -> Self::Future {
-        Box::pin(async move {
-            self().await;
-        })
+        Box::pin(self())
     }
 }
 
@@ -61,20 +59,16 @@ macro_rules! impl_handler {
         impl<F, Fut, $($ty,)*> Handler<($($ty,)*)> for F
         where
             F: FnOnce($($ty,)*) -> Fut + Clone + Send + 'static,
-            Fut: Future<Output = ()> + Send,
+            Fut: Future<Output = ()> + Send + 'static,
             $( $ty: FromMsg + Send, )*
         {
             type Future = Pin<Box<dyn Future<Output = ()> + Send>>;
 
             fn call(self, msg: SeaMessage, app: Arc<App>) -> Self::Future {
-                let future_handler = async move {
-                    $(
-                        let $ty = $ty::from_msg(&msg, &app).await;
-                    )*
-
-                    self($($ty,)*).await;
-                };
-                Box::pin(future_handler)
+                $(
+                    let $ty = $ty::from_msg(&msg, &app);
+                )*
+                Box::pin(self($($ty,)*))
             }
         }
     };
