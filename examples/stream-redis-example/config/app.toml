@@ -3,9 +3,3 @@ uri = "redis://localhost:6379"
 
 [stream.redis]
 connect = { db = 0 }
-
-[stream.kafka]
-connect = { security_protocol = "Plain", sasl_options = { mechanism = "Plain", username = "user", password = "passwd" }, custom_options = [
-    [
-    ],
-] }
