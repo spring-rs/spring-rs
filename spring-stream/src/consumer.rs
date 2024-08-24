@@ -50,14 +50,10 @@ pub struct Consumer {
     pub(crate) handler: BoxedHandler,
 }
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct ConsumerOpts(pub(crate) SeaConsumerOptions);
 
 impl Consumer {
-    pub fn default() -> ConsumerOpts {
-        ConsumerOpts(SeaConsumerOptions::default())
-    }
-
     pub fn mode(mode: ConsumerMode) -> ConsumerOpts {
         ConsumerOpts(SeaConsumerOptions::new(mode))
     }
@@ -81,7 +77,7 @@ impl ConsumerOpts {
     #[cfg(feature = "kafka")]
     pub fn kafka_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut KafkaConsumerOptions) -> () + Send + Sync + 'static,
+        F: FnOnce(&mut KafkaConsumerOptions) + Send + Sync + 'static,
     {
         self.0.set_kafka_consumer_options(func);
         self
@@ -89,7 +85,7 @@ impl ConsumerOpts {
     #[cfg(feature = "redis")]
     pub fn redis_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut RedisConsumerOptions) -> () + Send + Sync + 'static,
+        F: FnOnce(&mut RedisConsumerOptions) + Send + Sync + 'static,
     {
         self.0.set_redis_consumer_options(func);
         self
@@ -97,7 +93,7 @@ impl ConsumerOpts {
     #[cfg(feature = "stdio")]
     pub fn stdio_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut StdioConsumerOptions) -> () + Send + Sync + 'static,
+        F: FnOnce(&mut StdioConsumerOptions) + Send + Sync + 'static,
     {
         self.0.set_stdio_consumer_options(func);
         self
@@ -105,7 +101,7 @@ impl ConsumerOpts {
     #[cfg(feature = "file")]
     pub fn file_consumer_options<F>(mut self, func: F) -> Self
     where
-        F: FnOnce(&mut FileConsumerOptions) -> () + Send + Sync + 'static,
+        F: FnOnce(&mut FileConsumerOptions) + Send + Sync + 'static,
     {
         self.0.set_file_consumer_options(func);
         self
@@ -133,10 +129,7 @@ impl ConsumerInstance {
     pub async fn schedule(self, app: Arc<App>) -> Result<String> {
         let ConsumerInstance { consumer, handler } = self;
         loop {
-            let message = consumer
-                .next()
-                .await
-                .with_context(|| format!("consumer poll msg failed"))?;
+            let message = consumer.next().await.context("consumer poll msg failed")?;
             BoxedHandler::call(handler.clone(), message, app.clone()).await;
         }
     }

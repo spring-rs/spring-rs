@@ -115,9 +115,11 @@ pub(crate) trait ErasedHandler: Send {
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
 
+type HandlerCaller<H> = fn(H, SeaMessage, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>;
+
 pub(crate) struct MakeErasedHandler<H> {
     pub(crate) handler: H,
-    pub(crate) caller: fn(H, SeaMessage, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>,
+    pub(crate) caller: HandlerCaller<H>,
 }
 
 impl<H> Clone for MakeErasedHandler<H>

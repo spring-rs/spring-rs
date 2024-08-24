@@ -122,12 +122,12 @@ pub(crate) trait ErasedHandler: Send {
     ) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
 
-type SchedulerCaller<H> =
+type HandlerCaller<H> =
     fn(H, JobId, JobScheduler, Arc<App>) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 
 pub(crate) struct MakeErasedHandler<H> {
     pub(crate) handler: H,
-    pub(crate) caller: SchedulerCaller<H>,
+    pub(crate) caller: HandlerCaller<H>,
 }
 
 impl<H> Clone for MakeErasedHandler<H>
