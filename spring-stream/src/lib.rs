@@ -7,13 +7,13 @@ use anyhow::Context;
 use config::StreamConfig;
 pub use consumer::{ConsumerOpts, Consumers};
 #[cfg(feature = "file")]
-pub use sea_streamer::file::FileConsumerOptions;
+pub use sea_streamer::file;
 #[cfg(feature = "kafka")]
-pub use sea_streamer::kafka::KafkaConsumerOptions;
+pub use sea_streamer::kafka;
 #[cfg(feature = "redis")]
-pub use sea_streamer::redis::RedisConsumerOptions;
+pub use sea_streamer::redis;
 #[cfg(feature = "stdio")]
-pub use sea_streamer::stdio::StdioConsumerOptions;
+pub use sea_streamer::stdio;
 pub use sea_streamer::ConsumerMode;
 use sea_streamer::{
     Buffer, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey,
