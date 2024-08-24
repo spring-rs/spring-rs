@@ -66,7 +66,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 
 <table>
 <tr>
-<td><img src="docs/static/sponsor-wechat.jpg" alt="微信"/></td>
-<td><img src="docs/static/sponsor-alipay.jpg" alt="支付宝"/></td>
+<td><img src="docs/static/sponsor-wechat.jpg" alt="微信" height="400"/></td>
+<td><img src="docs/static/sponsor-alipay.jpg" alt="支付宝" height="400"/></td>
 </tr>
 </table>
