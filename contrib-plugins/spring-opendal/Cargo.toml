@@ -7,6 +7,8 @@ version = "0.0.1"
 edition = "2021"
 license = "MIT"
 authors = ["Lemon"]
+homepage = "https://spring-rs.github.io/"
+repository = "https://github.com/spring-rs/spring-rs/"
 
 [dependencies]
 spring-boot = { path = "../../spring-boot", version = "0.0.8" }
