@@ -26,9 +26,10 @@ If you already know these prerequisites, click this [Quick Start →](/docs/gett
 * [x] [`spring-redis`](/docs/plugins/spring-redis/)(Integrated with [`redis`](https://github.com/redis-rs/redis-rs))
 * [x] [`spring-mail`](/docs/plugins/spring-mail/)(integrated with [`lettre`](https://github.com/lettre/lettre))
 * [x] [`spring-job`](/docs/plugins/spring-job/)(integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
+* [x] [`spring-stream`](/docs/plugins/spring-stream/)(Integrate [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing such as redis-stream and kafka)
 * [ ] `spring-actuator`(provides a simple health check and system diagnostic interface)
-* [ ] `spring-stream`(integrated with [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing)
-* [ ] `spring-opentelemetry`(integrated with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing)
+* [ ] `spring-opentelemetry`(integrate with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing)
+* [ ] `spring-tarpc`(Integrate[`tarpc`](https://github.com/google/tarpc) to implement RPC calls)
 
 ## Contribution
 
