@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-sea-orm = { version = "0.0.7", features = ["postgres"] }
+spring-sea-orm = { version = "0.0.8", features = ["postgres"] }
 sea-orm = { version = "1.0" }    # 主要为了适配sea-orm-cli生成的entity代码
 ```
 

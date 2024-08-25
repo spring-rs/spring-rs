@@ -4,8 +4,10 @@
 ## 依赖
 
 ```toml
-spring-stream = { version = "0.0.7" }
+spring-stream = { version = "0.0.8",features=["file"] }
 ```
+
+spring-stream支持`file`、`stdio`、`redis`、`kafka`四种消息存储。
 
 ## 配置项
 
@@ -39,3 +41,73 @@ connect = { db=0,username="user",password="passwd" }
 [stream.kafka]
 connect = { sasl_options={mechanism="Plain",username="user",password="passwd"}}
 ```
+
+### 发送消息
+
+`StreamPlugin`注册了一个`Producer`用于发送消息。如果需要发送json格式的消息，需要在依赖项中添加`json`的feature：
+
+```toml
+spring-stream = { version = "0.0.8", features=["file","json"] }
+```
+
+```rust
+#[auto_config(WebConfigurator)]
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(StreamPlugin)
+        .add_plugin(WebPlugin)
+        .run()
+        .await
+}
+
+#[get("/")]
+async fn send_msg(Component(producer): Component<Producer>) -> Result<impl IntoResponse> {
+    let now = SystemTime::now();
+    let json = json!({
+        "success": true,
+        "msg": format!("This message was sent at {:?}", now),
+    });
+    let resp = producer
+        .send_json("topic", json)
+        .await
+        .context("send msg failed")?;
+
+    let seq = resp.sequence();
+    Ok(Json(json!({"seq":seq})))
+}
+```
+
+### 消费消息
+
+`spring-stream`提供了`stream_listener`的过程宏来订阅指定topic的消息，代码如下：
+
+```rust
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(StreamPlugin)
+        .add_consumer(consumers())
+        .run()
+        .await
+}
+
+fn consumers() -> Consumers {
+    Consumers::new().typed_consumer(listen_topic_do_something)
+}
+
+#[stream_listener(
+    "topic",
+    "topic2",
+    file_consumer_options = fill_file_consumer_options
+)]
+async fn listen_topic_do_something(Json(payload): Json<Payload>) {
+    tracing::info!("{:#?}", payload);
+}
+
+fn fill_file_consumer_options(opts: &mut FileConsumerOptions) {
+    opts.set_auto_stream_reset(AutoStreamReset::Earliest);
+}
+```
+
+完整示例代码查看[stream-file-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-file-example)、[stream-redis-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-redis-example)、[stream-kafka-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-kafka-example)

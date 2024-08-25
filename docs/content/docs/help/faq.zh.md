@@ -2,7 +2,7 @@
 title = "常见问题"
 description = "回答一些常见问题"
 draft = false
-weight = 31
+weight = 101
 sort_by = "weight"
 template = "docs/page.html"
 

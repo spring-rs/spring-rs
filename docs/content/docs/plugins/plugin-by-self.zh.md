@@ -2,7 +2,7 @@
 title = "编写自己的插件"
 description = "如何编写自己的插件"
 draft = false
-weight = 19
+weight = 98
 sort_by = "weight"
 template = "docs/page.html"
 

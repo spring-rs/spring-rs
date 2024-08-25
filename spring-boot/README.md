@@ -12,7 +12,7 @@ All plugins need to implement the [`Plugin`](https://docs.rs/spring-boot/latest/
 Add dependencies
 
 ```toml
-spring-boot = { version = "0.0.7" }      # This crate contains the definition of plugin traits
+spring-boot = { version = "0.0.8" }      # This crate contains the definition of plugin traits
 serde = { workspace = true, features = ["derive"] } # Used to parse plugin configuration items
 ```
 

@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.7" }
+spring-boot = { path = "../spring-boot", version = "0.0.8" }
 axum = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }

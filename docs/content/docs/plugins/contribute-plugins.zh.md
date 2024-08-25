@@ -2,7 +2,7 @@
 title = "社区贡献的插件"
 description = "社区贡献的插件"
 draft = false
-weight = 20
+weight = 99
 sort_by = "weight"
 template = "docs/page.html"
 

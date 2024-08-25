@@ -2,7 +2,7 @@
 title = "Community contributed plugins"
 description = "Plugins contributed by the community"
 draft = false
-weight = 20
+weight = 99
 sort_by = "weight"
 template = "docs/page.html"
 

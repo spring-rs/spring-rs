@@ -10,8 +10,8 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.7" }
-spring-web = { path = "../spring-web", version = "0.0.7" }
+spring-boot = { path = "../spring-boot", version = "0.0.8" }
+spring-web = { path = "../spring-web", version = "0.0.8" }
 tracing = { workspace = true, features = ["log"] }
 serde = { workspace = true }
 schemars = { workspace = true }
