@@ -146,6 +146,7 @@ struct ConnectOptions {
     timeout: Option<Duration>,
     security_protocol: Option<SecurityProtocol>,
     sasl_options: Option<SaslOptions>,
+    #[serde(default)]
     custom_options: Vec<(String, String)>,
 }
 
@@ -185,6 +186,7 @@ struct ConsumerOptions {
     enable_auto_commit: Option<bool>,
     auto_commit_interval: Option<Duration>,
     enable_auto_offset_store: Option<bool>,
+    #[serde(default)]
     custom_options: Vec<(String, String)>,
 }
 
@@ -202,6 +204,7 @@ enum AutoOffsetReset {
 struct ProducerOptions {
     compression_type: Option<CompressionType>,
     transaction_timeout: Option<Duration>,
+    #[serde(default)]
     custom_options: Vec<(String, String)>,
 }
 
