@@ -1,3 +1,4 @@
+//! spring-actuator
 mod extractor;
 
 use extractor::App;

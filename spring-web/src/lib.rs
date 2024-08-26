@@ -1,10 +1,16 @@
+//! spring-web
+#[doc = include_str!("../README.md")]
+
+/// spring-web config
 pub mod config;
+/// spring-web defined error
 pub mod error;
+/// axum extract
 pub mod extractor;
+/// axum route handler
 pub mod handler;
 pub use axum;
 pub use spring_boot::async_trait;
-
 use anyhow::Context;
 use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 use spring_boot::config::Configurable;
@@ -24,12 +30,18 @@ use tower_http::{
     trace::TraceLayer,
 };
 
+/// axum::routing::MethodFilter re-export
 pub type MethodFilter = axum::routing::MethodFilter;
+/// MethodRouter with AppState
 pub type MethodRouter = axum::routing::MethodRouter<AppState>;
+/// Router with AppState
 pub type Router = axum::Router<AppState>;
+/// Routers collection
 pub type Routers = Vec<Router>;
 
+/// Web Configurator
 pub trait WebConfigurator {
+    /// add route to app registry
     fn add_router(&mut self, router: Router) -> &mut Self;
 }
 
@@ -48,11 +60,14 @@ impl WebConfigurator for AppBuilder {
     }
 }
 
+/// State of App
 #[derive(Clone)]
 pub struct AppState {
+    /// App Registry Ref
     pub app: Arc<App>,
 }
 
+/// Web Plugin Definition
 #[derive(Configurable)]
 #[config_prefix = "web"]
 pub struct WebPlugin;

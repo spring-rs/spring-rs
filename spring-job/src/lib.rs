@@ -1,3 +1,5 @@
+//! spring-job
+#[doc = include_str!("../README.md")]
 pub mod extractor;
 pub mod handler;
 pub mod job;

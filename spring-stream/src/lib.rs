@@ -1,3 +1,5 @@
+//! spring-stream
+#[doc = include_str!("../README.md")]
 mod config;
 pub mod consumer;
 pub mod extractor;

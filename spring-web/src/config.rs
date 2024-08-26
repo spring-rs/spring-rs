@@ -1,8 +1,8 @@
 use std::net::{IpAddr, Ipv4Addr};
-
 use schemars::JsonSchema;
 use serde::Deserialize;
 
+/// spring-web Config
 #[derive(Debug, JsonSchema, Deserialize)]
 pub struct WebConfig {
     #[serde(default = "default_binding")]
@@ -44,6 +44,7 @@ pub struct Middlewares {
 /// Static asset middleware configuration
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct StaticAssetsMiddleware {
+    /// toggle enable
     pub enable: bool,
     /// Check that assets must exist on disk
     #[serde(default = "bool::default")]
@@ -66,6 +67,7 @@ pub struct StaticAssetsMiddleware {
 /// CORS middleware configuration
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct CorsMiddleware {
+    /// toggle enable
     pub enable: bool,
     /// Allow origins
     pub allow_origins: Option<Vec<String>>,
@@ -80,14 +82,16 @@ pub struct CorsMiddleware {
 /// Timeout middleware configuration
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct TimeoutRequestMiddleware {
+    /// toggle enable
     pub enable: bool,
-    // Timeout request in milliseconds
+    /// Timeout request in milliseconds
     pub timeout: u64,
 }
 
 /// Limit payload size middleware configuration
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct LimitPayloadMiddleware {
+    /// toggle enable
     pub enable: bool,
     /// Body limit. for example: 5mb
     pub body_limit: String,
@@ -97,6 +101,7 @@ pub struct LimitPayloadMiddleware {
 /// disabled.
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct EnableMiddleware {
+    /// toggle enable
     pub enable: bool,
 }
 
