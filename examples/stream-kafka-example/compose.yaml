@@ -49,4 +49,4 @@ services:
     ports:
       - 8000:8080
     depends_on:
-      - redpanda
+      - redpanda-broker

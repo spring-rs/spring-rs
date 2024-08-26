@@ -1,8 +1,5 @@
 [stream]
-uri = "kafka://localhost:9092"
+uri = "kafka://localhost:19092"
 
 [stream.kafka]
-connect = { security_protocol = "Plain", sasl_options = { mechanism = "Plain", username = "user", password = "passwd" }, custom_options = [
-    [
-    ],
-] }
+connect = { security_protocol = "Plaintext"}
