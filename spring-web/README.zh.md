@@ -1,6 +1,8 @@
 [![crates.io](https://img.shields.io/crates/v/spring-web.svg)](https://crates.io/crates/spring-web)
 [![Documentation](https://docs.rs/spring-web/badge.svg)](https://docs.rs/spring-web)
 
+[Axum](https://github.com/tokio-rs/axum)是rust社区最优秀的Web框架之一，它是由tokio官方维护的一个基于[hyper](https://github.com/hyperium/hyper)的子项目。Axum提供了web路由，声明式的HTTP请求解析，HTTP响应的序列化等功能，而且能够与[tower](https://github.com/tower-rs)生态中的中间件结合。
+
 ## 依赖
 
 ```toml

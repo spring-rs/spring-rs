@@ -1,6 +1,8 @@
 [![crates.io](https://img.shields.io/crates/v/spring-web.svg)](https://crates.io/crates/spring-web)
 [![Documentation](https://docs.rs/spring-web/badge.svg)](https://docs.rs/spring-web)
 
+[Axum](https://github.com/tokio-rs/axum) is one of the best web frameworks in the Rust community. It is a sub-project based on [hyper](https://github.com/hyperium/hyper) maintained by Tokio. Axum provides web routing, declarative HTTP request parsing, HTTP response serialization, and can be combined with the middleware in the [tower](https://github.com/tower-rs) ecosystem.
+
 ## Dependencies
 
 ```toml
