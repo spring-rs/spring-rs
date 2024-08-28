@@ -20,3 +20,7 @@ tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 inventory = { workspace = true }
+axum-server = { workspace = true, optional = true }
+
+[features]
+ssl = ["axum-server"]
