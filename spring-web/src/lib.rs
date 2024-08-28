@@ -9,10 +9,10 @@ pub mod error;
 pub mod extractor;
 /// axum route handler
 pub mod handler;
-pub use axum;
-pub use spring_boot::async_trait;
 use anyhow::Context;
-use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
+pub use axum;
+use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig, TLS};
+pub use spring_boot::async_trait;
 use spring_boot::config::Configurable;
 use spring_boot::{
     app::{App, AppBuilder},
@@ -29,6 +29,9 @@ use tower_http::{
     timeout::TimeoutLayer,
     trace::TraceLayer,
 };
+
+#[cfg(feature = "tls")]
+use axum_server::tls_rustls::RustlsConfig;
 
 /// axum::routing::MethodFilter re-export
 pub type MethodFilter = axum::routing::MethodFilter;
@@ -91,25 +94,27 @@ impl Plugin for WebPlugin {
             }
             None => Router::new(),
         };
-        if let Some(middlewares) = config.middlewares {
+        if let Some(middlewares) = &config.middlewares {
             router = Self::apply_middleware(router, middlewares);
         }
-
-        let addr = SocketAddr::from((config.binding, config.port));
-
-        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(addr, router, app)));
+        #[cfg(feature = "tls")]
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule_tls(config, router, app)));
+        #[cfg(not(feature = "tls"))]
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(config, router, app)));
     }
 }
 
 impl WebPlugin {
-    async fn schedule(addr: SocketAddr, router: Router, app: Arc<App>) -> Result<String> {
-        // 2. bind tcp listener
+    #[cfg(not(feature = "tls"))]
+    async fn schedule(config: WebConfig, router: Router, app: Arc<App>) -> Result<String> {
+        // bind tcp listener
+        let addr = SocketAddr::from((config.binding, config.port));
         let listener = tokio::net::TcpListener::bind(addr)
             .await
             .with_context(|| format!("bind tcp listener failed:{}", addr))?;
         tracing::info!("bind tcp listener: {}", addr);
 
-        // 3. axum server
+        // start axum server
         let router = router.with_state(AppState { app });
 
         tracing::info!("axum server started");
@@ -120,38 +125,59 @@ impl WebPlugin {
         Ok("axum schedule finished".to_string())
     }
 
-    fn apply_middleware(router: Router, middleware: Middlewares) -> Router {
+    #[cfg(feature = "tls")]
+    async fn schedule_tls(config: WebConfig, router: Router, app: Arc<App>) -> Result<String> {
+        let addr = SocketAddr::from((config.binding, config.port));
+
+        let router = router.with_state(AppState { app });
+
+        match config.tls {
+            TLS::ExistingCert { cert, pri_key } => {
+                let config = RustlsConfig::from_pem_file(cert, pri_key)
+                    .await
+                    .context("read ssl pem file failed")?;
+                axum_server::tls_rustls::bind_rustls(addr, config)
+                    .serve(router.into_make_service())
+                    .await
+                    .context("start tls server failed")?;
+            }
+            TLS::AutoCert {} => {}
+        }
+        todo!()
+    }
+
+    fn apply_middleware(router: Router, middleware: &Middlewares) -> Router {
         let mut router = router;
-        if let Some(catch_panic) = middleware.catch_panic {
+        if let Some(catch_panic) = &middleware.catch_panic {
             if catch_panic.enable {
                 router = router.layer(CatchPanicLayer::new());
             }
         }
-        if let Some(compression) = middleware.compression {
+        if let Some(compression) = &middleware.compression {
             if compression.enable {
                 router = router.layer(CompressionLayer::new());
             }
         }
-        if let Some(cors) = middleware.cors {
+        if let Some(cors) = &middleware.cors {
             if cors.enable {
                 let cors =
                     Self::build_cors_middleware(&cors).expect("cors middleware build failed");
                 router = router.layer(cors);
             }
         }
-        if let Some(limit_payload) = middleware.limit_payload {
+        if let Some(limit_payload) = &middleware.limit_payload {
             if limit_payload.enable {
                 let limit_payload = Self::build_body_limit_middleware(limit_payload)
                     .expect("limit payload middleware build failed");
                 router = router.layer(limit_payload);
             }
         }
-        if let Some(logger) = middleware.logger {
+        if let Some(logger) = &middleware.logger {
             if logger.enable {
                 router = router.layer(TraceLayer::new_for_http());
             }
         }
-        if let Some(timeout_request) = middleware.timeout_request {
+        if let Some(timeout_request) = &middleware.timeout_request {
             if timeout_request.enable {
                 router = router.layer(TimeoutLayer::new(Duration::from_millis(
                     timeout_request.timeout,
@@ -159,7 +185,7 @@ impl WebPlugin {
             }
         }
 
-        if let Some(static_assets) = middleware.static_assets {
+        if let Some(static_assets) = &middleware.static_assets {
             if static_assets.enable {
                 return Self::apply_static_dir(router, static_assets);
             }
@@ -167,7 +193,7 @@ impl WebPlugin {
         router
     }
 
-    fn apply_static_dir(router: Router, static_assets: StaticAssetsMiddleware) -> Router {
+    fn apply_static_dir(router: Router, static_assets: &StaticAssetsMiddleware) -> Router {
         if static_assets.must_exist
             && (!PathBuf::from(&static_assets.path).exists()
                 || !PathBuf::from(&static_assets.fallback).exists())
@@ -178,8 +204,8 @@ impl WebPlugin {
             );
         }
 
-        let serve_dir = ServeDir::new(static_assets.path)
-            .not_found_service(ServeFile::new(static_assets.fallback));
+        let serve_dir = ServeDir::new(static_assets.path.clone())
+            .not_found_service(ServeFile::new(static_assets.fallback.clone()));
 
         let service = if static_assets.precompressed {
             tracing::info!("[Middleware] Enable precompressed static assets");
@@ -239,7 +265,7 @@ impl WebPlugin {
     }
 
     fn build_body_limit_middleware(
-        limit_payload: LimitPayloadMiddleware,
+        limit_payload: &LimitPayloadMiddleware,
     ) -> Result<RequestBodyLimitLayer> {
         let limit = byte_unit::Byte::from_str(&limit_payload.body_limit).with_context(|| {
             format!(

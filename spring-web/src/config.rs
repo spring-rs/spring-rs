@@ -1,6 +1,6 @@
-use std::net::{IpAddr, Ipv4Addr};
 use schemars::JsonSchema;
 use serde::Deserialize;
+use std::net::{IpAddr, Ipv4Addr};
 
 /// spring-web Config
 #[derive(Debug, JsonSchema, Deserialize)]
@@ -10,6 +10,9 @@ pub struct WebConfig {
     #[serde(default = "default_port")]
     pub(crate) port: u16,
     pub(crate) middlewares: Option<Middlewares>,
+
+    #[cfg(feature = "tls")]
+    pub(crate) tls: TLS,
 }
 
 fn default_binding() -> IpAddr {
@@ -103,6 +106,13 @@ pub struct LimitPayloadMiddleware {
 pub struct EnableMiddleware {
     /// toggle enable
     pub enable: bool,
+}
+
+/// ssl/tls config
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+pub enum TLS {
+    AutoCert {},
+    ExistingCert { cert: String, pri_key: String },
 }
 
 fn default_assets_path() -> String {

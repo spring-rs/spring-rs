@@ -23,4 +23,4 @@ inventory = { workspace = true }
 axum-server = { workspace = true, optional = true }
 
 [features]
-ssl = ["axum-server"]
+tls = ["axum-server", "axum-server/tls-rustls"]
