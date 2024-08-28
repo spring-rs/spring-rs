@@ -1,24 +1,58 @@
 use anyhow::Context;
 use instant_acme::{
-    Account, AuthorizationStatus, ChallengeType, Identifier, LetsEncrypt, NewAccount, NewOrder,
-    OrderStatus,
+    Account, AuthorizationStatus, ChallengeType, Identifier, NewAccount, NewOrder, OrderStatus,
 };
 use rcgen::{CertificateParams, DistinguishedName, KeyPair};
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
+use tokio::{
+    fs::{self, File},
+    io::{AsyncReadExt, AsyncWriteExt},
+};
 
-pub async fn challenge(domain: String) -> anyhow::Result<()> {
-    let (account, credentials) = Account::create(
-        &NewAccount {
-            contact: &[],
-            terms_of_service_agreed: true,
-            only_return_existing: false,
-        },
-        LetsEncrypt::Staging.url(),
-        None,
-    )
-    .await
-    .context("request acount failed")?;
+use crate::config::AcmeServer;
 
+pub async fn get_account(
+    contact: &str,
+    server: AcmeServer,
+    acme_cert_dir: PathBuf,
+) -> anyhow::Result<Account> {
+    let credentials_file = acme_cert_dir.join("account.credentials");
+    if credentials_file.exists() {
+        let mut credentials_file = File::open(credentials_file)
+            .await
+            .context("account credentials open failed")?;
+        let mut json = String::new();
+        credentials_file.read_to_string(&mut json).await?;
+        let credentials = serde_json::from_str(&json)?;
+        Account::from_credentials(credentials)
+            .await
+            .context("Restore an existing account failed")
+    } else {
+        let (account, credentials) = Account::create(
+            &NewAccount {
+                contact: &[contact],
+                terms_of_service_agreed: true,
+                only_return_existing: false,
+            },
+            server.url(),
+            None,
+        )
+        .await
+        .context("request account failed")?;
+
+        // write credentials
+        let json = serde_json::to_string(&credentials)?;
+        if let Some(parent) = credentials_file.parent() {
+            fs::create_dir_all(parent).await?;
+        }
+        let mut credentials_file = fs::File::create(credentials_file).await?;
+        credentials_file.write_all(json.as_bytes()).await?;
+
+        Ok(account)
+    }
+}
+
+pub async fn challenge(account: Account, domain: String) -> anyhow::Result<(String, String)> {
     // Create the ACME order based on the given domain names.
     // Note that this only needs an `&Account`, so the library will let you
     // process multiple orders in parallel for a single account.
@@ -130,9 +164,9 @@ pub async fn challenge(domain: String) -> anyhow::Result<()> {
             None => tokio::time::sleep(Duration::from_secs(1)).await,
         }
     };
-
+    let private_key_pem = private_key.serialize_pem();
     tracing::info!("certficate chain:\n\n{}", cert_chain_pem);
-    tracing::info!("private key:\n\n{}", private_key.serialize_pem());
+    tracing::info!("private key:\n\n{}", private_key_pem);
 
-    Ok(())
+    Ok((cert_chain_pem, private_key_pem))
 }

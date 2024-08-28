@@ -11,7 +11,7 @@ pub mod extractor;
 pub mod handler;
 use anyhow::Context;
 pub use axum;
-use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig, TLS};
+use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
 pub use spring_boot::async_trait;
 use spring_boot::config::Configurable;
 use spring_boot::{
@@ -34,6 +34,8 @@ use tower_http::{
 mod acme;
 #[cfg(feature = "tls")]
 use axum_server::tls_rustls::RustlsConfig;
+#[cfg(feature = "tls")]
+use config::TLS;
 
 /// axum::routing::MethodFilter re-export
 pub type MethodFilter = axum::routing::MethodFilter;
@@ -143,7 +145,29 @@ impl WebPlugin {
                     .await
                     .context("start tls server failed")?;
             }
-            TLS::AutoCert {} => {}
+            TLS::AutoCert {
+                acme_cert_dir,
+                acme_server,
+                domain,
+                contact,
+            } => {
+                let cert_dir = PathBuf::from(acme_cert_dir);
+
+                let account = acme::get_account(&contact, acme_server, cert_dir)
+                    .await
+                    .context("get acme account failed")?;
+
+                let (cert, pk) = acme::challenge(account, domain).await.context("")?;
+
+                let config = RustlsConfig::from_pem(cert.into_bytes(), pk.into_bytes())
+                    .await
+                    .context("read ssl pem file failed")?;
+
+                axum_server::tls_rustls::bind_rustls(addr, config)
+                    .serve(router.into_make_service())
+                    .await
+                    .context("start tls server failed")?;
+            }
         }
         todo!()
     }

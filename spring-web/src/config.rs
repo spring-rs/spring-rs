@@ -1,3 +1,5 @@
+#[cfg(feature = "tls")]
+use instant_acme::{LetsEncrypt, ZeroSsl};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use std::net::{IpAddr, Ipv4Addr};
@@ -10,7 +12,6 @@ pub struct WebConfig {
     #[serde(default = "default_port")]
     pub(crate) port: u16,
     pub(crate) middlewares: Option<Middlewares>,
-
     #[cfg(feature = "tls")]
     pub(crate) tls: TLS,
 }
@@ -109,10 +110,54 @@ pub struct EnableMiddleware {
 }
 
 /// ssl/tls config
+#[cfg(feature = "tls")]
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub enum TLS {
-    AutoCert {},
-    ExistingCert { cert: String, pri_key: String },
+    AutoCert {
+        #[serde(default = "default_acme_cert_dir")]
+        acme_cert_dir: String,
+
+        #[serde(default)]
+        acme_server: AcmeServer,
+
+        domain: String,
+
+        contact: String,
+    },
+    ExistingCert {
+        cert: String,
+        pri_key: String,
+    },
+}
+
+#[cfg(feature = "tls")]
+#[derive(Debug, Default, Clone, JsonSchema, Deserialize)]
+pub enum AcmeServer {
+    /// https://letsencrypt.org/docs/
+    #[default]
+    LetsEncryptProduction,
+    /// https://letsencrypt.org/docs/staging-environment/
+    /// recommend testing against our staging environment before using our production environment.
+    /// This will allow you to get things right before issuing trusted certificates and reduce the chance of your running up against rate limits.
+    LetsEncryptStaging,
+    /// https://zerossl.com/features/acme/
+    ZeroSsl,
+    /// * https://github.com/topics/acme-server
+    /// * https://github.com/letsencrypt/boulder
+    /// * https://github.com/smallstep/certificates
+    Other(String),
+}
+
+#[cfg(feature = "tls")]
+impl AcmeServer {
+    pub(crate) fn url(&self) -> &str {
+        match self {
+            Self::LetsEncryptProduction => LetsEncrypt::Production.url(),
+            Self::LetsEncryptStaging => LetsEncrypt::Staging.url(),
+            Self::ZeroSsl => ZeroSsl::Production.url(),
+            Self::Other(url) => url,
+        }
+    }
 }
 
 fn default_assets_path() -> String {
@@ -125,4 +170,9 @@ fn default_assets_uri() -> String {
 
 fn default_fallback() -> String {
     "index.html".to_string()
+}
+
+#[cfg(feature = "tls")]
+fn default_acme_cert_dir() -> String {
+    "./acme-cert".to_string()
 }

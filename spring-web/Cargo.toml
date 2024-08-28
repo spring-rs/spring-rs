@@ -11,6 +11,7 @@ repository.workspace = true
 spring-boot = { path = "../spring-boot", version = "0.0.8" }
 axum = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
