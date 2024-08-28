@@ -39,6 +39,8 @@ tower-http = "0.5.2"
 byte-unit = "5.1"
 axum = "0.7.5"
 axum-server = "0.7.1"
+instant-acme = "0.7.1"
+rcgen = "0.13.1"
 sqlx = "0.7"
 sea-orm = "1.0"
 sea-streamer = { git = "https://github.com/SeaQL/sea-streamer.git", branch = "main" }

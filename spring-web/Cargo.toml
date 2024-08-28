@@ -21,6 +21,8 @@ byte-unit = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 inventory = { workspace = true }
 axum-server = { workspace = true, optional = true }
+instant-acme = { workspace = true, optional = true }
+rcgen = { workspace = true, optional = true }
 
 [features]
-tls = ["axum-server", "axum-server/tls-rustls"]
+tls = ["axum-server", "axum-server/tls-rustls", "instant-acme", "rcgen"]

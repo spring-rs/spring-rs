@@ -31,6 +31,8 @@ use tower_http::{
 };
 
 #[cfg(feature = "tls")]
+mod acme;
+#[cfg(feature = "tls")]
 use axum_server::tls_rustls::RustlsConfig;
 
 /// axum::routing::MethodFilter re-export
