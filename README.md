@@ -1,6 +1,6 @@
 <div align="center">
     <img src="docs/static/logo.svg" alt="Logo"/>
-    <h3>spring-rs is microservice framework written in Rust</h3>
+    <h3>spring-rs is application framework written in Rust, inspired by Java's SpringBoot</h3>
     <p>English ｜ <a href="./README.zh.md">中文</a></p>
     <p>
         <a href="https://crates.io/crates/spring">
@@ -12,7 +12,7 @@
     </p>
 </div>
 
-<b>spring-rs</b> is a microservice framework written in Rust, similar to SpringBoot in the Java ecosystem, which adopts the concept of convention over configuration. <b>spring-rs</b> provides an easily extensible plug-in system for integrating excellent projects in the Rust community, such as axum, sqlx, sea-orm, etc.
+<b>spring-rs</b> is an application framework that emphasizes convention over configuration, inspired by Java's SpringBoot. <b>spring-rs</b> provides an easily extensible plug-in system for integrating excellent projects in the Rust community, such as axum, sqlx, sea-orm, etc.
 
 Compared with SpringBoot in java, spring-rs has higher performance and lower memory usage, allowing you to completely get rid of the bloated JVM and travel light.
 
