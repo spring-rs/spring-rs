@@ -4,7 +4,7 @@ title = "spring-rs"
 
 # The homepage contents
 [extra]
-lead = "<b>spring-rs</b> is a microservice framework written in rust inspired by java's spring-boot"
+lead = "<b>spring-rs</b> is a application framework written in rust inspired by java's spring-boot"
 url = "/docs/getting-started/introduction/"
 url_button = "Get started"
 repo_version = "GitHub v0.0.8"

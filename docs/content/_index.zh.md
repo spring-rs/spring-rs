@@ -4,7 +4,7 @@ title = "spring-rs"
 
 # The homepage contents
 [extra]
-lead = 'spring-rs是Rust编写的微服务框架，与java生态的spring-boot类似'
+lead = 'spring-rs是Rust编写的应用框架，与java生态的spring-boot类似'
 url = "/zh/docs/getting-started/introduction/"
 url_button = "快速上手"
 repo_version = "GitHub v0.0.8"

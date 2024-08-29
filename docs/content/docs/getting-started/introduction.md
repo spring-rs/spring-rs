@@ -1,13 +1,13 @@
 +++
 title = "Introduction"
-description = "spring-rs is a microservice framework written in Rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in Rust community, such as axum, sqlx, sea-orm, etc."
+description = "spring-rs is a application framework written in Rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in Rust community, such as axum, sqlx, sea-orm, etc."
 draft = false
 weight = 2
 sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = 'spring-rs is a microservice framework written in Rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in Rust community, such as axum, sqlx, sea-orm, etc.'
+lead = 'spring-rs is a application framework written in Rust, similar to SpringBoot in java ecosystem. spring-rs provides an easily extensible plug-in system for integrating excellent projects in Rust community, such as axum, sqlx, sea-orm, etc.'
 toc = true
 top = false
 +++

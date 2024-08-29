@@ -1,13 +1,13 @@
 +++
 title = "介绍"
-description = "spring-rs是一个Rust编写的微服务框架，类似于java生态的springboot"
+description = "spring-rs是一个Rust编写的应用框架，类似于java生态的springboot"
 draft = false
 weight = 2
 sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = '<b>spring-rs</b>是一个Rust编写的微服务框架，类似于java生态的springboot。<b>spring-rs</b>提供了易于扩展的插件系统，用于整合Rust社区的优秀项目，例如axum、sqlx、sea-orm等。'
+lead = '<b>spring-rs</b>是一个Rust编写的应用框架，类似于java生态的springboot。<b>spring-rs</b>提供了易于扩展的插件系统，用于整合Rust社区的优秀项目，例如axum、sqlx、sea-orm等。'
 toc = true
 top = false
 +++
