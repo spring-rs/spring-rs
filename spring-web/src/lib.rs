@@ -9,10 +9,13 @@ pub mod error;
 pub mod extractor;
 /// axum route handler
 pub mod handler;
-pub use axum;
-pub use spring_boot::async_trait;
 use anyhow::Context;
-use config::{LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware, WebConfig};
+pub use axum;
+use config::{
+    EnableMiddleware, LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware,
+    TimeoutRequestMiddleware, WebConfig,
+};
+pub use spring_boot::async_trait;
 use spring_boot::config::Configurable;
 use spring_boot::{
     app::{App, AppBuilder},
@@ -122,14 +125,27 @@ impl WebPlugin {
 
     fn apply_middleware(router: Router, middleware: Middlewares) -> Router {
         let mut router = router;
-        if let Some(catch_panic) = middleware.catch_panic {
-            if catch_panic.enable {
-                router = router.layer(CatchPanicLayer::new());
+        if Some(EnableMiddleware { enable: true }) == middleware.catch_panic {
+            router = router.layer(CatchPanicLayer::new());
+        }
+        if Some(EnableMiddleware { enable: true }) == middleware.compression {
+            router = router.layer(CompressionLayer::new());
+        }
+        if Some(EnableMiddleware { enable: true }) == middleware.logger {
+            router = router.layer(TraceLayer::new_for_http());
+        }
+        if let Some(TimeoutRequestMiddleware { enable, timeout }) = middleware.timeout_request {
+            if enable {
+                router = router.layer(TimeoutLayer::new(Duration::from_millis(timeout)));
             }
         }
-        if let Some(compression) = middleware.compression {
-            if compression.enable {
-                router = router.layer(CompressionLayer::new());
+        if let Some(LimitPayloadMiddleware { enable, body_limit }) = middleware.limit_payload {
+            if enable {
+                let limit = byte_unit::Byte::from_str(&body_limit)
+                    .expect(&format!("parse limit payload str failed: {}", &body_limit));
+
+                let limit_payload = RequestBodyLimitLayer::new(limit.as_u64() as usize);
+                router = router.layer(limit_payload);
             }
         }
         if let Some(cors) = middleware.cors {
@@ -139,26 +155,6 @@ impl WebPlugin {
                 router = router.layer(cors);
             }
         }
-        if let Some(limit_payload) = middleware.limit_payload {
-            if limit_payload.enable {
-                let limit_payload = Self::build_body_limit_middleware(limit_payload)
-                    .expect("limit payload middleware build failed");
-                router = router.layer(limit_payload);
-            }
-        }
-        if let Some(logger) = middleware.logger {
-            if logger.enable {
-                router = router.layer(TraceLayer::new_for_http());
-            }
-        }
-        if let Some(timeout_request) = middleware.timeout_request {
-            if timeout_request.enable {
-                router = router.layer(TimeoutLayer::new(Duration::from_millis(
-                    timeout_request.timeout,
-                )));
-            }
-        }
-
         if let Some(static_assets) = middleware.static_assets {
             if static_assets.enable {
                 return Self::apply_static_dir(router, static_assets);
@@ -236,18 +232,5 @@ impl WebPlugin {
         }
 
         Ok(layer)
-    }
-
-    fn build_body_limit_middleware(
-        limit_payload: LimitPayloadMiddleware,
-    ) -> Result<RequestBodyLimitLayer> {
-        let limit = byte_unit::Byte::from_str(&limit_payload.body_limit).with_context(|| {
-            format!(
-                "parse limit payload str failed: {}",
-                &limit_payload.body_limit
-            )
-        })?;
-
-        Ok(RequestBodyLimitLayer::new(limit.as_u64() as usize))
     }
 }

@@ -1,6 +1,6 @@
-use std::net::{IpAddr, Ipv4Addr};
 use schemars::JsonSchema;
 use serde::Deserialize;
+use std::net::{IpAddr, Ipv4Addr};
 
 /// spring-web Config
 #[derive(Debug, JsonSchema, Deserialize)]
@@ -99,7 +99,7 @@ pub struct LimitPayloadMiddleware {
 
 /// A generic middleware configuration that can be enabled or
 /// disabled.
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Debug, PartialEq, Clone, JsonSchema, Deserialize)]
 pub struct EnableMiddleware {
     /// toggle enable
     pub enable: bool,
