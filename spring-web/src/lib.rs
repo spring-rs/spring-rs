@@ -1,4 +1,5 @@
 //! spring-web
+#[cfg(not(doctest))]
 #[doc = include_str!("../README.md")]
 
 /// spring-web config

@@ -1,4 +1,5 @@
 //! spring
+#[cfg(not(doctest))]
 #[doc = include_str!("../README.md")]
 pub use spring_boot::app::App;
 pub use spring_boot::tracing;
