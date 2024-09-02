@@ -76,6 +76,10 @@ You can also use the `auto_config` macro to implement automatic configuration. T
     .run()
     .await
 }
+
+-fn router() -> Router {
+-    Router::new().typed_route(hello_word)
+-}
 ```
 
 ## Attribute macro

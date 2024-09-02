@@ -24,3 +24,6 @@ redis = ["sea-streamer/redis"]
 file = ["sea-streamer/file"]
 stdio = ["sea-streamer/stdio"]
 json = ["sea-streamer/json", "serde_json"]
+
+[dev-dependencies]
+spring-web = { path = "../spring-web", version = "0.0.8" }

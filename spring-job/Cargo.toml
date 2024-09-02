@@ -15,3 +15,6 @@ tracing = { workspace = true, features = ["log"] }
 uuid = { workspace = true, features = ["v4"] }
 chrono = { workspace = true }
 inventory = { workspace = true }
+
+[dev-dependencies]
+spring-sqlx = { path = "../spring-sqlx", version = "0.0.8" }

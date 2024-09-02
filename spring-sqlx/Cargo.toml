@@ -7,20 +7,6 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
-[dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.8" }
-serde = { workspace = true }
-anyhow = { workspace = true }
-tracing = { workspace = true, features = ["log"] }
-schemars = { workspace = true }
-sqlx = { workspace = true, optional = true }
-serde_json = { workspace = true, optional = true }
-rust_decimal = { version = "1", default-features = false, optional = true }
-bigdecimal = { version = "0.3", default-features = false, optional = true }
-chrono = { version = "0.4.30", default-features = false, optional = true }
-time = { version = "0.3.36", default-features = false, optional = true }
-uuid = { version = "1", default-features = false, optional = true }
-
 [features]
 default = ["runtime-tokio-native-tls", "sqlx/default"]
 postgres = ["sqlx/postgres"]
@@ -41,3 +27,20 @@ with-time = ["time", "sqlx?/time"]
 runtime-tokio = ["sqlx?/runtime-tokio"]
 runtime-tokio-native-tls = ["sqlx?/runtime-tokio-native-tls", "runtime-tokio"]
 runtime-tokio-rustls = ["sqlx?/runtime-tokio-rustls", "runtime-tokio"]
+
+[dependencies]
+spring-boot = { path = "../spring-boot", version = "0.0.8" }
+serde = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+schemars = { workspace = true }
+sqlx = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+rust_decimal = { version = "1", default-features = false, optional = true }
+bigdecimal = { version = "0.3", default-features = false, optional = true }
+chrono = { version = "0.4.30", default-features = false, optional = true }
+time = { version = "0.3.36", default-features = false, optional = true }
+uuid = { version = "1", default-features = false, optional = true }
+
+[dev-dependencies]
+spring-web = { path = "../spring-web", version = "0.0.8" }

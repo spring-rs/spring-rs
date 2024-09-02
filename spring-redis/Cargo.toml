@@ -14,3 +14,6 @@ anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 redis = { workspace = true, features = ["connection-manager", "tokio-comp"] }
 schemars = { workspace = true }
+
+[dev-dependencies]
+spring-web = { path = "../spring-web", version = "0.0.8" }

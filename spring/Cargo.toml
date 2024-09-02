@@ -7,9 +7,12 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+default = []
+
 [dependencies]
 spring-boot = { path = "../spring-boot", version = "0.0.8" }
 spring-macros = { path = "../spring-macros", version = "0.0.8" }
 
-[features]
-default = []
+[dev-dependencies]
+spring-web = { path = "../spring-web", version = "0.0.8" }

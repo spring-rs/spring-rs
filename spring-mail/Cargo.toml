@@ -14,3 +14,6 @@ serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 schemars = { workspace = true }
+
+[dev-dependencies]
+spring-web = { path = "../spring-web", version = "0.0.8" }
