@@ -16,3 +16,4 @@ spring-macros = { path = "../spring-macros", version = "0.0.8" }
 
 [dev-dependencies]
 spring-web = { path = "../spring-web", version = "0.0.8" }
+tokio = { workspace = true, features = ["full"] }

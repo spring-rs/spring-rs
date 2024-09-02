@@ -4,7 +4,7 @@
 
 ```rust
 use spring::{get, auto_config, App};
-use spring_web::{response::IntoResponse, WebConfigurator, WebPlugin};
+use spring_web::{axum::response::IntoResponse, WebConfigurator, WebPlugin};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
