@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot" }
+spring-boot = { path = "../spring-boot", version = "0.0.8" }
 sea-streamer = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true, optional = true }
