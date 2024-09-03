@@ -1,7 +1,9 @@
 //! spring-boot
 #[cfg(not(doctest))]
 #[doc = include_str!("../README.md")]
+/// App Builder
 pub mod app;
+/// App Config
 pub mod config;
 pub mod error;
 pub mod log;
