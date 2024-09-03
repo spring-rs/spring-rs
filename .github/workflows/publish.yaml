@@ -22,4 +22,4 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --verbose
       - name: Run Publish
-        run: sed -i 's/"examples.*,//' cargo.toml && cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}} --allow-dirty
+        run: sed -i 's/"examples.*,//' Cargo.toml && cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}} --allow-dirty
