@@ -135,14 +135,18 @@ impl Streamer {
             .create_generic_producer(producer_options)
             .await
             .context("create stream generic producer failed")?;
-        Ok(Producer(producer))
+        Ok(Producer::new(producer))
     }
 }
 
 #[derive(Clone)]
-pub struct Producer(SeaProducer);
+pub struct Producer(Arc<SeaProducer>);
 
 impl Producer {
+    fn new(producer: SeaProducer) -> Self {
+        Self(Arc::new(producer))
+    }
+
     #[cfg(feature = "json")]
     pub async fn send_json<T: Serialize>(
         &self,
