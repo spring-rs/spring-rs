@@ -1,6 +1,5 @@
-//! spring-stream
-#[cfg(not(doctest))]
-#[doc = include_str!("../README.md")]
+//! [spring-stream](https://spring-rs.github.io/docs/plugins/spring-stream/)
+
 mod config;
 pub mod consumer;
 pub mod extractor;

@@ -1,5 +1,5 @@
-//! spring-mail
-#[doc = include_str!("../README.md")]
+//! [spring-mail](https://spring-rs.github.io/docs/plugins/spring-mail/)
+
 pub mod config;
 
 use anyhow::Context;

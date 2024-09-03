@@ -1,5 +1,5 @@
-//! spring-job
-#[doc = include_str!("../README.md")]
+//! [spring-job](https://spring-rs.github.io/docs/plugins/spring-job/)
+
 pub mod extractor;
 pub mod handler;
 pub mod job;

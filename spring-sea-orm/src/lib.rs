@@ -1,5 +1,5 @@
-//! spring-sea-orm
-#[doc = include_str!("../README.md")]
+//! [spring-sea-orm](https://spring-rs.github.io/docs/plugins/spring-sea-orm/)
+
 pub mod config;
 
 use anyhow::Context;

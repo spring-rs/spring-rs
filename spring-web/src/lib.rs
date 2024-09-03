@@ -1,6 +1,4 @@
-//! spring-web
-#[cfg(not(doctest))]
-#[doc = include_str!("../README.md")]
+//! [spring-web](https://spring-rs.github.io/docs/plugins/spring-web/)
 
 /// spring-web config
 pub mod config;

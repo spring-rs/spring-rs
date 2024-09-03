@@ -1,5 +1,5 @@
-//! spring-redis
-#[doc = include_str!("../README.md")]
+//! [spring-redis](https://spring-rs.github.io/docs/plugins/spring-redis/)
+
 pub mod config;
 
 use anyhow::Context;

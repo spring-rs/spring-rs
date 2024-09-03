@@ -30,7 +30,7 @@ impl Job {
             trigger: Trigger::OneShot(delay_seconds),
         }
     }
-    /// TODO: tokio-cron-scheduler not support: https://github.com/mvniekerk/tokio-cron-scheduler/issues/56
+    /// TODO: tokio-cron-scheduler not support: <https://github.com/mvniekerk/tokio-cron-scheduler/issues/56>
     pub fn fix_delay(seconds: u64) -> JobBuilder {
         JobBuilder {
             trigger: Trigger::FixedDelay(seconds),

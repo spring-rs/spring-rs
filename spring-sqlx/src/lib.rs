@@ -1,5 +1,5 @@
-//! spring-sqlx
-#[doc = include_str!("../README.md")]
+//! [spring-sqlx](https://spring-rs.github.io/docs/plugins/spring-sqlx/)
+
 pub mod config;
 pub extern crate sqlx;
 use anyhow::Context;

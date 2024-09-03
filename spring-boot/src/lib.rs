@@ -1,6 +1,5 @@
-//! spring-boot
-#[cfg(not(doctest))]
-#[doc = include_str!("../README.md")]
+//! [spring-boot](https://spring-rs.github.io/docs/plugins/plugin-by-self/)
+
 /// App Builder
 pub mod app;
 /// App Config

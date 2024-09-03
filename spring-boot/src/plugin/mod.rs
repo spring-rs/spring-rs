@@ -9,7 +9,7 @@ pub struct PluginRef(Arc<dyn Plugin>);
 
 #[async_trait]
 pub trait Plugin: Any + Send + Sync {
-    /// Configures the [`App`] to which this plugin is added.
+    /// Configures the `App` to which this plugin is added.
     async fn build(&self, app: &mut AppBuilder);
 
     /// Configures a name for the [`Plugin`] which is primarily used for checking plugin

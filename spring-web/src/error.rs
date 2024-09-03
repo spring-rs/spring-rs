@@ -7,7 +7,7 @@ use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, WebError>;
 
-/// https://tools.ietf.org/html/rfc7231
+/// <https://tools.ietf.org/html/rfc7231>
 #[derive(Error, Debug)]
 #[error("request error, status code is {status_code}: {msg}")]
 pub struct KnownWebError {

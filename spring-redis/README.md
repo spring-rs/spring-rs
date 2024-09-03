@@ -41,4 +41,6 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 }
 ```
 
-Complete code reference [`redis-example`](https://github.com/spring -rs/spring-rs/tree/master/examples/redis-example)
+Complete code reference [`redis-example`][redis-example]
+
+[redis-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/redis-example
