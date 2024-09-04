@@ -29,7 +29,7 @@ pub(crate) fn load_config(config_path: &Path, env: Env) -> Result<Table> {
     let main_table = toml::from_str::<Table>(main_toml_str.as_str())
         .with_context(|| format!("Failed to parse the toml file at path {:?}", config_path))?;
 
-    let config_table: toml::map::Map<String, toml::Value> = match env.get_config_path(config_path) {
+    let config_table: Table = match env.get_config_path(config_path) {
         Ok(env_path) => {
             let env_path = env_path.as_path();
             if !env_path.exists() {
@@ -53,4 +53,45 @@ pub(crate) fn load_config(config_path: &Path, env: Env) -> Result<Table> {
     };
 
     Ok(config_table)
+}
+
+#[allow(unused_imports)]
+mod tests {
+    use super::env::Env;
+    use crate::error::Result;
+    use std::fs;
+
+    #[test]
+    fn test_load_config() -> Result<()> {
+        let temp_dir = std::env::temp_dir();
+
+        let foo = temp_dir.join("foo.toml");
+        #[rustfmt::skip]
+        let _ = fs::write(&foo,r#"
+        [group-key-a]
+        key_a = "A"
+        "#,
+        );
+
+        let table = super::load_config(&foo, Env::from_string("dev"))?;
+        let group = table.get("group-key-a");
+        assert_eq!(group.unwrap().get("key_a").unwrap().as_str(), Some("A"));
+
+        // test merge
+        let foo_dev = temp_dir.join("foo-dev.toml");
+        #[rustfmt::skip]
+        let _ = fs::write(&foo_dev,r#"
+        [group-key-a]
+        key_a = "OOOOA"
+        "#,
+        );
+
+        let table = super::load_config(&foo, Env::from_string("dev"))?;
+        let group = table.get("group-key-a");
+        assert_eq!(group.unwrap().get("key_a").unwrap().as_str(), Some("OOOOA"));
+
+        let _ = fs::remove_file(foo);
+        let _ = fs::remove_file(foo_dev);
+        Ok(())
+    }
 }
