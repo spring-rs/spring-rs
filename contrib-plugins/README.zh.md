@@ -1,4 +1,4 @@
-* [opendal](#spring-opendal): OpenDAL 提供了统一的数据访问层, 可以方便的访问各种存储系统.
+* [opendal](#spring-opendal) [![crates.io](https://img.shields.io/crates/v/spring-opendal.svg)](https://crates.io/crates/spring-opendal) [![Documentation](https://docs.rs/spring-opendal/badge.svg)](https://docs.rs/spring-opendal): OpenDAL 提供了统一的数据访问层, 可以方便的访问各种存储系统.
 
 ## Spring OpenDAL
 

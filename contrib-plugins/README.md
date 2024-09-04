@@ -1,4 +1,4 @@
-* [![crates.io](https://img.shields.io/crates/v/spring-opendal.svg)](https://crates.io/crates/spring-opendal)[![Documentation](https://docs.rs/spring-opendal/badge.svg)](https://docs.rs/spring-opendal) [opendal](#spring-opendal): OpenDAL offers a unified data access layer, empowering users to
+* [opendal](#spring-opendal) [![crates.io](https://img.shields.io/crates/v/spring-opendal.svg)](https://crates.io/crates/spring-opendal) [![Documentation](https://docs.rs/spring-opendal/badge.svg)](https://docs.rs/spring-opendal): OpenDAL offers a unified data access layer, empowering users to
   seamlessly and efficiently retrieve data from diverse storage services.
 
 ## Spring OpenDAL
