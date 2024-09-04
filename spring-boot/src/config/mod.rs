@@ -63,35 +63,33 @@ mod tests {
 
     #[test]
     fn test_load_config() -> Result<()> {
-        let temp_dir = std::env::temp_dir();
+        let temp_dir = tempfile::tempdir()?;
 
-        let foo = temp_dir.join("foo.toml");
+        let foo = temp_dir.path().join("foo.toml");
         #[rustfmt::skip]
         let _ = fs::write(&foo,r#"
-        [group-key-a]
-        key_a = "A"
+        [group]
+        key = "A"
         "#,
         );
 
         let table = super::load_config(&foo, Env::from_string("dev"))?;
-        let group = table.get("group-key-a");
-        assert_eq!(group.unwrap().get("key_a").unwrap().as_str(), Some("A"));
+        let group = table.get("group");
+        assert_eq!(group.unwrap().get("key").unwrap().as_str(), Some("A"));
 
         // test merge
-        let foo_dev = temp_dir.join("foo-dev.toml");
+        let foo_dev = temp_dir.path().join("foo-dev.toml");
         #[rustfmt::skip]
         let _ = fs::write(&foo_dev,r#"
-        [group-key-a]
-        key_a = "OOOOA"
+        [group]
+        key = "OOOOA"
         "#,
         );
 
         let table = super::load_config(&foo, Env::from_string("dev"))?;
-        let group = table.get("group-key-a");
-        assert_eq!(group.unwrap().get("key_a").unwrap().as_str(), Some("OOOOA"));
+        let group = table.get("group");
+        assert_eq!(group.unwrap().get("key").unwrap().as_str(), Some("OOOOA"));
 
-        let _ = fs::remove_file(foo);
-        let _ = fs::remove_file(foo_dev);
         Ok(())
     }
 }

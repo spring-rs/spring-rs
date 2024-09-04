@@ -7,6 +7,9 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+default = []
+
 [dependencies]
 spring-macros = { path = "../spring-macros", version = "0.0.9" }
 anyhow = { workspace = true }
@@ -29,5 +32,5 @@ schemars = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 dashmap = { workspace = true }
 
-[features]
-default = []
+[dev-dependencies]
+tempfile = "3.12"

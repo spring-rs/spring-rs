@@ -72,63 +72,62 @@ mod tests {
 
     #[test]
     fn test_get_config_path() -> Result<()> {
-        let temp_dir = std::env::temp_dir();
+        let temp_dir = tempfile::tempdir()?;
 
-        let foo = temp_dir.join("foo.toml");
+        let foo = temp_dir.path().join("foo.toml");
         let _ = touch(&foo);
 
         assert_eq!(
             Env::from_string("dev").get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-dev.toml")
+            temp_dir.path().join("foo-dev.toml")
         );
 
         assert_eq!(
             Env::from_string("test").get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-test.toml")
+            temp_dir.path().join("foo-test.toml")
         );
 
         assert_eq!(
             Env::from_string("prod").get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-prod.toml")
+            temp_dir.path().join("foo-prod.toml")
         );
 
         assert_eq!(
             Env::from_string("other").get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-dev.toml")
+            temp_dir.path().join("foo-dev.toml")
         );
 
-        let _ = fs::remove_file(foo);
         Ok(())
     }
 
     #[test]
     fn test_env() -> Result<()> {
-        let temp_dir = std::env::temp_dir();
-        let foo = temp_dir.join("foo.toml");
+        let temp_dir = tempfile::tempdir()?;
+        let foo = temp_dir.path().join("foo.toml");
         let _ = touch(&foo);
 
         std::env::set_var("SPRING_ENV", "dev");
         assert_eq!(
             Env::from_env().get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-dev.toml")
+            temp_dir.path().join("foo-dev.toml")
         );
 
         std::env::set_var("SPRING_ENV", "TEST");
         assert_eq!(
             Env::from_env().get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-test.toml")
+            temp_dir.path().join("foo-test.toml")
         );
 
         std::env::set_var("SPRING_ENV", "Prod");
         assert_eq!(
             Env::from_env().get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-prod.toml")
+            temp_dir.path().join("foo-prod.toml")
         );
 
         std::env::set_var("SPRING_ENV", "Other");
         assert_eq!(
             Env::from_env().get_config_path(&foo.as_path())?,
-            temp_dir.join("foo-dev.toml")
+            temp_dir.path().join("foo-dev.toml")
         );
 
         Ok(())
