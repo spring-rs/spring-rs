@@ -11,5 +11,5 @@ repository.workspace = true
 default = []
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.8" }
-spring-macros = { path = "../spring-macros", version = "0.0.8" }
+spring-boot = { path = "../spring-boot", version = "0.0.9" }
+spring-macros = { path = "../spring-macros", version = "0.0.9" }

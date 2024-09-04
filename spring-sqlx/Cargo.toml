@@ -29,7 +29,7 @@ runtime-tokio-native-tls = ["sqlx?/runtime-tokio-native-tls", "runtime-tokio"]
 runtime-tokio-rustls = ["sqlx?/runtime-tokio-rustls", "runtime-tokio"]
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.8" }
+spring-boot = { path = "../spring-boot", version = "0.0.9" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
@@ -43,4 +43,4 @@ time = { version = "0.3.36", default-features = false, optional = true }
 uuid = { version = "1", default-features = false, optional = true }
 
 [dev-dependencies]
-spring-web = { path = "../spring-web", version = "0.0.8" }
+spring-web = { path = "../spring-web", version = "0.0.9" }

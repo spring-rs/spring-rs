@@ -9,11 +9,11 @@ repository.workspace = true
 
 [dependencies]
 lettre = { workspace = true, features = ["tokio1-native-tls", "serde"] }
-spring-boot = { path = "../spring-boot", version = "0.0.8" }
+spring-boot = { path = "../spring-boot", version = "0.0.9" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 schemars = { workspace = true }
 
 [dev-dependencies]
-spring-web = { path = "../spring-web", version = "0.0.8" }
+spring-web = { path = "../spring-web", version = "0.0.9" }

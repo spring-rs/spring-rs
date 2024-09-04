@@ -4,7 +4,7 @@
 ## Dependencies
 
 ```toml
-spring-job = { version = "0.0.8" }
+spring-job = { version = "0.0.9" }
 ```
 
 ## API interface

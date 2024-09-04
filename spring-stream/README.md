@@ -4,7 +4,7 @@
 ## Dependencies
 
 ```toml
-spring-stream = { version = "0.0.8", features=["file"] }
+spring-stream = { version = "0.0.9", features=["file"] }
 ```
 
 spring-stream supports four message storages: `file`, `stdio`, `redis`, and `kafka`.
@@ -47,7 +47,7 @@ connect = { sasl_options={mechanism="Plain",username="user",password="passwd"}}
 `StreamPlugin` registers a `Producer` for sending messages. If you need to send messages in json format, you need to add the `json` feature in the dependencies:
 
 ```toml
-spring-stream = { version = "0.0.8", features=["file","json"] }
+spring-stream = { version = "0.0.9", features=["file","json"] }
 ```
 
 ```rust

@@ -4,6 +4,11 @@
 
 - **added:** [#4 spring-opentelemetry plugin](https://github.com/spring-rs/spring-rs/issues/4)
 
+## 0.0.9 - 2024.9.4
+
+- **removed**: spring-actuator
+- **changed**: fix spring-web default binding ip
+
 ## 0.0.8 - 2024.8.25
 
 - **added:** [#3 spring-stream plugin](https://github.com/spring-rs/spring-rs/issues/3) ([#21])

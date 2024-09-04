@@ -6,7 +6,7 @@
 ## Dependencies
 
 ```toml
-spring-web = { version = "0.0.8" }
+spring-web = { version = "0.0.9" }
 ```
 
 ## Configuration items

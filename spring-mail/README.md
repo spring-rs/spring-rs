@@ -4,7 +4,7 @@
 ## Dependencies
 
 ```toml
-spring-mail = { version = "0.0.8" }
+spring-mail = { version = "0.0.9" }
 ```
 
 ## Configuration items

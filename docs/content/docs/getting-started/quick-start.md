@@ -23,11 +23,11 @@ Add the following dependencies to your `Cargo.toml` file
 ```toml
 [dependencies]
 # Spring provides the core plugin system and useful Procedural Macros
-spring = "0.0.8"
+spring = "0.0.9"
 # If you are going to write a web application, add spring-web
-spring-web = "0.0.8"
+spring-web = "0.0.9"
 # If the application needs to interact with the database, add spring-sqlx
-spring-sqlx = { version="0.0.8", features = ["mysql"] }
+spring-sqlx = { version="0.0.9", features = ["mysql"] }
 # The spring-rs project uses the tokio asynchronous runtime by default
 tokio = "1"
 ```

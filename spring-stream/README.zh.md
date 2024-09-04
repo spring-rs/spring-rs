@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-stream = { version = "0.0.8",features=["file"] }
+spring-stream = { version = "0.0.9",features=["file"] }
 ```
 
 spring-stream支持`file`、`stdio`、`redis`、`kafka`四种消息存储。
@@ -47,7 +47,7 @@ connect = { sasl_options={mechanism="Plain",username="user",password="passwd"}}
 `StreamPlugin`注册了一个`Producer`用于发送消息。如果需要发送json格式的消息，需要在依赖项中添加`json`的feature：
 
 ```toml
-spring-stream = { version = "0.0.8", features=["file","json"] }
+spring-stream = { version = "0.0.9", features=["file","json"] }
 ```
 
 ```rust

@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.8" }
+spring-boot = { path = "../spring-boot", version = "0.0.9" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
@@ -16,4 +16,4 @@ redis = { workspace = true, features = ["connection-manager", "tokio-comp"] }
 schemars = { workspace = true }
 
 [dev-dependencies]
-spring-web = { path = "../spring-web", version = "0.0.8" }
+spring-web = { path = "../spring-web", version = "0.0.9" }

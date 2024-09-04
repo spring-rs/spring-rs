@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.8" }
+spring-boot = { path = "../spring-boot", version = "0.0.9" }
 tokio-cron-scheduler = { workspace = true, features = ["signal"] }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
@@ -17,4 +17,4 @@ chrono = { workspace = true }
 inventory = { workspace = true }
 
 [dev-dependencies]
-spring-sqlx = { path = "../spring-sqlx", version = "0.0.8" }
+spring-sqlx = { path = "../spring-sqlx", version = "0.0.9" }
