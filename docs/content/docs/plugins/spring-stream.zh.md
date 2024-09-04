@@ -2,7 +2,7 @@
 title = "spring-stream插件"
 description = "spring-stream插件如何使用"
 draft = false
-weight = 19
+weight = 18
 sort_by = "weight"
 template = "docs/page.html"
 

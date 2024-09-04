@@ -2,7 +2,7 @@
 title = "spring-stream Plugin"
 description = "How to use spring-stream plugin"
 draft = false
-weight = 19
+weight = 18
 sort_by = "weight"
 template = "docs/page.html"
 
