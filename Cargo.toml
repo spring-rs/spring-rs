@@ -10,7 +10,6 @@ members = [
     "spring-sqlx",
     "spring-sea-orm",
     "spring-stream",
-    "spring-actuator",
     "spring-mail",
     "examples/*",
 ]
