@@ -78,22 +78,22 @@ mod tests {
         let _ = touch(&foo);
 
         assert_eq!(
-            Env::from_string("dev").get_config_path(&foo.as_path())?,
+            Env::from_string("dev").get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-dev.toml")
         );
 
         assert_eq!(
-            Env::from_string("test").get_config_path(&foo.as_path())?,
+            Env::from_string("test").get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-test.toml")
         );
 
         assert_eq!(
-            Env::from_string("prod").get_config_path(&foo.as_path())?,
+            Env::from_string("prod").get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-prod.toml")
         );
 
         assert_eq!(
-            Env::from_string("other").get_config_path(&foo.as_path())?,
+            Env::from_string("other").get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-dev.toml")
         );
 
@@ -108,25 +108,25 @@ mod tests {
 
         std::env::set_var("SPRING_ENV", "dev");
         assert_eq!(
-            Env::from_env().get_config_path(&foo.as_path())?,
+            Env::from_env().get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-dev.toml")
         );
 
         std::env::set_var("SPRING_ENV", "TEST");
         assert_eq!(
-            Env::from_env().get_config_path(&foo.as_path())?,
+            Env::from_env().get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-test.toml")
         );
 
         std::env::set_var("SPRING_ENV", "Prod");
         assert_eq!(
-            Env::from_env().get_config_path(&foo.as_path())?,
+            Env::from_env().get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-prod.toml")
         );
 
         std::env::set_var("SPRING_ENV", "Other");
         assert_eq!(
-            Env::from_env().get_config_path(&foo.as_path())?,
+            Env::from_env().get_config_path(foo.as_path())?,
             temp_dir.path().join("foo-dev.toml")
         );
 

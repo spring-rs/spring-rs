@@ -80,7 +80,7 @@ mod tests {
         // test merge
         let foo_dev = temp_dir.path().join("foo-dev.toml");
         #[rustfmt::skip]
-        let _ = fs::write(&foo_dev,r#"
+        let _ = fs::write(foo_dev,r#"
         [group]
         key = "OOOOA"
         "#,
