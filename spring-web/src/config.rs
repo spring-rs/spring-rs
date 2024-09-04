@@ -13,7 +13,7 @@ pub struct WebConfig {
 }
 
 fn default_binding() -> IpAddr {
-    IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1))
+    IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))
 }
 
 fn default_port() -> u16 {
