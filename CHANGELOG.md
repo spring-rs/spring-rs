@@ -7,8 +7,9 @@
 ## 0.0.9 - 2024.9.4
 
 - **removed**: spring-actuator
-- **changed**: fix spring-web default binding ip
 - **added**: spring-boot testcase
+- **changed**: fix spring-web default binding ip
+- **changed**: the added component must implement the Clone trait
 
 ## 0.0.8 - 2024.8.25
 
