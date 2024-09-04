@@ -16,7 +16,7 @@ use sea_streamer::{ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumer, Se
 use spring_boot::{app::App, error::Result};
 use std::{ops::Deref, sync::Arc};
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Consumers(Vec<Consumer>);
 
 impl Consumers {
@@ -44,6 +44,7 @@ impl Deref for Consumers {
     }
 }
 
+#[derive(Clone)]
 pub struct Consumer {
     pub(crate) stream_keys: &'static [&'static str],
     pub(crate) opts: ConsumerOpts,

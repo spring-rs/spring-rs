@@ -16,7 +16,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use uuid::Uuid;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Jobs(Vec<Job>);
 
 impl Jobs {

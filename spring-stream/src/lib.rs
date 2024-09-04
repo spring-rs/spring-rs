@@ -85,7 +85,6 @@ impl Plugin for StreamPlugin {
             .await
             .expect("create producer failed");
 
-        app.add_component(streamer);
         app.add_component(producer);
     }
 }
@@ -107,7 +106,7 @@ impl Streamer {
         Ok(Self { streamer, config })
     }
 
-    pub async fn create_consumer(
+    async fn create_consumer(
         &self,
         stream_keys: &'static [&'static str],
         opts: ConsumerOpts,

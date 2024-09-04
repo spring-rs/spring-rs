@@ -1,12 +1,12 @@
 pub mod env;
 
-use crate::app::AppBuilder;
 use crate::error::{AppError, Result};
 use anyhow::Context;
 use env::Env;
 use serde_toml_merge::merge_tables;
 pub use spring_macros::Configurable;
 use std::fs;
+use std::path::Path;
 use toml::Table;
 
 pub trait Configurable {
@@ -16,21 +16,20 @@ pub trait Configurable {
 }
 
 /// load toml config
-pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {
-    let main_path = app.config_path.as_path();
-    let config_file_content = fs::read_to_string(main_path);
+pub(crate) fn load_config(config_path: &Path, env: Env) -> Result<Table> {
+    let config_file_content = fs::read_to_string(config_path);
     let main_toml_str = match config_file_content {
         Err(e) => {
-            log::warn!("Failed to read configuration file {:?}: {}", main_path, e);
+            log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
             return Ok(Table::new());
         }
         Ok(content) => content,
     };
 
     let main_table = toml::from_str::<Table>(main_toml_str.as_str())
-        .with_context(|| format!("Failed to parse the toml file at path {:?}", main_path))?;
+        .with_context(|| format!("Failed to parse the toml file at path {:?}", config_path))?;
 
-    let config_table = match env.get_config_path(main_path) {
+    let config_table: toml::map::Map<String, toml::Value> = match env.get_config_path(config_path) {
         Ok(env_path) => {
             let env_path = env_path.as_path();
             if !env_path.exists() {
@@ -44,7 +43,7 @@ pub(crate) fn load_config(app: &AppBuilder, env: Env) -> Result<Table> {
             merge_tables(main_table, env_table)
                 .map_err(|e| AppError::TomlMergeError(format!("merge toml error: {}", e)))
                 .with_context(|| {
-                    format!("Failed to merge files {:?} and {:?}", main_path, env_path)
+                    format!("Failed to merge files {:?} and {:?}", config_path, env_path)
                 })?
         }
         Err(_) => {

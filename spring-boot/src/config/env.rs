@@ -26,11 +26,11 @@ impl Env {
         }
     }
 
-    pub fn from_string(str: String) -> Self {
-        match str {
-            str if str.eq_ignore_ascii_case("dev") => Self::Dev,
-            str if str.eq_ignore_ascii_case("test") => Self::Test,
-            str if str.eq_ignore_ascii_case("prod") => Self::Prod,
+    pub fn from_string<S: Into<String>>(str: S) -> Self {
+        match str.into() {
+            s if s.eq_ignore_ascii_case("dev") => Self::Dev,
+            s if s.eq_ignore_ascii_case("test") => Self::Test,
+            s if s.eq_ignore_ascii_case("prod") => Self::Prod,
             _ => Self::Dev,
         }
     }
@@ -62,4 +62,85 @@ pub fn init() -> Result<Env> {
     }
 
     Ok(Env::from_env())
+}
+
+mod tests {
+    #[allow(unused_imports)]
+    use super::Env;
+    use crate::error::Result;
+    use std::{fs, path::PathBuf};
+
+    #[test]
+    fn test_get_config_path() -> Result<()> {
+        let temp_dir = std::env::temp_dir();
+
+        let foo = temp_dir.join("foo.toml");
+        let _ = touch(&foo);
+
+        assert_eq!(
+            Env::from_string("dev").get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-dev.toml")
+        );
+
+        assert_eq!(
+            Env::from_string("test").get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-test.toml")
+        );
+
+        assert_eq!(
+            Env::from_string("prod").get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-prod.toml")
+        );
+
+        assert_eq!(
+            Env::from_string("other").get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-dev.toml")
+        );
+
+        let _ = fs::remove_file(foo);
+        Ok(())
+    }
+
+    #[test]
+    fn test_env() -> Result<()> {
+        let temp_dir = std::env::temp_dir();
+        let foo = temp_dir.join("foo.toml");
+        let _ = touch(&foo);
+
+        std::env::set_var("SPRING_ENV", "dev");
+        assert_eq!(
+            Env::from_env().get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-dev.toml")
+        );
+
+        std::env::set_var("SPRING_ENV", "TEST");
+        assert_eq!(
+            Env::from_env().get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-test.toml")
+        );
+
+        std::env::set_var("SPRING_ENV", "Prod");
+        assert_eq!(
+            Env::from_env().get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-prod.toml")
+        );
+
+        std::env::set_var("SPRING_ENV", "Other");
+        assert_eq!(
+            Env::from_env().get_config_path(&foo.as_path())?,
+            temp_dir.join("foo-dev.toml")
+        );
+
+        Ok(())
+    }
+
+    #[allow(dead_code)]
+    fn touch(path: &PathBuf) -> Result<()> {
+        let _ = fs::OpenOptions::new()
+            .truncate(true)
+            .create(true)
+            .write(true)
+            .open(path)?;
+        Ok(())
+    }
 }

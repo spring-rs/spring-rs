@@ -117,7 +117,7 @@ impl AppBuilder {
     /// Add component to the registry
     pub fn add_component<T>(&mut self, component: T) -> &mut Self
     where
-        T: any::Any + Send + Sync,
+        T: Clone + any::Any + Send + Sync,
     {
         let component_name = std::any::type_name::<T>();
         log::debug!("added component: {}", component_name);
@@ -165,19 +165,22 @@ impl AppBuilder {
         let env = env::init()?;
 
         // 2. load yaml config
-        self.config = config::load_config(self, env)?;
+        self.config = self.load_config(env)?;
 
-        // 3. load LogPlugin
-        LogPlugin.build(self);
-
-        // 4. build plugin
+        // 3. build plugin
         self.build_plugins().await;
 
-        // 5. schedule
+        // 4. schedule
         self.schedule().await
     }
 
+    fn load_config(&mut self, env: env::Env) -> Result<Table> {
+        config::load_config(&self.config_path, env)
+    }
+
     async fn build_plugins(&mut self) {
+        LogPlugin.build(self);
+
         let registry = std::mem::take(&mut self.plugin_registry);
         let mut to_register = registry
             .iter()

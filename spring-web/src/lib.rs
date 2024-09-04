@@ -141,7 +141,7 @@ impl WebPlugin {
         if let Some(LimitPayloadMiddleware { enable, body_limit }) = middleware.limit_payload {
             if enable {
                 let limit = byte_unit::Byte::from_str(&body_limit)
-                    .expect(&format!("parse limit payload str failed: {}", &body_limit));
+                    .unwrap_or_else(|_| panic!("parse limit payload str failed: {}", &body_limit));
 
                 let limit_payload = RequestBodyLimitLayer::new(limit.as_u64() as usize);
                 router = router.layer(limit_payload);
