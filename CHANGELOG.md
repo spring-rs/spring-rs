@@ -8,6 +8,7 @@
 
 - **removed**: spring-actuator
 - **changed**: fix spring-web default binding ip
+- **added**: spring-boot testcase
 
 ## 0.0.8 - 2024.8.25
 
