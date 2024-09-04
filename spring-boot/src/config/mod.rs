@@ -41,7 +41,7 @@ pub(crate) fn load_config(config_path: &Path, env: Env) -> Result<Table> {
             let env_table = toml::from_str::<Table>(env_toml_str.as_str())
                 .with_context(|| format!("Failed to parse the toml file at path {:?}", env_path))?;
             merge_tables(main_table, env_table)
-                .map_err(|e| AppError::TomlMergeError(format!("merge toml error: {}", e)))
+                .map_err(|e| AppError::TomlMergeError(e.to_string()))
                 .with_context(|| {
                     format!("Failed to merge files {:?} and {:?}", config_path, env_path)
                 })?

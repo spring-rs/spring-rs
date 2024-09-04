@@ -13,11 +13,8 @@ pub enum AppError {
     #[error(transparent)]
     TomlParseError(#[from] toml::de::Error),
 
-    #[error("{0}")]
+    #[error("merge toml error: {0}")]
     TomlMergeError(String),
-
-    #[error("{0}")]
-    ConfigError(String),
 
     #[error(transparent)]
     JoinError(#[from] tokio::task::JoinError),
