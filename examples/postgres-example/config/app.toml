@@ -1,0 +1,2 @@
+[postgres]
+connect = "postgres://postgres:xudjf23adj213@localhost/postgres"

@@ -8,6 +8,7 @@ members = [
     "spring-job",
     "spring-redis",
     "spring-sqlx",
+    "spring-postgres",
     "spring-sea-orm",
     "spring-stream",
     "spring-mail",
@@ -40,6 +41,7 @@ axum = "0.7.5"
 sqlx = "0.7"
 sea-orm = "1.0"
 sea-streamer = "0.5"
+tokio-postgres = "0.7"
 redis = "0.26.1"
 lettre = "0.11.7"
 tokio-cron-scheduler = "0.11"

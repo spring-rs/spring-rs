@@ -140,34 +140,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'spring_actuator'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--lib",
-                    "--package=spring-actuator"
-                ],
-                "filter": {
-                    "name": "spring_actuator",
-                    "kind": "lib"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug executable 'actuator-example'",
+            "name": "Debug executable 'postgres-example'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=actuator-example",
-                    "--package=actuator-example"
+                    "--bin=postgres-example",
+                    "--package=postgres-example"
                 ],
                 "filter": {
-                    "name": "actuator-example",
+                    "name": "postgres-example",
                     "kind": "bin"
                 }
             },
@@ -175,7 +156,7 @@
             "env": {
                 "RUST_BACKTRACE": "1",
             },
-            "cwd": "${workspaceFolder}/examples/actuator-example"
+            "cwd": "${workspaceFolder}/examples/postgres-example"
         },
         {
             "type": "lldb",

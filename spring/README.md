@@ -29,6 +29,5 @@ async fn hello_world() -> impl IntoResponse {
 * [x] [`spring-redis`](https://docs.rs/spring-redis)(Integrated with [`redis`](https://github.com/redis-rs/redis-rs))
 * [x] [`spring-mail`](https://docs.rs/spring-mail)(integrated with [`lettre`](https://github.com/lettre/lettre))
 * [x] [`spring-job`](https://docs.rs/spring-job)(integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
-* [ ] `spring-actuator`(provides a simple health check and system diagnostic interface)
-* [ ] `spring-stream`(integrated with [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing)
+* [x] `spring-stream`(integrated with [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing)
 * [ ] `spring-opentelemetry`(integrated with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing)
