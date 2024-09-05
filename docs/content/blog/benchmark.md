@@ -18,7 +18,7 @@ The size of the Docker image built with spring-rs is 1/4 of the SpringBoot image
 The runtime memory usage of using spring-rs is 1/10 of that of SpringBoot.
 <img width="100%" alt="Runtime Memory Usage" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27Runtime%20Memory%20Usage(MB)%27,data:[234.6,21.2]}]}}&format=svg"/>
 
-The QPS of the simplest web application using spring-rs is 5 times that of SpringBoot.
+The QPS of the simplest web application using spring-rs is twice that of SpringBoot.
 <img width="100%" alt="Raw Query QPS" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27Raw%20Query%20QPS%27,data:[24805.60,40143.45]}]}}&format=svg"/>
 
 The QPS of a web application with database queries using spring-rs is basically the same as SpringBoot.

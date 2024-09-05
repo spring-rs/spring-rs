@@ -18,7 +18,7 @@ template = "blog/page.html"
 使用spring-rs的运行时内存占用是SpringBoot运行时占用的1/10。
 <img width="100%" alt="Runtime Memory Usage" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27Runtime%20Memory%20Usage(MB)%27,data:[234.6,21.2]}]}}&format=svg"/>
 
-使用spring-rs的最简单的Web应用程序QPS是SpringBoot的5倍。
+使用spring-rs的最简单的Web应用程序QPS是SpringBoot的2倍。
 <img width="100%" alt="Raw Query QPS" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27Raw%20Query%20QPS%27,data:[24805.60,40143.45]}]}}&format=svg"/>
 
 使用spring-rs的包含数据库查询的Web应用程序QPS和SpringBoot基本相当。
