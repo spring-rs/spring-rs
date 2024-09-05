@@ -24,7 +24,7 @@ The QPS of the simplest web application using spring-rs is twice that of SpringB
 The QPS of a web application with database queries using spring-rs is basically the same as SpringBoot.
 <img width="100%" alt="Postgres Query QPS" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27Postgres%20Query%20QPS%27,data:[9679.59,9250.40]}]}}&format=svg"/>
 
-The data query tool currently used is `sqlx`. [sqlx's performance on mysql](https://github.com/launchbadge/sqlx/issues/1481) is very poor, and the stress test result is only half of SpringBoot, so it is recommended to use PostgreSQL as the backend of sqlx.
+The data query tool currently used is `sqlx`. [sqlx's performance support for MySQL](https://github.com/launchbadge/sqlx/issues/1481) is very poor, and the stress test results are only half of SpringBoot, so it is recommended to use PostgreSQL as the backend of sqlx.
 
 Next, I will connect to [rust-postgres](https://github.com/sfackler/rust-postgres) to see if the performance will be improved compared to sqlx.
 

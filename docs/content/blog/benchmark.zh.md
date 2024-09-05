@@ -24,7 +24,7 @@ template = "blog/page.html"
 使用spring-rs的包含数据库查询的Web应用程序QPS和SpringBoot基本相当。
 <img width="100%" alt="Postgres Query QPS" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27Postgres%20Query%20QPS%27,data:[9679.59,9250.40]}]}}&format=svg"/>
 
-目前用的数据查询工具是`sqlx`，[sqlx对mysql性能](https://github.com/launchbadge/sqlx/issues/1481)很差，压测结果只有SpringBoot的一半，所以推荐使用PostgreSQL作为sqlx的后端。
+目前用的数据查询工具是`sqlx`，[sqlx对mysql性能支持](https://github.com/launchbadge/sqlx/issues/1481)很差，压测结果只有SpringBoot的一半，所以推荐使用PostgreSQL作为sqlx的后端。
 
 接下来我会对接一下[rust-postgres](https://github.com/sfackler/rust-postgres)，看看性能会不会比sqlx有所提升。
 
