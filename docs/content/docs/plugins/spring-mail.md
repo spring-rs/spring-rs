@@ -2,7 +2,7 @@
 title = "spring-mail Plugin"
 description = "How to use the spring-mail plugin"
 draft = false
-weight = 16
+weight = 20
 sort_by = "weight"
 template = "docs/page.html"
 

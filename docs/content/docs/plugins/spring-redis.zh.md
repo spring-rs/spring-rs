@@ -2,7 +2,7 @@
 title = "spring-redis插件"
 description = "redis插件如何使用"
 draft = false
-weight = 15
+weight = 16
 sort_by = "weight"
 template = "docs/page.html"
 

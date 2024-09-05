@@ -2,7 +2,7 @@
 title = "spring-sea-orm Plugin"
 description = "How to use spring-sea-orm plugin"
 draft = false
-weight = 14
+weight = 15
 sort_by = "weight"
 template = "docs/page.html"
 

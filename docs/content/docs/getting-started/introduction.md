@@ -22,6 +22,7 @@ If you already know these prerequisites, click this [Quick Start →](/docs/gett
 
 * [x] [`spring-web`](/docs/plugins/spring-web/)(Based on [`axum`](https://github.com/tokio-rs/axum))
 * [x] [`spring-sqlx`](/docs/plugins/spring-sqlx/)(Integrated with [`sqlx`](https://github.com/launchbadge/sqlx))
+* [x] [`spring-postgres`](/docs/plugins/spring-postgres/)(Integrated with [`rust-postgres`](https://github.com/sfackler/rust-postgres))
 * [x] [`spring-sea-orm`](/docs/plugins/spring-sea-orm/)(Integrated with [`sea-orm`](https://www.sea-ql.org/SeaORM/))
 * [x] [`spring-redis`](/docs/plugins/spring-redis/)(Integrated with [`redis`](https://github.com/redis-rs/redis-rs))
 * [x] [`spring-mail`](/docs/plugins/spring-mail/)(integrated with [`lettre`](https://github.com/lettre/lettre))

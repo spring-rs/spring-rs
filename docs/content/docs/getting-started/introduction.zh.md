@@ -22,6 +22,7 @@ top = false
 
 * [x] [`spring-web`](/zh/docs/plugins/spring-web/)(基于[`axum`](https://github.com/tokio-rs/axum)实现)
 * [x] [`spring-sqlx`](/zh/docs/plugins/spring-sqlx/)(整合了[`sqlx`](https://github.com/launchbadge/sqlx))
+* [x] [`spring-postgres`](/zh/docs/plugins/spring-postgres/)(整合了[`rust-postgres`](https://github.com/sfackler/rust-postgres))
 * [x] [`spring-sea-orm`](/zh/docs/plugins/spring-sea-orm/)(整合了[`sea-orm`](https://www.sea-ql.org/SeaORM/))
 * [x] [`spring-redis`](/zh/docs/plugins/spring-redis/)(整合了[`redis`](https://github.com/redis-rs/redis-rs))
 * [x] [`spring-mail`](/zh/docs/plugins/spring-mail/)(整合了[`lettre`](https://github.com/lettre/lettre))

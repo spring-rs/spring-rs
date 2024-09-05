@@ -2,7 +2,7 @@
 title = "logger插件"
 description = "logger插件如何使用"
 draft = false
-weight = 19
+weight = 21
 sort_by = "weight"
 template = "docs/page.html"
 

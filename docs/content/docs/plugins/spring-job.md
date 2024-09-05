@@ -2,7 +2,7 @@
 title = "spring-job Plugin"
 description = "How to use the spring-job plugin"
 draft = false
-weight = 17
+weight = 18
 sort_by = "weight"
 template = "docs/page.html"
 
