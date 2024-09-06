@@ -2,7 +2,7 @@
 title = "FAQ"
 description = "Answers to frequently asked questions."
 draft = false
-weight = 101
+weight = 110
 sort_by = "weight"
 template = "docs/page.html"
 
