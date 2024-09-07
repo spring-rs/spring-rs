@@ -4,11 +4,18 @@ pub mod extractor;
 pub mod handler;
 pub mod job;
 
+/////////////////job-macros/////////////////////
+/// To use these Procedural Macros, you need to add `spring-job` dependency
+pub use spring_macros::cron;
+pub use spring_macros::fix_delay;
+pub use spring_macros::fix_rate;
+pub use spring_macros::one_shot;
+
 use anyhow::Context;
 use job::Job;
-use spring_boot::async_trait;
-use spring_boot::error::Result;
-use spring_boot::{
+use spring::async_trait;
+use spring::error::Result;
+use spring::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };

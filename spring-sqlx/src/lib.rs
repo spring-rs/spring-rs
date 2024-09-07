@@ -4,18 +4,16 @@ pub mod config;
 pub extern crate sqlx;
 use anyhow::Context;
 use config::SqlxConfig;
-use spring_boot::app::AppBuilder;
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::error::Result;
-use spring_boot::plugin::Plugin;
+use spring::app::AppBuilder;
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::error::Result;
+use spring::plugin::Plugin;
 use sqlx::any::AnyPoolOptions;
 use std::time::Duration;
 
 pub type ConnectPool = sqlx::AnyPool;
 
-#[derive(Configurable)]
-#[config_prefix = "sqlx"]
 pub struct SqlxPlugin;
 
 #[async_trait]
@@ -23,7 +21,7 @@ impl Plugin for SqlxPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         sqlx::any::install_default_drivers();
         let config = app
-            .get_config::<SqlxConfig>(self)
+            .get_config::<SqlxConfig>()
             .expect("sqlx plugin config load failed");
 
         let connect_pool = Self::connect(&config)

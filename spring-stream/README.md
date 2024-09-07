@@ -50,7 +50,7 @@ connect = { sasl_options={mechanism="Plain",username="user",password="passwd"}}
 spring-stream = { version = "0.0.9", features=["file","json"] }
 ```
 
-```rust
+```rust, linenos
 #[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
@@ -82,7 +82,7 @@ async fn send_msg(Component(producer): Component<Producer>) -> Result<impl IntoR
 
 `spring-stream` provides a process macro called `stream_listener` to subscribe to messages from a specified topic. The code is as follows:
 
-```rust
+```rust, linenos, hl_lines=5 10-17
 #[tokio::main]
 async fn main() {
     App::new()

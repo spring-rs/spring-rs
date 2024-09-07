@@ -42,25 +42,25 @@ static = { enable = true, uri = "/static", path = "static", precompressed = true
 
 App implements the [WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html) feature, which can be used to specify routing configuration:
 
-```diff
- #[tokio::main]
- async fn main() {
+```rust, linenos, hl_lines=6 10-18
+#[tokio::main]
+async fn main() {
     App::new()
-    .add_plugin(SqlxPlugin)
-    .add_plugin(WebPlugin)
-+   .add_router(router())
-    .run()
-    .await
+      .add_plugin(SqlxPlugin)
+      .add_plugin(WebPlugin)
+      .add_router(router())
+      .run()
+      .await
 }
 
-+fn router() -> Router {
-+    Router::new().typed_route(hello_word)
-+}
+fn router() -> Router {
+    Router::new().typed_route(hello_word)
+}
 
-+#[get("/")]
-+async fn hello_word() -> impl IntoResponse {
-+   "hello word"
-+}
+#[get("/")]
+async fn hello_word() -> impl IntoResponse {
+   "hello word"
+}
 ```
 
 You can also use the `auto_config` macro to implement automatic configuration. This process macro will automatically register the routes marked by the Procedural Macro into the app:
@@ -84,7 +84,7 @@ You can also use the `auto_config` macro to implement automatic configuration. T
 
 ## Attribute macro
 
-[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html) in the above example is an attribute macro. Spring provides eight standard HTTP METHOD process macros: `get`, `post`, `patch`, `put`, `delete`, `head`, `trace`, `options`.
+[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html) in the above example is an attribute macro. `spring-web` provides eight standard HTTP METHOD process macros: `get`, `post`, `patch`, `put`, `delete`, `head`, `trace`, `options`.
 
 You can also use the [`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html) macro to bind multiple methods at the same time:
 
@@ -112,12 +112,6 @@ async fn example() -> impl IntoResponse {
 In the above example, the `SqlxPlugin` plugin automatically registers a Sqlx connection pool component for us. We can use `Component` to extract this connection pool from State. [`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html) is an axum [extractor](https://docs.rs/axum/latest/axum/extract/index.html).
 
 ```rust
-use spring::get;
-use spring_sqlx::{sqlx::{self, Row}, ConnectPool};
-use spring_web::extractor::Component;
-use spring_web::error::Result;
-use anyhow::Context;
-
 #[get("/version")]
 async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String> {
     let version = sqlx::query("select version() as version")
@@ -130,5 +124,33 @@ async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String
 ```
 
 Axum also provides other [extractors](https://docs.rs/axum/latest/axum/extract/index.html), which are reexported under [`spring_web::extractor`](https://docs.rs/spring-web/latest/spring_web/extractor/index.html).
+
+## Read configuration
+
+You can use [`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Config.html) to extract the configuration in the configuration toml.
+
+
+```rust
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "custom"]
+struct CustomConfig {
+    a: u32,
+    b: bool,
+}
+
+#[get("/config")]
+async fn use_toml_config(Config(conf): Config<CustomConfig>) -> impl IntoResponse {
+    format!("a={}, b={}", conf.a, conf.b)
+}
+```
+
+Add the corresponding configuration to your configuration file:
+
+```toml
+[custom]
+a = 1
+b = true
+```
+
 
 Complete code reference [`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)

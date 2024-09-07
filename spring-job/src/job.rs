@@ -3,7 +3,7 @@ use crate::{
     JobId, JobScheduler,
 };
 use anyhow::Context;
-use spring_boot::app::App;
+use spring::app::App;
 use std::{sync::Arc, time::Duration};
 
 #[derive(Clone)]

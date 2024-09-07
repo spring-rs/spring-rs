@@ -5,8 +5,6 @@ pub mod consumer;
 pub mod extractor;
 pub mod handler;
 
-use anyhow::Context;
-use config::StreamConfig;
 pub use consumer::{ConsumerOpts, Consumers};
 #[cfg(feature = "file")]
 pub use sea_streamer::file;
@@ -17,16 +15,21 @@ pub use sea_streamer::redis;
 #[cfg(feature = "stdio")]
 pub use sea_streamer::stdio;
 pub use sea_streamer::ConsumerMode;
+/////////////////stream-macros/////////////////////
+pub use spring_macros::stream_listener;
+
+use anyhow::Context;
+use config::StreamConfig;
 use sea_streamer::{
     Buffer, MessageHeader, Producer as _, SeaConsumer, SeaProducer, SeaStreamer, StreamKey,
     Streamer as _, StreamerUri,
 };
 #[cfg(feature = "json")]
 use serde::Serialize;
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::error::Result;
-use spring_boot::{
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::error::Result;
+use spring::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };
@@ -52,15 +55,13 @@ impl StreamConfigurator for AppBuilder {
     }
 }
 
-#[derive(Configurable)]
-#[config_prefix = "stream"]
 pub struct StreamPlugin;
 
 #[async_trait]
 impl Plugin for StreamPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<StreamConfig>(self)
+            .get_config::<StreamConfig>()
             .expect("sea-streamer plugin config load failed");
 
         let streamer = Streamer::new(config).await.expect("create streamer failed");

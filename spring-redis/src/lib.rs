@@ -2,26 +2,25 @@
 
 pub mod config;
 
+pub use redis;
+
 use anyhow::Context;
 use config::RedisConfig;
-pub use redis;
 use redis::{aio::ConnectionManagerConfig, Client};
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use std::time::Duration;
 
 pub type Redis = redis::aio::ConnectionManager;
 
-#[derive(Configurable)]
-#[config_prefix = "redis"]
 pub struct RedisPlugin;
 
 #[async_trait]
 impl Plugin for RedisPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<RedisConfig>(self)
+            .get_config::<RedisConfig>()
             .expect("redis plugin config load failed");
 
         let connect: Redis = Self::connect(config).await.expect("redis connect failed");

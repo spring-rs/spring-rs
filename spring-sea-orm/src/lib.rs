@@ -5,22 +5,20 @@ pub mod config;
 use anyhow::Context;
 use config::SeaOrmConfig;
 use sea_orm::{ConnectOptions, Database};
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use std::time::Duration;
 
 pub type DbConn = sea_orm::DbConn;
 
-#[derive(Configurable)]
-#[config_prefix = "sea-orm"]
 pub struct SeaOrmPlugin;
 
 #[async_trait]
 impl Plugin for SeaOrmPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<SeaOrmConfig>(self)
+            .get_config::<SeaOrmConfig>()
             .expect("sea-orm plugin config load failed");
 
         let conn = Self::connect(&config)

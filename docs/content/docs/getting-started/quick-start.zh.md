@@ -35,15 +35,19 @@ tokio = "1"
 ## 编写代码
 
 ```rust
-use spring::{nest, route, routes, auto_config, App};
+use anyhow::Context;
+use spring::{auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
-    ConnectPool, SqlxPlugin
+    ConnectPool, SqlxPlugin,
 };
 use spring_web::{
-    error::Result, extractor::Path, handler::TypeRouter, response::IntoResponse, Router, 
+    axum::response::IntoResponse,
+    error::Result,
+    extractor::{Component, Path},
     WebConfigurator, WebPlugin,
 };
+use spring_web::{get, route};
 
 // 主函数入口
 #[auto_config(WebConfigurator)]   // 自动扫描web router

@@ -1,8 +1,9 @@
 use spring::tracing;
-use spring::{stream_listener, App};
+use spring::App;
 use spring_stream::consumer::Consumers;
 use spring_stream::extractor::{Json, StreamKey};
 use spring_stream::handler::TypedConsumer;
+use spring_stream::stream_listener;
 use spring_stream::{kafka::KafkaConsumerOptions, StreamConfigurator, StreamPlugin};
 use stream_kafka_example::Payload;
 

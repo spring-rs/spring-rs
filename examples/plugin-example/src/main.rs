@@ -1,19 +1,17 @@
 use serde::Deserialize;
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::{
+use spring::async_trait;
+use spring::config::{ConfigRegistry, Configurable};
+use spring::{
     app::{App, AppBuilder},
     plugin::Plugin,
 };
 
-#[derive(Configurable)]
-#[config_prefix = "my-plugin"]
 struct MyPlugin;
 
 #[async_trait]
 impl Plugin for MyPlugin {
     async fn build(&self, app: &mut AppBuilder) {
-        match app.get_config::<Config>(self) {
+        match app.get_config::<Config>() {
             Ok(config) => {
                 println!("{:#?}", config);
                 assert_eq!(config.a, 1);
@@ -28,7 +26,8 @@ impl Plugin for MyPlugin {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "my-plugin"]
 struct Config {
     a: u32,
     b: bool,

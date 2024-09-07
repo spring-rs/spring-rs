@@ -60,3 +60,39 @@ pre code:hover {
 pre code::-webkit-scrollbar-thumb:hover {
   background: $gray-200;
 }
+
+pre code mark {
+  display: block;
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  box-shadow: none;
+}
+
+pre code table,
+pre code table span {
+  margin: 0;
+  color: inherit;
+}
+
+pre code table tr > td {
+  padding: 0;
+  border-bottom: none;
+}
+pre code table tr > td:first-child {
+  color: $gray-500;
+  text-align: right;
+  user-select: none;
+  position: relative;
+  transform: translateX(-1em);
+}
+pre code table tr > td:first-child > mark::after {
+  position: absolute;
+  display: block;
+  content: "";
+  right: -1em;
+  top: 0;
+  bottom: 0;
+  width: 1em;
+  background: inherit;
+}

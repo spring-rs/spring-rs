@@ -6,6 +6,6 @@ license.workspace = true
 authors.workspace = true
 
 [dependencies]
-spring-boot = { path = "../../spring-boot" }
+spring = { path = "../../spring" }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true }

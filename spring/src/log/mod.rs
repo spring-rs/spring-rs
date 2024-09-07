@@ -1,6 +1,7 @@
 mod config;
 
-use crate::{app::AppBuilder, config::Configurable};
+use crate::app::AppBuilder;
+use crate::config::ConfigRegistry;
 use config::{Format, LogLevel, LoggerConfig};
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
@@ -14,18 +15,12 @@ use tracing_subscriber::{
 
 pub(crate) struct LogPlugin;
 
-impl Configurable for LogPlugin {
-    fn config_prefix(&self) -> &str {
-        "logger"
-    }
-}
-
 impl LogPlugin {
     pub(crate) fn build(&self, app: &mut AppBuilder) {
         let registry = std::mem::take(&mut app.tracing_registry);
 
         let config = app
-            .get_config::<LoggerConfig>(self)
+            .get_config::<LoggerConfig>()
             .expect("tracing plugin config load failed");
 
         if config.pretty_backtrace {

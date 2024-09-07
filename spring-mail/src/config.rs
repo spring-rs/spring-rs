@@ -1,8 +1,10 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
+use spring::config::Configurable;
 
 /// SMTP mailer configuration structure.
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "mail"]
 pub struct MailerConfig {
     /// SMTP host. for example: localhost, smtp.gmail.com etc.
     pub host: String,

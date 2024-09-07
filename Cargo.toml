@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
     "spring",
-    "spring-boot",
     "spring-macros",
     "spring-web",
     "spring-job",

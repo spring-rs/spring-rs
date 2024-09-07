@@ -1,7 +1,9 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
+use spring::config::Configurable;
 
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "redis"]
 pub struct RedisConfig {
     /// The URI for connecting to the Redis server. For example:
     /// <redis://127.0.0.1/>

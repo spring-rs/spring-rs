@@ -7,16 +7,17 @@ pub mod redis;
 #[cfg(feature = "stdio")]
 pub mod stdio;
 
+use crate::consumer::ConsumerOpts;
 use schemars::JsonSchema;
 use sea_streamer::{
     ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConnectOptions, SeaConsumerOptions,
     SeaProducerOptions,
 };
 use serde::Deserialize;
+use spring::config::Configurable;
 
-use crate::consumer::ConsumerOpts;
-
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "stream"]
 pub struct StreamConfig {
     /// streamer uri
     /// https://docs.rs/sea-streamer-types/latest/sea_streamer_types/struct.StreamerUri.html

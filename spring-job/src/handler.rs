@@ -1,7 +1,8 @@
+pub use inventory::submit;
+
 use crate::JobScheduler;
 use crate::{extractor::FromApp, JobId, Jobs};
-pub use inventory::submit;
-use spring_boot::app::App;
+use spring::app::App;
 use std::pin::Pin;
 use std::{
     future::Future,

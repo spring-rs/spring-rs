@@ -1,10 +1,11 @@
 pub mod env;
 
+pub use spring_macros::Configurable;
+
 use crate::error::{AppError, Result};
 use anyhow::Context;
 use env::Env;
 use serde_toml_merge::merge_tables;
-pub use spring_macros::Configurable;
 use std::fs;
 use std::path::Path;
 use toml::Table;
@@ -12,7 +13,26 @@ use toml::Table;
 pub trait Configurable {
     /// Prefix used to read toml configuration.
     /// If you need to load external configuration, you need to rewrite this method
-    fn config_prefix(&self) -> &str;
+    fn config_prefix() -> &'static str;
+}
+
+pub trait ConfigRegistry {
+    /// Get the configuration items of the plugin according to the plugin's `config_prefix`
+    fn get_config<T>(&self) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned + Configurable,
+    {
+        let prefix = T::config_prefix();
+        let table = self.get_by_prefix(prefix);
+        Ok(T::deserialize(table.to_owned()).with_context(|| {
+            format!(
+                "Failed to deserialize the configuration of prefix \"{}\"",
+                prefix
+            )
+        })?)
+    }
+
+    fn get_by_prefix(&self, prefix: &str) -> Table;
 }
 
 /// load toml config

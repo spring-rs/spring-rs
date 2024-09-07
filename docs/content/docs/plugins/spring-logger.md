@@ -12,4 +12,4 @@ toc = true
 top = false
 +++
 
-{{ include(path="../../spring-boot/Log-Plugin.md") }}
+{{ include(path="../../spring/Log-Plugin.md") }}

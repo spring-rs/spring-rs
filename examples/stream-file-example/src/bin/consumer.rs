@@ -1,9 +1,10 @@
 use spring::tracing;
-use spring::{stream_listener, App};
+use spring::App;
 use spring_stream::consumer::Consumers;
 use spring_stream::extractor::Json;
 use spring_stream::file::AutoStreamReset;
 use spring_stream::handler::TypedConsumer;
+use spring_stream::stream_listener;
 use spring_stream::{file::FileConsumerOptions, StreamConfigurator, StreamPlugin};
 use stream_file_example::Payload;
 
