@@ -42,26 +42,25 @@ static = { enable = true, uri = "/static", path = "static", precompressed = true
 
 App实现了[WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html)特征，可以通过该特征指定路由配置：
 
-```diff
- #[tokio::main]
- async fn main() {
-     App::new()
-         .add_plugin(SqlxPlugin)
-         .add_plugin(WebPlugin)
-+        .add_router(router())
-         .run()
-         .await
- }
+```rust, linenos, hl_lines=6 10-18
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(SqlxPlugin)
+        .add_plugin(WebPlugin)
+        .add_router(router())
+        .run()
+        .await
+}
 
-+fn router() -> Router {
-+    Router::new()
-+        .typed_route(hello_word)
-+}
+fn router() -> Router {
+    Router::new().typed_route(hello_word)
+}
 
-+#[get("/")]
-+async fn hello_word() -> impl IntoResponse {
-+    "hello word"
-+}
+#[get("/")]
+async fn hello_word() -> impl IntoResponse {
+    "hello word"
+}
 ```
 
 你也可以使用`auto_config`宏来实现自动配置，这个过程宏会自动将被过程宏标记的路由注册进app中：
@@ -81,7 +80,7 @@ App实现了[WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait
 
 ## 属性宏
 
-上面例子中的[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html)是一个属性宏，spring提供了八个标准HTTP METHOD的过程宏：`get`、`post`、`patch`、`put`、`delete`、`head`、`trace`、`options`。
+上面例子中的[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html)是一个属性宏，`spring-web`提供了八个标准HTTP METHOD的过程宏：`get`、`post`、`patch`、`put`、`delete`、`head`、`trace`、`options`。
 
 也可以使用[`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html)宏同时绑定多个method：
 
@@ -109,12 +108,6 @@ async fn example() -> impl IntoResponse {
 上面的例子中`SqlxPlugin`插件为我们自动注册了一个Sqlx连接池组件，我们可以使用`Component`从State中提取这个连接池，[`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)是一个axum的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)。
 
 ```rust
-use spring::get;
-use spring_sqlx::{sqlx::{self, Row}, ConnectPool};
-use spring_web::extractor::Component;
-use spring_web::error::Result;
-use anyhow::Context;
-
 #[get("/version")]
 async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String> {
     let version = sqlx::query("select version() as version")
@@ -128,11 +121,9 @@ async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String
 
 axum也提供了其他的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)，这些都被reexport到了[`spring_web::extractor`](https://docs.rs/spring-web/latest/spring_web/extractor/index.html)下。
 
-完整代码参考[`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)
-
 ## 读取配置
 
-你可以用[`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)抽取配置
+你可以用[`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Config.html)抽取配置toml中的配置。
 
 ```rust
 #[derive(Debug, Configurable, Deserialize)]
@@ -141,4 +132,19 @@ struct CustomConfig {
     a: u32,
     b: bool,
 }
+
+#[get("/config")]
+async fn use_toml_config(Config(conf): Config<CustomConfig>) -> impl IntoResponse {
+    format!("a={}, b={}", conf.a, conf.b)
+}
 ```
+
+在你的配置文件中添加相应配置：
+
+```toml
+[custom]
+a = 1
+b = true
+```
+
+完整代码参考[`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)

@@ -50,7 +50,7 @@ connect = { sasl_options={mechanism="Plain",username="user",password="passwd"}}
 spring-stream = { version = "0.0.9", features=["file","json"] }
 ```
 
-```rust
+```rust, linenos
 #[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
@@ -82,7 +82,7 @@ async fn send_msg(Component(producer): Component<Producer>) -> Result<impl IntoR
 
 `spring-stream`提供了`stream_listener`的过程宏来订阅指定topic的消息，代码如下：
 
-```rust
+```rust, linenos, hl_lines=5 10-17
 #[tokio::main]
 async fn main() {
     App::new()
@@ -96,11 +96,7 @@ fn consumers() -> Consumers {
     Consumers::new().typed_consumer(listen_topic_do_something)
 }
 
-#[stream_listener(
-    "topic",
-    "topic2",
-    file_consumer_options = fill_file_consumer_options
-)]
+#[stream_listener("topic", file_consumer_options = fill_file_consumer_options)]
 async fn listen_topic_do_something(Json(payload): Json<Payload>) {
     tracing::info!("{:#?}", payload);
 }

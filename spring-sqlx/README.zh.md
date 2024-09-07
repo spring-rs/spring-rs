@@ -34,8 +34,8 @@ pub type ConnectPool = sqlx::AnyPool;
 `SqlxPlugin`插件为我们自动注册了一个Sqlx连接池组件，我们可以使用`Component`从AppState中提取这个连接池，[`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)是一个axum的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)。
 
 ```rust
-use spring::get;
 use spring_sqlx::{sqlx::{self, Row}, ConnectPool};
+use spring_web::get;
 use spring_web::extractor::Component;
 use spring_web::error::Result;
 use anyhow::Context;
