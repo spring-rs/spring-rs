@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-redis = { version = "0.0.9" }
+spring-redis = { version = "0.1.0" }
 ```
 
 ## 配置项

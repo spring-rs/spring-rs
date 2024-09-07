@@ -8,14 +8,15 @@
 * 所有的插件都需要实现[`Plugin`](https://docs.rs/spring/latest/spring/plugin/trait.Plugin.html)特征。
 * 所有的配置都需要实现[`Configurable`](https://docs.rs/spring/latest/spring/config/trait.Configurable.html)特征。
 * 所有的组件都需要实现[`Clone`](https://doc.rust-lang.org/std/clone/trait.Clone.html)特征。
-  > 注意：为了避免大结构的进行深拷贝，推荐使用[newtype模式](https://effective-rust.com/newtype.html)通过`Arc<T>`进行引用。
+
+> 注意：为了避免对Component内大结构的进行深拷贝，推荐使用[newtype模式](https://effective-rust.com/newtype.html)通过`Arc<T>`进行引用。
 
 ## 如何编写自己的插件
 
 添加依赖
 
 ```toml
-spring = { version = "0.0.9" }                       # 该crate中包含了插件trait的定义
+spring = { version = "0.1.0" }                       # 该crate中包含了插件trait的定义
 serde = { workspace = true, features = ["derive"] }  # 用于解析插件的配置项
 ```
 

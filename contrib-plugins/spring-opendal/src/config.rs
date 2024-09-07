@@ -2,8 +2,10 @@ use schemars::JsonSchema;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
+use spring::config::Configurable;
 
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "opendal"]
 pub struct OpenDALConfig {
     /// [Services](opendal::Scheme)  that OpenDAL supports
     ///

@@ -11,13 +11,14 @@ members = [
     "spring-sea-orm",
     "spring-stream",
     "spring-mail",
+    "contrib-plugins/*",
     "examples/*",
 ]
 default-members = ["spring", "spring-*"]
 exclude = ["examples/**"]
 
 [workspace.package]
-version = "0.0.9"
+version = "0.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["holmofy"]

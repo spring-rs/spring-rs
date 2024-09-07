@@ -4,6 +4,30 @@
 
 - **added:** [#4 spring-opentelemetry plugin](https://github.com/spring-rs/spring-rs/issues/4)
 
+## 0.1.0 - 2024.9.8
+
+- **added**: add ConfigRegistry trait. ([#31])
+- **changed**: refactor app configuration management: Configuration and plugins are independent of each other. ([#31])
+
+[#31]: https://github.com/spring-rs/spring-rs/pull/31
+
+**Migrating from 0.0 to 0.1**
+
+```diff
+-#[derive(Configurable)]
+-#[config_prefix = "my-plugin"]
+struct MyPlugin;
+```
+
+```diff
+ #[derive(Debug, Configurable, Deserialize)]
++#[config_prefix = "my-plugin"]
+ struct Config {
+     a: u32,
+     b: bool,
+ }
+```
+
 ## 0.0.9 - 2024.9.4
 
 - **added**: spring-postgres plugin

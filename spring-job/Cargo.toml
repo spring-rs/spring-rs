@@ -8,8 +8,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring = { path = "../spring", version = "0.0.9" }
-spring-macros = { path = "../spring-macros", version = "0.0.9" }
+spring = { path = "../spring", version = "0.1.0" }
+spring-macros = { path = "../spring-macros", version = "0.1.0" }
 tokio-cron-scheduler = { workspace = true, features = ["signal"] }
 anyhow = { workspace = true }
 serde = { workspace = true }
@@ -19,4 +19,4 @@ chrono = { workspace = true }
 inventory = { workspace = true }
 
 [dev-dependencies]
-spring-sqlx = { path = "../spring-sqlx", version = "0.0.9" }
+spring-sqlx = { path = "../spring-sqlx", version = "0.1.0" }

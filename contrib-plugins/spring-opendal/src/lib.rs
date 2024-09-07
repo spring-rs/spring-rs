@@ -3,23 +3,21 @@ pub mod config;
 use crate::config::*;
 use anyhow::Result;
 use opendal::Operator;
-use spring_boot::app::AppBuilder;
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::plugin::Plugin;
+use spring::app::AppBuilder;
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::plugin::Plugin;
 use std::str::FromStr;
 
 pub type Op = Operator;
 
-#[derive(Configurable)]
-#[config_prefix = "opendal"]
 pub struct OpenDALPlugin;
 
 #[async_trait]
 impl Plugin for OpenDALPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<OpenDALConfig>(self)
+            .get_config::<OpenDALConfig>()
             .expect("OpenDAL plugin config load failed");
 
         let connect: Operator = Self::operator(config).expect("OpenDAL operator construct failed");

@@ -8,14 +8,15 @@
 * All plugins need to implement the [`Plugin`](https://docs.rs/spring/latest/spring/plugin/trait.Plugin.html) trait.
 * All configurations need to implement the [`Configurable`](https://docs.rs/spring/latest/spring/config/trait.Configurable.html) trait.
 * All components need to implement the [`Clone`](https://doc.rust-lang.org/std/clone/trait.Clone.html) trait.
-  > Note: To avoid deep copying of large struct, it is recommended to use the [newtype pattern](https://effective-rust.com/newtype.html) to reference them via `Arc<T>`.
+
+> Note: To avoid deep copying of large struct in Component, it is recommended to use the [newtype pattern](https://effective-rust.com/newtype.html) to reference them via `Arc<T>`.
 
 ## How to write your own plugin
 
 Add dependencies
 
 ```toml
-spring = { version = "0.0.9" }           # This crate contains the definition of plugin traits
+spring = { version = "0.1.0" }           # This crate contains the definition of plugin traits
 serde = { workspace = true, features = ["derive"] } # Used to parse plugin configuration items
 ```
 

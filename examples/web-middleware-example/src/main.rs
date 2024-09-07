@@ -1,6 +1,7 @@
 use std::time::Duration;
 
-use spring::{get, App};
+use spring::App;
+use spring_web::get;
 use spring_web::{axum::response::IntoResponse, Router, WebConfigurator, WebPlugin};
 use tower_http::timeout::TimeoutLayer;
 

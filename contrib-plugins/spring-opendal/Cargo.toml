@@ -1,18 +1,16 @@
-[workspace]
-
 [package]
 name = "spring-opendal"
 description = "OpenDAL plugin for spring-rs"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 license = "MIT"
-authors = ["Lemon"]
+authors = ["Lemon", "holmofy"]
 homepage = "https://spring-rs.github.io/"
 repository = "https://github.com/spring-rs/spring-rs/"
 
 [dependencies]
-spring = { path = "../../spring", version = "0.0.9" }
-schemars = "0.8.21"
+spring = { path = "../../spring", version = "0.1.0" }
+schemars = "0.8"
 serde = "1.0"
 anyhow = "1.0"
 opendal = "0.49"
@@ -151,7 +149,10 @@ layers-chaos = ["opendal/layers-chaos"]
 layers-metrics = ["opendal/layers-metrics"]
 layers-mime-guess = ["opendal/layers-mime-guess"]
 layers-prometheus = ["opendal/layers-prometheus", "dep:prometheus"]
-layers-prometheus-client = ["opendal/layers-prometheus-client", "dep:prometheus-client"]
+layers-prometheus-client = [
+    "opendal/layers-prometheus-client",
+    "dep:prometheus-client",
+]
 layers-fastrace = ["opendal/layers-fastrace"]
 layers-tracing = ["opendal/layers-tracing"]
 layers-otel-trace = ["opendal/layers-otel-trace"]

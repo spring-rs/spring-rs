@@ -4,7 +4,7 @@ use axum::http::StatusCode;
 use jwt::Claims;
 use serde::Deserialize;
 use spring::{auto_config, App};
-use spring_boot::config::Configurable;
+use spring::config::Configurable;
 use spring_sqlx::SqlxPlugin;
 use spring_web::{
     axum::response::IntoResponse,
