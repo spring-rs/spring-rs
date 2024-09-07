@@ -7,6 +7,7 @@
 ## 0.1.0 - 2024.9.8
 
 - **added**: add ConfigRegistry trait. ([#31])
+- **added**: add Config extractor for spring-web,spring-job,spring-stream. ([#31])
 - **changed**: refactor app configuration management: Configuration and plugins are independent of each other. ([#31])
 
 [#31]: https://github.com/spring-rs/spring-rs/pull/31
