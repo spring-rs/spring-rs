@@ -47,7 +47,7 @@ mod app {
         install_default_drivers();
         let db = AnyPoolOptions::new()
             .min_connections(10)
-            .connect("mysql://root:xudjf23adj213@127.0.0.1:3306")
+            .connect("postgres://postgres:xudjf23adj213@127.0.0.1:5432")
             .await
             .unwrap();
         AppState { db }

@@ -8,7 +8,7 @@ authors.workspace = true
 [dependencies]
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
-spring-sqlx = { path = "../../spring-sqlx", features = ["mysql"] }
+spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
 tokio = { workspace = true, features = ["full", "tracing"] }
 anyhow = { workspace = true }
 serde = { workspace = true }
@@ -23,4 +23,4 @@ tracing = { workspace = true }
 axum = { workspace = true }
 actix-web = "4"
 ntex = { version = "2.0", features = ["tokio"] }
-sqlx = { workspace = true, features = ["mysql"] }
+sqlx = { workspace = true, features = ["postgres"] }
