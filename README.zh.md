@@ -19,11 +19,12 @@
 ## 简单的例子
 
 ```rust
-use spring::{get, route, routes, auto_config, App};
+use spring::{auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin
 };
+use spring_web::{get, route};
 use spring_web::{
     error::Result, extractor::{Path, Component}, handler::TypeRouter, axum::response::IntoResponse, Router, 
     WebConfigurator, WebPlugin,
