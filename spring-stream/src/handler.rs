@@ -1,7 +1,8 @@
-use crate::{consumer::Consumers, extractor::FromMsg};
 pub use inventory::submit;
+
+use crate::{consumer::Consumers, extractor::FromMsg};
 use sea_streamer::SeaMessage;
-use spring_boot::app::App;
+use spring::app::App;
 use std::{
     future::Future,
     pin::Pin,

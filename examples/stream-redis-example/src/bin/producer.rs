@@ -1,8 +1,9 @@
 use anyhow::Context;
 use serde_json::json;
-use spring::{auto_config, get, App};
+use spring::{auto_config, App};
 use spring_stream::{Producer, StreamPlugin};
 use spring_web::error::Result;
+use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
     extractor::Component,

@@ -13,7 +13,7 @@ use sea_streamer::redis::RedisConsumerOptions;
 use sea_streamer::stdio::StdioConsumerOptions;
 use sea_streamer::Consumer as _;
 use sea_streamer::{ConsumerGroup, ConsumerMode, ConsumerOptions, SeaConsumer, SeaConsumerOptions};
-use spring_boot::{app::App, error::Result};
+use spring::{app::App, error::Result};
 use std::{ops::Deref, sync::Arc};
 
 #[derive(Clone, Default)]

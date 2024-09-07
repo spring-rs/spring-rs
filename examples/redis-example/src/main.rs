@@ -1,5 +1,5 @@
 use anyhow::Context;
-use spring::{auto_config, get, post, App};
+use spring::{auto_config, App};
 use spring_redis::{redis::AsyncCommands, Redis, RedisPlugin};
 use spring_web::{
     axum::response::{IntoResponse, Json},
@@ -7,6 +7,7 @@ use spring_web::{
     extractor::{Component, Path},
     WebConfigurator, WebPlugin,
 };
+use spring_web::{get, post};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]

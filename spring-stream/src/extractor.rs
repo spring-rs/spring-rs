@@ -1,6 +1,3 @@
-use std::ops::Deref;
-use std::ops::DerefMut;
-
 pub use sea_streamer::Message;
 pub use sea_streamer::MessageHeader;
 pub use sea_streamer::SeaMessage;
@@ -9,7 +6,12 @@ pub use sea_streamer::ShardId;
 pub use sea_streamer::SharedMessage;
 pub use sea_streamer::StreamKey;
 pub use sea_streamer::Timestamp;
-use spring_boot::app::App;
+
+use spring::app::App;
+use spring::config::ConfigRegistry;
+use spring::config::Configurable;
+use std::ops::Deref;
+use std::ops::DerefMut;
 
 pub trait FromMsg {
     fn from_msg(msg: &SeaMessage, app: &App) -> Self;
@@ -101,5 +103,45 @@ where
             .deserialize_json()
             .expect("stream message parse as json failed");
         Json(value)
+    }
+}
+
+pub struct Config<T>(pub T)
+where
+    T: serde::de::DeserializeOwned + Configurable;
+
+impl<T> FromMsg for Config<T>
+where
+    T: serde::de::DeserializeOwned + Configurable,
+{
+    fn from_msg(_msg: &SeaMessage, app: &App) -> Self {
+        match app.get_config::<T>() {
+            Ok(config) => Config(config),
+            Err(e) => panic!(
+                "get config failed for typeof {}: {}",
+                std::any::type_name::<T>(),
+                e
+            ),
+        }
+    }
+}
+
+impl<T> Deref for Config<T>
+where
+    T: serde::de::DeserializeOwned + Configurable,
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for Config<T>
+where
+    T: serde::de::DeserializeOwned + Configurable,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

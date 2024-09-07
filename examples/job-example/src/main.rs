@@ -1,6 +1,6 @@
 use anyhow::Context;
 use spring::{auto_config, App};
-use spring::{cron, fix_delay, fix_rate};
+use spring_job::{cron, fix_delay, fix_rate};
 use spring_job::{extractor::Component, JobConfigurator, JobPlugin};
 use spring_sqlx::{
     sqlx::{self, Row},

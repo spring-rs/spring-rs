@@ -14,7 +14,7 @@ sqlite = ["sea-orm/sqlx-sqlite"]
 postgres = ["sea-orm/sqlx-postgres"]
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.9" }
+spring = { path = "../spring", version = "0.0.9" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }

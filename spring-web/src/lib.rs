@@ -8,16 +8,31 @@ pub mod error;
 pub mod extractor;
 /// axum route handler
 pub mod handler;
-use anyhow::Context;
+
 pub use axum;
+pub use spring::async_trait;
+/////////////////web-macros/////////////////////
+/// To use these Procedural Macros, you need to add `spring-web` dependency
+pub use spring_macros::delete;
+pub use spring_macros::get;
+pub use spring_macros::head;
+pub use spring_macros::nest;
+pub use spring_macros::options;
+pub use spring_macros::patch;
+pub use spring_macros::post;
+pub use spring_macros::put;
+pub use spring_macros::route;
+pub use spring_macros::routes;
+pub use spring_macros::trace;
+
+use anyhow::Context;
 use config::{
     EnableMiddleware, LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware,
     TimeoutRequestMiddleware, WebConfig,
 };
-pub use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::{
+use spring::{
     app::{App, AppBuilder},
+    config::ConfigRegistry,
     error::Result,
     plugin::Plugin,
 };
@@ -70,15 +85,13 @@ pub struct AppState {
 }
 
 /// Web Plugin Definition
-#[derive(Configurable)]
-#[config_prefix = "web"]
 pub struct WebPlugin;
 
 #[async_trait]
 impl Plugin for WebPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<WebConfig>(self)
+            .get_config::<WebConfig>()
             .expect("web plugin config load failed");
 
         // 1. collect router

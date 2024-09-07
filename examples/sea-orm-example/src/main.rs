@@ -7,8 +7,9 @@ use entities::{
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait};
 use serde::Deserialize;
-use spring::{auto_config, get, App};
+use spring::{auto_config, App};
 use spring_sea_orm::{DbConn, SeaOrmPlugin};
+use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
     error::Result,

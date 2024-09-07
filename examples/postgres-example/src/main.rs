@@ -1,6 +1,7 @@
 use anyhow::Context;
-use spring::{auto_config, get, App};
+use spring::{auto_config, App};
 use spring_postgres::{PgPlugin, Postgres};
+use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
     error::Result,

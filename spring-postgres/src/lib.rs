@@ -3,10 +3,10 @@ pub mod config;
 pub extern crate tokio_postgres as postgres;
 
 use config::PgConfig;
-use spring_boot::app::AppBuilder;
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::plugin::Plugin;
+use spring::app::AppBuilder;
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::plugin::Plugin;
 use std::ops::Deref;
 use std::sync::Arc;
 use tokio_postgres::NoTls;
@@ -28,15 +28,13 @@ impl Deref for Postgres {
     }
 }
 
-#[derive(Configurable)]
-#[config_prefix = "postgres"]
 pub struct PgPlugin;
 
 #[async_trait]
 impl Plugin for PgPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<PgConfig>(self)
+            .get_config::<PgConfig>()
             .expect("postgres plugin config load failed");
 
         let (client, connection) = tokio_postgres::connect(&config.connect, NoTls)

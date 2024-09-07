@@ -3,14 +3,16 @@ mod jwt;
 use axum::http::StatusCode;
 use jwt::Claims;
 use serde::Deserialize;
-use spring::{auto_config, get, nest, post, route, routes, App};
+use spring::{auto_config, App};
+use spring_boot::config::Configurable;
 use spring_sqlx::SqlxPlugin;
 use spring_web::{
     axum::response::IntoResponse,
     error::Result,
-    extractor::{Json, Path},
+    extractor::{Config, Json, Path},
     WebConfigurator, WebPlugin,
 };
+use spring_web::{get, nest, post, route, routes};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -55,24 +57,32 @@ async fn login(Json(credentials): Json<LoginCredentials>) -> Result<impl IntoRes
     }
 }
 
+#[derive(Configurable, Deserialize)]
+#[config_prefix = "custom"]
+struct CustomConfig {
+    user_info_detail: String,
+}
+
 #[get("/user-info")]
-async fn protected_user_info(claims: Claims) -> impl IntoResponse {
+async fn protected_user_info(
+    claims: Claims,
+    Config(conf): Config<CustomConfig>,
+) -> impl IntoResponse {
     let user_id = claims.uid;
-    format!("get user info of id#{user_id}")
+    format!("get user info of id#{}: {}", user_id, conf.user_info_detail)
 }
 
 #[nest("/sql")]
 mod sql {
-    use std::ops::Deref;
-
     use anyhow::Context;
-    use spring::get;
     use spring_sqlx::{
         sqlx::{self, Row},
         ConnectPool,
     };
     use spring_web::error::Result;
     use spring_web::extractor::Component;
+    use spring_web::get;
+    use std::ops::Deref;
 
     #[get("/version")]
     pub async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {

@@ -2,27 +2,26 @@
 
 pub mod config;
 
-use anyhow::Context;
-use config::MailerConfig;
 pub use lettre::message::*;
 pub use lettre::AsyncTransport;
 pub use lettre::Message;
+
+use anyhow::Context;
+use config::MailerConfig;
 use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
-use spring_boot::async_trait;
-use spring_boot::config::Configurable;
-use spring_boot::{app::AppBuilder, error::Result, plugin::Plugin};
+use spring::async_trait;
+use spring::config::ConfigRegistry;
+use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 
 pub type Mailer = lettre::AsyncSmtpTransport<Tokio1Executor>;
 
-#[derive(Configurable)]
-#[config_prefix = "mail"]
 pub struct MailPlugin;
 
 #[async_trait]
 impl Plugin for MailPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<MailerConfig>(self)
+            .get_config::<MailerConfig>()
             .expect("mail plugin config load failed");
 
         let mailer = Self::build_mailer(&config).expect("build mail plugin failed");

@@ -17,3 +17,6 @@ level = "info"
 
 [logger.file]
 enable = true
+
+[custom]
+user_info_detail = "hello custom config"

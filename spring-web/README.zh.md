@@ -129,3 +129,16 @@ async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String
 axum也提供了其他的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)，这些都被reexport到了[`spring_web::extractor`](https://docs.rs/spring-web/latest/spring_web/extractor/index.html)下。
 
 完整代码参考[`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)
+
+## 读取配置
+
+你可以用[`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)抽取配置
+
+```rust
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "custom"]
+struct CustomConfig {
+    a: u32,
+    b: bool,
+}
+```

@@ -8,7 +8,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.9" }
+spring = { path = "../spring", version = "0.0.9" }
+spring-macros = { path = "../spring-macros", version = "0.0.9" }
 sea-streamer = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true, optional = true }
@@ -24,6 +25,3 @@ redis = ["sea-streamer/redis"]
 file = ["sea-streamer/file"]
 stdio = ["sea-streamer/stdio"]
 json = ["sea-streamer/json", "serde_json"]
-
-[dev-dependencies]
-spring-web = { path = "../spring-web", version = "0.0.9" }

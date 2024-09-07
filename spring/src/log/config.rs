@@ -1,7 +1,13 @@
-use std::fmt::Display;
-
+use crate::config::Configurable;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use std::fmt::Display;
+
+impl Configurable for LoggerConfig {
+    fn config_prefix() -> &'static str {
+        "logger"
+    }
+}
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub(crate) struct LoggerConfig {

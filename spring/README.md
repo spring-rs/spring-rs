@@ -1,33 +1,54 @@
-<b>spring-rs</b> is a microservice framework written in rust, similar to SpringBoot in java. <b>spring-rs</b> provides an easily extensible plug-in system for integrating excellent projects in the rust community, such as axum, sqlx, sea-orm, etc.
+[![crates.io](https://img.shields.io/crates/v/spring.svg)](https://crates.io/crates/spring)
+[![Documentation](https://docs.rs/spring/badge.svg)](https://docs.rs/spring)
 
-## Example
+## Introduction
+
+`spring` is the core module of the `spring` project, which includes: configuration management, plugin management, and component management.
+
+All plugins need to implement the [`Plugin`](https://docs.rs/spring/latest/spring/plugin/trait.Plugin.html) feature.
+
+## How to write your own plugin
+
+Add dependencies
+
+```toml
+spring = { version = "0.0.9" }           # This crate contains the definition of plugin traits
+serde = { workspace = true, features = ["derive"] } # Used to parse plugin configuration items
+```
 
 ```rust
-use spring::{get, auto_config, App};
-use spring_web::{axum::response::IntoResponse, WebConfigurator, WebPlugin};
+use serde::Deserialize;
+use spring::async_trait;
+use spring::config::Configurable;
+use spring::{app::AppBuilder, plugin::Plugin};
 
-#[auto_config(WebConfigurator)]
-#[tokio::main]
-async fn main() {
-    App::new()
-        .add_plugin(WebPlugin)
-        .run()
-        .await
+struct MyPlugin;
+
+#[async_trait]
+impl Plugin for MyPlugin {
+    async fn build(&self, app: &mut AppBuilder) {
+        // Call app.get_config::<Config>() method to get configuration items
+        match app.get_config::<Config>() {
+            Ok(config) => {
+                println!("{:#?}", config);
+                assert_eq!(config.a, 1);
+                assert_eq!(config.b, true);
+
+                // Get the configuration items to build the corresponding components
+
+            }
+            Err(e) => println!("{:?}", e),
+        }
+    }
 }
 
-#[get("/")]
-async fn hello_world() -> impl IntoResponse {
-    "hello world"
+/// Plugin configuration
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "my-plugin"]
+struct Config {
+    a: u32,
+    b: bool,
 }
 ```
 
-## Supported plugins
-
-* [x] [`spring-web`](https://docs.rs/spring-web)(Based on [`axum`](https://github.com/tokio-rs/axum))
-* [x] [`spring-sqlx`](https://docs.rs/spring-sqlx)(Integrated with [`sqlx`](https://github.com/launchbadge/sqlx))
-* [x] [`spring-sea-orm`](https://docs.rs/spring-sea-orm)(Integrated with [`sea-orm`](https://www.sea-ql.org/SeaORM/))
-* [x] [`spring-redis`](https://docs.rs/spring-redis)(Integrated with [`redis`](https://github.com/redis-rs/redis-rs))
-* [x] [`spring-mail`](https://docs.rs/spring-mail)(integrated with [`lettre`](https://github.com/lettre/lettre))
-* [x] [`spring-job`](https://docs.rs/spring-job)(integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
-* [x] `spring-stream`(integrated with [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing)
-* [ ] `spring-opentelemetry`(integrated with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing)
+For the complete code, refer to [`plugin-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/plugin-example), or refer to other built-in plugin codes.

@@ -1,4 +1,4 @@
-use crate::config::Configurable;
+use crate::config::ConfigRegistry;
 use crate::log::LogPlugin;
 use crate::{config, plugin::Plugin};
 use crate::{
@@ -6,7 +6,6 @@ use crate::{
     error::Result,
     plugin::{component::ComponentRef, PluginRef},
 };
-use anyhow::Context;
 use dashmap::DashMap;
 use std::any::Any;
 use std::{
@@ -24,6 +23,7 @@ pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<Stri
 pub struct App {
     /// Component
     components: Registry<ComponentRef>,
+    config: Table,
 }
 
 pub struct AppBuilder {
@@ -85,7 +85,7 @@ impl AppBuilder {
 
     /// The path of the configuration file, default is `./config/app.toml`.
     /// The application automatically reads the environment configuration file
-    /// in the same directory according to the `spring_ENV` environment variable,
+    /// in the same directory according to the `SPRING_ENV` environment variable,
     /// such as `./config/app-dev.toml`.
     /// The environment configuration file has a higher priority and will
     /// overwrite the configuration items of the main configuration file.
@@ -94,24 +94,6 @@ impl AppBuilder {
     pub fn config_file(&mut self, config_path: &str) -> &mut Self {
         self.config_path = Path::new(config_path).to_path_buf();
         self
-    }
-
-    /// Get the configuration items of the plugin according to the plugin's `config_prefix`
-    pub fn get_config<T>(&self, plugin: &impl Configurable) -> Result<T>
-    where
-        T: serde::de::DeserializeOwned,
-    {
-        let prefix = plugin.config_prefix();
-        let table = match self.config.get(prefix) {
-            Some(toml::Value::Table(table)) => table.to_owned(),
-            _ => Table::new(),
-        };
-        Ok(T::deserialize(table.to_owned()).with_context(|| {
-            format!(
-                "Failed to deserialize the configuration of prefix \"{}\"",
-                prefix
-            )
-        })?)
     }
 
     /// Add component to the registry
@@ -156,7 +138,7 @@ impl AppBuilder {
             Err(e) => {
                 log::error!("{:?}", e);
             }
-            Ok(_app) => {}
+            Ok(_app) => { /* return? */ }
         }
     }
 
@@ -164,18 +146,14 @@ impl AppBuilder {
         // 1. read env variable
         let env = env::init()?;
 
-        // 2. load yaml config
-        self.config = self.load_config(env)?;
+        // 2. load toml config
+        self.config = config::load_config(&self.config_path, env)?;
 
         // 3. build plugin
         self.build_plugins().await;
 
         // 4. schedule
         self.schedule().await
-    }
-
-    fn load_config(&mut self, env: env::Env) -> Result<Table> {
-        config::load_config(&self.config_path, env)
     }
 
     async fn build_plugins(&mut self) {
@@ -228,7 +206,8 @@ impl AppBuilder {
 
     fn build_app(&mut self) -> Arc<App> {
         let components = std::mem::take(&mut self.components);
-        Arc::new(App { components })
+        let config = std::mem::take(&mut self.config);
+        Arc::new(App { components, config })
     }
 }
 
@@ -241,6 +220,24 @@ impl Default for AppBuilder {
             config: Default::default(),
             components: Default::default(),
             schedulers: Default::default(),
+        }
+    }
+}
+
+impl ConfigRegistry for App {
+    fn get_by_prefix(&self, prefix: &str) -> Table {
+        match self.config.get(prefix) {
+            Some(toml::Value::Table(table)) => table.clone(),
+            _ => Table::new(),
+        }
+    }
+}
+
+impl ConfigRegistry for AppBuilder {
+    fn get_by_prefix(&self, prefix: &str) -> Table {
+        match self.config.get(prefix) {
+            Some(toml::Value::Table(table)) => table.clone(),
+            _ => Table::new(),
         }
     }
 }

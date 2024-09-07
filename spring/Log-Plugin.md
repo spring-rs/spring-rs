@@ -1,6 +1,6 @@
 ## Introduction
 
-The log plugin is a plugin built into the `spring-boot` core module and is also the first plugin loaded by spring. This plugin does not need to be added manually by the developer.
+The log plugin is a plugin built into the `spring` core module and is also the first plugin loaded by spring. This plugin does not need to be added manually by the developer.
 
 This plugin integrates the most popular log library [`tracing`](https://tracing.rs/) and provides the following configuration items
 

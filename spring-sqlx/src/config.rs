@@ -1,7 +1,9 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
+use spring::config::Configurable;
 
-#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "sqlx"]
 #[allow(clippy::struct_excessive_bools)]
 pub struct SqlxConfig {
     /// The URI for connecting to the database. For example:

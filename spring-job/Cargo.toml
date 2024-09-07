@@ -8,9 +8,11 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring-boot = { path = "../spring-boot", version = "0.0.9" }
+spring = { path = "../spring", version = "0.0.9" }
+spring-macros = { path = "../spring-macros", version = "0.0.9" }
 tokio-cron-scheduler = { workspace = true, features = ["signal"] }
 anyhow = { workspace = true }
+serde = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 uuid = { workspace = true, features = ["v4"] }
 chrono = { workspace = true }

@@ -1,4 +1,5 @@
 use crate::Router;
+
 pub use inventory::submit;
 
 /// TypeHandler is used to configure the spring-macro marked route handler

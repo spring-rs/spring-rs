@@ -1,9 +1,11 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
+use spring::config::Configurable;
 use std::net::{IpAddr, Ipv4Addr};
 
 /// spring-web Config
-#[derive(Debug, JsonSchema, Deserialize)]
+#[derive(Debug, Configurable, JsonSchema, Deserialize)]
+#[config_prefix = "web"]
 pub struct WebConfig {
     #[serde(default = "default_binding")]
     pub(crate) binding: IpAddr,
