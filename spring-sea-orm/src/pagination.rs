@@ -99,11 +99,11 @@ mod web {
 
 #[derive(Debug, Serialize)]
 pub struct Page<T> {
-    content: Vec<T>,
-    size: u64,
-    page: u64,
-    total_elements: u64,
-    total_pages: u64,
+    pub content: Vec<T>,
+    pub size: u64,
+    pub page: u64,
+    pub total_elements: u64,
+    pub total_pages: u64,
 }
 
 impl<T> Page<T> {
@@ -120,6 +120,11 @@ impl<T> Page<T> {
     /// Compute the number of pages for the current page
     fn total_pages(total: u64, size: u64) -> u64 {
         (total / size) + (total % size > 0) as u64
+    }
+
+    /// iterator for content
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+        self.content.iter()
     }
 }
 

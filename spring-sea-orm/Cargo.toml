@@ -1,7 +1,7 @@
 [package]
 name = "spring-sea-orm"
-description = "rust microservice framework"
-version.workspace = true
+description = "spring-rs integrated with sea-orm"
+version = "0.1.2"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
