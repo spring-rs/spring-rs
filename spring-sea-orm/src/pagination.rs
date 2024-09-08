@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use spring::async_trait;
 use thiserror::Error;
 
+/// pagination information.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Pagination {
     #[serde(default = "default_page")]
@@ -97,12 +98,17 @@ mod web {
     }
 }
 
+/// A page is a sublist of a list of objects.
+/// It allows gain information about the position of it in the containing entire list.
+
 #[derive(Debug, Serialize)]
 pub struct Page<T> {
     pub content: Vec<T>,
     pub size: u64,
     pub page: u64,
+    /// the total amount of elements.
     pub total_elements: u64,
+    /// the number of total pages.
     pub total_pages: u64,
 }
 
@@ -125,6 +131,28 @@ impl<T> Page<T> {
     /// iterator for content
     pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.content.iter()
+    }
+
+    /// Returns a new Page with the content of the current one mapped by the given Function
+    pub fn map<F, R>(self, func: F) -> Page<R>
+    where
+        F: FnMut(T) -> R,
+    {
+        let Page {
+            content,
+            size,
+            page,
+            total_elements,
+            total_pages,
+        } = self;
+        let content = content.into_iter().map(func).collect();
+        Page {
+            content,
+            size,
+            page,
+            total_elements,
+            total_pages,
+        }
     }
 }
 
