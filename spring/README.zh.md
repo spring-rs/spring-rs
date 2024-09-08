@@ -16,7 +16,7 @@
 添加依赖
 
 ```toml
-spring = { version = "0.1.0" }                       # 该crate中包含了插件trait的定义
+spring = { version = "0.1.1" }                       # 该crate中包含了插件trait的定义
 serde = { workspace = true, features = ["derive"] }  # 用于解析插件的配置项
 ```
 

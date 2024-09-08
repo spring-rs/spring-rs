@@ -16,7 +16,7 @@
 Add dependencies
 
 ```toml
-spring = { version = "0.1.0" }           # This crate contains the definition of plugin traits
+spring = { version = "0.1.1" }           # This crate contains the definition of plugin traits
 serde = { workspace = true, features = ["derive"] } # Used to parse plugin configuration items
 ```
 

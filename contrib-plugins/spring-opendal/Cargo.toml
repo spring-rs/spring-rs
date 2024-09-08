@@ -9,7 +9,7 @@ homepage = "https://spring-rs.github.io/"
 repository = "https://github.com/spring-rs/spring-rs/"
 
 [dependencies]
-spring = { path = "../../spring", version = "0.1.0" }
+spring = { path = "../../spring", version = "0.1.1" }
 schemars = "0.8"
 serde = "1.0"
 anyhow = "1.0"

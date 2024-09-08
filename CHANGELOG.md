@@ -4,6 +4,12 @@
 
 - **added:** [#4 spring-opentelemetry plugin](https://github.com/spring-rs/spring-rs/issues/4)
 
+## 0.1.1 - 2024.9.8
+
+- **added**: spring-sea-orm add PaginationExt trait. ([#commit_003715])
+
+[#commit_003715]: https://github.com/spring-rs/spring-rs/commit/003715f843c0200d6e46db206f03eed135ff9ddb
+
 ## 0.1.0 - 2024.9.8
 
 - **added**: add ConfigRegistry trait. ([#31])

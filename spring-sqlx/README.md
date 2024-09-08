@@ -4,7 +4,7 @@
 ## Dependencies
 
 ```toml
-spring-sqlx = { version = "0.1.0", features = ["mysql"] }
+spring-sqlx = { version = "0.1.1", features = ["mysql"] }
 ```
 
 You can replace `postgres`, `mysql`, `sqlite`feature to select the appropriate database driver.
