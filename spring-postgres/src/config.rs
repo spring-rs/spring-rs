@@ -7,6 +7,7 @@ use spring::config::Configurable;
 pub struct PgConfig {
     /// The URI for connecting to the postgres. For example:
     /// * postgresql: `postgres://root:12341234@localhost:5432/myapp_development`
+    ///
     /// Please refer to [tokio_postgres::Config] for details.
     pub connect: String,
 }
