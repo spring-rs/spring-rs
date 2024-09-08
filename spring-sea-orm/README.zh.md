@@ -56,4 +56,32 @@ async fn get_todo_list(
 }
 ```
 
+## 翻页支持
+
+`spring-sea-orm`为[SeaOrm的Select](https://docs.rs/sea-orm/latest/sea_orm/query/struct.Select.html)扩展了[PaginationExt特征](https://docs.rs/spring-sea-orm/latest/spring_sea_orm/pagination/trait.PaginationExt.html)。
+
+另外还提供了web翻页参数的解析，只需在依赖中添加`with-web`功能即可。
+
+```toml
+spring-sea-orm = { version = "<version>", features = ["postgres", "with-web"] }
+```
+
+使用方式如下：
+
+```rust
+#[get("/")]
+async fn get_todo_list(
+    Component(db): Component<DbConn>,
+    Query(query): Query<TodoListQuery>,
+    pagination: Pagination,
+) -> Result<impl IntoResponse> {
+    let rows = TodoList::find()
+        .filter(query)
+        .page(&db, pagination)
+        .await
+        .context("query todo list failed")?;
+    Ok(Json(rows))
+}
+```
+
 完整代码参考[`sea-orm-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/sea-orm-example)

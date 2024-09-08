@@ -56,4 +56,32 @@ async fn get_todo_list(
 }
 ```
 
+## Pagination support
+
+`spring-sea-orm` extends [SeaOrm's Select](https://docs.rs/sea-orm/latest/sea_orm/query/struct.Select.html) with the [PaginationExt feature](https://docs.rs/spring-sea-orm/latest/spring_sea_orm/pagination/trait.PaginationExt.html).
+
+In addition, web pagination parameter parsing is also provided. Just add the `with-web` function to the dependency.
+
+```toml
+spring-sea-orm = { version = "<version>", features = ["postgres", "with-web"] }
+```
+
+Use as follows:
+
+```rust
+#[get("/")]
+async fn get_todo_list(
+    Component(db): Component<DbConn>,
+    Query(query): Query<TodoListQuery>,
+    pagination: Pagination,
+) -> Result<impl IntoResponse> {
+    let rows = TodoList::find()
+        .filter(query)
+        .page(&db, pagination)
+        .await
+        .context("query todo list failed")?;
+    Ok(Json(rows))
+}
+```
+
 For the complete code, please refer to [`sea-orm-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/sea-orm-example)

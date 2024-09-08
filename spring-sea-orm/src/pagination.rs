@@ -137,6 +137,7 @@ pub trait PaginationExt<'db, C, M>
 where
     C: ConnectionTrait,
 {
+    /// pagination
     async fn page(self, db: &'db C, pagination: Pagination) -> PageResult<M>;
 }
 
