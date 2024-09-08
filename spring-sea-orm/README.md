@@ -66,6 +66,16 @@ In addition, web pagination parameter parsing is also provided. Just add the `wi
 spring-sea-orm = { version = "<version>", features = ["postgres", "with-web"] }
 ```
 
+The configuration is as follows:
+
+```toml
+# sea-orm-web configuration
+[sea-orm-web]
+one_indexed = false     # 1-based index, closed by default
+max_page_size = 2000    # Maximum supported page size, to avoid OOM caused by server attacks, default value 2000
+default_page_size = 20  # Default page size, 20
+```
+
 Use as follows:
 
 ```rust

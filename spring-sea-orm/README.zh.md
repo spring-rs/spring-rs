@@ -66,6 +66,16 @@ async fn get_todo_list(
 spring-sea-orm = { version = "<version>", features = ["postgres", "with-web"] }
 ```
 
+配置方式如下：
+
+```toml
+# sea-orm-web配置
+[sea-orm-web]
+one_indexed = false     # 基于1的索引，默认关闭
+max_page_size = 2000    # 支持的最大页大小，避免服务器攻击出现OOM，默认值2000
+default_page_size = 20  # 默认页大小，20
+```
+
 使用方式如下：
 
 ```rust
