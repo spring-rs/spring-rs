@@ -7,6 +7,11 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+http2 = ["axum/http2"]
+multipart = ["axum/multipart"]
+ws = ["axum/ws"]
+
 [dependencies]
 spring = { path = "../spring", version = "0.1.0" }
 spring-macros = { path = "../spring-macros", version = "0.1.0" }
@@ -21,6 +26,3 @@ tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 inventory = { workspace = true }
-
-[dev-dependencies]
-spring-sqlx = { path = "../spring-sqlx", version = "0.1.0" }
