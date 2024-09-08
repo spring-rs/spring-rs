@@ -63,14 +63,17 @@ pub struct SeaOrmWebConfig {
     pub default_page_size: u64,
 }
 
+#[allow(dead_code)]
 fn default_one_indexed() -> bool {
     false
 }
 
+#[allow(dead_code)]
 fn default_max_page_size() -> u64 {
     2000
 }
 
+#[allow(dead_code)]
 fn default_page_size() -> u64 {
     20
 }
