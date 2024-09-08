@@ -4,7 +4,6 @@ use spring::config::Configurable;
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "sea-orm"]
-#[allow(clippy::struct_excessive_bools)]
 pub struct SeaOrmConfig {
     /// The URI for connecting to the database. For example:
     /// * Postgres: `postgres://root:12341234@localhost:5432/myapp_development`
@@ -41,4 +40,37 @@ fn default_min_connections() -> u32 {
 
 fn default_max_connections() -> u32 {
     10
+}
+
+#[cfg(feature = "with-web")]
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "sea-orm-web"]
+pub struct SeaOrmWebConfig {
+    /// Configures whether to expose and assume 1-based page number indexes in the request parameters.
+    /// Defaults to false, meaning a page number of 0 in the request equals the first page.
+    /// If this is set to true, a page number of 1 in the request will be considered the first page.
+    #[serde(default = "default_one_indexed")]
+    pub one_indexed: bool,
+
+    /// Configures the maximum page size to be accepted.
+    /// This allows to put an upper boundary of the page size to prevent potential attacks trying to issue an OOM.
+    /// Defaults to 2000.
+    #[serde(default = "default_max_page_size")]
+    pub max_page_size: u64,
+
+    /// Default page size.
+    #[serde(default = "default_page_size")]
+    pub default_page_size: u64,
+}
+
+fn default_one_indexed() -> bool {
+    false
+}
+
+fn default_max_page_size() -> u64 {
+    2000
+}
+
+fn default_page_size() -> u64 {
+    20
 }

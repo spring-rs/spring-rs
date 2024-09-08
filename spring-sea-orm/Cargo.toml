@@ -12,14 +12,14 @@ default = ["sea-orm/runtime-tokio-native-tls"]
 mysql = ["sea-orm/sqlx-mysql"]
 sqlite = ["sea-orm/sqlx-sqlite"]
 postgres = ["sea-orm/sqlx-postgres"]
+with-web = ["spring-web"]
 
 [dependencies]
+spring-web = { path = "../spring-web", version = "0.1.0", optional = true }
 spring = { path = "../spring", version = "0.1.0" }
 serde = { workspace = true }
 anyhow = { workspace = true }
+thiserror = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 schemars = { workspace = true }
 sea-orm = { workspace = true, optional = true }
-
-[dev-dependencies]
-spring-web = { path = "../spring-web", version = "0.1.0" }

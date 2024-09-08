@@ -1,2 +1,8 @@
 [sea-orm]
 uri = "postgres://postgres:xudjf23adj213@localhost/postgres"
+enable_logging = true
+
+[sea-orm-web]
+one_indexed = true
+max_page_size = 100
+default_page_size = 10

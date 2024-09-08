@@ -1,3 +1,8 @@
+0. generate entities
+```sh
+sea-orm-cli generate entity --with-serde both --output-dir src/entities
+```
+
 1. start postgres
     ```sh
     docker compose up -d

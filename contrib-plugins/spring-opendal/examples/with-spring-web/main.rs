@@ -1,7 +1,8 @@
-use spring::{auto_config, get, post, App};
+use spring::{auto_config, App};
 use spring_opendal::{Op, OpenDALPlugin};
 use spring_web::extractor::Component;
 use spring_web::{axum::http::StatusCode, axum::response::IntoResponse};
+use spring_web::{get, post};
 use spring_web::{WebConfigurator, WebPlugin};
 
 #[auto_config(WebConfigurator)]
