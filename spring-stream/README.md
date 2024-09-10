@@ -58,7 +58,7 @@ spring-stream = { version = "0.1.1", features=["file","json"] }
 
 `spring-stream` provides a process macro called `stream_listener` to subscribe to messages from a specified topic. The code is as follows:
 
-```rust, linenos, hl_lines=5 10-17
+```rust, linenos
 {{ include_code(path="../../examples/stream-file-example/src/bin/consumer.rs") }}
 ``` 
 
