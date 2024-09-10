@@ -1,4 +1,5 @@
-//! [spring-web](https://spring-rs.github.io/docs/plugins/spring-web/)
+//! [![spring-rs](https://img.shields.io/github/stars/spring-rs/spring-rs)](https://spring-rs.github.io/docs/plugins/spring-web)
+#![doc = include_str!("../README.md")]
 
 /// spring-web config
 pub mod config;
@@ -135,8 +136,7 @@ impl WebPlugin {
         Ok("axum schedule finished".to_string())
     }
 
-    fn apply_middleware(router: Router, middleware: Middlewares) -> Router {
-        let mut router = router;
+    fn apply_middleware(mut router: Router, middleware: Middlewares) -> Router {
         if Some(EnableMiddleware { enable: true }) == middleware.catch_panic {
             router = router.layer(CatchPanicLayer::new());
         }
@@ -169,7 +169,7 @@ impl WebPlugin {
         }
         if let Some(static_assets) = middleware.static_assets {
             if static_assets.enable {
-                return Self::apply_static_dir(router, static_assets);
+                router = Self::apply_static_dir(router, static_assets);
             }
         }
         router

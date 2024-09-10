@@ -42,7 +42,7 @@ static = { enable = true, uri = "/static", path = "static", precompressed = true
 
 App实现了[WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html)特征，可以通过该特征指定路由配置：
 
-```rust, linenos, hl_lines=6 10-18
+```rust, linenos, hl_lines=6 10-18, no_run
 #[tokio::main]
 async fn main() {
     App::new()
@@ -85,6 +85,9 @@ async fn hello_word() -> impl IntoResponse {
 也可以使用[`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html)宏同时绑定多个method：
 
 ```rust
+use spring_web::route;
+use spring_web::axum::response::IntoResponse;
+
 #[route("/test", method = "GET", method = "HEAD")]
 async fn example() -> impl IntoResponse {
     "hello world"
@@ -94,6 +97,9 @@ async fn example() -> impl IntoResponse {
 除此之外，spring还支持一个handler绑定多个路由，这需要用到[`routes`](https://docs.rs/spring-macros/latest/spring_macros/attr.routes.html)属性宏：
 
 ```rust
+use spring_web::{routes, get, delete};
+use spring_web::axum::response::IntoResponse;
+
 #[routes]
 #[get("/test")]
 #[get("/test2")]

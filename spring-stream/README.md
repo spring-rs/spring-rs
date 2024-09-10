@@ -51,31 +51,7 @@ spring-stream = { version = "0.1.1", features=["file","json"] }
 ```
 
 ```rust, linenos
-#[auto_config(WebConfigurator)]
-#[tokio::main]
-async fn main() {
-    App::new()
-        .add_plugin(StreamPlugin)
-        .add_plugin(WebPlugin)
-        .run()
-        .await
-}
-
-#[get("/")]
-async fn send_msg(Component(producer): Component<Producer>) -> Result<impl IntoResponse> {
-    let now = SystemTime::now();
-    let json = json!({
-        "success": true,
-        "msg": format!("This message was sent at {:?}", now),
-    });
-    let resp = producer
-        .send_json("topic", json)
-        .await
-        .context("send msg failed")?;
-
-    let seq = resp.sequence();
-    Ok(Json(json!({"seq":seq})))
-}
+{{ include_code(path="../../examples/stream-file-example/src/bin/producer.rs") }}
 ```
 
 ### Consume messages
@@ -83,27 +59,7 @@ async fn send_msg(Component(producer): Component<Producer>) -> Result<impl IntoR
 `spring-stream` provides a process macro called `stream_listener` to subscribe to messages from a specified topic. The code is as follows:
 
 ```rust, linenos, hl_lines=5 10-17
-#[tokio::main]
-async fn main() {
-    App::new()
-        .add_plugin(StreamPlugin)
-        .add_consumer(consumers())
-        .run()
-        .await
-}
-
-fn consumers() -> Consumers {
-    Consumers::new().typed_consumer(listen_topic_do_something)
-}
-
-#[stream_listener("topic", file_consumer_options = fill_file_consumer_options)]
-async fn listen_topic_do_something(Json(payload): Json<Payload>) { 
-    tracing::info!("{:#?}", payload); 
-} 
-
-fn fill_file_consumer_options(opts: &mut FileConsumerOptions) { 
-    opts.set_auto_stream_reset(AutoStreamReset::Earliest); 
-} 
+{{ include_code(path="../../examples/stream-file-example/src/bin/consumer.rs") }}
 ``` 
 
 View the complete example code [stream-file-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-file-example), [stream-redis-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-redis-example), [stream-kafka-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-kafka-example)

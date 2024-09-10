@@ -1,6 +1,6 @@
-//! [spring-stream](https://spring-rs.github.io/docs/plugins/spring-stream/)
+//! [![spring-rs](https://img.shields.io/github/stars/spring-rs/spring-rs)](https://spring-rs.github.io/docs/plugins/spring-stream)
 
-mod config;
+pub mod config;
 pub mod consumer;
 pub mod extractor;
 pub mod handler;

@@ -42,7 +42,12 @@ static = { enable = true, uri = "/static", path = "static", precompressed = true
 
 App implements the [WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html) feature, which can be used to specify routing configuration:
 
-```rust, linenos, hl_lines=6 10-18
+```no_run, rust, linenos, hl_lines=6 10-18
+use spring::App;
+use spring_web::get;
+use spring_web::{WebPlugin, WebConfigurator, Router, axum::response::IntoResponse, handler::TypeRouter};
+use spring_sqlx::SqlxPlugin;
+
 #[tokio::main]
 async fn main() {
     App::new()
@@ -89,6 +94,9 @@ You can also use the `auto_config` macro to implement automatic configuration. T
 You can also use the [`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html) macro to bind multiple methods at the same time:
 
 ```rust
+use spring_web::route;
+use spring_web::axum::response::IntoResponse;
+
 #[route("/test", method = "GET", method = "HEAD")]
 async fn example() -> impl IntoResponse {
     "hello world"
@@ -98,6 +106,9 @@ async fn example() -> impl IntoResponse {
 In addition, spring also supports binding multiple routes to a handler, which requires the [`routes`](https://docs.rs/spring-macros/latest/spring_macros/attr.routes.html) attribute macro:
 
 ```rust
+use spring_web::{routes, get, delete};
+use spring_web::axum::response::IntoResponse;
+
 #[routes]
 #[get("/test")]
 #[get("/test2")]
@@ -112,6 +123,11 @@ async fn example() -> impl IntoResponse {
 In the above example, the `SqlxPlugin` plugin automatically registers a Sqlx connection pool component for us. We can use `Component` to extract this connection pool from State. [`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html) is an axum [extractor](https://docs.rs/axum/latest/axum/extract/index.html).
 
 ```rust
+use anyhow::Context;
+use spring_web::get;
+use spring_web::{axum::response::IntoResponse, extractor::Component, error::Result};
+use spring_sqlx::{ConnectPool, sqlx::{self, Row}};
+
 #[get("/version")]
 async fn mysql_version(Component(pool): Component<ConnectPool>) -> Result<String> {
     let version = sqlx::query("select version() as version")
@@ -131,6 +147,11 @@ You can use [`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/st
 
 
 ```rust
+use spring_web::get;
+use spring_web::{extractor::Config, axum::response::IntoResponse};
+use spring::config::Configurable;
+use serde::Deserialize;
+
 #[derive(Debug, Configurable, Deserialize)]
 #[config_prefix = "custom"]
 struct CustomConfig {
@@ -153,4 +174,6 @@ b = true
 ```
 
 
-Complete code reference [`web-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-example)
+Complete code reference [`web-example`][web-example]
+
+[web-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/web-example
