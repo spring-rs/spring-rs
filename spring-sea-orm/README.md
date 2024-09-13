@@ -31,6 +31,10 @@ After configuring the above configuration items, the plugin will automatically r
 pub type DbConn = sea_orm::DbConn;
 ```
 
+## Model generation
+
+[sea-orm-cli](https://www.sea-ql.org/SeaORM/docs/generate-entity/sea-orm-cli/) provides a great model code generation function. You only need to define the table structure in the database, and after a simple configuration, the model code corresponding to the database structure can be generated, which can save a lot of code writing work.
+
 ## Extract the Component registered by the plugin
 
 The `SeaOrmPlugin` plugin automatically registers a connection pool component for us. We can use `Component` to extract this connection pool from AppState. [`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html) is an axum [extractor](https://docs.rs/axum/latest/axum/extract/index.html).

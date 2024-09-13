@@ -31,6 +31,10 @@ enable_logging = true                                # 打印sql日志
 pub type DbConn = sea_orm::DbConn;
 ```
 
+## 模型生成
+
+[sea-orm-cli](https://www.sea-ql.org/SeaORM/docs/generate-entity/sea-orm-cli/)提供了非常棒的模型代码生成的功能。你只需在数据库内定义好表结构，经过简单的配置就能生成与数据库结构对应的模型代码，这可以节省大量的代码编写工作。
+
 ## 提取插件注册的Component
 
 `SeaOrmPlugin`插件为我们自动注册了一个连接池组件，我们可以使用`Component`从AppState中提取这个连接池，[`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html)是一个axum的[extractor](https://docs.rs/axum/latest/axum/extract/index.html)。
