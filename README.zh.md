@@ -61,7 +61,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 }
 ```
 
-<objecct type="image/svg+xml" data="https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Date"></object>
+<object type="image/svg+xml" data="https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Date"></object>
 
 ## 请作者喝杯茶
 
