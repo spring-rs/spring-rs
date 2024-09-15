@@ -247,11 +247,17 @@ pub enum WebError {
 impl IntoResponse for WebError {
     fn into_response(self) -> Response {
         match self {
-            Self::ResponseStatusError(e) => (e.status_code, e.msg),
-            Self::ServerError(e) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Something went wrong: {}", e),
-            ),
+            Self::ResponseStatusError(e) => {
+                tracing::warn!("handler error:{}", e);
+                (e.status_code, e.msg)
+            }
+            Self::ServerError(e) => {
+                tracing::error!("internal server error:{}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    format!("Something went wrong: {}", e),
+                )
+            }
         }
         .into_response()
     }
