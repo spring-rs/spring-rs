@@ -15,6 +15,10 @@ pub struct MailerConfig {
     pub secure: bool,
     /// Auth SMTP server
     pub auth: Option<MailerAuth>,
+    /// Use stub transport. This transport logs messages and always returns the given response.
+    /// It can be useful for testing purposes.
+    #[serde(default = "bool::default")]
+    pub stub: bool,
 }
 
 /// Authentication details for the mailer
