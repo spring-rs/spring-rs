@@ -7,6 +7,7 @@
 ## after 0.1.2 CHANGELOG
 
 * [spring-sea-orm CHANGELOG](./spring-sea-orm/CHANGELOG.md)
+* [spring-web CHANGELOG](./spring-web/CHANGELOG.md)
 
 ## 0.1.1 - 2024.9.8
 
