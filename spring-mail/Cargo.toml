@@ -12,7 +12,6 @@ lettre = { workspace = true, features = ["tokio1-native-tls", "serde"] }
 spring = { path = "../spring", version = "0.1.1" }
 serde = { workspace = true }
 anyhow = { workspace = true }
-thiserror = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 schemars = { workspace = true }
 
