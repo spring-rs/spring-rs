@@ -8,6 +8,7 @@
 
 * [spring-sea-orm CHANGELOG](./spring-sea-orm/CHANGELOG.md)
 * [spring-web CHANGELOG](./spring-web/CHANGELOG.md)
+* [spring-mail CHANGELOG](./spring-mail/CHANGELOG.md)
 
 ## 0.1.1 - 2024.9.8
 
