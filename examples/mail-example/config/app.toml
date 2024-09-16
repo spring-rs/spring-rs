@@ -1,3 +1,4 @@
 [mail]
 host = "smtp.163.com"
 port = 465
+stub = true
