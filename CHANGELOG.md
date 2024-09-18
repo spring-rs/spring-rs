@@ -3,6 +3,7 @@
 ## Unrelease
 
 - **added:** [#4 spring-opentelemetry plugin](https://github.com/spring-rs/spring-rs/issues/4)
+- **added:** [#14 spring-tarpc plugin](https://github.com/spring-rs/spring-rs/issues/14)
 
 ## after 0.1.2 CHANGELOG
 
