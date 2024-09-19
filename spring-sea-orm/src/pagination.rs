@@ -24,13 +24,12 @@ mod web {
     use crate::config::SeaOrmWebConfig;
     use serde::Deserialize;
     use spring::async_trait;
-    use spring::config::ConfigRegistry;
     use spring_web::axum::extract::rejection::QueryRejection;
     use spring_web::axum::extract::{FromRequestParts, Query};
     use spring_web::axum::http::request::Parts;
-    use spring_web::axum::http::StatusCode;
     use spring_web::axum::response::IntoResponse;
-    use spring_web::AppState;
+    use spring_web::extractor::RequestPartsExt;
+    use std::result::Result as StdResult;
     use thiserror::Error;
 
     #[derive(Debug, Error)]
@@ -39,18 +38,14 @@ mod web {
         QueryRejection(#[from] QueryRejection),
 
         #[error(transparent)]
-        AppConfigError(#[from] spring::error::AppError),
+        WebError(#[from] spring_web::error::WebError),
     }
 
     impl IntoResponse for SeaOrmWebErr {
         fn into_response(self) -> spring_web::axum::response::Response {
             match self {
                 Self::QueryRejection(e) => e.into_response(),
-                Self::AppConfigError(e) => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("sea orm get pagination config failed: {}", e),
-                )
-                    .into_response(),
+                Self::WebError(e) => e.into_response(),
             }
         }
     }
@@ -68,15 +63,10 @@ mod web {
         async fn from_request_parts(
             parts: &mut Parts,
             _state: &S,
-        ) -> std::result::Result<Self, Self::Rejection> {
-            let state = parts
-                .extensions
-                .get::<AppState>()
-                .expect("extract app state from extension failed");
-
+        ) -> StdResult<Self, Self::Rejection> {
             let Query(pagination) = Query::<OptionalPagination>::try_from_uri(&parts.uri)?;
 
-            let config = state.app.get_config::<SeaOrmWebConfig>()?;
+            let config = parts.get_config::<SeaOrmWebConfig>()?;
 
             let size = match pagination.size {
                 Some(size) => {

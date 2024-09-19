@@ -5,8 +5,7 @@ use crate::AppState;
 use axum::{async_trait, http::request::Parts};
 use spring::config::{ConfigRegistry, Configurable};
 use std::ops::{Deref, DerefMut};
-
-type StdResult<T, E> = std::result::Result<T, E>;
+use std::result::Result as StdResult;
 
 /// Extending the functionality of RequestParts
 pub trait RequestPartsExt {

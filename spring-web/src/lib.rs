@@ -127,8 +127,7 @@ impl WebPlugin {
         tracing::info!("bind tcp listener: {}", addr);
 
         // 3. axum server
-        let state = AppState { app };
-        let router = router.layer(Extension(state));
+        let router = router.layer(Extension(AppState { app }));
 
         tracing::info!("axum server started");
         axum::serve(listener, router)
