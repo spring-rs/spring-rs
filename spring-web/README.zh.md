@@ -42,7 +42,7 @@ static = { enable = true, uri = "/static", path = "static", precompressed = true
 
 App实现了[WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html)特征，可以通过该特征指定路由配置：
 
-```rust, linenos, hl_lines=6 10-18, no_run
+```no_run, rust, linenos, hl_lines=6 10-18
 #[tokio::main]
 async fn main() {
     App::new()
@@ -129,7 +129,7 @@ axum也提供了其他的[extractor](https://docs.rs/axum/latest/axum/extract/in
 
 ## 读取配置
 
-你可以用[`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Config.html)抽取配置toml中的配置。
+你可以用[`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Config.html)抽取toml中的配置。
 
 ```rust
 #[derive(Debug, Configurable, Deserialize)]
@@ -168,4 +168,4 @@ async fn problem_middleware(Component(db): Component<ConnectPool>, request: Requ
 }
 ```
 
-完整代码参考[`web-middleware-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/examples/web-middleware-example)
+完整代码参考[`web-middleware-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example)
