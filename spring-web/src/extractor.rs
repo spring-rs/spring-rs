@@ -1,34 +1,59 @@
 pub use axum::extract::*;
 
+use crate::error::{Result, WebError};
 use crate::AppState;
-use axum::{
-    async_trait,
-    http::{request::Parts, StatusCode},
-};
+use axum::{async_trait, http::request::Parts};
 use spring::config::{ConfigRegistry, Configurable};
 use std::ops::{Deref, DerefMut};
+
+type StdResult<T, E> = std::result::Result<T, E>;
+
+/// Extending the functionality of RequestParts
+pub trait RequestPartsExt {
+    /// get AppState
+    fn get_app_state(&self) -> &AppState;
+
+    /// get Component
+    fn get_component<T: Clone + Send + Sync + 'static>(&self) -> Result<T>;
+
+    /// get Config
+    fn get_config<T: serde::de::DeserializeOwned + Configurable>(&self) -> Result<T>;
+}
+
+impl RequestPartsExt for Parts {
+    fn get_app_state(&self) -> &AppState {
+        self.extensions
+            .get::<AppState>()
+            .expect("extract app state from extension failed")
+    }
+
+    fn get_component<T: Clone + Send + Sync + 'static>(&self) -> Result<T> {
+        match self.get_app_state().app.get_component::<T>() {
+            Some(component) => Ok(T::clone(&component)),
+            None => Err(WebError::ComponentNotExists(std::any::type_name::<T>())),
+        }
+    }
+
+    fn get_config<T: serde::de::DeserializeOwned + Configurable>(&self) -> Result<T> {
+        self.get_app_state()
+            .app
+            .get_config::<T>()
+            .map_err(|e| WebError::ConfigDeserializeErr(std::any::type_name::<T>(), e))
+    }
+}
 
 /// Extract the components registered by the plugin from AppState
 pub struct Component<T: Clone>(pub T);
 
 #[async_trait]
-impl<T, S> FromRequest<S> for Component<T>
+impl<T, S> FromRequestParts<S> for Component<T>
 where
     T: Clone + Send + Sync + 'static,
 {
-    type Rejection = (StatusCode, &'static str);
-    async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
-        let state = req
-            .extensions()
-            .get::<AppState>()
-            .expect("extract app state from extension failed");
-        match state.app.get_component::<T>() {
-            Some(component) => Ok(Component(T::clone(&component))),
-            None => Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "server component not found",
-            )),
-        }
+    type Rejection = WebError;
+
+    async fn from_request_parts(parts: &mut Parts, _s: &S) -> StdResult<Self, Self::Rejection> {
+        parts.get_component::<T>().map(|c| Component(c))
     }
 }
 
@@ -51,24 +76,14 @@ where
     T: serde::de::DeserializeOwned + Configurable;
 
 #[async_trait]
-impl<T> FromRequestParts<AppState> for Config<T>
+impl<T, S> FromRequestParts<S> for Config<T>
 where
     T: serde::de::DeserializeOwned + Configurable,
 {
-    type Rejection = (StatusCode, String);
+    type Rejection = WebError;
 
-    async fn from_request_parts(_: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
-        match state.app.get_config::<T>() {
-            Ok(config) => Ok(Config(config)),
-            Err(e) => Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!(
-                    "get server config failed for typeof {}: {}",
-                    std::any::type_name::<T>(),
-                    e
-                ),
-            )),
-        }
+    async fn from_request_parts(parts: &mut Parts, _s: &S) -> StdResult<Self, Self::Rejection> {
+        parts.get_config().map(|c| Config(c))
     }
 }
 

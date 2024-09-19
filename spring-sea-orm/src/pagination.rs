@@ -62,13 +62,18 @@ mod web {
     }
 
     #[async_trait]
-    impl FromRequestParts<AppState> for Pagination {
+    impl<S> FromRequestParts<S> for Pagination {
         type Rejection = SeaOrmWebErr;
 
         async fn from_request_parts(
             parts: &mut Parts,
-            state: &AppState,
+            _state: &S,
         ) -> std::result::Result<Self, Self::Rejection> {
+            let state = parts
+                .extensions
+                .get::<AppState>()
+                .expect("extract app state from extension failed");
+
             let Query(pagination) = Query::<OptionalPagination>::try_from_uri(&parts.uri)?;
 
             let config = state.app.get_config::<SeaOrmWebConfig>()?;
