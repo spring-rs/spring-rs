@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+- **changed**: changed Pagination extractor support AppState in extension ([#44])
+
+[#44]: https://github.com/spring-rs/spring-rs/pull/44
+
 ## 0.1.3
 
 - **added**: Page add `map()` ([#34])
