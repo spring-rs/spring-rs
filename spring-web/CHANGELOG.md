@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+- **added**: Support extracting Component in middleware ([#44])
+- **changed**: web-middleware-example support problemdetail ([#44])
+
+[#44]: https://github.com/spring-rs/spring-rs/pull/44
+
 ## 0.1.2
 
 - **added**: WebError IntoResponse add log ([#5c684e])
