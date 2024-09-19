@@ -19,6 +19,9 @@ pub enum AppError {
     #[error(transparent)]
     JoinError(#[from] tokio::task::JoinError),
 
+    #[error("Failed to deserialize the configuration of prefix \"{0}\": {1}")]
+    DeserializeErr(String, toml::de::Error),
+
     #[error(transparent)]
     OtherError(#[from] anyhow::Error),
 }

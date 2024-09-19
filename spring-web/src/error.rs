@@ -3,6 +3,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use spring::error::AppError;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, WebError>;
@@ -239,6 +240,12 @@ pub enum WebError {
     #[error(transparent)]
     ResponseStatusError(#[from] KnownWebError),
 
+    #[error("Component of type {0} does not exist")]
+    ComponentNotExists(&'static str),
+
+    #[error("get server config failed for typeof {0}, {1}")]
+    ConfigDeserializeErr(&'static str, AppError),
+
     #[error(transparent)]
     ServerError(#[from] anyhow::Error),
 }
@@ -251,11 +258,11 @@ impl IntoResponse for WebError {
                 tracing::warn!("handler error:{}", e);
                 (e.status_code, e.msg)
             }
-            Self::ServerError(e) => {
-                tracing::error!("internal server error:{}", e);
+            _other => {
+                tracing::error!("internal server error:{}", _other);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Something went wrong: {}", e),
+                    format!("Something went wrong: {}", _other),
                 )
             }
         }

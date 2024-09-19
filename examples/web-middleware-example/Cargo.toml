@@ -8,8 +8,9 @@ authors.workspace = true
 [dependencies]
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
-spring-sqlx = { path = "../../spring-sqlx" }
+spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
 tokio = { workspace = true, features = ["full", "tracing"] }
 tower = { workspace = true }
 tower-http = { workspace = true }
 anyhow = { workspace = true }
+problemdetails = { version = "0.4", features = ["axum"] }

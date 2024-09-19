@@ -24,12 +24,8 @@ pub trait ConfigRegistry {
     {
         let prefix = T::config_prefix();
         let table = self.get_by_prefix(prefix);
-        Ok(T::deserialize(table.to_owned()).with_context(|| {
-            format!(
-                "Failed to deserialize the configuration of prefix \"{}\"",
-                prefix
-            )
-        })?)
+        T::deserialize(table.to_owned())
+            .map_err(|e| AppError::DeserializeErr(prefix.to_string(), e))
     }
 
     fn get_by_prefix(&self, prefix: &str) -> Table;
