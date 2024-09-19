@@ -143,7 +143,7 @@ Axum also provides other [extractors](https://docs.rs/axum/latest/axum/extract/i
 
 ## Read configuration
 
-You can use [`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Config.html) to extract the configuration in the configuration toml.
+You can use [`Config`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Config.html) to extract the configuration in the toml file.
 
 
 ```rust
@@ -192,4 +192,4 @@ async fn problem_middleware(Component(db): Component<ConnectPool>, request: Requ
 
 Complete code reference [`web-middleware-example`][web-middleware-example]
 
-[web-middleware-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/examples/web-middleware-example
+[web-middleware-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example
