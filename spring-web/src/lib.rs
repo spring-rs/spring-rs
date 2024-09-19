@@ -11,6 +11,7 @@ pub mod extractor;
 pub mod handler;
 
 pub use axum;
+use axum::Extension;
 pub use spring::async_trait;
 /////////////////web-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-web` dependency
@@ -51,9 +52,9 @@ use tower_http::{
 /// axum::routing::MethodFilter re-export
 pub type MethodFilter = axum::routing::MethodFilter;
 /// MethodRouter with AppState
-pub type MethodRouter = axum::routing::MethodRouter<AppState>;
+pub type MethodRouter = axum::routing::MethodRouter;
 /// Router with AppState
-pub type Router = axum::Router<AppState>;
+pub type Router = axum::Router;
 /// Routers collection
 pub type Routers = Vec<Router>;
 
@@ -126,7 +127,8 @@ impl WebPlugin {
         tracing::info!("bind tcp listener: {}", addr);
 
         // 3. axum server
-        let router = router.with_state(AppState { app });
+        let state = AppState { app };
+        let router = router.layer(Extension(state));
 
         tracing::info!("axum server started");
         axum::serve(listener, router)

@@ -12,13 +12,16 @@ use std::ops::{Deref, DerefMut};
 pub struct Component<T: Clone>(pub T);
 
 #[async_trait]
-impl<T> FromRequestParts<AppState> for Component<T>
+impl<T, S> FromRequest<S> for Component<T>
 where
     T: Clone + Send + Sync + 'static,
 {
     type Rejection = (StatusCode, &'static str);
-
-    async fn from_request_parts(_: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
+        let state = req
+            .extensions()
+            .get::<AppState>()
+            .expect("extract app state from extension failed");
         match state.app.get_component::<T>() {
             Some(component) => Ok(Component(T::clone(&component))),
             None => Err((
