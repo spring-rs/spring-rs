@@ -159,7 +159,10 @@ b = true
 
 你也可以在[middleware中使用Extractor](https://docs.rs/axum/latest/axum/middleware/fn.from_fn.html)，注意需要遵循axum的规则。
 
-```no_run, rust, linenos, hl_lines=6 10-18
+```rust
+use spring_web::{axum::{response::Response, middleware::Next}, extractor::{Request, Component}};
+use spring_sqlx::ConnectPool;
+
 async fn problem_middleware(Component(db): Component<ConnectPool>, request: Request, next: Next) -> Response {
     // do something
     let response = next.run(request).await;
@@ -167,5 +170,6 @@ async fn problem_middleware(Component(db): Component<ConnectPool>, request: Requ
     response
 }
 ```
+
 
 完整代码参考[`web-middleware-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example)

@@ -20,7 +20,10 @@ pub enum AppError {
     JoinError(#[from] tokio::task::JoinError),
 
     #[error("Failed to deserialize the configuration of prefix \"{0}\": {1}")]
-    DeserializeErr(String, toml::de::Error),
+    DeserializeErr(&'static str, toml::de::Error),
+
+    #[error("config of prefix \"{0}\" not found")]
+    ConfigNotFoundErr(&'static str),
 
     #[error(transparent)]
     OtherError(#[from] anyhow::Error),

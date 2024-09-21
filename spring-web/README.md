@@ -181,7 +181,10 @@ Complete code reference [`web-example`][web-example]
 
 You can also use [Extractor in middleware](https://docs.rs/axum/latest/axum/middleware/fn.from_fn.html), but please note that you need to follow the rules of axum.
 
-```no_run, rust, linenos, hl_lines=6 10-18
+```rust
+use spring_web::{axum::{response::Response, middleware::Next}, extractor::{Request, Component}};
+use spring_sqlx::ConnectPool;
+
 async fn problem_middleware(Component(db): Component<ConnectPool>, request: Request, next: Next) -> Response {
     // do something
     let response = next.run(request).await;

@@ -1,6 +1,7 @@
+use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::LogPlugin;
-use crate::{config, plugin::Plugin};
+use crate::plugin::Plugin;
 use crate::{
     config::env,
     error::Result,
@@ -15,7 +16,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use toml::Table;
 
 pub type Registry<T> = DashMap<String, T>;
 pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send>;
@@ -23,7 +23,7 @@ pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<Stri
 pub struct App {
     /// Component
     components: Registry<ComponentRef>,
-    config: Table,
+    config: TomlConfigRegistry,
 }
 
 pub struct AppBuilder {
@@ -35,7 +35,7 @@ pub struct AppBuilder {
     /// Path of config file
     pub(crate) config_path: PathBuf,
     /// Configuration read from `config_path`
-    config: Table,
+    config: TomlConfigRegistry,
     /// task
     schedulers: Vec<Box<Scheduler>>,
 }
@@ -147,7 +147,7 @@ impl AppBuilder {
         let env = env::init()?;
 
         // 2. load toml config
-        self.config = config::load_config(&self.config_path, env)?;
+        self.config = TomlConfigRegistry::new(&self.config_path, env)?;
 
         // 3. build plugin
         self.build_plugins().await;
@@ -225,19 +225,19 @@ impl Default for AppBuilder {
 }
 
 impl ConfigRegistry for App {
-    fn get_by_prefix(&self, prefix: &str) -> Table {
-        match self.config.get(prefix) {
-            Some(toml::Value::Table(table)) => table.clone(),
-            _ => Table::new(),
-        }
+    fn get_config<T>(&self) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned + crate::config::Configurable,
+    {
+        self.config.get_config::<T>()
     }
 }
 
 impl ConfigRegistry for AppBuilder {
-    fn get_by_prefix(&self, prefix: &str) -> Table {
-        match self.config.get(prefix) {
-            Some(toml::Value::Table(table)) => table.clone(),
-            _ => Table::new(),
-        }
+    fn get_config<T>(&self) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned + crate::config::Configurable,
+    {
+        self.config.get_config::<T>()
     }
 }
