@@ -90,7 +90,7 @@ impl AppBuilder {
     /// The environment configuration file has a higher priority and will
     /// overwrite the configuration items of the main configuration file.
     ///
-    /// For specific supported environments, see the [Env](./config/env) enum.
+    /// For specific supported environments, see the [Env](../config/env/enum.Env.html) enum.
     pub fn config_file(&mut self, config_path: &str) -> &mut Self {
         self.config_path = Path::new(config_path).to_path_buf();
         self
