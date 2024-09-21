@@ -23,7 +23,7 @@ serde = { workspace = true, features = ["derive"] } # Used to parse plugin confi
 ```rust
 use serde::Deserialize;
 use spring::async_trait;
-use spring::config::Configurable;
+use spring::config::{Configurable, ConfigRegistry};
 use spring::{app::AppBuilder, plugin::Plugin};
 
 struct MyPlugin;

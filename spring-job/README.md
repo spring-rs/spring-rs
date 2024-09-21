@@ -11,7 +11,11 @@ spring-job = { version = "0.1.1" }
 
 App implements the [JobConfigurator](https://docs.rs/spring-job/latest/spring_job/trait.JobConfigurator.html) feature, which can be used to configure the scheduling task:
 
-```rust, linenos, hl_lines=6 11-18
+```rust, linenos, hl_lines=10 15-22
+use spring::App;
+use spring_job::{cron, JobPlugin, JobConfigurator, Jobs};
+use spring_sqlx::SqlxPlugin;
+
 #[tokio::main]
 async fn main() {
     App::new()

@@ -1,4 +1,5 @@
 //! [spring](https://spring-rs.github.io/docs/plugins/plugin-by-self/)
+#![doc = include_str!("../README.md")]
 
 /// App Builder
 pub mod app;
