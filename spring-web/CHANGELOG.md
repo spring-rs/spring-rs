@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+- **changed**: update debug log ([#52])
+
+[#52]: https://github.com/spring-rs/spring-rs/pull/52
+
 ## 0.1.4
 
 - **added**: support ConnectInfo ([#51])
