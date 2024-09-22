@@ -27,6 +27,13 @@ pub use spring_macros::route;
 pub use spring_macros::routes;
 pub use spring_macros::trace;
 
+/// axum::routing::MethodFilter re-export
+pub use axum::routing::MethodFilter;
+/// MethodRouter with AppState
+pub use axum::routing::MethodRouter;
+/// Router with AppState
+pub use axum::Router;
+
 use anyhow::Context;
 use config::{
     EnableMiddleware, LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware,
@@ -49,12 +56,6 @@ use tower_http::{
     trace::TraceLayer,
 };
 
-/// axum::routing::MethodFilter re-export
-pub type MethodFilter = axum::routing::MethodFilter;
-/// MethodRouter with AppState
-pub type MethodRouter = axum::routing::MethodRouter;
-/// Router with AppState
-pub type Router = axum::Router;
 /// Routers collection
 pub type Routers = Vec<Router>;
 
@@ -114,12 +115,19 @@ impl Plugin for WebPlugin {
 
         let addr = SocketAddr::from((config.binding, config.port));
 
-        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(addr, router, app)));
+        let ci = config.connect_info;
+
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(addr, router, app, ci)));
     }
 }
 
 impl WebPlugin {
-    async fn schedule(addr: SocketAddr, router: Router, app: Arc<App>) -> Result<String> {
+    async fn schedule(
+        addr: SocketAddr,
+        router: Router,
+        app: Arc<App>,
+        connect_info: bool,
+    ) -> Result<String> {
         // 2. bind tcp listener
         let listener = tokio::net::TcpListener::bind(addr)
             .await
@@ -130,9 +138,15 @@ impl WebPlugin {
         let router = router.layer(Extension(AppState { app }));
 
         tracing::info!("axum server started");
-        axum::serve(listener, router)
-            .await
-            .context("start axum server failed")?;
+        if connect_info {
+            // with client connect info
+            let service = router.into_make_service_with_connect_info::<SocketAddr>();
+            axum::serve(listener, service).await
+        } else {
+            let service = router.into_make_service();
+            axum::serve(listener, service).await
+        }
+        .context("start axum server failed")?;
 
         Ok("axum schedule finished".to_string())
     }

@@ -11,6 +11,8 @@ pub struct WebConfig {
     pub(crate) binding: IpAddr,
     #[serde(default = "default_port")]
     pub(crate) port: u16,
+    #[serde(default)]
+    pub(crate) connect_info: bool,
     pub(crate) middlewares: Option<Middlewares>,
 }
 

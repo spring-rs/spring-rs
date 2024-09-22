@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- **added**: support ConnectInfo
+
 ## 0.1.3
 
 - **added**: Support extracting Component in middleware ([#44])
