@@ -255,11 +255,11 @@ impl IntoResponse for WebError {
     fn into_response(self) -> Response {
         match self {
             Self::ResponseStatusError(e) => {
-                tracing::warn!("handler error:{}", e);
+                tracing::warn!("handler error:{:?}", e);
                 (e.status_code, e.msg)
             }
             _other => {
-                tracing::error!("internal server error:{}", _other);
+                tracing::error!("internal server error:{:?}", _other);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     format!("Something went wrong: {}", _other),
