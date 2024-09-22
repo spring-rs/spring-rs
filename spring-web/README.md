@@ -15,6 +15,7 @@ spring-web = { version = "0.1.1" }
 [web]
 binding = "172.20.10.4"  # IP address of the network card to bind, default 127.0.0.1
 port = 8000              # Port number to bind, default 8080
+connect_info = false     # Whether to use client connection information
 
 # Web middleware configuration
 [web.middlewares]

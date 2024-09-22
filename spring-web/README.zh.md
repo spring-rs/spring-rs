@@ -15,6 +15,7 @@ spring-web = { version = "0.1.1" }
 [web]
 binding = "172.20.10.4"  # 要绑定的网卡IP地址，默认127.0.0.1
 port = 8000              # 要绑定的端口号，默认8080
+connect_info = false     # 是否使用客户端连接信息
 
 # web中间件配置
 [web.middlewares]
