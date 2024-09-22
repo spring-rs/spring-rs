@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+- **added**: support ConnectInfo ([#51])
+
+[#51]: https://github.com/spring-rs/spring-rs/pull/51
+
 ## 0.1.3
 
 - **added**: Support extracting Component in middleware ([#44])

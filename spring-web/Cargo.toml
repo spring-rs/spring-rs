@@ -1,7 +1,7 @@
 [package]
 name = "spring-web"
-description = "rust microservice framework"
-version = "0.1.3"
+description = "Integration of rust application framework spring-rs and Axum web framework"
+version = "0.1.4"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
