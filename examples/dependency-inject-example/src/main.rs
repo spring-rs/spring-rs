@@ -1,4 +1,5 @@
 use anyhow::Context;
+use serde::Deserialize;
 use spring::{
     auto_config,
     config::{ConfigRef, Configurable},
@@ -28,7 +29,7 @@ async fn main() {
         .await
 }
 
-#[derive(Clone, Configurable)]
+#[derive(Clone, Configurable, Deserialize)]
 #[config_prefix = "user"]
 struct UserConfig {
     username: String,
@@ -37,6 +38,15 @@ struct UserConfig {
 
 #[derive(Clone, Service)]
 struct UserService {
+    #[component]
+    db: ConnectPool,
+    #[config]
+    config: UserConfig,
+}
+
+/// For some large-sized components or configs, using Ref can avoid the performance impact of deep copying.
+#[derive(Clone, Service)]
+struct UserServiceUseRef {
     db: ComponentRef<ConnectPool>,
     config: ConfigRef<UserConfig>,
 }
