@@ -9,10 +9,10 @@ draft = false
 template = "blog/page.html"
 +++
 
-The size of the release binary built with spring-rs is half of the SpringBoot jar package.
+The size of the release binary built with spring-rs is half of the SpringBoot jar package. [Rust still have a lot of room for optimization](https://github.com/johnthagen/min-sized-rust).
 <img width="100%" alt="Build Target Size" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java%27sspring-boot%22,%22rust%27sspring-rs%22],datasets:[{label:%22build%20target%20size(MB)%22,data:[22.25,11.17]}]}}&format=svg"/>
 
-The size of the Docker image built with spring-rs is 1/4 of the SpringBoot image.
+The size of the Docker image built with spring-rs is 1/4 of the SpringBoot image. [The rust docker image also has a lot of room for optimization](https://github.com/kpcyrd/mini-docker-rust).
 <img width="100%" alt="Docker Image Size" src="https://quickchart.io/chart?c={type:%27bar%27,data:{labels:[%22java-springboot%22,%22rust-spring-rs%22],datasets:[{label:%27docker%20image%20size(MB)%27,data:[429.99,124.55]}]}}&format=svg"/>
 
 The runtime memory usage of using spring-rs is 1/10 of that of SpringBoot.
