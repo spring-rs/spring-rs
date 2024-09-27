@@ -13,6 +13,6 @@ pub use spring_macros::Service;
 ///     config: CustomConfig,
 /// }
 /// ```
-pub trait Service: Sized {
+pub trait Service: Clone + Sized {
     fn build(app: &AppBuilder) -> Result<Self>;
 }

@@ -13,6 +13,7 @@ pub mod handler;
 pub use axum;
 use axum::Extension;
 pub use spring::async_trait;
+use spring::plugin::component::ComponentRef;
 /////////////////web-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-web` dependency
 pub use spring_macros::delete;
@@ -69,7 +70,7 @@ impl WebConfigurator for AppBuilder {
     fn add_router(&mut self, router: Router) -> &mut Self {
         if let Some(routers) = self.get_component::<Routers>() {
             unsafe {
-                let raw_ptr = Arc::into_raw(routers);
+                let raw_ptr = ComponentRef::into_raw(routers);
                 let routers = &mut *(raw_ptr as *mut Vec<Router>);
                 routers.push(router);
             }

@@ -4,6 +4,7 @@ pub mod extractor;
 pub mod handler;
 pub mod job;
 
+use spring::plugin::component::ComponentRef;
 /////////////////job-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-job` dependency
 pub use spring_macros::cron;
@@ -73,7 +74,7 @@ impl JobConfigurator for AppBuilder {
     fn add_job(&mut self, job: Job) -> &mut Self {
         if let Some(jobs) = self.get_component::<Jobs>() {
             unsafe {
-                let raw_ptr = Arc::into_raw(jobs);
+                let raw_ptr = ComponentRef::into_raw(jobs);
                 let jobs = &mut *(raw_ptr as *mut Vec<Job>);
                 jobs.push(job);
             }
@@ -86,7 +87,7 @@ impl JobConfigurator for AppBuilder {
     fn add_jobs(&mut self, new_jobs: Jobs) -> &mut Self {
         if let Some(jobs) = self.get_component::<Jobs>() {
             unsafe {
-                let raw_ptr = Arc::into_raw(jobs);
+                let raw_ptr = ComponentRef::into_raw(jobs);
                 let jobs = &mut *(raw_ptr as *mut Jobs);
                 jobs.merge(new_jobs);
             }

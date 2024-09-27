@@ -1,6 +1,8 @@
 pub mod env;
 pub mod toml;
 
+use std::{ops::Deref, sync::Arc};
+
 pub use spring_macros::Configurable;
 
 use crate::error::Result;
@@ -16,4 +18,18 @@ pub trait ConfigRegistry {
     fn get_config<T>(&self) -> Result<T>
     where
         T: serde::de::DeserializeOwned + Configurable;
+}
+
+#[derive(Debug, Clone)]
+pub struct ConfigRef<T: Configurable>(Arc<T>);
+
+impl<T> Deref for ConfigRef<T>
+where
+    T: Configurable,
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
 }

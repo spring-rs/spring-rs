@@ -1,11 +1,12 @@
 use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::LogPlugin;
+use crate::plugin::component::ComponentRef;
 use crate::plugin::Plugin;
 use crate::{
     config::env,
     error::Result,
-    plugin::{component::ComponentRef, PluginRef},
+    plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
 use std::any::Any;
@@ -22,7 +23,7 @@ pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<Stri
 
 pub struct App {
     /// Component
-    components: Registry<ComponentRef>,
+    components: Registry<DynComponentRef>,
     config: TomlConfigRegistry,
 }
 
@@ -31,7 +32,7 @@ pub struct AppBuilder {
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
-    components: Registry<ComponentRef>,
+    components: Registry<DynComponentRef>,
     /// Path of config file
     pub(crate) config_path: PathBuf,
     /// Configuration read from `config_path`
@@ -47,7 +48,7 @@ impl App {
     }
 
     /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<Arc<T>>
+    pub fn get_component<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
     {
@@ -108,12 +109,12 @@ impl AppBuilder {
         }
         let component_name = component_name.to_string();
         self.components
-            .insert(component_name, ComponentRef::new(component));
+            .insert(component_name, DynComponentRef::new(component));
         self
     }
 
     /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<Arc<T>>
+    pub fn get_component<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
     {

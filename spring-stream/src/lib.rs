@@ -15,6 +15,7 @@ pub use sea_streamer::redis;
 #[cfg(feature = "stdio")]
 pub use sea_streamer::stdio;
 pub use sea_streamer::ConsumerMode;
+use spring::plugin::component::ComponentRef;
 /////////////////stream-macros/////////////////////
 pub use spring_macros::stream_listener;
 
@@ -44,7 +45,7 @@ impl StreamConfigurator for AppBuilder {
     fn add_consumer(&mut self, new_consumers: Consumers) -> &mut Self {
         if let Some(consumers) = self.get_component::<Consumers>() {
             unsafe {
-                let raw_ptr = Arc::into_raw(consumers);
+                let raw_ptr = ComponentRef::into_raw(consumers);
                 let consumers = &mut *(raw_ptr as *mut Consumers);
                 consumers.merge(new_consumers);
             }
