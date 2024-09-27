@@ -2,6 +2,7 @@
 
 mod auto;
 mod config;
+mod inject;
 mod job;
 mod nest;
 mod route;
@@ -206,7 +207,13 @@ pub fn auto_config(args: TokenStream, input: TokenStream) -> TokenStream {
     auto::config(args, input)
 }
 
-/// Configurable Plugin
+/// stream macro
+#[proc_macro_attribute]
+pub fn stream_listener(args: TokenStream, input: TokenStream) -> TokenStream {
+    stream::listener(args, input)
+}
+
+/// Configurable
 #[proc_macro_derive(Configurable, attributes(config_prefix))]
 pub fn derive_config(input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input as DeriveInput);
@@ -216,7 +223,12 @@ pub fn derive_config(input: TokenStream) -> TokenStream {
         .into()
 }
 
-#[proc_macro_attribute]
-pub fn stream_listener(args: TokenStream, input: TokenStream) -> TokenStream {
-    stream::listener(args, input)
+/// Injectable Servcie
+#[proc_macro_derive(Service, attributes(config, component))]
+pub fn derive_service(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input as DeriveInput);
+
+    inject::expand_derive(input)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
 }
