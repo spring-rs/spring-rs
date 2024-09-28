@@ -146,7 +146,7 @@ impl ToTokens for Job {
             #[allow(non_camel_case_types, missing_docs)]
             #vis struct #name;
 
-            impl ::spring_job::handler::TypedHandlerFactory for #name {
+            impl ::spring_job::handler::TypedHandlerRegistrar for #name {
                 fn install_job(&self, mut __jobs: ::spring_job::Jobs) -> ::spring_job::Jobs {
                     use ::spring_job::JobConfigurator;
                     use ::spring_job::job::JobBuilder;

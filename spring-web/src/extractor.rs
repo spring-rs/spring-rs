@@ -27,7 +27,7 @@ impl RequestPartsExt for Parts {
     }
 
     fn get_component<T: Clone + Send + Sync + 'static>(&self) -> Result<T> {
-        match self.get_app_state().app.get_component::<T>() {
+        match self.get_app_state().app.get_component_ref::<T>() {
             Some(component) => Ok(T::clone(&component)),
             None => Err(WebError::ComponentNotExists(std::any::type_name::<T>())),
         }

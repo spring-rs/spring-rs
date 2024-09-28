@@ -1,4 +1,5 @@
 pub mod component;
+pub mod service;
 
 use crate::app::AppBuilder;
 use async_trait::async_trait;

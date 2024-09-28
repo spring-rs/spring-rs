@@ -288,7 +288,7 @@ impl ToTokens for Route {
             #[allow(non_camel_case_types, missing_docs)]
             #vis struct #name;
 
-            impl ::spring_web::handler::TypedHandlerFactory for #name {
+            impl ::spring_web::handler::TypedHandlerRegistrar for #name {
                 fn install_route(&self, mut __router: ::spring_web::Router) -> ::spring_web::Router{
                     #ast
                     #registrations

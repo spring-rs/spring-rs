@@ -164,34 +164,34 @@ where
 /// TypeHandler is used to configure the spring-macro marked job handler
 ///
 
-pub trait TypedHandlerFactory: Send + Sync + 'static {
+pub trait TypedHandlerRegistrar: Send + Sync + 'static {
     fn install_job(&self, jobs: Jobs) -> Jobs;
 }
 
 pub trait TypedJob {
-    fn typed_job<F: TypedHandlerFactory>(self, factory: F) -> Self;
+    fn typed_job<F: TypedHandlerRegistrar>(self, factory: F) -> Self;
 }
 
 impl TypedJob for Jobs {
-    fn typed_job<F: TypedHandlerFactory>(self, factory: F) -> Self {
+    fn typed_job<F: TypedHandlerRegistrar>(self, factory: F) -> Self {
         factory.install_job(self)
     }
 }
 
-inventory::collect!(&'static dyn TypedHandlerFactory);
+inventory::collect!(&'static dyn TypedHandlerRegistrar);
 
 #[macro_export]
 macro_rules! submit_typed_handler {
     ($ty:ident) => {
         ::spring_job::handler::submit! {
-            &$ty as &dyn ::spring_job::handler::TypedHandlerFactory
+            &$ty as &dyn ::spring_job::handler::TypedHandlerRegistrar
         }
     };
 }
 
 pub fn auto_jobs() -> Jobs {
     let mut jobs = Jobs::new();
-    for factory in inventory::iter::<&dyn TypedHandlerFactory> {
+    for factory in inventory::iter::<&dyn TypedHandlerRegistrar> {
         jobs = factory.install_job(jobs);
     }
     jobs

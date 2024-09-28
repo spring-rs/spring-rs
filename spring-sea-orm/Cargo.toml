@@ -15,8 +15,8 @@ postgres = ["sea-orm/sqlx-postgres"]
 with-web = ["spring-web"]
 
 [dependencies]
-spring-web = { path = "../spring-web", version = "0.1.1", optional = true }
-spring = { path = "../spring", version = "0.1.1" }
+spring-web = { path = "../spring-web", version = "0.1.5", optional = true }
+spring = { path = "../spring", version = "0.1.4" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }

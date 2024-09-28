@@ -154,34 +154,34 @@ where
 
 /// TypeHandler is used to configure the spring-macro marked stream_listener handler
 ///
-pub trait TypedHandlerFactory: Send + Sync + 'static {
+pub trait TypedHandlerRegistrar: Send + Sync + 'static {
     fn install_consumer(&self, jobs: Consumers) -> Consumers;
 }
 
 pub trait TypedConsumer {
-    fn typed_consumer<F: TypedHandlerFactory>(self, factory: F) -> Self;
+    fn typed_consumer<F: TypedHandlerRegistrar>(self, factory: F) -> Self;
 }
 
 impl TypedConsumer for Consumers {
-    fn typed_consumer<F: TypedHandlerFactory>(self, factory: F) -> Self {
+    fn typed_consumer<F: TypedHandlerRegistrar>(self, factory: F) -> Self {
         factory.install_consumer(self)
     }
 }
 
-inventory::collect!(&'static dyn TypedHandlerFactory);
+inventory::collect!(&'static dyn TypedHandlerRegistrar);
 
 #[macro_export]
 macro_rules! submit_typed_handler {
     ($ty:ident) => {
         ::spring_stream::handler::submit! {
-            &$ty as &dyn ::spring_stream::handler::TypedHandlerFactory
+            &$ty as &dyn ::spring_stream::handler::TypedHandlerRegistrar
         }
     };
 }
 
 pub fn auto_consumers() -> Consumers {
     let mut consumers = Consumers::new();
-    for factory in inventory::iter::<&dyn TypedHandlerFactory> {
+    for factory in inventory::iter::<&dyn TypedHandlerRegistrar> {
         consumers = factory.install_consumer(consumers);
     }
     consumers

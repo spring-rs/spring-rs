@@ -1,11 +1,12 @@
 use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::LogPlugin;
-use crate::plugin::Plugin;
+use crate::plugin::component::ComponentRef;
+use crate::plugin::{service, Plugin};
 use crate::{
     config::env,
     error::Result,
-    plugin::{component::ComponentRef, PluginRef},
+    plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
 use std::any::Any;
@@ -22,7 +23,7 @@ pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<Stri
 
 pub struct App {
     /// Component
-    components: Registry<ComponentRef>,
+    components: Registry<DynComponentRef>,
     config: TomlConfigRegistry,
 }
 
@@ -31,7 +32,7 @@ pub struct AppBuilder {
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
-    components: Registry<ComponentRef>,
+    components: Registry<DynComponentRef>,
     /// Path of config file
     pub(crate) config_path: PathBuf,
     /// Configuration read from `config_path`
@@ -47,7 +48,7 @@ impl App {
     }
 
     /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<Arc<T>>
+    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
     {
@@ -108,12 +109,12 @@ impl AppBuilder {
         }
         let component_name = component_name.to_string();
         self.components
-            .insert(component_name, ComponentRef::new(component));
+            .insert(component_name, DynComponentRef::new(component));
         self
     }
 
     /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<Arc<T>>
+    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
     {
@@ -121,6 +122,15 @@ impl AppBuilder {
         let pair = self.components.get(component_name)?;
         let component_ref = pair.value().clone();
         component_ref.downcast::<T>()
+    }
+
+    /// get cloned component
+    pub fn get_component<T>(&self) -> Option<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        let component_ref = self.get_component_ref();
+        component_ref.map(|c| T::clone(&c))
     }
 
     /// Add a scheduled task
@@ -152,7 +162,10 @@ impl AppBuilder {
         // 3. build plugin
         self.build_plugins().await;
 
-        // 4. schedule
+        // 4. service dependency inject
+        service::auto_inject_service(self)?;
+
+        // 5. schedule
         self.schedule().await
     }
 
