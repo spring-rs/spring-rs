@@ -17,7 +17,7 @@ where
     T: Clone + Send + Sync + 'static,
 {
     async fn from_app(_job_id: &JobId, _scheduler: &JobScheduler, app: &App) -> Self {
-        match app.get_component::<T>() {
+        match app.get_component_ref::<T>() {
             Some(component) => Component(T::clone(&component)),
             None => panic!(
                 "There is no component of `{}` type",

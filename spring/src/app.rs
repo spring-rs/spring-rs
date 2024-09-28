@@ -48,7 +48,7 @@ impl App {
     }
 
     /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<ComponentRef<T>>
+    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
     {
@@ -114,7 +114,7 @@ impl AppBuilder {
     }
 
     /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<ComponentRef<T>>
+    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
     {
@@ -122,6 +122,15 @@ impl AppBuilder {
         let pair = self.components.get(component_name)?;
         let component_ref = pair.value().clone();
         component_ref.downcast::<T>()
+    }
+
+    /// get cloned component
+    pub fn get_component<T>(&self) -> Option<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        let component_ref = self.get_component_ref();
+        component_ref.map(|c| T::clone(&c))
     }
 
     /// Add a scheduled task

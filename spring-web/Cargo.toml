@@ -13,7 +13,7 @@ multipart = ["axum/multipart"]
 ws = ["axum/ws"]
 
 [dependencies]
-spring = { path = "../spring", version = "0.1.1" }
+spring = { path = "../spring", version = "0.1.4" }
 spring-macros = { path = "../spring-macros", version = "0.1.1" }
 axum = { workspace = true }
 serde = { workspace = true }

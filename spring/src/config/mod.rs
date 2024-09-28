@@ -23,6 +23,12 @@ pub trait ConfigRegistry {
 #[derive(Debug, Clone)]
 pub struct ConfigRef<T: Configurable>(Arc<T>);
 
+impl<T: Configurable> ConfigRef<T> {
+    pub fn new(config: T) -> Self {
+        Self(Arc::new(config))
+    }
+}
+
 impl<T> Deref for ConfigRef<T>
 where
     T: Configurable,

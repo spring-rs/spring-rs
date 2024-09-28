@@ -48,10 +48,12 @@ struct UserService {
 #[derive(Clone, Service)]
 struct UserServiceUseRef {
     db: ComponentRef<ConnectPool>,
-    config: ConfigRef<UserConfig>,
+    config: spring::config::ConfigRef<UserConfig>,
 }
 
 #[get("/")]
 async fn hello(Component(user_service): Component<UserService>) -> Result<impl IntoResponse> {
+    // let a = None;
+    // a.expect(format!(""));
     Ok("")
 }
