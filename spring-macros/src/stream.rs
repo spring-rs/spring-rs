@@ -263,7 +263,7 @@ impl ToTokens for StreamListener {
             #[allow(non_camel_case_types, missing_docs)]
             #vis struct #name;
 
-            impl ::spring_stream::handler::TypedHandlerFactory for #name {
+            impl ::spring_stream::handler::TypedHandlerRegistrar for #name {
                 fn install_consumer(&self, mut consumers: ::spring_stream::Consumers) -> ::spring_stream::Consumers {
                     use ::spring_stream::StreamConfigurator;
                     #ast

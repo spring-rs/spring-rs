@@ -16,3 +16,7 @@ pub use spring_macros::Service;
 pub trait Service: Clone + Sized {
     fn build(app: &AppBuilder) -> Result<Self>;
 }
+
+pub trait ServiceRegistrar: 'static {
+    fn install_service(app: &AppBuilder);
+}

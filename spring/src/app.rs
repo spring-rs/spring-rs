@@ -162,7 +162,10 @@ impl AppBuilder {
         // 3. build plugin
         self.build_plugins().await;
 
-        // 4. schedule
+        // 4. service dependency inject
+        self.build_service();
+
+        // 5. schedule
         self.schedule().await
     }
 
@@ -199,6 +202,10 @@ impl AppBuilder {
             to_register = next_round;
         }
         self.plugin_registry = registry;
+    }
+
+    fn build_service(&mut self) {
+        
     }
 
     async fn schedule(&mut self) -> Result<Arc<App>> {

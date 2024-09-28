@@ -12,10 +12,7 @@ use spring_sqlx::{
 };
 use spring_web::get;
 use spring_web::{
-    axum::response::IntoResponse,
-    error::Result,
-    extractor::{Component, Path},
-    WebConfigurator, WebPlugin,
+    axum::response::IntoResponse, error::Result, extractor::Component, WebConfigurator, WebPlugin,
 };
 
 // Main function entry
@@ -44,16 +41,53 @@ struct UserService {
     config: UserConfig,
 }
 
+impl UserService {
+    pub async fn query_db(&self) -> Result<String> {
+        let UserConfig { username, project } = &self.config;
+
+        let version: String = sqlx::query("select version() as version")
+            .fetch_one(&self.db)
+            .await
+            .context("sqlx query failed")?
+            .get("version");
+
+        Ok(format!(
+            "The database used by {username}'s {project} is {version}"
+        ))
+    }
+}
+
 /// For some large-sized components or configs, using Ref can avoid the performance impact of deep copying.
 #[derive(Clone, Service)]
 struct UserServiceUseRef {
     db: ComponentRef<ConnectPool>,
-    config: spring::config::ConfigRef<UserConfig>,
+    config: ConfigRef<UserConfig>,
+}
+
+impl UserServiceUseRef {
+    pub async fn query_db(&self) -> Result<String> {
+        let UserConfig { username, project } = &*self.config;
+
+        let version: String = sqlx::query("select version() as version")
+            .fetch_one(&*self.db)
+            .await
+            .context("sqlx query failed")?
+            .get("version");
+
+        Ok(format!(
+            "The database used by {username}'s {project} is {version}"
+        ))
+    }
 }
 
 #[get("/")]
 async fn hello(Component(user_service): Component<UserService>) -> Result<impl IntoResponse> {
-    // let a = None;
-    // a.expect(format!(""));
-    Ok("")
+    Ok(user_service.query_db().await?)
+}
+
+#[get("/use-ref")]
+async fn hello_ref(
+    Component(user_service): Component<UserServiceUseRef>,
+) -> Result<impl IntoResponse> {
+    Ok(user_service.query_db().await?)
 }
