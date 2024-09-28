@@ -36,6 +36,6 @@ impl<T> Deref for ComponentRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
