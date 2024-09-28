@@ -1,11 +1,9 @@
 pub mod env;
 pub mod toml;
 
-use std::{ops::Deref, sync::Arc};
-
-pub use spring_macros::Configurable;
-
 use crate::error::Result;
+pub use spring_macros::Configurable;
+use std::{ops::Deref, sync::Arc};
 
 pub trait Configurable {
     /// Prefix used to read toml configuration.
