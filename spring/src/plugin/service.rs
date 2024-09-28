@@ -1,3 +1,5 @@
+//! Service is a special Component that supports dependency injection at compile time
+
 use crate::app::AppBuilder;
 use crate::error::Result;
 pub use spring_macros::Service;
