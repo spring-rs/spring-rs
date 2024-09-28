@@ -7,13 +7,13 @@ pub use inventory::submit;
 
 /// Service is a special Component that can inject dependent Components as field members
 /// ```rust
-/// #[derived(Service)]
+/// use spring::plugin::service::Service;
+/// use spring_sqlx::ConnectPool;
+/// 
+/// #[derive(Clone, Service)]
 /// struct UserService {
 ///     #[component]
-///     db: DbConn,
-///     redis: Redis,
-///     #[config]
-///     config: CustomConfig,
+///     db: ConnectPool
 /// }
 /// ```
 pub trait Service: Clone + Sized {

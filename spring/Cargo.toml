@@ -31,3 +31,4 @@ dashmap = { workspace = true }
 
 [dev-dependencies]
 tempfile = "3.12"
+spring-sqlx = { path = "../spring-sqlx", version = "0.1.1" }

@@ -66,6 +66,7 @@ Like the following example, `UserService` only needs to derive the `Service` fea
 ```rust
 use spring_sqlx::ConnectPool;
 use spring::config::Configurable;
+use spring::plugin::service::Service;
 use serde::Deserialize;
 
 #[derive(Clone, Configurable, Deserialize)]
