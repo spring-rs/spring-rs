@@ -136,6 +136,8 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
         return Err(inject_error_tip());
     };
     let ident = input.ident;
+    let service_registrar =
+        syn::Ident::new(&format!("__ServiceRegistrarFor_{ident}"), ident.span());
 
     let output = quote! {
         impl ::spring::plugin::service::Service for #ident {
@@ -144,6 +146,15 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
                 Ok(#service)
             }
         }
+        #[allow(non_camel_case_types)]
+        struct #service_registrar;
+        impl ::spring::plugin::service::ServiceRegistrar for #service_registrar{
+            fn install_service(&self, app: &mut ::spring::app::AppBuilder)->::spring::error::Result<()> {
+                app.add_component(#ident::build(app)?);
+                Ok(())
+            }
+        }
+        ::spring::submit_service!(#service_registrar);
     };
 
     Ok(output)

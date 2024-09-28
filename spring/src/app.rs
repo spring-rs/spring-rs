@@ -2,7 +2,7 @@ use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::LogPlugin;
 use crate::plugin::component::ComponentRef;
-use crate::plugin::Plugin;
+use crate::plugin::{service, Plugin};
 use crate::{
     config::env,
     error::Result,
@@ -163,7 +163,7 @@ impl AppBuilder {
         self.build_plugins().await;
 
         // 4. service dependency inject
-        self.build_service();
+        service::auto_inject_service(self)?;
 
         // 5. schedule
         self.schedule().await
@@ -202,10 +202,6 @@ impl AppBuilder {
             to_register = next_round;
         }
         self.plugin_registry = registry;
-    }
-
-    fn build_service(&mut self) {
-        
     }
 
     async fn schedule(&mut self) -> Result<Arc<App>> {
