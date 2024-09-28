@@ -20,14 +20,14 @@ top = false
 
 ## 支持的插件
 
-* [x] [`spring-web`](/zh/docs/plugins/spring-web/)(基于[`axum`](https://github.com/tokio-rs/axum)实现)
-* [x] [`spring-sqlx`](/zh/docs/plugins/spring-sqlx/)(整合了[`sqlx`](https://github.com/launchbadge/sqlx))
-* [x] [`spring-postgres`](/zh/docs/plugins/spring-postgres/)(整合了[`rust-postgres`](https://github.com/sfackler/rust-postgres))
-* [x] [`spring-sea-orm`](/zh/docs/plugins/spring-sea-orm/)(整合了[`sea-orm`](https://www.sea-ql.org/SeaORM/))
-* [x] [`spring-redis`](/zh/docs/plugins/spring-redis/)(整合了[`redis`](https://github.com/redis-rs/redis-rs))
-* [x] [`spring-mail`](/zh/docs/plugins/spring-mail/)(整合了[`lettre`](https://github.com/lettre/lettre))
-* [x] [`spring-job`](/zh/docs/plugins/spring-job/)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
-* [x] [`spring-stream`](/zh/docs/plugins/spring-stream/)(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现redis-stream、kafka等消息处理)
+* [x] ![spring-web](https://img.shields.io/crates/v/spring-web.svg)[`spring-web`](/zh/docs/plugins/spring-web/)(基于[`axum`](https://github.com/tokio-rs/axum)实现)
+* [x] ![spring-sqlx](https://img.shields.io/crates/v/spring-sqlx.svg)[`spring-sqlx`](/zh/docs/plugins/spring-sqlx/)(整合了[`sqlx`](https://github.com/launchbadge/sqlx))
+* [x] ![spring-postgres](https://img.shields.io/crates/v/spring-postgres.svg)[`spring-postgres`](/zh/docs/plugins/spring-postgres/)(整合了[`rust-postgres`](https://github.com/sfackler/rust-postgres))
+* [x] ![spring-sea-orm](https://img.shields.io/crates/v/spring-sea-orm.svg)[`spring-sea-orm`](/zh/docs/plugins/spring-sea-orm/)(整合了[`sea-orm`](https://www.sea-ql.org/SeaORM/))
+* [x] ![spring-redis](https://img.shields.io/crates/v/spring-redis.svg)[`spring-redis`](/zh/docs/plugins/spring-redis/)(整合了[`redis`](https://github.com/redis-rs/redis-rs))
+* [x] ![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)[`spring-mail`](/zh/docs/plugins/spring-mail/)(整合了[`lettre`](https://github.com/lettre/lettre))
+* [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](/zh/docs/plugins/spring-job/)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
+* [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](/zh/docs/plugins/spring-stream/)(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现redis-stream、kafka等消息处理)
 * [ ] `spring-opentelemetry`(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
 * [ ] `spring-tarpc`(整合了[`tarpc`](https://github.com/google/tarpc)实现RPC调用)
 
