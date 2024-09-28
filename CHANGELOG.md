@@ -8,9 +8,15 @@
 ## after 0.1.2 CHANGELOG
 
 * [spring CHANGELOG](./spring/CHANGELOG.md)
-* [spring-sea-orm CHANGELOG](./spring-sea-orm/CHANGELOG.md)
-* [spring-web CHANGELOG](./spring-web/CHANGELOG.md)
+* [spring-job CHANGELOG](./spring-job/CHANGELOG.md)
+* [spring-macros CHANGELOG](./spring-macros/CHANGELOG.md)
 * [spring-mail CHANGELOG](./spring-mail/CHANGELOG.md)
+* [spring-postgres CHANGELOG](./spring-postgres/CHANGELOG.md)
+* [spring-redis CHANGELOG](./spring-redis/CHANGELOG.md)
+* [spring-sea-orm CHANGELOG](./spring-sea-orm/CHANGELOG.md)
+* [spring-sqlx CHANGELOG](./spring-sqlx/CHANGELOG.md)
+* [spring-stream CHANGELOG](./spring-stream/CHANGELOG.md)
+* [spring-web CHANGELOG](./spring-web/CHANGELOG.md)
 
 ## 0.1.1 - 2024.9.8
 

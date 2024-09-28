@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- **added**: support dependency inject ([#54])
+- **changed**: rename TypedHandlerFactory to TypedHandlerRegistrar ([#54])
+
+[#54]: https://github.com/spring-rs/spring-rs/pull/54
+
 ## 0.1.5
 
 - **changed**: update debug log ([#52])

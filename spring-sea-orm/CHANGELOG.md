@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- **added**: support dependency inject ([#54])
+
+[#54]: https://github.com/spring-rs/spring-rs/pull/54
+
 ## 0.1.4
 
 - **changed**: changed Pagination extractor support AppState in extension ([#44])

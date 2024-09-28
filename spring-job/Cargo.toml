@@ -1,15 +1,15 @@
 [package]
 name = "spring-job"
 description = "rust microservice framework"
-version.workspace = true
+version = "0.2.0"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring = { path = "../spring", version = "0.1.4" }
-spring-macros = { path = "../spring-macros", version = "0.1.1" }
+spring = { path = "../spring", version = "0.2.0" }
+spring-macros = { path = "../spring-macros", version = "0.2.0" }
 tokio-cron-scheduler = { workspace = true, features = ["signal"] }
 anyhow = { workspace = true }
 serde = { workspace = true }

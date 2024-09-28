@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- **added**: add `Service` support dependency inject ([#54])
+- **added**: add `get_component` ([#54])
+- **breaking**: rename origin `get_component` to `get_component_ref` ([#54])
+
+[#54]: https://github.com/spring-rs/spring-rs/pull/54
+
 ## 0.1.3
 
 - **changed**: refactor toml config registry ([#1a750a])
