@@ -28,7 +28,7 @@
     <section class="section container-fluid mt-n3 pb-3">
       <div class="row justify-content-center">
         <div class="col-lg-12 text-center">
-          <img src="{{ get_url(path=section.extra.logo | default(value="/")) | safe }}" alt="Logo">
+          <img src="{{ get_url(path=section.extra.logo | default(value="/")) | safe }}" alt="Logo" height="300">
         </div>
         <div class="col-lg-12 text-center">
           <h1 class="mt-0">{{ section.title | default(value="spring-rs") }}</h1>
