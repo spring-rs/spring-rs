@@ -1,4 +1,4 @@
-## compile dependency inject
+## Compile-time dependency inject
 
 spring-rs provides a special Component - [Service](https://docs.rs/spring/latest/spring/plugin/service/index.html), which supports injecting dependent components at compile time.
 
