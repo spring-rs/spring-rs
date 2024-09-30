@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="docs/static/logo-rust.svg" alt="Logo"/>
+    <img src="docs/static/logo-rust.svg" alt="Logo" width="200"/>
     <h3>spring-rs是Rust编写的应用框架，类似于java生态的SpringBoot</h3>
     <p><a href="./README.md">English</a> ｜ 中文</p>
     <p>
