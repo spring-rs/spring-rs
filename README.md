@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="docs/static/logo.svg" alt="Logo"/>
+    <img src="docs/static/logo-rust.svg" alt="Logo"/>
     <h3>spring-rs is application framework written in Rust, inspired by Java's SpringBoot</h3>
     <p>English ｜ <a href="./README.zh.md">中文</a></p>
     <p>
