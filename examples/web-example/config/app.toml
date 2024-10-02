@@ -14,6 +14,15 @@ min_connections = 10
 [logger]
 enable = true
 level = "info"
+time_style = "local"
+time_pattern = "%Y-%m-%d %H:%M:%S"
+with_fields = [
+    "thread_id",
+    "thread_name",
+    "file",
+    "line_number",
+    "internal_errors",
+]
 
 [logger.file]
 enable = true

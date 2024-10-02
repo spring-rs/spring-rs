@@ -2,10 +2,11 @@ mod config;
 
 use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
-use config::{Format, LogLevel, LoggerConfig};
+use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::filter::EnvFilter;
+use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{
@@ -59,16 +60,26 @@ fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + S
                 let (non_blocking_file_appender, work_guard) =
                     tracing_appender::non_blocking(file_appender);
                 NONBLOCKING_WORK_GUARD_KEEP.set(work_guard).unwrap();
-                build_fmt_layer(non_blocking_file_appender, &file_config.format, false)
+                build_fmt_layer(
+                    non_blocking_file_appender,
+                    &file_config.format,
+                    config,
+                    false,
+                )
             } else {
-                build_fmt_layer(file_appender, &file_config.format, false)
+                build_fmt_layer(file_appender, &file_config.format, config, false)
             };
             layers.push(file_appender_layer);
         }
     }
 
     if config.enable {
-        layers.push(build_fmt_layer(std::io::stdout, &config.format, true));
+        layers.push(build_fmt_layer(
+            std::io::stdout,
+            &config.format,
+            config,
+            true,
+        ));
     }
 
     layers
@@ -77,27 +88,104 @@ fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + S
 fn build_fmt_layer<W2>(
     make_writer: W2,
     format: &Format,
+    config: &LoggerConfig,
     ansi: bool,
 ) -> Box<dyn Layer<Registry> + Sync + Send>
 where
     W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
 {
+    let LoggerConfig {
+        time_style,
+        time_pattern,
+        with_fields,
+        ..
+    } = config;
+    match time_style {
+        TimeStyle::SystemTime => {
+            config_layer_with_timer(make_writer, format, SystemTime, ansi, with_fields)
+        }
+        TimeStyle::Uptime => {
+            config_layer_with_timer(make_writer, format, Uptime::default(), ansi, with_fields)
+        }
+        TimeStyle::ChronoLocal => config_layer_with_timer(
+            make_writer,
+            format,
+            ChronoLocal::new(time_pattern.to_string()),
+            ansi,
+            with_fields,
+        ),
+        TimeStyle::ChronoUtc => config_layer_with_timer(
+            make_writer,
+            format,
+            ChronoUtc::new(time_pattern.to_string()),
+            ansi,
+            with_fields,
+        ),
+        TimeStyle::None => config_layer_without_time(make_writer, format, ansi, with_fields),
+    }
+}
+
+fn config_layer_with_timer<W2, T>(
+    make_writer: W2,
+    format: &Format,
+    timer: T,
+    ansi: bool,
+    with_fields: &Vec<WithFields>,
+) -> Box<dyn Layer<Registry> + Sync + Send>
+where
+    W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
+    T: FormatTime + Sync + Send + 'static,
+{
+    let mut layer = fmt::Layer::default()
+        .with_ansi(ansi)
+        .with_writer(make_writer)
+        .with_timer(timer);
+
+    for field in with_fields {
+        match field {
+            WithFields::File => layer = layer.with_file(true),
+            WithFields::LineNumber => layer = layer.with_line_number(true),
+            WithFields::ThreadId => layer = layer.with_thread_ids(true),
+            WithFields::ThreadName => layer = layer.with_thread_names(true),
+            WithFields::InternalErrors => layer = layer.log_internal_errors(true),
+        }
+    }
+
     match format {
-        Format::Compact => fmt::Layer::default()
-            .with_ansi(ansi)
-            .with_writer(make_writer)
-            .compact()
-            .boxed(),
-        Format::Pretty => fmt::Layer::default()
-            .with_ansi(ansi)
-            .with_writer(make_writer)
-            .pretty()
-            .boxed(),
-        Format::Json => fmt::Layer::default()
-            .with_ansi(ansi)
-            .with_writer(make_writer)
-            .json()
-            .boxed(),
+        Format::Compact => layer.compact().boxed(),
+        Format::Pretty => layer.pretty().boxed(),
+        Format::Json => layer.json().boxed(),
+    }
+}
+
+fn config_layer_without_time<W2>(
+    make_writer: W2,
+    format: &Format,
+    ansi: bool,
+    with_fields: &Vec<WithFields>,
+) -> Box<dyn Layer<Registry> + Sync + Send>
+where
+    W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
+{
+    let mut layer = fmt::Layer::default()
+        .with_ansi(ansi)
+        .with_writer(make_writer)
+        .without_time();
+
+    for field in with_fields {
+        match field {
+            WithFields::File => layer = layer.with_file(true),
+            WithFields::LineNumber => layer = layer.with_line_number(true),
+            WithFields::ThreadId => layer = layer.with_thread_ids(true),
+            WithFields::ThreadName => layer = layer.with_thread_names(true),
+            WithFields::InternalErrors => layer = layer.log_internal_errors(true),
+        }
+    }
+
+    match format {
+        Format::Compact => layer.compact().boxed(),
+        Format::Pretty => layer.pretty().boxed(),
+        Format::Json => layer.json().boxed(),
     }
 }
 

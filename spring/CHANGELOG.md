@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- **added**: support config logger time pattern ([#59])
+- **added**: support config logger add with_fields ([#59])
+
+[#59]: https://github.com/spring-rs/spring-rs/pull/59
+
 ## 0.2.0
 
 - **added**: add `Service` support dependency inject ([#54])
