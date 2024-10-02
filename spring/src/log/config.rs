@@ -33,10 +33,13 @@ pub(crate) struct LoggerConfig {
 
     /// Formatters for event timestamps.
     #[serde(default)]
-    pub time_format: TimeFormat,
+    pub time_style: TimeStyle,
 
     #[serde(default)]
     pub time_pattern: ChronoTimePattern,
+
+    #[serde(default)]
+    pub with_fields: Vec<WithFields>,
 
     /// Override our custom tracing filter.
     ///
@@ -102,20 +105,22 @@ pub(crate) enum Format {
 
 /// https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/time/index.html
 #[derive(Debug, Default, Clone, JsonSchema, Deserialize)]
-pub(crate) enum TimeFormat {
+pub(crate) enum TimeStyle {
     /// Retrieve and print the current wall-clock time.
-    #[default]
     #[serde(rename = "system")]
     SystemTime,
     /// Retrieve and print the relative elapsed wall-clock time since an epoch.
     #[serde(rename = "uptime")]
     Uptime,
     /// Formats local times and UTC times with FormatTime implementations that use the chrono crate.
+    #[default]
     #[serde(rename = "local")]
     ChronoLocal,
     /// Formats the current UTC time using a formatter from the chrono crate.
     #[serde(rename = "utc")]
     ChronoUtc,
+    #[serde(rename = "none")]
+    None,
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
@@ -128,10 +133,21 @@ impl Default for ChronoTimePattern {
     }
 }
 
+#[allow(clippy::to_string_trait_impl)]
 impl ToString for ChronoTimePattern {
     fn to_string(&self) -> String {
         self.0.to_string()
     }
+}
+
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum WithFields {
+    File,
+    LineNumber,
+    ThreadId,
+    ThreadName,
+    InternalErrors,
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]

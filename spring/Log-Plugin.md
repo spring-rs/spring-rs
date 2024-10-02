@@ -12,6 +12,15 @@ enable = true            # Whether to enable the log function, which is enabled 
 pretty_backtrace = false # Whether to print stack information, which is disabled by default. It is recommended to enable it only during application development
 level = "info"           # The default log level is info
 format = "compact"       # The log format supports compact, pretty, and json, and the default is compact
+time_style = "local"    # The timestamp used for log output, supporting system, uptime, local, utc, none
+time_pattern = "%Y-%m-%dT%H:%M:%S"  # The output format of the timestamp, effective only when time_style is local or utc
+with_fields = [                     # Carry other fields when outputting logs, the following fields are not carried by default
+"thread_id",                        # Current thread ID
+"thread_name",                      # Current thread name
+"file",                             # Output the source file name of the log
+"line_number",                      # Output the line number of the source file of the log
+"internal_errors",                  # Whether to output the internal errors contained when an error occurs
+]
 override_filter = "info,axum=debug" # Override the default log filter level, and specify the log level for the crate library
 file = { enabled = true } # Whether to write logs to files, which is not enabled by default
 ```
