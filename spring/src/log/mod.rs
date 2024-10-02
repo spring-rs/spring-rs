@@ -63,11 +63,11 @@ fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + S
                 build_fmt_layer(
                     non_blocking_file_appender,
                     &file_config.format,
-                    &config,
+                    config,
                     false,
                 )
             } else {
-                build_fmt_layer(file_appender, &file_config.format, &config, false)
+                build_fmt_layer(file_appender, &file_config.format, config, false)
             };
             layers.push(file_appender_layer);
         }
@@ -77,7 +77,7 @@ fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + S
         layers.push(build_fmt_layer(
             std::io::stdout,
             &config.format,
-            &config,
+            config,
             true,
         ));
     }
