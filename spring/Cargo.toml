@@ -19,6 +19,7 @@ tracing-subscriber = { workspace = true, features = [
     "json",
     "env-filter",
     "tracing-log",
+    "chrono",
 ] }
 inventory = { workspace = true }
 dotenvy = { workspace = true }

@@ -31,6 +31,13 @@ pub(crate) struct LoggerConfig {
     #[serde(default)]
     pub format: Format,
 
+    /// Formatters for event timestamps.
+    #[serde(default)]
+    pub time_format: TimeFormat,
+
+    #[serde(default)]
+    pub time_pattern: ChronoTimePattern,
+
     /// Override our custom tracing filter.
     ///
     /// Set this to your own filter if you want to see traces from internal
@@ -91,6 +98,40 @@ pub(crate) enum Format {
     Pretty,
     #[serde(rename = "json")]
     Json,
+}
+
+/// https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/time/index.html
+#[derive(Debug, Default, Clone, JsonSchema, Deserialize)]
+pub(crate) enum TimeFormat {
+    /// Retrieve and print the current wall-clock time.
+    #[default]
+    #[serde(rename = "system")]
+    SystemTime,
+    /// Retrieve and print the relative elapsed wall-clock time since an epoch.
+    #[serde(rename = "uptime")]
+    Uptime,
+    /// Formats local times and UTC times with FormatTime implementations that use the chrono crate.
+    #[serde(rename = "local")]
+    ChronoLocal,
+    /// Formats the current UTC time using a formatter from the chrono crate.
+    #[serde(rename = "utc")]
+    ChronoUtc,
+}
+
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+#[serde(transparent)]
+pub(crate) struct ChronoTimePattern(String);
+
+impl Default for ChronoTimePattern {
+    fn default() -> Self {
+        Self("%Y-%m-%dT%H:%M:%S".to_string())
+    }
+}
+
+impl ToString for ChronoTimePattern {
+    fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
 
 #[derive(Debug, Clone, JsonSchema, Deserialize)]

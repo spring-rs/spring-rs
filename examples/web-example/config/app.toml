@@ -14,6 +14,7 @@ min_connections = 10
 [logger]
 enable = true
 level = "info"
+time_format = "local"
 
 [logger.file]
 enable = true
