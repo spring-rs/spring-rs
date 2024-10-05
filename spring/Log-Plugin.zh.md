@@ -25,6 +25,8 @@ override_filter = "info,axum=debug"         # 重写默认的日志过滤级别�
 file = { enabled = true }                   # 是否将日志写入文件中，默认没有开启
 ```
 
+> 这里的[time_pattern](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/time/index.html)使用了chrono实现，如需自定义可以参考[chrono的格式化语法](https://docs.rs/chrono/latest/chrono/format/strftime/index.html)。
+
 你也可以对日志文件进行更详细的配置
 ```toml
 [logger.file]

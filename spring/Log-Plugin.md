@@ -25,6 +25,8 @@ override_filter = "info,axum=debug" # Override the default log filter level, and
 file = { enabled = true } # Whether to write logs to files, which is not enabled by default
 ```
 
+> The [time_pattern](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/time/index.html) here is implemented using [chrono](https://docs.rs/chrono). If you need to customize it, you can refer to [chrono's formatting syntax](https://docs.rs/chrono/latest/chrono/format/strftime/index.html).
+
 You can also configure the log file in more detail
 ```toml
 [logger.file]
