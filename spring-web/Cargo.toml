@@ -14,7 +14,7 @@ ws = ["axum/ws"]
 
 [dependencies]
 spring = { path = "../spring", version = "0.2.2" }
-spring-macros = { path = "../spring-macros", version = "0.2.0" }
+spring-macros = { path = "../spring-macros", version = "0.2" }
 axum = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
