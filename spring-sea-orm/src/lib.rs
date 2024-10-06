@@ -1,13 +1,14 @@
 //! [spring-sea-orm](https://spring-rs.github.io/docs/plugins/spring-sea-orm/)
-pub mod pagination;
 pub mod config;
+pub mod pagination;
 
 use anyhow::Context;
 use config::SeaOrmConfig;
 use sea_orm::{ConnectOptions, Database};
-use spring::async_trait;
 use spring::config::ConfigRegistry;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
+use spring::{async_trait, App};
+use std::sync::Arc;
 use std::time::Duration;
 
 pub type DbConn = sea_orm::DbConn;
@@ -24,7 +25,8 @@ impl Plugin for SeaOrmPlugin {
         let conn = Self::connect(&config)
             .await
             .expect("sea-orm plugin load failed");
-        app.add_component(conn);
+        app.add_component(conn)
+            .add_shutdown_hook(|app: Arc<App>| Box::new(Self::close_db_connection(app)));
     }
 }
 
@@ -48,5 +50,14 @@ impl SeaOrmPlugin {
         Ok(Database::connect(opt)
             .await
             .with_context(|| format!("sea-orm connection failed:{}", &config.uri))?)
+    }
+
+    async fn close_db_connection(app: Arc<App>) -> Result<()> {
+        Ok(app
+            .get_component::<DbConn>()
+            .expect("sea-orm db connection not exists")
+            .close()
+            .await
+            .context("sea-orm db connection close failed")?)
     }
 }

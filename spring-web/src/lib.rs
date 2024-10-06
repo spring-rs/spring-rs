@@ -11,9 +11,7 @@ pub mod extractor;
 pub mod handler;
 
 pub use axum;
-use axum::Extension;
 pub use spring::async_trait;
-use spring::plugin::component::ComponentRef;
 /////////////////web-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-web` dependency
 pub use spring_macros::delete;
@@ -36,10 +34,13 @@ pub use axum::routing::MethodRouter;
 pub use axum::Router;
 
 use anyhow::Context;
+use axum::Extension;
+use config::ServerConfig;
 use config::{
     EnableMiddleware, LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware,
     TimeoutRequestMiddleware, WebConfig,
 };
+use spring::plugin::component::ComponentRef;
 use spring::{
     app::{App, AppBuilder},
     config::ConfigRegistry,
@@ -114,22 +115,16 @@ impl Plugin for WebPlugin {
             router = Self::apply_middleware(router, middlewares);
         }
 
-        let addr = SocketAddr::from((config.binding, config.port));
+        let server_conf = config.server;
 
-        let ci = config.connect_info;
-
-        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(addr, router, app, ci)));
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(router, app, server_conf)));
     }
 }
 
 impl WebPlugin {
-    async fn schedule(
-        addr: SocketAddr,
-        router: Router,
-        app: Arc<App>,
-        connect_info: bool,
-    ) -> Result<String> {
+    async fn schedule(router: Router, app: Arc<App>, config: ServerConfig) -> Result<String> {
         // 2. bind tcp listener
+        let addr = SocketAddr::from((config.binding, config.port));
         let listener = tokio::net::TcpListener::bind(addr)
             .await
             .with_context(|| format!("bind tcp listener failed:{}", addr))?;
@@ -139,13 +134,23 @@ impl WebPlugin {
         let router = router.layer(Extension(AppState { app }));
 
         tracing::info!("axum server started");
-        if connect_info {
+        if config.connect_info {
             // with client connect info
             let service = router.into_make_service_with_connect_info::<SocketAddr>();
-            axum::serve(listener, service).await
+            let server = axum::serve(listener, service);
+            if config.graceful {
+                server.with_graceful_shutdown(shutdown_signal()).await
+            } else {
+                server.await
+            }
         } else {
             let service = router.into_make_service();
-            axum::serve(listener, service).await
+            let server = axum::serve(listener, service);
+            if config.graceful {
+                server.with_graceful_shutdown(shutdown_signal()).await
+            } else {
+                server.await
+            }
         }
         .context("start axum server failed")?;
 
@@ -260,5 +265,33 @@ impl WebPlugin {
         }
 
         Ok(layer)
+    }
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {
+            tracing::info!("Received Ctrl+C signal, waiting for web server shutdown")
+        },
+        _ = terminate => {
+            tracing::info!("Received kill signal, waiting for web server shutdown")
+        },
     }
 }

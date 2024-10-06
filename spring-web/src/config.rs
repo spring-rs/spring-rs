@@ -7,13 +7,21 @@ use std::net::{IpAddr, Ipv4Addr};
 #[derive(Debug, Configurable, JsonSchema, Deserialize)]
 #[config_prefix = "web"]
 pub struct WebConfig {
+    #[serde(flatten)]
+    pub(crate) server: ServerConfig,
+    pub(crate) middlewares: Option<Middlewares>,
+}
+
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+pub struct ServerConfig {
     #[serde(default = "default_binding")]
     pub(crate) binding: IpAddr,
     #[serde(default = "default_port")]
     pub(crate) port: u16,
     #[serde(default)]
     pub(crate) connect_info: bool,
-    pub(crate) middlewares: Option<Middlewares>,
+    #[serde(default)]
+    pub(crate) graceful: bool,
 }
 
 fn default_binding() -> IpAddr {

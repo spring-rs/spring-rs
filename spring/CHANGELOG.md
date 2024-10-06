@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- **added**: support shutdown hook ([#61])
+
+[#61]: https://github.com/spring-rs/spring-rs/pull/61
+
 ## 0.2.1
 
 - **added**: support config logger time pattern ([#59])

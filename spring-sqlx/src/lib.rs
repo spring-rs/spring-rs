@@ -5,11 +5,12 @@ pub extern crate sqlx;
 use anyhow::Context;
 use config::SqlxConfig;
 use spring::app::AppBuilder;
-use spring::async_trait;
 use spring::config::ConfigRegistry;
 use spring::error::Result;
 use spring::plugin::Plugin;
+use spring::{async_trait, App};
 use sqlx::any::AnyPoolOptions;
+use std::sync::Arc;
 use std::time::Duration;
 
 pub type ConnectPool = sqlx::AnyPool;
@@ -30,7 +31,8 @@ impl Plugin for SqlxPlugin {
 
         tracing::info!("sqlx connection success");
 
-        app.add_component(connect_pool);
+        app.add_component(connect_pool)
+            .add_shutdown_hook(|app: Arc<App>| Box::new(Self::close_db_connection(app)));
     }
 }
 
@@ -55,5 +57,13 @@ impl SqlxPlugin {
             .connect(&config.uri)
             .await
             .with_context(|| format!("sqlx connection failed: {}", config.uri))?)
+    }
+
+    async fn close_db_connection(app: Arc<App>) -> Result<()> {
+        app.get_component::<ConnectPool>()
+            .expect("sqlx connect pool not exists")
+            .close()
+            .await;
+        Ok(())
     }
 }

@@ -3,8 +3,8 @@ mod jwt;
 use axum::http::StatusCode;
 use jwt::Claims;
 use serde::Deserialize;
-use spring::{auto_config, App};
 use spring::config::Configurable;
+use spring::{auto_config, App};
 use spring_sqlx::SqlxPlugin;
 use spring_web::{
     axum::response::IntoResponse,
@@ -21,7 +21,9 @@ async fn main() {
         .add_plugin(SqlxPlugin)
         .add_plugin(WebPlugin)
         .run()
-        .await
+        .await;
+
+    tracing::info!(">>> graceful shutdown should log!!!")
 }
 
 #[routes]
