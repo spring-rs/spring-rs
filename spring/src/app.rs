@@ -19,7 +19,7 @@ use std::{
 };
 
 pub type Registry<T> = DashMap<String, T>;
-pub type Scheduler = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send>;
+pub type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
 pub struct App {
     /// Component
@@ -38,7 +38,8 @@ pub struct AppBuilder {
     /// Configuration read from `config_path`
     config: TomlConfigRegistry,
     /// task
-    schedulers: Vec<Box<Scheduler>>,
+    schedulers: Vec<Box<Scheduler<String>>>,
+    shutdown_hooks: Vec<Box<Scheduler<()>>>,
 }
 
 impl App {
@@ -56,6 +57,14 @@ impl App {
         let pair = self.components.get(component_name)?;
         let component_ref = pair.value().clone();
         component_ref.downcast::<T>()
+    }
+
+    pub fn get_component<T>(&self) -> Option<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        let component_ref = self.get_component_ref();
+        component_ref.map(|c| T::clone(&c))
     }
 
     pub fn get_components(&self) -> Vec<String> {
@@ -142,6 +151,15 @@ impl AppBuilder {
         self
     }
 
+    /// Add a shutdown hook
+    pub fn add_shutdown_hook<T>(&mut self, hook: T) -> &mut Self
+    where
+        T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<()>> + Send> + 'static,
+    {
+        self.shutdown_hooks.push(Box::new(hook));
+        self
+    }
+
     /// Running
     pub async fn run(&mut self) {
         match self.inner_run().await {
@@ -214,6 +232,11 @@ impl AppBuilder {
                 Ok(msg) => log::info!("scheduled result: {}", msg),
             }
         }
+
+        let shutdown_hooks = std::mem::take(&mut self.shutdown_hooks);
+        for hook in shutdown_hooks {
+            Box::into_pin(hook(app.clone())).await?;
+        }
         Ok(app)
     }
 
@@ -233,6 +256,7 @@ impl Default for AppBuilder {
             config: Default::default(),
             components: Default::default(),
             schedulers: Default::default(),
+            shutdown_hooks: Default::default(),
         }
     }
 }
