@@ -1,6 +1,6 @@
 //! [spring-sea-orm](https://spring-rs.github.io/docs/plugins/spring-sea-orm/)
-pub mod pagination;
 pub mod config;
+pub mod pagination;
 
 use anyhow::Context;
 use config::SeaOrmConfig;
