@@ -60,10 +60,10 @@ impl SqlxPlugin {
     }
 
     async fn close_db_connection(app: Arc<App>) -> Result<()> {
-        Ok(app
-            .get_component::<ConnectPool>()
+        app.get_component::<ConnectPool>()
             .expect("sqlx connect pool not exists")
             .close()
-            .await)
+            .await;
+        Ok(())
     }
 }
