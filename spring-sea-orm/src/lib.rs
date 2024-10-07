@@ -1,4 +1,7 @@
 //! [spring-sea-orm](https://spring-rs.github.io/docs/plugins/spring-sea-orm/)
+#![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
+#![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
+
 pub mod config;
 pub mod pagination;
 
