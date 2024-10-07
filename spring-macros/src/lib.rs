@@ -1,4 +1,6 @@
 //! spring-macros
+#![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
+#![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
 mod auto;
 mod config;
