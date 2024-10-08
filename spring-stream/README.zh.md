@@ -9,6 +9,8 @@ spring-stream = { version = "0.1.1",features=["file"] }
 
 spring-stream支持`file`、`stdio`、`redis`、`kafka`四种消息存储。
 
+可选的features: `json`.
+
 ## 配置项
 
 ```toml

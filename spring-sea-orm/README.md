@@ -10,6 +10,8 @@ sea-orm = { version = "1.0" }          # Mainly to adapt to the entity code gene
 
 You can replace `postgres`, `mysql`, `sqlite`feature to select the appropriate database driver.
 
+optional features: `with-web`.
+
 ## Configuration items
 
 ```toml

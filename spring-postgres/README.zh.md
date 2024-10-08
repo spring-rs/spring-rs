@@ -9,6 +9,22 @@
 spring-postgres = { version = "0.1.1" }
 ```
 
+可选的features:
+* `array-impls`
+* `js`
+* `with-bit-vec-0_6`
+* `with-chrono-0_4`
+* `with-eui48-0_4`
+* `with-eui48-1`
+* `with-geo-types-0_6`
+* `with-geo-types-0_7`
+* `with-serde_json-1`
+* `with-smol_str-01`
+* `with-time-0_2`
+* `with-time-0_3`
+* `with-uuid-0_8`
+* `with-uuid-1`
+
 ## 配置项
 
 ```toml

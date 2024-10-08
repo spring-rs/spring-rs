@@ -9,6 +9,14 @@ spring-sqlx = { version = "0.1.1", features = ["mysql"] }
 
 You can replace `postgres`, `mysql`, `sqlite`feature to select the appropriate database driver.
 
+optional features: 
+* `with-json`
+* `with-chrono`
+* `with-rust_decimal`
+* `with-bigdecimal`
+* `with-uuid`
+* `with-time`
+
 ## Configuration items
 
 ```toml

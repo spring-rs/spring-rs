@@ -9,6 +9,8 @@
 spring-web = { version = "0.1.1" }
 ```
 
+可选的**features**: `http2`、`multipart`、`ws`。
+
 ## 配置项
 
 ```toml
