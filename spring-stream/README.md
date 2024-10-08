@@ -9,6 +9,8 @@ spring-stream = { version = "0.1.1", features=["file"] }
 
 spring-stream supports four message storages: `file`, `stdio`, `redis`, and `kafka`.
 
+optional features: `json`.
+
 ## Configuration items
 
 ```toml

@@ -9,6 +9,14 @@ spring-sqlx = { version = "0.1.1", features = ["mysql"] }
 
 可以替换`postgres`、`mysql`、`sqlite`feature来选择合适的数据库驱动。
 
+可选的features: 
+* `with-json`
+* `with-chrono`
+* `with-rust_decimal`
+* `with-bigdecimal`
+* `with-uuid`
+* `with-time`
+
 ## 配置项
 
 ```toml

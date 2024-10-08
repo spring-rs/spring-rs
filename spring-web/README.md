@@ -9,6 +9,8 @@
 spring-web = { version = "0.1.1" }
 ```
 
+optional **features**: `http2`, `multipart`, `ws`.
+
 ## Configuration items
 
 ```toml

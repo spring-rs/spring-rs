@@ -10,6 +10,8 @@ sea-orm = { version = "1.0" }    # 主要为了适配sea-orm-cli生成的entity�
 
 可以替换`postgres`、`mysql`、`sqlite`feature来选择合适的数据库驱动。
 
+可选的features：`with-web`。
+
 ## 配置项
 
 ```toml
