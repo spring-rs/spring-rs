@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- **changed**: refactor KnownWebError: change &str to Into<String> ([#6f243a])
+
+[#6f243a]: https://github.com/spring-rs/spring-rs/commit/6f243aa384aee22a0f3a32ed2ea2f20ec0f4d513
+
 ## 0.2.1
 
 - **added**: support graceful shutdown ([#61])
