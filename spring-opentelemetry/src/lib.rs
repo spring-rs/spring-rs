@@ -6,7 +6,7 @@ pub mod config;
 
 use anyhow::Context;
 use config::OpenTelemetryConfig;
-use opentelemetry::trace::{Tracer, TracerProvider};
+use opentelemetry::trace::TracerProvider;
 use opentelemetry::{global, KeyValue};
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_sdk::logs::LoggerProvider;
@@ -15,12 +15,11 @@ use opentelemetry_sdk::propagation::TraceContextPropagator;
 use opentelemetry_sdk::trace::{self as sdktrace, BatchConfig};
 use opentelemetry_sdk::{resource, runtime, Resource};
 use opentelemetry_semantic_conventions::attribute;
+use spring::async_trait;
 use spring::config::ConfigRegistry;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
-use spring::{async_trait, log};
 use std::time::Duration;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub struct OpenTelemetryPlugin;
 
@@ -37,12 +36,12 @@ impl Plugin for OpenTelemetryPlugin {
 
         let trace_layer = OpenTelemetryLayer::new(tracer);
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
-        let metric_layer = MetricsLayer::new(meter_provider);
+        let metric_layer = MetricsLayer::new(meter_provider.clone());
 
         app.with_layer(trace_layer)
             .with_layer(log_layer)
             .with_layer(metric_layer)
-            .add_shutdown_hook(|app| Box::new(Self::shutdown(meter_provider, log_provider)));
+            .add_shutdown_hook(|_app| Box::new(Self::shutdown(meter_provider, log_provider)));
     }
 }
 
@@ -91,11 +90,15 @@ impl OpenTelemetryPlugin {
     async fn shutdown(
         meter_provider: SdkMeterProvider,
         log_provider: LoggerProvider,
-    ) -> Result<()> {
+    ) -> Result<String> {
         global::shutdown_tracer_provider();
-        meter_provider.shutdown();
-        log_provider.shutdown();
-        Ok(())
+        meter_provider
+            .shutdown()
+            .context("shutdown meter provider failed")?;
+        log_provider
+            .shutdown()
+            .context("shutdown log provider failed")?;
+        Ok("OpenTelemetry shutdown successful!".into())
     }
 
     fn get_resource_attr() -> Resource {

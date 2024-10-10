@@ -61,11 +61,11 @@ impl SqlxPlugin {
             .with_context(|| format!("sqlx connection failed: {}", config.uri))?)
     }
 
-    async fn close_db_connection(app: Arc<App>) -> Result<()> {
+    async fn close_db_connection(app: Arc<App>) -> Result<String> {
         app.get_component::<ConnectPool>()
             .expect("sqlx connect pool not exists")
             .close()
             .await;
-        Ok(())
+        Ok("sqlx connection pool close successful".into())
     }
 }

@@ -40,7 +40,7 @@ pub struct AppBuilder {
     config: TomlConfigRegistry,
     /// task
     schedulers: Vec<Box<Scheduler<String>>>,
-    shutdown_hooks: Vec<Box<Scheduler<()>>>,
+    shutdown_hooks: Vec<Box<Scheduler<String>>>,
 }
 
 impl App {
@@ -163,7 +163,7 @@ impl AppBuilder {
     /// Add a shutdown hook
     pub fn add_shutdown_hook<T>(&mut self, hook: T) -> &mut Self
     where
-        T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<()>> + Send> + 'static,
+        T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send> + 'static,
     {
         self.shutdown_hooks.push(Box::new(hook));
         self
@@ -182,6 +182,7 @@ impl AppBuilder {
     async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. read env variable
         let env = env::init()?;
+        log::info!("The application runs in the {:?} environment", env);
 
         // 2. load toml config
         self.config = TomlConfigRegistry::new(&self.config_path, env)?;
@@ -244,7 +245,8 @@ impl AppBuilder {
 
         let shutdown_hooks = std::mem::take(&mut self.shutdown_hooks);
         for hook in shutdown_hooks {
-            Box::into_pin(hook(app.clone())).await?;
+            let result = Box::into_pin(hook(app.clone())).await?;
+            log::info!("shutdown result: {result}");
         }
         Ok(app)
     }

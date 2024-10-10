@@ -55,12 +55,12 @@ impl SeaOrmPlugin {
             .with_context(|| format!("sea-orm connection failed:{}", &config.uri))?)
     }
 
-    async fn close_db_connection(app: Arc<App>) -> Result<()> {
-        Ok(app
-            .get_component::<DbConn>()
+    async fn close_db_connection(app: Arc<App>) -> Result<String> {
+        app.get_component::<DbConn>()
             .expect("sea-orm db connection not exists")
             .close()
             .await
-            .context("sea-orm db connection close failed")?)
+            .context("sea-orm db connection close failed")?;
+        Ok("sea-orm db connection close successful!".into())
     }
 }

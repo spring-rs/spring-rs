@@ -57,6 +57,7 @@ impl TomlConfigRegistry {
                 if !env_path.exists() {
                     return Ok(main_table);
                 }
+                log::info!("The profile of the {:?} environment is active", env);
 
                 let env_toml_str = fs::read_to_string(env_path)
                     .with_context(|| format!("Failed to read configuration file {:?}", env_path))?;
