@@ -23,7 +23,9 @@ opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 opentelemetry-otlp = { workspace = true }
 opentelemetry-http = { workspace = true }
 opentelemetry-appender-tracing = { workspace = true }
-opentelemetry-semantic-conventions = { workspace = true }
+opentelemetry-semantic-conventions = { workspace = true, features = [
+    "semconv_experimental",
+] }
 #opentelemetry-prometheus = { workspace = true }
 opentelemetry-jaeger-propagator = { workspace = true, optional = true }
 opentelemetry-zipkin = { workspace = true, optional = true }

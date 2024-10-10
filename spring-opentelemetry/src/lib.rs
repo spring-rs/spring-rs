@@ -1,8 +1,31 @@
-//! [spring-redis](https://spring-rs.github.io/docs/plugins/spring-redis/)
+//! [spring-opentelemetry](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/)
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
 pub mod config;
+
+#[rustfmt::skip]
+pub use opentelemetry_otlp::{
+    OTEL_EXPORTER_OTLP_COMPRESSION,
+    OTEL_EXPORTER_OTLP_ENDPOINT,
+    OTEL_EXPORTER_OTLP_HEADERS,
+    OTEL_EXPORTER_OTLP_TIMEOUT,
+    // logs
+    OTEL_EXPORTER_OTLP_LOGS_COMPRESSION,
+    OTEL_EXPORTER_OTLP_LOGS_ENDPOINT,
+    OTEL_EXPORTER_OTLP_LOGS_HEADERS,
+    OTEL_EXPORTER_OTLP_LOGS_TIMEOUT,
+    // metrics
+    OTEL_EXPORTER_OTLP_METRICS_COMPRESSION,
+    OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
+    OTEL_EXPORTER_OTLP_METRICS_HEADERS,
+    OTEL_EXPORTER_OTLP_METRICS_TIMEOUT,
+    // trace
+    OTEL_EXPORTER_OTLP_TRACES_COMPRESSION,
+    OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
+    OTEL_EXPORTER_OTLP_TRACES_HEADERS,
+    OTEL_EXPORTER_OTLP_TRACES_TIMEOUT,
+};
 
 use anyhow::Context;
 use config::OpenTelemetryConfig;
@@ -41,7 +64,7 @@ impl Plugin for OpenTelemetryPlugin {
         app.with_layer(trace_layer)
             .with_layer(log_layer)
             .with_layer(metric_layer)
-            .add_shutdown_hook(|_app| Box::new(Self::shutdown(meter_provider, log_provider)));
+            .add_shutdown_hook(move |_| Box::new(Self::shutdown(meter_provider, log_provider)));
     }
 }
 
@@ -50,6 +73,7 @@ impl OpenTelemetryPlugin {
         opentelemetry_otlp::new_pipeline()
             .logging()
             .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+            .with_resource(Self::get_resource_attr())
             .install_batch(runtime::Tokio)
             .expect("build LogProvider failed")
     }
@@ -58,10 +82,12 @@ impl OpenTelemetryPlugin {
         let provider = opentelemetry_otlp::new_pipeline()
             .metrics(runtime::Tokio)
             .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+            .with_resource(Self::get_resource_attr())
             .build()
             .expect("build MeterProvider failed");
 
         global::set_meter_provider(provider.clone());
+        tracing::debug!("metrics provider installed");
 
         provider
     }
@@ -83,6 +109,7 @@ impl OpenTelemetryPlugin {
 
         let tracer = provider.tracer(env!("CARGO_PKG_NAME"));
         global::set_tracer_provider(provider);
+        tracing::debug!("tracer provider installed");
 
         tracer
     }
