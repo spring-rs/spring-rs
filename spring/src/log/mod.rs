@@ -18,7 +18,7 @@ pub(crate) struct LogPlugin;
 
 impl LogPlugin {
     pub(crate) fn build(&self, app: &mut AppBuilder) {
-        let registry = std::mem::take(&mut app.tracing_registry);
+        let mut layers = std::mem::take(&mut app.layers);
 
         let config = app
             .get_config::<LoggerConfig>()
@@ -31,11 +31,14 @@ impl LogPlugin {
             );
         }
 
-        let layers = build_logger_layers(&config);
+        layers.extend(build_logger_layers(&config));
 
         if !layers.is_empty() {
             let env_filter = init_env_filter(config.override_filter, &config.level);
-            registry.with(layers).with(env_filter).init();
+            tracing_subscriber::registry()
+                .with(layers)
+                .with(env_filter)
+                .init();
         }
     }
 }

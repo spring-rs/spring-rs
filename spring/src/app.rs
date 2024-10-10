@@ -17,7 +17,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::Layer;
 
 pub type Registry<T> = DashMap<String, T>;
@@ -30,7 +29,7 @@ pub struct App {
 }
 
 pub struct AppBuilder {
-    pub(crate) tracing_registry: tracing_subscriber::Registry,
+    pub(crate) layers: Vec<Box<dyn Layer<tracing_subscriber::Registry> + Send + Sync + 'static>>,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
@@ -155,10 +154,9 @@ impl AppBuilder {
 
     pub fn with_layer<L>(&mut self, layer: L) -> &mut Self
     where
-        L: Layer<tracing_subscriber::Registry>,
+        L: Layer<tracing_subscriber::Registry> + Send + Sync + 'static,
     {
-        let registry = std::mem::take(&mut self.tracing_registry);
-        self.tracing_registry = registry.with(layer);
+        self.layers.push(layer.boxed());
         self
     }
 
@@ -261,7 +259,7 @@ impl AppBuilder {
 impl Default for AppBuilder {
     fn default() -> Self {
         Self {
-            tracing_registry: tracing_subscriber::registry(),
+            layers: Vec::default(),
             plugin_registry: Default::default(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
             config: Default::default(),

@@ -118,11 +118,11 @@ impl OpenTelemetryPlugin {
             Duration::from_secs(0),
             vec![
                 #[cfg(feature = "more-resource")]
+                Box::new(opentelemetry_resource_detectors::HostResourceDetector::default()),
+                #[cfg(feature = "more-resource")]
                 Box::new(opentelemetry_resource_detectors::OsResourceDetector),
                 #[cfg(feature = "more-resource")]
                 Box::new(opentelemetry_resource_detectors::ProcessResourceDetector),
-                #[cfg(feature = "more-resource")]
-                Box::new(opentelemetry_resource_detectors::HostResourceDetector::default()),
                 Box::new(resource::SdkProvidedResourceDetector),
                 Box::new(resource::TelemetryResourceDetector),
                 Box::new(resource::EnvResourceDetector::new()),
