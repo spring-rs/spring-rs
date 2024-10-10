@@ -2,13 +2,13 @@ mod config;
 
 use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
-use config::{Format, LogLevel, LoggerConfig, LoggerFileAppender, TimeStyle, WithFields};
+use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
 use std::ops::Deref;
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
-use tracing_subscriber::layer::{Layered, SubscriberExt};
+use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::reload::{self, Handle};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Registry;
