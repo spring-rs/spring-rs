@@ -1,2 +1,5 @@
+[web]
+graceful = true
+
 [sqlx]
 uri = "postgres://postgres:xudjf23adj213@127.0.0.1:5432"

@@ -17,7 +17,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use tracing_subscriber::Layer;
 
 pub type Registry<T> = DashMap<String, T>;
 pub type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
@@ -29,7 +28,6 @@ pub struct App {
 }
 
 pub struct AppBuilder {
-    pub(crate) layers: Vec<Box<dyn Layer<tracing_subscriber::Registry> + Send + Sync + 'static>>,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
@@ -152,14 +150,6 @@ impl AppBuilder {
         self
     }
 
-    pub fn with_layer<L>(&mut self, layer: L) -> &mut Self
-    where
-        L: Layer<tracing_subscriber::Registry> + Send + Sync + 'static,
-    {
-        self.layers.push(layer.boxed());
-        self
-    }
-
     /// Add a shutdown hook
     pub fn add_shutdown_hook<T>(&mut self, hook: T) -> &mut Self
     where
@@ -261,7 +251,6 @@ impl AppBuilder {
 impl Default for AppBuilder {
     fn default() -> Self {
         Self {
-            layers: Vec::default(),
             plugin_registry: Default::default(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
             config: Default::default(),

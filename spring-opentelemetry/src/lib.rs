@@ -40,6 +40,7 @@ use opentelemetry_sdk::{resource, runtime, Resource};
 use opentelemetry_semantic_conventions::attribute;
 use spring::async_trait;
 use spring::config::ConfigRegistry;
+use spring::log::LayersReloader;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use std::time::Duration;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
@@ -61,10 +62,17 @@ impl Plugin for OpenTelemetryPlugin {
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
         let metric_layer = MetricsLayer::new(meter_provider.clone());
 
-        app.with_layer(trace_layer)
-            .with_layer(log_layer)
-            .with_layer(metric_layer)
-            .add_shutdown_hook(move |_| Box::new(Self::shutdown(meter_provider, log_provider)));
+        let reloader_ref = app
+            .get_component_ref::<LayersReloader>()
+            .expect("get layers reloader failed");
+        reloader_ref
+            .modify(|layers| {
+                layers.push(Box::new(trace_layer));
+                layers.push(Box::new(log_layer));
+                layers.push(Box::new(metric_layer));
+            })
+            .expect("reload layers for opentelemetry failed");
+        app.add_shutdown_hook(move |_| Box::new(Self::shutdown(meter_provider, log_provider)));
     }
 }
 
@@ -125,7 +133,7 @@ impl OpenTelemetryPlugin {
         log_provider
             .shutdown()
             .context("shutdown log provider failed")?;
-        Ok("OpenTelemetry shutdown successful!".into())
+        Ok("OpenTelemetry shutdown successful".into())
     }
 
     fn get_resource_attr() -> Resource {

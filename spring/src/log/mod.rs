@@ -3,23 +3,27 @@ mod config;
 use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
 use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
+use std::ops::Deref;
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
 use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::reload::{self, Handle};
 use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Registry;
 use tracing_subscriber::{
     fmt::{self, MakeWriter},
-    Layer, Registry,
+    Layer,
 };
+
+type BoxLayer = Box<dyn Layer<Registry> + Send + Sync + 'static>;
+type Layers = Vec<BoxLayer>;
 
 pub(crate) struct LogPlugin;
 
 impl LogPlugin {
     pub(crate) fn build(&self, app: &mut AppBuilder) {
-        let mut layers = std::mem::take(&mut app.layers);
-
         let config = app
             .get_config::<LoggerConfig>()
             .expect("tracing plugin config load failed");
@@ -31,14 +35,16 @@ impl LogPlugin {
             );
         }
 
-        layers.extend(build_logger_layers(&config));
+        let layers = build_logger_layers(&config);
 
         if !layers.is_empty() {
             let env_filter = init_env_filter(config.override_filter, &config.level);
+            let (layers, layers_reload_handler) = reload::Layer::new(layers);
             tracing_subscriber::registry()
                 .with(layers)
                 .with(env_filter)
                 .init();
+            app.add_component(LayersReloader(layers_reload_handler));
         }
     }
 }
@@ -46,7 +52,7 @@ impl LogPlugin {
 // Keep nonblocking file appender work guard
 static NONBLOCKING_WORK_GUARD_KEEP: OnceLock<WorkerGuard> = OnceLock::new();
 
-fn build_logger_layers(config: &LoggerConfig) -> Vec<Box<dyn Layer<Registry> + Sync + Send>> {
+fn build_logger_layers(config: &LoggerConfig) -> Layers {
     let mut layers = Vec::new();
 
     if let Some(file_config) = &config.file_appender {
@@ -93,7 +99,7 @@ fn build_fmt_layer<W2>(
     format: &Format,
     config: &LoggerConfig,
     ansi: bool,
-) -> Box<dyn Layer<Registry> + Sync + Send>
+) -> BoxLayer
 where
     W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
 {
@@ -134,7 +140,7 @@ fn config_layer_with_timer<W2, T>(
     timer: T,
     ansi: bool,
     with_fields: &Vec<WithFields>,
-) -> Box<dyn Layer<Registry> + Sync + Send>
+) -> BoxLayer
 where
     W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
     T: FormatTime + Sync + Send + 'static,
@@ -166,7 +172,7 @@ fn config_layer_without_time<W2>(
     format: &Format,
     ansi: bool,
     with_fields: &Vec<WithFields>,
-) -> Box<dyn Layer<Registry> + Sync + Send>
+) -> BoxLayer
 where
     W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
 {
@@ -200,4 +206,15 @@ fn init_env_filter(override_filter: Option<String>, level: &LogLevel) -> EnvFilt
             EnvFilter::try_new(override_filter.unwrap_or(format!("{level}")))
         })
         .expect("logger initialization failed")
+}
+
+#[derive(Clone)]
+pub struct LayersReloader(Handle<Layers, Registry>);
+
+impl Deref for LayersReloader {
+    type Target = Handle<Layers, Registry>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
