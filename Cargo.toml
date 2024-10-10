@@ -11,6 +11,7 @@ members = [
     "spring-sea-orm",
     "spring-stream",
     "spring-mail",
+    "spring-opentelemetry",
     "contrib-plugins/*",
     "examples/*",
 ]
@@ -57,3 +58,15 @@ schemars = "0.8.21"
 dashmap = "6.0.1"
 uuid = "1"
 chrono = "0.4"
+opentelemetry = "0.26"
+opentelemetry_sdk = "0.26"
+opentelemetry-otlp = "0.26"
+opentelemetry-stdout = "0.26"
+opentelemetry-http = "0.26"
+opentelemetry-appender-tracing = "0.26"
+opentelemetry-jaeger-propagator = "0.26"
+opentelemetry-semantic-conventions = "0.26"
+opentelemetry-prometheus = "0.17"
+opentelemetry-zipkin = "0.26"
+opentelemetry-resource-detectors = "0.5"
+tracing-opentelemetry = "0.27"
