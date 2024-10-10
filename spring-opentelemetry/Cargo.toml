@@ -7,24 +7,29 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+jaeger = ["opentelemetry-jaeger-propagator"]
+zipkin = ["opentelemetry-zipkin"]
+more-resource = ["opentelemetry-resource-detectors"]
+
 [dependencies]
 spring = { path = "../spring", version = "0.2" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 schemars = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+opentelemetry-otlp = { workspace = true }
+opentelemetry-http = { workspace = true }
+opentelemetry-appender-tracing = { workspace = true }
+opentelemetry-semantic-conventions = { workspace = true }
+#opentelemetry-prometheus = { workspace = true }
+opentelemetry-jaeger-propagator = { workspace = true, optional = true }
+opentelemetry-zipkin = { workspace = true, optional = true }
+opentelemetry-resource-detectors = { workspace = true, optional = true }
+tracing-opentelemetry = { workspace = true }
+tracing-subscriber = { workspace = true }
 
 [dev-dependencies]
 spring-web = { path = "../spring-web" }
-opentelemetry = { workspace = true }
-opentelemetry_sdk = { workspace = true }
-opentelemetry-otlp = { workspace = true }
-opentelemetry-stdout = { workspace = true }
-opentelemetry-http = { workspace = true }
-opentelemetry-appender-tracing = { workspace = true }
-opentelemetry-jaeger-propagator = { workspace = true }
-opentelemetry-semantic-conventions = { workspace = true }
-opentelemetry-prometheus = { workspace = true }
-opentelemetry-zipkin = { workspace = true }
-opentelemetry-resource-detectors = { workspace = true }
-tracing-opentelemetry = { workspace = true }

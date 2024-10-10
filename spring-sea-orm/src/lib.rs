@@ -29,7 +29,7 @@ impl Plugin for SeaOrmPlugin {
             .await
             .expect("sea-orm plugin load failed");
         app.add_component(conn)
-            .add_shutdown_hook(|app: Arc<App>| Box::new(Self::close_db_connection(app)));
+            .add_shutdown_hook(|app| Box::new(Self::close_db_connection(app)));
     }
 }
 

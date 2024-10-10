@@ -34,7 +34,7 @@ impl Plugin for SqlxPlugin {
         tracing::info!("sqlx connection success");
 
         app.add_component(connect_pool)
-            .add_shutdown_hook(|app: Arc<App>| Box::new(Self::close_db_connection(app)));
+            .add_shutdown_hook(|app| Box::new(Self::close_db_connection(app)));
     }
 }
 
