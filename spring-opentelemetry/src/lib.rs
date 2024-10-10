@@ -50,9 +50,10 @@ pub struct OpenTelemetryPlugin;
 #[async_trait]
 impl Plugin for OpenTelemetryPlugin {
     async fn build(&self, app: &mut AppBuilder) {
-        let config = app
+        let _config = app
             .get_config::<OpenTelemetryConfig>()
             .expect("redis plugin config load failed");
+        // TODO: config
 
         let meter_provider = Self::init_metrics();
         let log_provider = Self::init_logs();
