@@ -2,7 +2,7 @@ mod config;
 
 use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
-use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
+use config::{Format, LoggerConfig, TimeStyle, WithFields};
 use std::ops::Deref;
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
@@ -36,7 +36,7 @@ impl LogPlugin {
 
         let layers = config.config_subscriber();
 
-        let env_filter = init_env_filter(config.override_filter, &config.level);
+        let env_filter = config.build_env_filter();
 
         let (layers, layers_reload_handler) = reload::Layer::new(layers);
 
@@ -184,16 +184,24 @@ impl LoggerConfig {
             Format::Json => layer.json().boxed(),
         }
     }
-}
 
-fn init_env_filter(override_filter: Option<String>, level: &LogLevel) -> EnvFilter {
-    EnvFilter::try_from_default_env()
-        .or_else(|_| {
-            // user wanted a specific filter, don't care about our internal whitelist
-            // or, if no override give them the default whitelisted filter (most common)
-            EnvFilter::try_new(override_filter.unwrap_or(format!("{level}")))
-        })
-        .expect("logger initialization failed")
+    fn build_env_filter(&self) -> EnvFilter {
+        match EnvFilter::try_from_default_env() {
+            Ok(env_filter) => env_filter,
+            Err(_) => {
+                let LoggerConfig {
+                    override_filter,
+                    level,
+                    ..
+                } = self;
+                let directive = match override_filter {
+                    Some(dir) => dir.into(),
+                    None => format!("{level}"),
+                };
+                EnvFilter::try_new(directive).expect("logger initialization failed")
+            }
+        }
+    }
 }
 
 #[derive(Clone)]
