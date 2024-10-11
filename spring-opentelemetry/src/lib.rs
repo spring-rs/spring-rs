@@ -56,9 +56,9 @@ impl Plugin for OpenTelemetryPlugin {
             .expect("redis plugin config load failed");
 
         let env = app.get_env();
-        let meter_provider = config.init_metrics(env);
-        let log_provider = config.init_logs(env);
-        let tracer = config.init_tracer(env);
+        let meter_provider = config.init_metrics(*env);
+        let log_provider = config.init_logs(*env);
+        let tracer = config.init_tracer(*env);
 
         let trace_layer = OpenTelemetryLayer::new(tracer);
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
