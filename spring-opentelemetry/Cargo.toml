@@ -30,6 +30,8 @@ opentelemetry-semantic-conventions = { workspace = true, features = [
 opentelemetry-jaeger-propagator = { workspace = true, optional = true }
 opentelemetry-zipkin = { workspace = true, optional = true }
 opentelemetry-resource-detectors = { workspace = true, optional = true }
+tonic = "0.12"
+http = "1"
 tracing-opentelemetry = { workspace = true }
 tracing-subscriber = { workspace = true }
 

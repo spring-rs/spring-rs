@@ -93,7 +93,7 @@ impl LoggerConfig {
     where
         W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
     {
-        let LoggerConfig {
+        let Self {
             time_style,
             time_pattern,
             ..

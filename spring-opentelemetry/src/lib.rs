@@ -28,7 +28,7 @@ pub use opentelemetry_otlp::{
 };
 
 use anyhow::Context;
-use config::OpenTelemetryConfig;
+use config::{Merger, OpenTelemetryConfig};
 use opentelemetry::trace::TracerProvider;
 use opentelemetry::{global, KeyValue};
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
@@ -50,14 +50,13 @@ pub struct OpenTelemetryPlugin;
 #[async_trait]
 impl Plugin for OpenTelemetryPlugin {
     async fn build(&self, app: &mut AppBuilder) {
-        let _config = app
+        let config = app
             .get_config::<OpenTelemetryConfig>()
             .expect("redis plugin config load failed");
-        // TODO: config
 
-        let meter_provider = Self::init_metrics();
-        let log_provider = Self::init_logs();
-        let tracer = Self::init_tracer();
+        let meter_provider = config.init_metrics();
+        let log_provider = config.init_logs();
+        let tracer = config.init_tracer();
 
         let trace_layer = OpenTelemetryLayer::new(tracer);
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
@@ -77,20 +76,32 @@ impl Plugin for OpenTelemetryPlugin {
     }
 }
 
-impl OpenTelemetryPlugin {
-    fn init_logs() -> LoggerProvider {
+impl OpenTelemetryConfig {
+    fn init_logs(&self) -> LoggerProvider {
+        let Self { otel, logs, .. } = self;
+        let exporter_config = logs.clone().merge(otel.clone());
+        let exporter = match exporter_config {
+            None => opentelemetry_otlp::new_exporter().tonic(),
+            Some(c) => c.apply_config(opentelemetry_otlp::new_exporter().tonic()),
+        };
         opentelemetry_otlp::new_pipeline()
             .logging()
-            .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+            .with_exporter(exporter)
             .with_resource(Self::get_resource_attr())
             .install_batch(runtime::Tokio)
             .expect("build LogProvider failed")
     }
 
-    fn init_metrics() -> SdkMeterProvider {
+    fn init_metrics(&self) -> SdkMeterProvider {
+        let Self { otel, metrics, .. } = self;
+        let exporter_config = metrics.clone().merge(otel.clone());
+        let exporter = match exporter_config {
+            None => opentelemetry_otlp::new_exporter().tonic(),
+            Some(c) => c.apply_config(opentelemetry_otlp::new_exporter().tonic()),
+        };
         let provider = opentelemetry_otlp::new_pipeline()
             .metrics(runtime::Tokio)
-            .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+            .with_exporter(exporter)
             .with_resource(Self::get_resource_attr())
             .build()
             .expect("build MeterProvider failed");
@@ -101,16 +112,22 @@ impl OpenTelemetryPlugin {
         provider
     }
 
-    fn init_tracer() -> sdktrace::Tracer {
+    fn init_tracer(&self) -> sdktrace::Tracer {
+        let Self { otel, traces, .. } = self;
         global::set_text_map_propagator(TraceContextPropagator::new());
         #[cfg(feature = "jaeger")]
         global::set_text_map_propagator(opentelemetry_jaeger_propagator::Propagator::new());
         #[cfg(feature = "zipkin")]
         global::set_text_map_propagator(opentelemetry_zipkin::Propagator::new());
 
+        let exporter_config = traces.clone().merge(otel.clone());
+        let exporter = match exporter_config {
+            None => opentelemetry_otlp::new_exporter().tonic(),
+            Some(c) => c.apply_config(opentelemetry_otlp::new_exporter().tonic()),
+        };
         let provider = opentelemetry_otlp::new_pipeline()
             .tracing()
-            .with_exporter(opentelemetry_otlp::new_exporter().tonic())
+            .with_exporter(exporter)
             .with_trace_config(sdktrace::Config::default().with_resource(Self::get_resource_attr()))
             .with_batch_config(BatchConfig::default())
             .install_batch(runtime::Tokio)
@@ -122,21 +139,6 @@ impl OpenTelemetryPlugin {
 
         tracer
     }
-
-    async fn shutdown(
-        meter_provider: SdkMeterProvider,
-        log_provider: LoggerProvider,
-    ) -> Result<String> {
-        global::shutdown_tracer_provider();
-        meter_provider
-            .shutdown()
-            .context("shutdown meter provider failed")?;
-        log_provider
-            .shutdown()
-            .context("shutdown log provider failed")?;
-        Ok("OpenTelemetry shutdown successful".into())
-    }
-
     fn get_resource_attr() -> Resource {
         Self::app_resource().merge(&Self::infra_resource())
     }
@@ -167,5 +169,21 @@ impl OpenTelemetryPlugin {
                 Box::new(resource::EnvResourceDetector::new()),
             ],
         )
+    }
+}
+
+impl OpenTelemetryPlugin {
+    async fn shutdown(
+        meter_provider: SdkMeterProvider,
+        log_provider: LoggerProvider,
+    ) -> Result<String> {
+        global::shutdown_tracer_provider();
+        meter_provider
+            .shutdown()
+            .context("shutdown meter provider failed")?;
+        log_provider
+            .shutdown()
+            .context("shutdown log provider failed")?;
+        Ok("OpenTelemetry shutdown successful".into())
     }
 }
