@@ -113,17 +113,17 @@ impl OpenTelemetryPlugin {
 
         tracer
     }
+
     fn get_resource_attr(env: Env) -> Resource {
         Self::app_resource(env).merge(&Self::infra_resource())
     }
 
     fn app_resource(env: Env) -> Resource {
         Resource::from_schema_url(
-            [
-                KeyValue::new(attribute::SERVICE_NAME, env!("CARGO_PKG_NAME")),
-                KeyValue::new(attribute::SERVICE_VERSION, env!("CARGO_PKG_VERSION")),
-                KeyValue::new(attribute::DEPLOYMENT_ENVIRONMENT_NAME, format!("{:?}", env)),
-            ],
+            [KeyValue::new(
+                attribute::DEPLOYMENT_ENVIRONMENT_NAME,
+                format!("{:?}", env),
+            )],
             opentelemetry_semantic_conventions::SCHEMA_URL,
         )
     }

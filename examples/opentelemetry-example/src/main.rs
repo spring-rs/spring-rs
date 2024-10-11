@@ -1,8 +1,6 @@
 use anyhow::Context;
 use spring::{auto_config, App};
-use spring_opentelemetry::{
-    OpenTelemetryPlugin, OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_HEADERS,
-};
+use spring_opentelemetry::OpenTelemetryPlugin;
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
@@ -19,11 +17,6 @@ use spring_web::{get, route};
 #[auto_config(WebConfigurator)] // auto config web router
 #[tokio::main]
 async fn main() {
-    std::env::set_var(OTEL_EXPORTER_OTLP_ENDPOINT, "localhost:5081");
-    std::env::set_var(
-        OTEL_EXPORTER_OTLP_HEADERS,
-        "authorization=Basic cm9vdEBleGFtcGxlLmNvbTpaV1NYZnNDSlIwODJLdjhW,organization=default",
-    );
     App::new()
         .add_plugin(SqlxPlugin) // Add plug-in
         .add_plugin(WebPlugin)
