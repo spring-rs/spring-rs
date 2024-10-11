@@ -2,6 +2,7 @@ mod config;
 
 use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
+use crate::plugin::Plugin;
 use config::{Format, LoggerConfig, TimeStyle, WithFields};
 use std::ops::Deref;
 use std::sync::OnceLock;
@@ -9,7 +10,7 @@ use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
 use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::reload::{self, Handle};
+use tracing_subscriber::reload::Handle;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Registry;
 use tracing_subscriber::{
@@ -17,12 +18,12 @@ use tracing_subscriber::{
     Layer,
 };
 
-type BoxLayer<S> = Box<dyn Layer<S> + Send + Sync + 'static>;
+pub type BoxLayer = Box<dyn Layer<Registry> + Send + Sync + 'static>;
 
 pub(crate) struct LogPlugin;
 
-impl LogPlugin {
-    pub(crate) fn build(&self, app: &mut AppBuilder) {
+impl Plugin for LogPlugin {
+    fn immediately_build(&self, app: &mut AppBuilder) {
         let config = app
             .get_config::<LoggerConfig>()
             .expect("tracing plugin config load failed");
@@ -34,18 +35,19 @@ impl LogPlugin {
             );
         }
 
-        let layers = config.config_subscriber();
+        let layers = std::mem::take(&mut app.layers);
+        let layers = config.config_subscriber(layers);
 
         let env_filter = config.build_env_filter();
-
-        let (layers, layers_reload_handler) = reload::Layer::new(layers);
 
         tracing_subscriber::registry()
             .with(layers)
             .with(env_filter)
             .init();
+    }
 
-        app.add_component(LayersReloader(layers_reload_handler));
+    fn immediately(&self) -> bool {
+        true
     }
 }
 
@@ -53,8 +55,7 @@ impl LogPlugin {
 static NONBLOCKING_WORK_GUARD_KEEP: OnceLock<WorkerGuard> = OnceLock::new();
 
 impl LoggerConfig {
-    fn config_subscriber(&self) -> Vec<BoxLayer<Registry>> {
-        let mut layers = Vec::new();
+    fn config_subscriber(&self, mut layers: Vec<BoxLayer>) -> Vec<BoxLayer> {
         if let Some(file_logger) = &self.file_appender {
             if file_logger.enable {
                 let file_appender = tracing_appender::rolling::Builder::default()
@@ -84,12 +85,7 @@ impl LoggerConfig {
         layers
     }
 
-    fn build_fmt_layer<W2>(
-        &self,
-        make_writer: W2,
-        format: &Format,
-        ansi: bool,
-    ) -> BoxLayer<Registry>
+    fn build_fmt_layer<W2>(&self, make_writer: W2, format: &Format, ansi: bool) -> BoxLayer
     where
         W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
     {
@@ -127,7 +123,7 @@ impl LoggerConfig {
         format: &Format,
         timer: T,
         ansi: bool,
-    ) -> BoxLayer<Registry>
+    ) -> BoxLayer
     where
         W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
         T: FormatTime + Sync + Send + 'static,
@@ -159,7 +155,7 @@ impl LoggerConfig {
         make_writer: W2,
         format: &Format,
         ansi: bool,
-    ) -> BoxLayer<Registry>
+    ) -> BoxLayer
     where
         W2: for<'writer> MakeWriter<'writer> + Sync + Send + 'static,
     {
@@ -205,10 +201,10 @@ impl LoggerConfig {
 }
 
 #[derive(Clone)]
-pub struct LayersReloader(Handle<Vec<BoxLayer<Registry>>, Registry>);
+pub struct EnvFilterReloader(Handle<EnvFilter, Registry>);
 
-impl Deref for LayersReloader {
-    type Target = Handle<Vec<BoxLayer<Registry>>, Registry>;
+impl Deref for EnvFilterReloader {
+    type Target = Handle<EnvFilter, Registry>;
 
     fn deref(&self) -> &Self::Target {
         &self.0

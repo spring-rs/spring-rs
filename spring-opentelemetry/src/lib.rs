@@ -2,8 +2,6 @@
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
-pub mod config;
-
 #[rustfmt::skip]
 pub use opentelemetry_otlp::{
     OTEL_EXPORTER_OTLP_COMPRESSION,
@@ -28,7 +26,6 @@ pub use opentelemetry_otlp::{
 };
 
 use anyhow::Context;
-use config::{Merger, OpenTelemetryConfig};
 use opentelemetry::trace::TracerProvider;
 use opentelemetry::{global, KeyValue};
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
@@ -40,8 +37,6 @@ use opentelemetry_sdk::{resource, runtime, Resource};
 use opentelemetry_semantic_conventions::attribute;
 use spring::async_trait;
 use spring::config::env::Env;
-use spring::config::ConfigRegistry;
-use spring::log::LayersReloader;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use std::time::Duration;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
@@ -50,60 +45,41 @@ pub struct OpenTelemetryPlugin;
 
 #[async_trait]
 impl Plugin for OpenTelemetryPlugin {
-    async fn build(&self, app: &mut AppBuilder) {
-        let config = app
-            .get_config::<OpenTelemetryConfig>()
-            .expect("redis plugin config load failed");
-
+    fn immediately_build(&self, app: &mut AppBuilder) {
         let env = app.get_env();
-        let meter_provider = config.init_metrics(*env);
-        let log_provider = config.init_logs(*env);
-        let tracer = config.init_tracer(*env);
+        let meter_provider = Self::init_metrics(*env);
+        let log_provider = Self::init_logs(*env);
+        let tracer = Self::init_tracer(*env);
 
         let trace_layer = OpenTelemetryLayer::new(tracer);
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
         let metric_layer = MetricsLayer::new(meter_provider.clone());
 
-        let reloader_ref = app
-            .get_component_ref::<LayersReloader>()
-            .expect("get layers reloader failed");
-        reloader_ref
-            .modify(|layers| {
-                layers.push(Box::new(trace_layer));
-                layers.push(Box::new(log_layer));
-                layers.push(Box::new(metric_layer));
-            })
-            .expect("reload layers for opentelemetry failed");
-        app.add_shutdown_hook(move |_| Box::new(Self::shutdown(meter_provider, log_provider)));
+        app.add_layer(Box::new(trace_layer))
+            .add_layer(Box::new(log_layer))
+            .add_layer(Box::new(metric_layer))
+            .add_shutdown_hook(move |_| Box::new(Self::shutdown(meter_provider, log_provider)));
+    }
+
+    fn immediately(&self) -> bool {
+        true
     }
 }
 
-impl OpenTelemetryConfig {
-    fn init_logs(&self, env: Env) -> LoggerProvider {
-        let Self { otel, logs, .. } = self;
-        let exporter_config = logs.clone().merge(otel.clone());
-        let exporter = match exporter_config {
-            None => opentelemetry_otlp::new_exporter().tonic(),
-            Some(c) => c.apply_config(opentelemetry_otlp::new_exporter().tonic()),
-        };
+impl OpenTelemetryPlugin {
+    fn init_logs(env: Env) -> LoggerProvider {
         opentelemetry_otlp::new_pipeline()
             .logging()
-            .with_exporter(exporter)
+            .with_exporter(opentelemetry_otlp::new_exporter().tonic())
             .with_resource(Self::get_resource_attr(env))
             .install_batch(runtime::Tokio)
             .expect("build LogProvider failed")
     }
 
-    fn init_metrics(&self, env: Env) -> SdkMeterProvider {
-        let Self { otel, metrics, .. } = self;
-        let exporter_config = metrics.clone().merge(otel.clone());
-        let exporter = match exporter_config {
-            None => opentelemetry_otlp::new_exporter().tonic(),
-            Some(c) => c.apply_config(opentelemetry_otlp::new_exporter().tonic()),
-        };
+    fn init_metrics(env: Env) -> SdkMeterProvider {
         let provider = opentelemetry_otlp::new_pipeline()
             .metrics(runtime::Tokio)
-            .with_exporter(exporter)
+            .with_exporter(opentelemetry_otlp::new_exporter().tonic())
             .with_resource(Self::get_resource_attr(env))
             .build()
             .expect("build MeterProvider failed");
@@ -114,22 +90,16 @@ impl OpenTelemetryConfig {
         provider
     }
 
-    fn init_tracer(&self, env: Env) -> sdktrace::Tracer {
-        let Self { otel, traces, .. } = self;
+    fn init_tracer(env: Env) -> sdktrace::Tracer {
         global::set_text_map_propagator(TraceContextPropagator::new());
         #[cfg(feature = "jaeger")]
         global::set_text_map_propagator(opentelemetry_jaeger_propagator::Propagator::new());
         #[cfg(feature = "zipkin")]
         global::set_text_map_propagator(opentelemetry_zipkin::Propagator::new());
 
-        let exporter_config = traces.clone().merge(otel.clone());
-        let exporter = match exporter_config {
-            None => opentelemetry_otlp::new_exporter().tonic(),
-            Some(c) => c.apply_config(opentelemetry_otlp::new_exporter().tonic()),
-        };
         let provider = opentelemetry_otlp::new_pipeline()
             .tracing()
-            .with_exporter(exporter)
+            .with_exporter(opentelemetry_otlp::new_exporter().tonic())
             .with_trace_config(
                 sdktrace::Config::default().with_resource(Self::get_resource_attr(env)),
             )

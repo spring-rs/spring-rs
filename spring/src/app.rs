@@ -1,7 +1,7 @@
 use crate::config::env::Env;
 use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
-use crate::log::LogPlugin;
+use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
 use crate::plugin::{service, Plugin};
 use crate::{
@@ -29,12 +29,14 @@ pub struct App {
 
 pub struct AppBuilder {
     pub(crate) env: Env,
+    /// Path of config file
+    pub(crate) config_path: PathBuf,
+    /// Tracing Layer
+    pub(crate) layers: Vec<BoxLayer>,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
     components: Registry<DynComponentRef>,
-    /// Path of config file
-    pub(crate) config_path: PathBuf,
     /// Configuration read from `config_path`
     config: TomlConfigRegistry,
     /// task
@@ -82,8 +84,12 @@ impl AppBuilder {
 
     /// add plugin
     pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
-        log::debug!("added plugin: {}", plugin.name());
         let plugin_name = plugin.name().to_string();
+        log::debug!("added plugin: {plugin_name}");
+        if plugin.immediately() {
+            plugin.immediately_build(self);
+            return self;
+        }
         if self.plugin_registry.contains_key(plugin.name()) {
             panic!("Error adding plugin {plugin_name}: plugin was already added in application")
         }
@@ -146,6 +152,12 @@ impl AppBuilder {
         component_ref.map(|c| T::clone(&c))
     }
 
+    /// add Tracing Layer
+    pub fn add_layer(&mut self, layer: BoxLayer) -> &mut Self {
+        self.layers.push(layer);
+        self
+    }
+
     /// Add a scheduled task
     pub fn add_scheduler<T>(&mut self, scheduler: T) -> &mut Self
     where
@@ -189,7 +201,7 @@ impl AppBuilder {
     }
 
     async fn build_plugins(&mut self) {
-        LogPlugin.build(self);
+        LogPlugin.immediately_build(self);
 
         let registry = std::mem::take(&mut self.plugin_registry);
         let mut to_register = registry
@@ -253,8 +265,9 @@ impl Default for AppBuilder {
     fn default() -> Self {
         Self {
             env: Env::init(),
-            plugin_registry: Default::default(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
+            layers: Default::default(),
+            plugin_registry: Default::default(),
             config: Default::default(),
             components: Default::default(),
             schedulers: Default::default(),
