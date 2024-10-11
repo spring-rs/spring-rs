@@ -39,6 +39,7 @@ use opentelemetry_sdk::trace::{self as sdktrace, BatchConfig};
 use opentelemetry_sdk::{resource, runtime, Resource};
 use opentelemetry_semantic_conventions::attribute;
 use spring::async_trait;
+use spring::config::env::Env;
 use spring::config::ConfigRegistry;
 use spring::log::LayersReloader;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
@@ -54,9 +55,10 @@ impl Plugin for OpenTelemetryPlugin {
             .get_config::<OpenTelemetryConfig>()
             .expect("redis plugin config load failed");
 
-        let meter_provider = config.init_metrics();
-        let log_provider = config.init_logs();
-        let tracer = config.init_tracer();
+        let env = app.get_env().clone();
+        let meter_provider = config.init_metrics(env);
+        let log_provider = config.init_logs(env);
+        let tracer = config.init_tracer(env);
 
         let trace_layer = OpenTelemetryLayer::new(tracer);
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
@@ -77,7 +79,7 @@ impl Plugin for OpenTelemetryPlugin {
 }
 
 impl OpenTelemetryConfig {
-    fn init_logs(&self) -> LoggerProvider {
+    fn init_logs(&self, env: Env) -> LoggerProvider {
         let Self { otel, logs, .. } = self;
         let exporter_config = logs.clone().merge(otel.clone());
         let exporter = match exporter_config {
@@ -87,12 +89,12 @@ impl OpenTelemetryConfig {
         opentelemetry_otlp::new_pipeline()
             .logging()
             .with_exporter(exporter)
-            .with_resource(Self::get_resource_attr())
+            .with_resource(Self::get_resource_attr(env))
             .install_batch(runtime::Tokio)
             .expect("build LogProvider failed")
     }
 
-    fn init_metrics(&self) -> SdkMeterProvider {
+    fn init_metrics(&self, env: Env) -> SdkMeterProvider {
         let Self { otel, metrics, .. } = self;
         let exporter_config = metrics.clone().merge(otel.clone());
         let exporter = match exporter_config {
@@ -102,7 +104,7 @@ impl OpenTelemetryConfig {
         let provider = opentelemetry_otlp::new_pipeline()
             .metrics(runtime::Tokio)
             .with_exporter(exporter)
-            .with_resource(Self::get_resource_attr())
+            .with_resource(Self::get_resource_attr(env))
             .build()
             .expect("build MeterProvider failed");
 
@@ -112,7 +114,7 @@ impl OpenTelemetryConfig {
         provider
     }
 
-    fn init_tracer(&self) -> sdktrace::Tracer {
+    fn init_tracer(&self, env: Env) -> sdktrace::Tracer {
         let Self { otel, traces, .. } = self;
         global::set_text_map_propagator(TraceContextPropagator::new());
         #[cfg(feature = "jaeger")]
@@ -128,7 +130,9 @@ impl OpenTelemetryConfig {
         let provider = opentelemetry_otlp::new_pipeline()
             .tracing()
             .with_exporter(exporter)
-            .with_trace_config(sdktrace::Config::default().with_resource(Self::get_resource_attr()))
+            .with_trace_config(
+                sdktrace::Config::default().with_resource(Self::get_resource_attr(env)),
+            )
             .with_batch_config(BatchConfig::default())
             .install_batch(runtime::Tokio)
             .expect("build TraceProvider failed");
@@ -139,16 +143,16 @@ impl OpenTelemetryConfig {
 
         tracer
     }
-    fn get_resource_attr() -> Resource {
-        Self::app_resource().merge(&Self::infra_resource())
+    fn get_resource_attr(env: Env) -> Resource {
+        Self::app_resource(env).merge(&Self::infra_resource())
     }
 
-    fn app_resource() -> Resource {
+    fn app_resource(env: Env) -> Resource {
         Resource::from_schema_url(
             [
                 KeyValue::new(attribute::SERVICE_NAME, env!("CARGO_PKG_NAME")),
                 KeyValue::new(attribute::SERVICE_VERSION, env!("CARGO_PKG_VERSION")),
-                KeyValue::new(attribute::DEPLOYMENT_ENVIRONMENT_NAME, "develop"), // TODO: get env
+                KeyValue::new(attribute::DEPLOYMENT_ENVIRONMENT_NAME, format!("{:?}", env)),
             ],
             opentelemetry_semantic_conventions::SCHEMA_URL,
         )

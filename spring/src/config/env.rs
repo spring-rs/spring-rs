@@ -8,7 +8,7 @@ use std::{
 };
 
 /// App environment
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Env {
     /// Development
     Dev,
@@ -19,6 +19,18 @@ pub enum Env {
 }
 
 impl Env {
+    pub fn init() -> Env {
+        match dotenvy::dotenv() {
+            Ok(path) => log::debug!(
+                "Loaded the environment variable file under the path: \"{:?}\"",
+                path
+            ),
+            Err(e) => log::debug!("Environment variable file not found: {}", e),
+        }
+
+        Self::from_env()
+    }
+
     pub fn from_env() -> Self {
         match env::var("SPRING_ENV") {
             Ok(var) => Self::from_string(var),
@@ -50,18 +62,6 @@ impl Env {
             Self::Prod => parent.join(format!("{}-prod.{}", stem, ext)),
         })
     }
-}
-
-pub fn init() -> Result<Env> {
-    match dotenvy::dotenv() {
-        Ok(path) => log::debug!(
-            "Loaded the environment variable file under the path: \"{:?}\"",
-            path
-        ),
-        Err(e) => log::debug!("Environment variable file not found: {}", e),
-    }
-
-    Ok(Env::from_env())
 }
 
 mod tests {

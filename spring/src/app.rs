@@ -1,3 +1,4 @@
+use crate::config::env::Env;
 use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::LogPlugin;
@@ -28,6 +29,7 @@ pub struct App {
 }
 
 pub struct AppBuilder {
+    pub(crate) env: Env,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
@@ -75,6 +77,10 @@ unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}
 
 impl AppBuilder {
+    pub fn get_env(&self) -> &Env {
+        &self.env
+    }
+
     /// add plugin
     pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
         log::debug!("added plugin: {}", plugin.name());
@@ -170,20 +176,16 @@ impl AppBuilder {
     }
 
     async fn inner_run(&mut self) -> Result<Arc<App>> {
-        // 1. read env variable
-        let env = env::init()?;
-        log::info!("The application runs in the {:?} environment", env);
+        // 1. load toml config
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env.clone())?;
 
-        // 2. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, env)?;
-
-        // 3. build plugin
+        // 2. build plugin
         self.build_plugins().await;
 
-        // 4. service dependency inject
+        // 3. service dependency inject
         service::auto_inject_service(self)?;
 
-        // 5. schedule
+        // 4. schedule
         self.schedule().await
     }
 
@@ -251,6 +253,7 @@ impl AppBuilder {
 impl Default for AppBuilder {
     fn default() -> Self {
         Self {
+            env: Env::init(),
             plugin_registry: Default::default(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
             config: Default::default(),
