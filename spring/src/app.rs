@@ -5,7 +5,6 @@ use crate::log::LogPlugin;
 use crate::plugin::component::ComponentRef;
 use crate::plugin::{service, Plugin};
 use crate::{
-    config::env,
     error::Result,
     plugin::{component::DynComponentRef, PluginRef},
 };
@@ -177,7 +176,7 @@ impl AppBuilder {
 
     async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env.clone())?;
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
 
         // 2. build plugin
         self.build_plugins().await;
