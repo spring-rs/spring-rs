@@ -200,13 +200,13 @@ impl LoggerConfig {
     }
 }
 
-#[derive(Clone)]
-pub struct EnvFilterReloader(Handle<EnvFilter, Registry>);
+// #[derive(Clone)]
+// pub struct EnvFilterReloader(Handle<EnvFilter, Registry>);
 
-impl Deref for EnvFilterReloader {
-    type Target = Handle<EnvFilter, Registry>;
+// impl Deref for EnvFilterReloader {
+//     type Target = Handle<EnvFilter, Registry>;
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }

@@ -1,6 +1,8 @@
 use anyhow::Context;
 use spring::{auto_config, App};
-use spring_opentelemetry::OpenTelemetryPlugin;
+use spring_opentelemetry::{
+    KeyValue, OpenTelemetryPlugin, ResourceConfigurator, SERVICE_NAME, SERVICE_VERSION,
+};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
@@ -18,6 +20,10 @@ use spring_web::{get, route};
 #[tokio::main]
 async fn main() {
     App::new()
+        .opentelemetry_attrs([
+            KeyValue::new(SERVICE_NAME, env!("CARGO_PKG_NAME")),
+            KeyValue::new(SERVICE_VERSION, env!("CARGO_PKG_VERSION")),
+        ])
         .add_plugin(SqlxPlugin) // Add plug-in
         .add_plugin(WebPlugin)
         .add_plugin(OpenTelemetryPlugin)
