@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-stream = { version = "0.1.1",features=["file"] }
+spring-stream = { version = "<version>",features=["file"] }
 ```
 
 spring-stream支持`file`、`stdio`、`redis`、`kafka`四种消息存储。

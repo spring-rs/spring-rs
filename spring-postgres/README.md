@@ -6,7 +6,7 @@
 ## Dependencies
 
 ```toml
-spring-postgres = { version = "0.1.1" }
+spring-postgres = { version = "<version>" }
 ```
 
 optional features:

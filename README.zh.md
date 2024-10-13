@@ -9,6 +9,7 @@
         <a href="https://docs.rs/spring">
             <img src="https://docs.rs/spring/badge.svg" alt="Documentation"/>
         </a>
+        <img src="https://img.shields.io/crates/l/spring" alt="Documentation"/>
     </p>
 </div>
 
