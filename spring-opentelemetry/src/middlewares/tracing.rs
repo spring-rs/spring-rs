@@ -120,13 +120,13 @@ impl<S> HttpService<S> {
                     $level,
                     "HTTP",
                     "exception.message" = Empty,
-                    "http.request.method" = format!("{}", request.method()),
+                    "http.request.method" = tracing::field::display(request.method()),
                     "http.response.status_code" = Empty,
                     "network.protocol.name" = "http",
-                    "network.protocol.version" = format!("{:?}", request.version()),
-                    "otel.kind" = format!("{:?}", kind),
+                    "network.protocol.version" = tracing::field::debug(request.version()),
+                    "otel.kind" = tracing::field::debug(kind),
                     "otel.status_code" = Empty,
-                    "url.full" = Empty,
+                    "url.full" = tracing::field::display(request.uri()),
                     "url.path" = request.uri().path(),
                     "url.query" = Empty,
                 )
@@ -157,8 +157,6 @@ impl<S> HttpService<S> {
 
         match kind {
             SpanKind::Client => {
-                span.record(attribute::URL_FULL, tracing::field::display(request.uri()));
-
                 let context = span.context();
                 opentelemetry::global::get_text_map_propagator(|injector| {
                     injector.inject_context(&context, &mut HeaderInjector(request.headers_mut()));
@@ -166,7 +164,7 @@ impl<S> HttpService<S> {
             }
             SpanKind::Server => {
                 let context = opentelemetry::global::get_text_map_propagator(|extractor| {
-                    extractor.extract(&HeaderExtractor(request.headers_mut()))
+                    extractor.extract(&HeaderExtractor(request.headers()))
                 });
                 span.set_parent(context);
             }
