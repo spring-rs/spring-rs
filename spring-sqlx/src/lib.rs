@@ -11,11 +11,14 @@ use spring::config::ConfigRegistry;
 use spring::error::Result;
 use spring::plugin::Plugin;
 use spring::{async_trait, App};
-use sqlx::any::AnyPoolOptions;
+use sqlx::{Database, Pool};
 use std::sync::Arc;
 use std::time::Duration;
 
+#[cfg(not(feature = "postgres"))]
 pub type ConnectPool = sqlx::AnyPool;
+#[cfg(feature = "postgres")]
+pub type ConnectPool = sqlx::PgPool;
 
 pub struct SqlxPlugin;
 
@@ -39,8 +42,26 @@ impl Plugin for SqlxPlugin {
 }
 
 impl SqlxPlugin {
-    pub async fn connect(config: &config::SqlxConfig) -> Result<ConnectPool> {
-        let mut opt = AnyPoolOptions::new();
+    #[cfg(not(feature = "postgres"))]
+    pub async fn connect(config: &SqlxConfig) -> Result<ConnectPool> {
+        use sqlx::any::AnyPoolOptions;
+
+        let opt = Self::configure_pool(AnyPoolOptions::new(), config);
+        Self::establish_connection(opt, &config.uri).await
+    }
+
+    #[cfg(feature = "postgres")]
+    pub async fn connect(config: &SqlxConfig) -> Result<ConnectPool> {
+        use sqlx::postgres::PgPoolOptions;
+
+        let opt = Self::configure_pool(PgPoolOptions::new(), config);
+        Self::establish_connection(opt, &config.uri).await
+    }
+
+    fn configure_pool<T>(mut opt: sqlx::pool::PoolOptions<T>, config: &SqlxConfig) -> sqlx::pool::PoolOptions<T>
+    where
+        T: Database
+    {
         opt = opt
             .max_connections(config.max_connections)
             .min_connections(config.min_connections);
@@ -55,10 +76,16 @@ impl SqlxPlugin {
             opt = opt.max_lifetime(Duration::from_millis(connect_timeout));
         }
 
-        Ok(opt
-            .connect(&config.uri)
+        opt
+    }
+
+    async fn establish_connection<T>(opt: sqlx::pool::PoolOptions<T>, uri: &str) -> Result<Pool<T>>
+        where
+        T: Database
+    {
+        Ok(opt.connect(uri)
             .await
-            .with_context(|| format!("sqlx connection failed: {}", config.uri))?)
+            .with_context(|| format!("Failed to connect to database: {}", uri))?)
     }
 
     async fn close_db_connection(app: Arc<App>) -> Result<()> {
