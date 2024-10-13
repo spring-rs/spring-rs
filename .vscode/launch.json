@@ -331,15 +331,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'stream-example'",
+            "name": "Debug executable 'stream-file-example'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=stream-example",
-                    "--package=stream-example"
+                    "--bin=stream-file-example",
+                    "--package=stream-file-example"
                 ],
                 "filter": {
-                    "name": "stream-example",
+                    "name": "stream-file-example",
                     "kind": "bin"
                 }
             },
@@ -347,7 +347,28 @@
             "env": {
                 "RUST_BACKTRACE": "1",
             },
-            "cwd": "${workspaceFolder}/examples/stream-example"
+            "cwd": "${workspaceFolder}/examples/stream-file-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'opentelemetry-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=opentelemetry-example",
+                    "--package=opentelemetry-example"
+                ],
+                "filter": {
+                    "name": "opentelemetry-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/opentelemetry-example"
         },
     ]
 }

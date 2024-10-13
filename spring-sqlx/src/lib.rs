@@ -37,7 +37,7 @@ impl Plugin for SqlxPlugin {
         tracing::info!("sqlx connection success");
 
         app.add_component(connect_pool)
-            .add_shutdown_hook(|app: Arc<App>| Box::new(Self::close_db_connection(app)));
+            .add_shutdown_hook(|app| Box::new(Self::close_db_connection(app)));
     }
 }
 
@@ -88,11 +88,11 @@ impl SqlxPlugin {
             .with_context(|| format!("Failed to connect to database: {}", uri))?)
     }
 
-    async fn close_db_connection(app: Arc<App>) -> Result<()> {
+    async fn close_db_connection(app: Arc<App>) -> Result<String> {
         app.get_component::<ConnectPool>()
             .expect("sqlx connect pool not exists")
             .close()
             .await;
-        Ok(())
+        Ok("sqlx connection pool close successful".into())
     }
 }

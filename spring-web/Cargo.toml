@@ -8,6 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [features]
+default = ["http2"]
 http2 = ["axum/http2"]
 multipart = ["axum/multipart"]
 ws = ["axum/ws"]

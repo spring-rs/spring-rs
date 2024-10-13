@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:15.3-alpine
+    environment:
+      - POSTGRES_PASSWORD=xudjf23adj213
+    ports:
+      - 5432:5432
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    restart: unless-stopped
+    environment:
+      ZO_ROOT_USER_EMAIL: "root@example.com"
+      ZO_ROOT_USER_PASSWORD: "Complexpass#123"
+    ports:
+      - "5080:5080" # http
+      - "5081:5081" # gprc
+    volumes:
+      - ./data:/data

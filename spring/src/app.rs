@@ -1,10 +1,10 @@
+use crate::config::env::Env;
 use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
-use crate::log::LogPlugin;
+use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
 use crate::plugin::{service, Plugin};
 use crate::{
-    config::env,
     error::Result,
     plugin::{component::DynComponentRef, PluginRef},
 };
@@ -28,18 +28,20 @@ pub struct App {
 }
 
 pub struct AppBuilder {
-    pub(crate) tracing_registry: tracing_subscriber::Registry,
+    pub(crate) env: Env,
+    /// Path of config file
+    pub(crate) config_path: PathBuf,
+    /// Tracing Layer
+    pub(crate) layers: Vec<BoxLayer>,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
     /// Component
     components: Registry<DynComponentRef>,
-    /// Path of config file
-    pub(crate) config_path: PathBuf,
     /// Configuration read from `config_path`
     config: TomlConfigRegistry,
     /// task
     schedulers: Vec<Box<Scheduler<String>>>,
-    shutdown_hooks: Vec<Box<Scheduler<()>>>,
+    shutdown_hooks: Vec<Box<Scheduler<String>>>,
 }
 
 impl App {
@@ -76,10 +78,18 @@ unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}
 
 impl AppBuilder {
+    pub fn get_env(&self) -> &Env {
+        &self.env
+    }
+
     /// add plugin
     pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
-        log::debug!("added plugin: {}", plugin.name());
         let plugin_name = plugin.name().to_string();
+        log::debug!("added plugin: {plugin_name}");
+        if plugin.immediately() {
+            plugin.immediately_build(self);
+            return self;
+        }
         if self.plugin_registry.contains_key(plugin.name()) {
             panic!("Error adding plugin {plugin_name}: plugin was already added in application")
         }
@@ -142,6 +152,12 @@ impl AppBuilder {
         component_ref.map(|c| T::clone(&c))
     }
 
+    /// add [tracing_subscriber::layer]
+    pub fn add_layer(&mut self, layer: BoxLayer) -> &mut Self {
+        self.layers.push(layer);
+        self
+    }
+
     /// Add a scheduled task
     pub fn add_scheduler<T>(&mut self, scheduler: T) -> &mut Self
     where
@@ -154,7 +170,7 @@ impl AppBuilder {
     /// Add a shutdown hook
     pub fn add_shutdown_hook<T>(&mut self, hook: T) -> &mut Self
     where
-        T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<()>> + Send> + 'static,
+        T: FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<String>> + Send> + 'static,
     {
         self.shutdown_hooks.push(Box::new(hook));
         self
@@ -171,24 +187,21 @@ impl AppBuilder {
     }
 
     async fn inner_run(&mut self) -> Result<Arc<App>> {
-        // 1. read env variable
-        let env = env::init()?;
+        // 1. load toml config
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
 
-        // 2. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, env)?;
-
-        // 3. build plugin
+        // 2. build plugin
         self.build_plugins().await;
 
-        // 4. service dependency inject
+        // 3. service dependency inject
         service::auto_inject_service(self)?;
 
-        // 5. schedule
+        // 4. schedule
         self.schedule().await
     }
 
     async fn build_plugins(&mut self) {
-        LogPlugin.build(self);
+        LogPlugin.immediately_build(self);
 
         let registry = std::mem::take(&mut self.plugin_registry);
         let mut to_register = registry
@@ -224,7 +237,9 @@ impl AppBuilder {
 
     async fn schedule(&mut self) -> Result<Arc<App>> {
         let app = self.build_app();
-        while let Some(task) = self.schedulers.pop() {
+
+        let schedulers = std::mem::take(&mut self.schedulers);
+        for task in schedulers {
             let poll_future = task(app.clone());
             let poll_future = Box::into_pin(poll_future);
             match tokio::spawn(poll_future).await? {
@@ -233,9 +248,10 @@ impl AppBuilder {
             }
         }
 
-        let shutdown_hooks = std::mem::take(&mut self.shutdown_hooks);
-        for hook in shutdown_hooks {
-            Box::into_pin(hook(app.clone())).await?;
+        // FILO: The hooks added by the plugin built first should be executed later
+        while let Some(hook) = self.shutdown_hooks.pop() {
+            let result = Box::into_pin(hook(app.clone())).await?;
+            log::info!("shutdown result: {result}");
         }
         Ok(app)
     }
@@ -250,9 +266,10 @@ impl AppBuilder {
 impl Default for AppBuilder {
     fn default() -> Self {
         Self {
-            tracing_registry: tracing_subscriber::registry(),
-            plugin_registry: Default::default(),
+            env: Env::init(),
             config_path: Path::new("./config/app.toml").to_path_buf(),
+            layers: Default::default(),
+            plugin_registry: Default::default(),
             config: Default::default(),
             components: Default::default(),
             schedulers: Default::default(),
