@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3
+
+- **added**: AppBuilder add `get_env` ([#65])
+- **added**: AppBuilder add `add_layer` to support extends `tracing-rs` ([#65])
+- **added**: support immediately Plugin ([#65])
+
+[#65]: https://github.com/spring-rs/spring-rs/pull/65
+
 ## 0.2.2
 
 - **added**: support shutdown hook ([#61])

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- **changed**: fix shutdown_hook ([#65])
+
+[#65]: https://github.com/spring-rs/spring-rs/pull/65
+
 ## 0.2.1
 
 - **added**: support graceful shutdown ([#61])

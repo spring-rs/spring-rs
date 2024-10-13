@@ -1,6 +1,6 @@
 [package]
 name = "spring-opentelemetry"
-description = "rust microservice framework"
+description = "Integration of spring-rs framework and open-telemetry"
 version = "0.2.0"
 edition.workspace = true
 license.workspace = true
