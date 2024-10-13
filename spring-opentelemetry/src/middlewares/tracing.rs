@@ -198,7 +198,7 @@ where
         let _enter = this.span.enter();
 
         match ready!(this.inner.poll(cx)) {
-            Ok(mut response) => {
+            Ok(response) => {
                 Self::record_response(this.span, *this.kind, *this.with_headers, &response);
                 Poll::Ready(Ok(response))
             }

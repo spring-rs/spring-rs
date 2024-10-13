@@ -1,6 +1,6 @@
 use anyhow::Context;
 use spring::{
-    tracing::{info, Level},
+    tracing::{info, info_span, Instrument, Level},
     App,
 };
 use spring_opentelemetry::{
@@ -61,6 +61,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
     info!("query sqlx version called");
     let version = sqlx::query("select version() as version")
         .fetch_one(&pool)
+        .instrument(info_span!("sqlx-query"))
         .await
         .context("sqlx query failed")?
         .get("version");
