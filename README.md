@@ -17,6 +17,15 @@
 
 Compared with SpringBoot in java, spring-rs has higher performance and lower memory usage, allowing you to completely get rid of the bloated JVM and travel light.
 
+## Features
+
+* ⚡️ High performance: Benefiting from the awesome rust language, <b>spring-rs</b> has the ultimate performance comparable to C/C++
+* 🛡️ High security: Compared to C/C++, the Rust language used by <b>spring-rs</b> provides memory safety and thread safety.
+* 🔨 Lightweight: The core code of spring-rs does not exceed 5,000 lines, and the binary size of the release version packaged in rust is also small.
+* 🔧 Easy to use: <b>spring-rs</b> provides a clear and concise API and optional Procedural Macros to simplify development.
+* 🔌 Highly extensible: <b>spring-rs</b> uses a highly extensible plug-in model, and users can customize plug-ins to extend program capabilities.
+* ⚙️ Highly configurable: <b>spring-rs</b> uses toml to configure applications and plug-ins to improve application flexibility.
+
 ## Example
 
 **web**
