@@ -2,6 +2,8 @@
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
+pub mod middlewares;
+
 #[rustfmt::skip]
 pub use opentelemetry_otlp::{
     OTEL_EXPORTER_OTLP_COMPRESSION,
@@ -55,13 +57,13 @@ impl Plugin for OpenTelemetryPlugin {
         } else {
             resource
         };
-        let meter_provider = Self::init_metrics(resource.clone());
         let log_provider = Self::init_logs(resource.clone());
+        let meter_provider = Self::init_metrics(resource.clone());
         let tracer = Self::init_tracer(resource);
 
-        let trace_layer = OpenTelemetryLayer::new(tracer);
         let log_layer = OpenTelemetryTracingBridge::new(&log_provider);
         let metric_layer = MetricsLayer::new(meter_provider.clone());
+        let trace_layer = OpenTelemetryLayer::new(tracer);
 
         app.add_layer(Box::new(trace_layer))
             .add_layer(Box::new(log_layer))

@@ -4,13 +4,11 @@ use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
 use crate::plugin::Plugin;
 use config::{Format, LoggerConfig, TimeStyle, WithFields};
-use std::ops::Deref;
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
 use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::reload::Handle;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Registry;
 use tracing_subscriber::{
@@ -199,14 +197,3 @@ impl LoggerConfig {
         }
     }
 }
-
-// #[derive(Clone)]
-// pub struct EnvFilterReloader(Handle<EnvFilter, Registry>);
-
-// impl Deref for EnvFilterReloader {
-//     type Target = Handle<EnvFilter, Registry>;
-
-//     fn deref(&self) -> &Self::Target {
-//         &self.0
-//     }
-// }

@@ -152,7 +152,7 @@ impl AppBuilder {
         component_ref.map(|c| T::clone(&c))
     }
 
-    /// add Tracing Layer
+    /// add [tracing_subscriber::layer]
     pub fn add_layer(&mut self, layer: BoxLayer) -> &mut Self {
         self.layers.push(layer);
         self
@@ -237,7 +237,9 @@ impl AppBuilder {
 
     async fn schedule(&mut self) -> Result<Arc<App>> {
         let app = self.build_app();
-        while let Some(task) = self.schedulers.pop() {
+
+        let schedulers = std::mem::take(&mut self.schedulers);
+        for task in schedulers {
             let poll_future = task(app.clone());
             let poll_future = Box::into_pin(poll_future);
             match tokio::spawn(poll_future).await? {
@@ -246,8 +248,8 @@ impl AppBuilder {
             }
         }
 
-        let shutdown_hooks = std::mem::take(&mut self.shutdown_hooks);
-        for hook in shutdown_hooks {
+        // FILO: The hooks added by the plugin built first should be executed later
+        while let Some(hook) = self.shutdown_hooks.pop() {
             let result = Box::into_pin(hook(app.clone())).await?;
             log::info!("shutdown result: {result}");
         }

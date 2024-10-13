@@ -1,7 +1,10 @@
 use anyhow::Context;
-use spring::{auto_config, App};
+use spring::{
+    tracing::{info, Level},
+    App,
+};
 use spring_opentelemetry::{
-    KeyValue, OpenTelemetryPlugin, ResourceConfigurator, SERVICE_NAME, SERVICE_VERSION,
+    middlewares, KeyValue, OpenTelemetryPlugin, ResourceConfigurator, SERVICE_NAME, SERVICE_VERSION,
 };
 use spring_sqlx::{
     sqlx::{self, Row},
@@ -11,12 +14,11 @@ use spring_web::{
     axum::response::IntoResponse,
     error::Result,
     extractor::{Component, Path},
-    WebConfigurator, WebPlugin,
+    Router, WebConfigurator, WebPlugin,
 };
 use spring_web::{get, route};
 
 // Main function entry
-#[auto_config(WebConfigurator)] // auto config web router
 #[tokio::main]
 async fn main() {
     App::new()
@@ -24,6 +26,7 @@ async fn main() {
             KeyValue::new(SERVICE_NAME, env!("CARGO_PKG_NAME")),
             KeyValue::new(SERVICE_VERSION, env!("CARGO_PKG_VERSION")),
         ])
+        .add_router(router())
         .add_plugin(SqlxPlugin) // Add plug-in
         .add_plugin(WebPlugin)
         .add_plugin(OpenTelemetryPlugin)
@@ -31,10 +34,16 @@ async fn main() {
         .await
 }
 
+fn router() -> Router {
+    let http_tracing_layer = middlewares::tracing::HttpLayer::server(Level::INFO);
+    spring_web::handler::auto_router().layer(http_tracing_layer)
+}
+
 // The get macro specifies the Http Method and request path.
 // spring-rs also provides other standard http method macros such as post, delete, patch, etc.
 #[get("/")]
 async fn hello_world() -> impl IntoResponse {
+    info!("hello world called");
     "hello world"
 }
 
@@ -42,12 +51,14 @@ async fn hello_world() -> impl IntoResponse {
 // Path extracts parameters from the HTTP request path
 #[route("/hello/:name", method = "GET", method = "POST")]
 async fn hello(Path(name): Path<String>) -> impl IntoResponse {
+    info!("hello {name} called");
     format!("hello {name}")
 }
 
 // Component can extract the connection pool registered by the SqlxPlugin in AppState
 #[get("/version")]
 async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result<String> {
+    info!("query sqlx version called");
     let version = sqlx::query("select version() as version")
         .fetch_one(&pool)
         .await
