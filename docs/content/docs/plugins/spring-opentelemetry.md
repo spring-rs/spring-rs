@@ -14,7 +14,7 @@ top = false
 
 ## A brief history of OpenTelemetry
 
-* The [Dapper](https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/) paper released by Google in 2010 marked the beginning of distributed link tracing.
+* In 2010, The [Dapper](https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/) paper released by Google marked the beginning of distributed link tracing.
 * In 2012, Twitter open-sourced [Zipkin](https://zipkin.io/).
 * In 2015, Uber released the open-source version of [Jaeger](https://www.jaegertracing.io/). Currently, Zipkin and Jaeger are still one of the most popular distributed link tracing tools.
 * In 2015, the [OpenTracing](https://opentracing.io/) project was accepted by CNCF as its third hosted project, dedicated to standardizing distributed link tracing across components.
