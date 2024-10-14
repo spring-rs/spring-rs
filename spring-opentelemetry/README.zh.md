@@ -15,3 +15,5 @@ OTEL默认使用[W3C格式](https://github.com/w3c/trace-context)传递链路追
 * `more-resource`: 添加更多的资源信息，如主机Host、操作系统、进程信息
 
 完整代码参考[`opentelemetry-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/opentelemetry-example)
+
+**注意**: [opentelemetry-rust](https://github.com/open-telemetry/opentelemetry-rust/issues/1678)尚未稳定，与[tracing](https://github.com/open-telemetry/opentelemetry-rust/issues/1571)的部分功能需要整合。插件会持续跟踪opentelemetry-rust和tracing的相关动态，并及时更新。

@@ -15,3 +15,5 @@ Optional features:
 * `more-resource`: Add more resource information, such as host Host, operating system, process information
 
 For complete code, refer to [`opentelemetry-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/opentelemetry-example)
+
+**Note**: [opentelemetry-rust](https://github.com/open-telemetry/opentelemetry-rust/issues/1678) is not stable yet, and some features of [tracing](https://github.com/open-telemetry/opentelemetry-rust/issues/1571) need to be integrated. The plugin will continue to track the relevant dynamics of opentelemetry-rust and tracing, and update them in a timely manner.
