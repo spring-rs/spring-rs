@@ -28,7 +28,7 @@ top = false
 * [x] ![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)[`spring-mail`](/zh/docs/plugins/spring-mail/)(整合了[`lettre`](https://github.com/lettre/lettre))
 * [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](/zh/docs/plugins/spring-job/)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
 * [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](/zh/docs/plugins/spring-stream/)(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现redis-stream、kafka等消息处理)
-* [ ] `spring-opentelemetry`(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
+* [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](/zh/docs/plugins/spring-opentelemetry/)(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
 * [ ] `spring-tarpc`(整合了[`tarpc`](https://github.com/google/tarpc)实现RPC调用)
 
 ## 贡献
