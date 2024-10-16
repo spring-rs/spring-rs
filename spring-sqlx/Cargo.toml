@@ -1,6 +1,6 @@
 [package]
 name = "spring-sqlx"
-description = "rust microservice framework"
+description = "Integrate sqlx with spring-rs"
 version = "0.2.1"
 edition.workspace = true
 license.workspace = true
