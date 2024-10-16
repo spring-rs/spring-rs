@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- **changed**: http2 as the default feature ([#65])
+
+[#65]: https://github.com/spring-rs/spring-rs/pull/65
+
 ## 0.2.2
 
 - **changed**: refactor KnownWebError: change &str to Into<String> ([#6f243a])

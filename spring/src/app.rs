@@ -17,6 +17,7 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
+use tracing_subscriber::Layer;
 
 pub type Registry<T> = DashMap<String, T>;
 pub type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
@@ -153,8 +154,11 @@ impl AppBuilder {
     }
 
     /// add [tracing_subscriber::layer]
-    pub fn add_layer(&mut self, layer: BoxLayer) -> &mut Self {
-        self.layers.push(layer);
+    pub fn add_layer<L>(&mut self, layer: L) -> &mut Self
+    where
+        L: Layer<tracing_subscriber::Registry> + Send + Sync + 'static,
+    {
+        self.layers.push(Box::new(layer));
         self
     }
 

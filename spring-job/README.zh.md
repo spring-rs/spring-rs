@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-job = { version = "0.1.1" }
+spring-job = { version = "<version>" }
 ```
 
 ## API接口

@@ -4,7 +4,7 @@
 ## 依赖
 
 ```toml
-spring-mail = { version = "0.1.1" }
+spring-mail = { version = "<version>" }
 ```
 
 ## 配置项

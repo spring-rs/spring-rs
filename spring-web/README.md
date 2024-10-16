@@ -6,7 +6,7 @@
 ## Dependencies
 
 ```toml
-spring-web = { version = "0.1.1" }
+spring-web = { version = "<version>" }
 ```
 
 optional **features**: `http2`, `multipart`, `ws`.

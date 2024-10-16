@@ -4,7 +4,7 @@
 ## Dependencies
 
 ```toml
-spring-redis = { version = "0.1.1" }
+spring-redis = { version = "<version>" }
 ```
 
 ## Configuration items

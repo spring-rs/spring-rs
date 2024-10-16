@@ -1,7 +1,7 @@
 [package]
 name = "spring-sqlx"
-description = "Integrate sqlx with spring-rs"
-version = "0.2.1"
+description = "Integration of spring-rs framework and sqlx"
+version = "0.2.2"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

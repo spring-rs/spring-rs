@@ -1,4 +1,5 @@
-//! [spring](https://spring-rs.github.io/docs/plugins/plugin-by-self/)
+//! For the complete documentation of spring, please click this address: https://spring-rs.github.io
+//! 
 #![doc = include_str!("../README.md")]
 #![doc = include_str!("../DI.md")]
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]

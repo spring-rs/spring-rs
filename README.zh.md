@@ -9,12 +9,22 @@
         <a href="https://docs.rs/spring">
             <img src="https://docs.rs/spring/badge.svg" alt="Documentation"/>
         </a>
+        <img src="https://img.shields.io/crates/l/spring" alt="Documentation"/>
     </p>
 </div>
 
 <b>spring-rs</b>是一个Rust编写的应用框架，强调约定大于服务，类似于java生态的SpringBoot。<b>spring-rs</b>提供了易于扩展的插件系统，用于整合Rust社区的优秀项目，例如axum、sqlx、sea-orm等。
 
 相比于java生态的SpringBoot，spring-rs有更高的性能和更低的内存占用，让你彻底摆脱臃肿的JVM，轻装上阵。
+
+## 特点
+
+* ⚡️ 高性能: 得益于出色的Rust语言，<b>spring-rs</b>拥有与c/c++媲美的极致性能
+* 🛡️ 高安全性: 相比C/C++，<b>spring-rs</b>使用的Rust语言提供了内存安全和线程安全的能力
+* 🔨 轻量级: <b>spring-rs</b>的核心代码不超过5000行，打包的release版二进制文件也非常小巧
+* 🔧 容易使用: <b>spring-rs</b>提供了清晰明了的API和可选的过程宏来简化开发
+* 🔌 高可扩展性: <b>spring-rs</b>采用高扩展性的插件模式，用户可以自定义插件扩展程序功能
+* ⚙️ 高可配置性: <b>spring-rs</b>用toml配置应用和插件，提升应用灵活性
 
 ## 简单的例子
 

@@ -23,7 +23,7 @@ version = "0.2.0"
 edition = "2021"
 license = "MIT"
 authors = ["holmofy"]
-repository = "https://github.com/holmofy/spring-rs"
+repository = "https://github.com/spring-rs/spring-rs"
 
 [workspace.dependencies]
 thiserror = "1.0"

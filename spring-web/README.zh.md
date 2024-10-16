@@ -6,7 +6,7 @@
 ## 依赖
 
 ```toml
-spring-web = { version = "0.1.1" }
+spring-web = { version = "<version>" }
 ```
 
 可选的**features**: `http2`、`multipart`、`ws`。

@@ -52,10 +52,9 @@ pub struct OpenTelemetryPlugin;
 impl Plugin for OpenTelemetryPlugin {
     fn immediately_build(&self, app: &mut AppBuilder) {
         let resource = Self::get_resource_attr(*app.get_env());
-        let resource = if let Some(r) = app.get_component_ref::<Resource>() {
-            resource.merge(r)
-        } else {
-            resource
+        let resource = match app.get_component_ref::<Resource>() {
+            Some(r) => resource.merge(r),
+            None => resource,
         };
         let log_provider = Self::init_logs(resource.clone());
         let meter_provider = Self::init_metrics(resource.clone());
@@ -65,9 +64,9 @@ impl Plugin for OpenTelemetryPlugin {
         let metric_layer = MetricsLayer::new(meter_provider.clone());
         let trace_layer = OpenTelemetryLayer::new(tracer);
 
-        app.add_layer(Box::new(trace_layer))
-            .add_layer(Box::new(log_layer))
-            .add_layer(Box::new(metric_layer))
+        app.add_layer(trace_layer)
+            .add_layer(log_layer)
+            .add_layer(metric_layer)
             .add_shutdown_hook(move |_| Box::new(Self::shutdown(meter_provider, log_provider)));
     }
 
