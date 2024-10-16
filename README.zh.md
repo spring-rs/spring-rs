@@ -140,6 +140,10 @@ async fn fix_rate_job() {
 * [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`]((./spring-opentelemetry/README.zh.md))(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
 * [ ] `spring-tarpc`(整合了[`tarpc`](https://github.com/google/tarpc)实现RPC调用)
 
+## 生态
+
+* ![spring-sqlx-migration-plugin](https://img.shields.io/crates/v/spring-sqlx-migration-plugin.svg) [`spring-sqlx-migration-plugin`](https://github.com/Phosphorus-M/spring-sqlx-migration-plugin)
+
 ![star history](https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Date)
 
 ## 请作者喝杯茶
