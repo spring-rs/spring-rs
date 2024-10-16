@@ -19,7 +19,7 @@ pub enum Env {
 }
 
 impl Env {
-    pub fn init() -> Env {
+    pub fn init() -> Self {
         match dotenvy::dotenv() {
             Ok(path) => log::debug!(
                 "Loaded the environment variable file under the path: \"{:?}\"",
@@ -57,9 +57,9 @@ impl Env {
             .parent()
             .ok_or_else(|| AppError::from_io(ErrorKind::NotFound, "config file path not found"))?;
         Ok(match self {
-            Self::Dev => parent.join(format!("{}-dev.{}", stem, ext)),
-            Self::Test => parent.join(format!("{}-test.{}", stem, ext)),
-            Self::Prod => parent.join(format!("{}-prod.{}", stem, ext)),
+            Self::Dev => parent.join(format!("{stem}-dev.{ext}")),
+            Self::Test => parent.join(format!("{stem}-test.{ext}")),
+            Self::Prod => parent.join(format!("{stem}-prod.{ext}")),
         })
     }
 }
