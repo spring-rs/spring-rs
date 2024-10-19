@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- **changed**: upgrade `tokio-cron-scheduler = "0.11"` to `tokio-cron-scheduler = "0.13"` ([#76])
+
+[#76]: https://github.com/spring-rs/spring-rs/pull/76
+
 ## 0.2.1
 
 - **changed**: fix spring MINOR version ([#62])

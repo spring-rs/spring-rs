@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- **changed**: upgrade `sqlx = "0.7"` to `sqlx = "0.8"` ([#76])
+
+[#76]: https://github.com/spring-rs/spring-rs/pull/76
+
 ## 0.2.2
 
 - **changed**: fix shutdown_hook ([#65])

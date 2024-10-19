@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- **changed**: upgrade `redis = "0.26.1"` to `redis = "0.27"` ([#76])
+
+[#76]: https://github.com/spring-rs/spring-rs/pull/76
+
 ## 0.2.1
 
 - **changed**: fix spring MINOR version ([#62])
