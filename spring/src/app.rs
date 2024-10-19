@@ -195,12 +195,28 @@ impl AppBuilder {
     /// * [spring-job]
     /// * [spring-stream]
     pub async fn run(&mut self) {
-        match self.build().await {
+        match self.inner_run().await {
             Err(e) => {
                 log::error!("{:?}", e);
             }
             Ok(_app) => { /* no return */ }
         }
+    }
+
+    /// Unlike the [`run()`] method, the `build` method is suitable for applications that do not contain scheduling logic.
+    /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
+    async fn inner_run(&mut self) -> Result<Arc<App>> {
+        // 1. load toml config
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
+
+        // 2. build plugin
+        self.build_plugins().await;
+
+        // 3. service dependency inject
+        service::auto_inject_service(self)?;
+
+        // 4. schedule
+        self.schedule().await
     }
 
     /// Unlike the [`run()`] method, the `build` method is suitable for applications that do not contain scheduling logic.
@@ -215,8 +231,7 @@ impl AppBuilder {
         // 3. service dependency inject
         service::auto_inject_service(self)?;
 
-        // 4. schedule
-        self.schedule().await
+        Ok(self.build_app())
     }
 
     async fn build_plugins(&mut self) {
