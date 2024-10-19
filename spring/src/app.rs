@@ -23,6 +23,7 @@ pub type Registry<T> = DashMap<String, T>;
 pub type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
 pub struct App {
+    env: Env,
     /// Component
     components: Registry<DynComponentRef>,
     config: TomlConfigRegistry,
@@ -51,7 +52,13 @@ impl App {
         AppBuilder::default()
     }
 
-    /// Get the component of the specified type
+    /// Currently active environment
+    /// * [Env]
+    pub fn get_env(&self) -> Env {
+        self.env
+    }
+
+    /// Get the component reference of the specified type
     pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
@@ -62,6 +69,7 @@ impl App {
         component_ref.downcast::<T>()
     }
 
+    /// Get the component of the specified type
     pub fn get_component<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static,
@@ -79,8 +87,8 @@ unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}
 
 impl AppBuilder {
-    pub fn get_env(&self) -> &Env {
-        &self.env
+    pub fn get_env(&self) -> Env {
+        self.env
     }
 
     /// add plugin
@@ -180,17 +188,24 @@ impl AppBuilder {
         self
     }
 
-    /// Running
+    /// The `run` method is suitable for applications that contain scheduling logic,
+    /// such as web, job, and stream.
+    ///
+    /// * [spring-web]
+    /// * [spring-job]
+    /// * [spring-stream]
     pub async fn run(&mut self) {
-        match self.inner_run().await {
+        match self.build().await {
             Err(e) => {
                 log::error!("{:?}", e);
             }
-            Ok(_app) => { /* return? */ }
+            Ok(_app) => { /* no return */ }
         }
     }
 
-    async fn inner_run(&mut self) -> Result<Arc<App>> {
+    /// Unlike the [`run()`] method, the `build` method is suitable for applications that do not contain scheduling logic.
+    /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
+    pub async fn build(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
         self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
 
@@ -263,7 +278,11 @@ impl AppBuilder {
     fn build_app(&mut self) -> Arc<App> {
         let components = std::mem::take(&mut self.components);
         let config = std::mem::take(&mut self.config);
-        Arc::new(App { components, config })
+        Arc::new(App {
+            env: self.env,
+            components,
+            config,
+        })
     }
 }
 

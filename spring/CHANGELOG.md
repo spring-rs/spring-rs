@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.4
+
+- **added**: App add `get_env` ([#74])
+- **added**: AppBuilder export `build` method ([#74])
+
+[#74]: https://github.com/spring-rs/spring-rs/pull/74
+
 ## 0.2.3
 
 - **added**: AppBuilder add `get_env` ([#65])

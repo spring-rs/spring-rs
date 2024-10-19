@@ -1,0 +1,13 @@
+# Changelog
+
+## 0.2.1
+
+- **added**: fix `get_env` ([#74])
+
+[#74]: https://github.com/spring-rs/spring-rs/pull/74
+
+## 0.2.0
+
+- **added**: add OpenTelemetry Plugin ([#65])
+
+[#65]: https://github.com/spring-rs/spring-rs/pull/65
