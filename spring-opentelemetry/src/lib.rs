@@ -51,7 +51,7 @@ pub struct OpenTelemetryPlugin;
 #[async_trait]
 impl Plugin for OpenTelemetryPlugin {
     fn immediately_build(&self, app: &mut AppBuilder) {
-        let resource = Self::get_resource_attr(*app.get_env());
+        let resource = Self::get_resource_attr(app.get_env());
         let resource = match app.get_component_ref::<Resource>() {
             Some(r) => resource.merge(r),
             None => resource,

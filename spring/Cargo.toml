@@ -1,7 +1,7 @@
 [package]
 name = "spring"
 description = "Rust microservice framework like spring boot in java"
-version = "0.2.3"
+version = "0.2.4"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
@@ -33,3 +33,6 @@ dashmap = { workspace = true }
 [dev-dependencies]
 tempfile = "3.12"
 spring-sqlx = { path = "../spring-sqlx" }
+spring-web = { path = "../spring-web" }
+spring-job = { path = "../spring-job" }
+spring-stream = { path = "../spring-stream" }
