@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- **changed**: upgrade `sea-orm = "1.0"` to `sea-orm = "1.1"` ([#76])
+
+[#76]: https://github.com/spring-rs/spring-rs/pull/76
+
 ## 0.2.2
 
 - **changed**: fix shutdown_hook ([#65])

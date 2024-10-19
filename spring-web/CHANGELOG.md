@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4
+
+- **changed**: upgrade `tower-http = "0.5"` to `tower-http = "0.6"` ([#76])
+
+[#76]: https://github.com/spring-rs/spring-rs/pull/76
+
 ## 0.2.3
 
 - **changed**: http2 as the default feature ([#65])
