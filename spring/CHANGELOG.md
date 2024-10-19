@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.5
+
+- **changed**: fix exported `build` method ([#75])
+
+[#75]: https://github.com/spring-rs/spring-rs/pull/75
+
 ## 0.2.4
 
 - **added**: App add `get_env` ([#74])
