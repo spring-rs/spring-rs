@@ -88,7 +88,7 @@ impl TomlConfigRegistry {
         #[cfg(not(feature = "inline_file"))]
         let main_toml_str = get_config(config_path);
 
-        let main_table = toml::from_str::<Table>(main_toml_str.as_str())
+        let main_table = toml::from_str::<Table>(main_toml_str?.as_str())
             .with_context(|| format!("Failed to parse the toml file at path {:?}", config_path))?;
 
         let config_table: Table = match env.get_config_path(config_path) {
