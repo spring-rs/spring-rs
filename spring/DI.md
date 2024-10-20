@@ -2,7 +2,7 @@
 
 spring-rs provides a special Component - [Service](https://docs.rs/spring/latest/spring/plugin/service/index.html), which supports injecting dependent components at compile time.
 
-Like the following example, `UserService` only needs to derive the `Service` feature. In order to distinguish the injected dependencies, you need to specify whether the dependency is a Component or a Config through the attribute macros `#[component]` and `#[config]`.
+Like the following example, `UserService` only needs to derive the `Service` trait. In order to distinguish the injected dependencies, you need to specify whether the dependency is a Component or a Config through the attribute macros `#[component]` and `#[config]`.
 
 ```rust
 use spring_sqlx::ConnectPool;
