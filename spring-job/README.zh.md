@@ -72,7 +72,7 @@ async fn cron_job(Component(db): Component<ConnectPool>) {
 
 ## 读取配置
 
-你可以用[`Config`](https://docs.rs/spring-web/latest/spring_job/extractor/struct.Config.html)抽取toml中的配置。用法上和[`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi)完全一致。
+你可以用[`Config`](https://docs.rs/spring-job/latest/spring_job/extractor/struct.Config.html)抽取toml中的配置。用法上和[`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi)完全一致。
 
 ```rust
 #[derive(Debug, Configurable, Deserialize)]

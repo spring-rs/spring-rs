@@ -68,7 +68,7 @@ View the complete example code [stream-file-example](https://github.com/spring-r
 
 ## Read configuration
 
-You can use [`Config`](https://docs.rs/spring-web/latest/spring_stream/extractor/struct.Config.html) to extract the configuration in toml. The usage is exactly the same as [`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi).
+You can use [`Config`](https://docs.rs/spring-stream/latest/spring_stream/extractor/struct.Config.html) to extract the configuration in toml. The usage is exactly the same as [`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi).
 
 ```rust
 #[derive(Debug, Configurable, Deserialize)]

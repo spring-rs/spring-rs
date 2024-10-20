@@ -76,7 +76,7 @@ async fn cron_job(Component(db): Component<ConnectPool>) {
 
 ## Read configuration
 
-You can use [`Config`](https://docs.rs/spring-web/latest/spring_job/extractor/struct.Config.html) to extract the configuration in toml. The usage is exactly the same as [`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi).
+You can use [`Config`](https://docs.rs/spring-job/latest/spring_job/extractor/struct.Config.html) to extract the configuration in toml. The usage is exactly the same as [`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi).
 
 
 ```rust
