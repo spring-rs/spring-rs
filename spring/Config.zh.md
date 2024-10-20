@@ -8,7 +8,7 @@ struct Config {
 }
 ```
 
-通过[`app.get_config()`][ConfigRegistry::get_config()]方法可以读取`toml`中的配置：
+通过[`app.get_config()`](https://docs.rs/spring/latest/spring/app/struct.AppBuilder.html#method.get_config)方法可以读取`toml`中的配置：
 
 ```toml
 [my-plugin]
