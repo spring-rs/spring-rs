@@ -1,8 +1,12 @@
+//! This module implements configuration loading.
+//! 
+#![doc = include_str!("../../Config.md")]
 pub mod env;
 pub mod toml;
 
-use crate::error::Result;
 pub use spring_macros::Configurable;
+
+use crate::error::Result;
 use std::{ops::Deref, sync::Arc};
 
 pub trait Configurable {
