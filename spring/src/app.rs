@@ -208,7 +208,7 @@ impl AppBuilder {
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env, &*self.inline_str)?;
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env, &self.inline_str)?;
 
         // 2. build plugin
         self.build_plugins().await;
@@ -224,7 +224,7 @@ impl AppBuilder {
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     pub async fn build(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env, &*self.inline_str)?;
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env, &self.inline_str)?;
 
         // 2. build plugin
         self.build_plugins().await;
