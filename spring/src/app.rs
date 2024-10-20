@@ -44,6 +44,7 @@ pub struct AppBuilder {
     /// task
     schedulers: Vec<Box<Scheduler<String>>>,
     shutdown_hooks: Vec<Box<Scheduler<String>>>,
+    pub inline_str: String,
 }
 
 impl App {
@@ -207,7 +208,7 @@ impl AppBuilder {
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env, &*self.inline_str)?;
 
         // 2. build plugin
         self.build_plugins().await;
@@ -223,7 +224,7 @@ impl AppBuilder {
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     pub async fn build(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
+        self.config = TomlConfigRegistry::new(&self.config_path, self.env, &*self.inline_str)?;
 
         // 2. build plugin
         self.build_plugins().await;
@@ -304,6 +305,11 @@ impl AppBuilder {
             config,
         })
     }
+
+    pub fn use_config(&mut self, cfg: &str) -> std::result::Result<&mut AppBuilder, std::io::Error> {
+        self.inline_str = cfg.to_string();
+        Ok(self)
+    }
 }
 
 impl Default for AppBuilder {
@@ -317,6 +323,7 @@ impl Default for AppBuilder {
             components: Default::default(),
             schedulers: Default::default(),
             shutdown_hooks: Default::default(),
+            inline_str: Default::default(),
         }
     }
 }

@@ -24,9 +24,27 @@ impl ConfigRegistry for TomlConfigRegistry {
     }
 }
 
+#[cfg(feature = "inline_file")]
+fn get_inline_str(inline_str: &str) -> &str {
+    inline_str
+}
+
+#[cfg(not(feature = "inline_file"))]
+fn get_profile(config_path: &Path) -> Result<String> {
+    let config_file_content = std::fs::read_to_string(config_path);
+    let main_toml_str = match config_file_content {
+        Err(e) => {
+            log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
+            return Ok(Table::new().to_string());
+        }
+        Ok(content) => content,
+    };
+    Ok(main_toml_str)
+}
+
 impl TomlConfigRegistry {
-    pub fn new(config_path: &Path, env: Env) -> Result<Self> {
-        let config = Self::load_config(config_path, env)?;
+    pub fn new(config_path: &Path, env: Env, inline_str: &str) -> Result<Self> {
+        let config = Self::load_config(config_path, env, inline_str)?;
         Ok(Self { config })
     }
 
@@ -38,15 +56,21 @@ impl TomlConfigRegistry {
     }
 
     /// load toml config
-    fn load_config(config_path: &Path, env: Env) -> Result<Table> {
-        let config_file_content = fs::read_to_string(config_path);
-        let main_toml_str = match config_file_content {
-            Err(e) => {
-                log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
-                return Ok(Table::new());
-            }
-            Ok(content) => content,
-        };
+    fn load_config(config_path: &Path, env: Env, inline_str: &str) -> Result<Table> {
+        // let config_file_content = fs::read_to_string(config_path);
+        // let main_toml_str = match config_file_content {
+        //     Err(e) => {
+        //         log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
+        //         return Ok(Table::new());
+        //     }
+        //     Ok(content) => content,
+        // };
+
+        #[cfg(feature = "inline_file")]
+        let main_toml_str = get_inline_str(inline_str);
+
+        #[cfg(not(feature = "inline_file"))]
+        let main_toml_str = get_profile(config_path)?;
 
         let main_table = toml::from_str::<Table>(main_toml_str.as_str())
             .with_context(|| format!("Failed to parse the toml file at path {:?}", config_path))?;
