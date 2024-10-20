@@ -273,10 +273,15 @@ impl AppBuilder {
         let app = self.build_app();
 
         let schedulers = std::mem::take(&mut self.schedulers);
+        let mut handles = vec![];
         for task in schedulers {
             let poll_future = task(app.clone());
             let poll_future = Box::into_pin(poll_future);
-            match tokio::spawn(poll_future).await? {
+            handles.push(tokio::spawn(poll_future));
+        }
+
+        while let Some(handle) = handles.pop() {
+            match handle.await? {
                 Err(e) => log::error!("{}", e),
                 Ok(msg) => log::info!("scheduled result: {}", msg),
             }
