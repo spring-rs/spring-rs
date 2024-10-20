@@ -2,11 +2,17 @@ use super::env::Env;
 use super::{ConfigRegistry, Configurable};
 use crate::error::{AppError, Result};
 use anyhow::Context;
+use rust_embed::RustEmbed;
 use serde::de::DeserializeOwned;
 use serde_toml_merge::merge_tables;
 use std::fs;
 use std::path::Path;
 use toml::Table;
+
+#[cfg(feature = "inline_file")]
+#[derive(RustEmbed)]
+#[folder = "${CARGO_MANIFEST_DIR}/config"]
+struct Asset;
 
 #[derive(Default)]
 pub struct TomlConfigRegistry {
@@ -24,6 +30,34 @@ impl ConfigRegistry for TomlConfigRegistry {
     }
 }
 
+#[cfg(feature = "inline_file")]
+fn get_config_inline_file() -> Result<String> {
+    let config_file_content = Asset::get("app.toml");
+    let main_toml_str = match config_file_content {
+        Some(content) => {
+            std::str::from_utf8(&content.data).unwrap().to_string()
+        }
+        None => {
+            log::warn!("Failed to read configuration file app.toml");
+            return Ok(Table::new().to_string());
+        }
+    };
+    Ok(main_toml_str)
+}
+
+#[cfg(not(feature = "inline_file"))]
+fn get_config(config_path: &Path) -> Result<String> {
+    let config_file_content = std::fs::read_to_string(config_path);
+    let main_toml_str = match config_file_content {
+        Err(e) => {
+            log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
+            return Ok(Table::new().to_string());
+        }
+        Ok(content) => content,
+    };
+    Ok(main_toml_str)
+}
+
 impl TomlConfigRegistry {
     pub fn new(config_path: &Path, env: Env) -> Result<Self> {
         let config = Self::load_config(config_path, env)?;
@@ -39,14 +73,20 @@ impl TomlConfigRegistry {
 
     /// load toml config
     fn load_config(config_path: &Path, env: Env) -> Result<Table> {
-        let config_file_content = fs::read_to_string(config_path);
-        let main_toml_str = match config_file_content {
-            Err(e) => {
-                log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
-                return Ok(Table::new());
-            }
-            Ok(content) => content,
-        };
+        // let config_file_content = fs::read_to_string(config_path);
+        // let main_toml_str = match config_file_content {
+            // Err(e) => {
+                // log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
+                // return Ok(Table::new());
+            // }
+            // Ok(content) => content,
+        // };
+        
+        #[cfg(feature = "inline_file")]
+        let main_toml_str = get_config_inline_file();
+
+        #[cfg(not(feature = "inline_file"))]
+        let main_toml_str = get_config(config_path);
 
         let main_table = toml::from_str::<Table>(main_toml_str.as_str())
             .with_context(|| format!("Failed to parse the toml file at path {:?}", config_path))?;

@@ -7,6 +7,9 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+inline_file = []
+
 [dependencies]
 spring-macros = { path = "../spring-macros", version = "0.2.0" }
 anyhow = { workspace = true }
@@ -29,6 +32,7 @@ async-trait = { workspace = true }
 schemars = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 dashmap = { workspace = true }
+rust-embed = { version = "8.5.0", features = ["interpolate-folder-path", "debug-embed"] }
 
 [dev-dependencies]
 tempfile = "3.12"
