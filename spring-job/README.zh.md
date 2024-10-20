@@ -69,3 +69,29 @@ async fn cron_job(Component(db): Component<ConnectPool>) {
     println!("cron scheduled: {:?}", time)
 }
 ```
+
+## 读取配置
+
+你可以用[`Config`](https://docs.rs/spring-web/latest/spring_job/extractor/struct.Config.html)抽取toml中的配置。用法上和[`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi)完全一致。
+
+```rust
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "custom"]
+struct CustomConfig {
+    a: u32,
+    b: bool,
+}
+
+#[cron("1/10 * * * * *")]
+async fn use_toml_config(Config(conf): Config<CustomConfig>) -> impl IntoResponse {
+    format!("a={}, b={}", conf.a, conf.b)
+}
+```
+
+在你的配置文件中添加相应配置：
+
+```toml
+[custom]
+a = 1
+b = true
+```

@@ -109,3 +109,29 @@ fn fill_file_consumer_options(opts: &mut FileConsumerOptions) {
 ```
 
 完整示例代码查看[stream-file-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-file-example)、[stream-redis-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-redis-example)、[stream-kafka-example](https://github.com/spring-rs/spring-rs/tree/master/examples/stream-kafka-example)
+
+## 读取配置
+
+你可以用[`Config`](https://docs.rs/spring-web/latest/spring_stream/extractor/struct.Config.html)抽取toml中的配置。用法上和[`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi)完全一致。
+
+```rust
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "custom"]
+struct CustomConfig {
+    a: u32,
+    b: bool,
+}
+
+#[stream_listener("topic")]
+async fn use_toml_config(Config(conf): Config<CustomConfig>) -> impl IntoResponse {
+    format!("a={}, b={}", conf.a, conf.b)
+}
+```
+
+在你的配置文件中添加相应配置：
+
+```toml
+[custom]
+a = 1
+b = true
+```

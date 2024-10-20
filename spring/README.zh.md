@@ -26,8 +26,8 @@ struct MyPlugin;
 #[async_trait]
 impl Plugin for MyPlugin {
     async fn build(&self, app: &mut AppBuilder) {
-        // 调用app.get_config::<Config>(self)方法即可获取配置项
-        match app.get_config::<Config>(self) {
+        // 调用app.get_config::<Config>()方法即可获取配置项
+        match app.get_config::<Config>() {
             Ok(config) => {
                 println!("{:#?}", config);
                 assert_eq!(config.a, 1);

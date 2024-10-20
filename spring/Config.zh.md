@@ -15,3 +15,22 @@ struct Config {
 a = 10
 b = true
 ```
+
+```rust
+struct MyPlugin;
+
+#[async_trait]
+impl Plugin for MyPlugin {
+    async fn build(&self, app: &mut AppBuilder) {
+        // 在自己的插件中加载配置
+        let config = app.get_config::<Config>().expect("load config failed");
+        //...
+    }
+}
+```
+
+## 在其他插件中使用配置
+
+* [`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi)
+* [`spring-job`](https://spring-rs.github.io/zh/docs/plugins/spring-job/#du-qu-pei-zhi)
+* [`spring-stream`](https://spring-rs.github.io/zh/docs/plugins/spring-stream/#du-qu-pei-zhi)

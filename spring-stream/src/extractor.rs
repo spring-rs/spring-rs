@@ -136,12 +136,3 @@ where
         &self.0
     }
 }
-
-impl<T> DerefMut for Config<T>
-where
-    T: serde::de::DeserializeOwned + Configurable,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
