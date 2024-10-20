@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.6
+
+- **changed**: fix concurrent scheduler ([#81])
+
+[#81]: https://github.com/spring-rs/spring-rs/pull/81
+
 ## 0.2.5
 
 - **changed**: fix exported `build` method ([#75])
