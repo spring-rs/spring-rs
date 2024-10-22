@@ -2,6 +2,7 @@
 name = "spring-sqlx"
 description = "Integration of spring-rs framework and sqlx"
 version = "0.2.3"
+categories = ["sql-database", "sql-query", "database", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

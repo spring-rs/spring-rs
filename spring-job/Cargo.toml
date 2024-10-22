@@ -2,6 +2,7 @@
 name = "spring-job"
 description = "Integrate tokio-cron-scheduler with spring-rs framework"
 version = "0.2.2"
+categories = ["cron-scheduler", "task-scheduling", "cron-job", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

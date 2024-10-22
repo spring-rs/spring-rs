@@ -2,6 +2,7 @@
 name = "spring-stream"
 description = "Integrate sea-streamer with spring-rs"
 version = "0.2.1"
+categories = ["stream-processing", "stream", "redis-stream", "kafka", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

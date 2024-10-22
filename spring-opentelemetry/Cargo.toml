@@ -2,6 +2,7 @@
 name = "spring-opentelemetry"
 description = "Integration of spring-rs framework and open-telemetry"
 version = "0.2.1"
+categories = ["logging", "metrics", "tracing", "observability", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
