@@ -2,7 +2,8 @@
 name = "spring"
 description = "Rust microservice framework like spring boot in java"
 version = "0.2.7"
-categories = ["framework", "spring"]
+categories = ["config"]
+keywords = ["framework", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
