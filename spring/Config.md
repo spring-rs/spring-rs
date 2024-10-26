@@ -1,5 +1,8 @@
 You can define configuration in the following way:
 ```rust
+use spring::config::Configurable;
+use serde::Deserialize;
+
 #[derive(Debug, Configurable, Deserialize)]
 #[config_prefix = "my-plugin"]
 struct Config {
@@ -16,7 +19,19 @@ a = 10
 b = true
 ```
 
-```rust
+```rust, hl_lines=19
+use spring::async_trait;
+use spring::plugin::Plugin;
+use spring::config::Configurable;
+use serde::Deserialize;
+
+#[derive(Debug, Configurable, Deserialize)]
+#[config_prefix = "my-plugin"]
+struct Config {
+    a: u32,
+    b: bool,
+}
+
 struct MyPlugin;
 
 #[async_trait]
