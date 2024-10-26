@@ -2,7 +2,8 @@
 name = "spring-macros"
 description = "spring-rs Procedural Macros implementation"
 version = "0.2.0"
-categories = ["procedural-macro-helpers", "web", "cron", "stream", "spring"]
+categories = ["development-tools::procedural-macro-helpers"]
+keywords = ["procedural-macro-helpers", "web", "cron", "stream", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

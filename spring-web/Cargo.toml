@@ -2,7 +2,8 @@
 name = "spring-web"
 description = "Integration of rust application framework spring-rs and Axum web framework"
 version = "0.2.4"
-categories = ["web-programming", "web-server", "spring"]
+categories = ["web-programming::http-server"]
+keywords = ["web-programming", "web-server", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
