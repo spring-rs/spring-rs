@@ -18,10 +18,13 @@ pub use spring_macros::Service;
 /// }
 /// ```
 pub trait Service: Clone + Sized {
+    /// Construct the Service component
     fn build(app: &AppBuilder) -> Result<Self>;
 }
 
+/// Install the Service component into the App
 pub trait ServiceRegistrar: Send + Sync + 'static {
+    /// Install the Service component into the App
     fn install_service(&self, app: &mut AppBuilder) -> Result<()>;
 }
 
@@ -37,6 +40,7 @@ macro_rules! submit_service {
     };
 }
 
+/// Find all ServiceRegistrar and install them into the app
 pub fn auto_inject_service(app: &mut AppBuilder) -> Result<()> {
     for registrar in inventory::iter::<&dyn ServiceRegistrar> {
         registrar.install_service(app)?;

@@ -6,8 +6,10 @@ use serde::de::DeserializeOwned;
 use serde_toml_merge::merge_tables;
 use std::fs;
 use std::path::Path;
+use std::str::FromStr;
 use toml::Table;
 
+/// Configuration management based on Toml
 #[derive(Default)]
 pub struct TomlConfigRegistry {
     config: Table,
@@ -25,11 +27,15 @@ impl ConfigRegistry for TomlConfigRegistry {
 }
 
 impl TomlConfigRegistry {
+    /// Read configuration from a configuration file.
+    /// If there is a configuration file corresponding to the [active environment][Env] in the same directory,
+    /// the environment configuration file will be merged with the main configuration file.
     pub fn new(config_path: &Path, env: Env) -> Result<Self> {
         let config = Self::load_config(config_path, env)?;
         Ok(Self { config })
     }
 
+    /// Get all configurations for a specified prefix
     pub fn get_by_prefix(&self, prefix: &str) -> Table {
         match self.config.get(prefix) {
             Some(toml::Value::Table(table)) => table.clone(),
@@ -78,6 +84,20 @@ impl TomlConfigRegistry {
         };
 
         Ok(config_table)
+    }
+
+    #[inline]
+    pub(crate) fn is_empty(&self) -> bool {
+        self.config.is_empty()
+    }
+}
+
+impl FromStr for TomlConfigRegistry {
+    type Err = AppError;
+
+    fn from_str(str: &str) -> std::result::Result<Self, Self::Err> {
+        let config = toml::from_str::<Table>(str)?;
+        Ok(Self { config })
     }
 }
 

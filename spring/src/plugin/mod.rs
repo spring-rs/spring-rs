@@ -1,5 +1,6 @@
 #![doc = include_str!("../../README.md")]
 
+/// Component definition
 pub mod component;
 pub mod service;
 
@@ -7,9 +8,11 @@ use crate::app::AppBuilder;
 use async_trait::async_trait;
 use std::{any::Any, ops::Deref, sync::Arc};
 
+/// Plugin Reference
 #[derive(Clone)]
 pub struct PluginRef(Arc<dyn Plugin>);
 
+/// Defined plugin interface
 #[async_trait]
 pub trait Plugin: Any + Send + Sync {
     /// Configures the `App` to which this plugin is added.

@@ -18,8 +18,10 @@ use tracing_subscriber::{
     Layer,
 };
 
+/// Boxed [Tracing Layer](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/index.html)
 pub type BoxLayer = Box<dyn Layer<Registry> + Send + Sync + 'static>;
 
+/// Built-in Log plugin based on [tracing](https://docs.rs/tracing)
 pub(crate) struct LogPlugin;
 
 impl Plugin for LogPlugin {

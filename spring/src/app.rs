@@ -10,18 +10,14 @@ use crate::{
 };
 use dashmap::DashMap;
 use std::any::Any;
-use std::{
-    any,
-    collections::HashSet,
-    future::Future,
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::str::FromStr;
+use std::{any, collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
 
-pub type Registry<T> = DashMap<String, T>;
-pub type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
+type Registry<T> = DashMap<String, T>;
+type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
+/// Running Applications
 pub struct App {
     env: Env,
     /// Component
@@ -29,10 +25,13 @@ pub struct App {
     config: TomlConfigRegistry,
 }
 
+/// AppBuilder: Application under construction
+/// The application consists of three important parts:
+/// - Plugin management
+/// - Component management
+/// - Configuration management
 pub struct AppBuilder {
     pub(crate) env: Env,
-    /// Path of config file
-    pub(crate) config_path: PathBuf,
     /// Tracing Layer
     pub(crate) layers: Vec<BoxLayer>,
     /// Plugin
@@ -47,6 +46,7 @@ pub struct AppBuilder {
 }
 
 impl App {
+    /// Preparing to build the application
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> AppBuilder {
         AppBuilder::default()
@@ -78,6 +78,7 @@ impl App {
         component_ref.map(|c| T::clone(&c))
     }
 
+    /// Get all built components. The return value is the full crate path of all components
     pub fn get_components(&self) -> Vec<String> {
         self.components.iter().map(|e| e.key().clone()).collect()
     }
@@ -87,6 +88,9 @@ unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}
 
 impl AppBuilder {
+    /// Currently active environment
+    /// * [Env]
+    #[inline]
     pub fn get_env(&self) -> Env {
         self.env
     }
@@ -108,6 +112,7 @@ impl AppBuilder {
     }
 
     /// Returns `true` if the [`Plugin`] has already been added.
+    #[inline]
     pub fn is_plugin_added<T: Plugin>(&self) -> bool {
         self.plugin_registry.contains_key(any::type_name::<T>())
     }
@@ -120,8 +125,19 @@ impl AppBuilder {
     /// overwrite the configuration items of the main configuration file.
     ///
     /// For specific supported environments, see the [Env](../config/env/enum.Env.html) enum.
-    pub fn config_file(&mut self, config_path: &str) -> &mut Self {
-        self.config_path = Path::new(config_path).to_path_buf();
+    pub fn use_config_file(&mut self, config_path: &str) -> &mut Self {
+        self.config = TomlConfigRegistry::new(Path::new(config_path), self.env)
+            .expect("config file load failed");
+        self
+    }
+
+    /// Use an existing toml string to configure the application. 
+    /// For example, use include_str!('app.toml') to compile the file into the program.
+    /// 
+    /// **Note**: This configuration method only supports one configuration content and does not support multiple environments.
+    pub fn use_config_str(&mut self, toml_content: &str) -> &mut Self {
+        self.config =
+            TomlConfigRegistry::from_str(toml_content).expect("config content parse failed");
         self
     }
 
@@ -191,9 +207,9 @@ impl AppBuilder {
     /// The `run` method is suitable for applications that contain scheduling logic,
     /// such as web, job, and stream.
     ///
-    /// * [spring-web]
-    /// * [spring-job]
-    /// * [spring-stream]
+    /// * [spring-web](https://docs.rs/spring-web)
+    /// * [spring-job](https://docs.rs/spring-job)
+    /// * [spring-stream](https://docs.rs/spring-stream)
     pub async fn run(&mut self) {
         match self.inner_run().await {
             Err(e) => {
@@ -203,11 +219,9 @@ impl AppBuilder {
         }
     }
 
-    /// Unlike the [`run()`] method, the `build` method is suitable for applications that do not contain scheduling logic.
-    /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
+        self.load_config_if_need()?;
 
         // 2. build plugin
         self.build_plugins().await;
@@ -219,11 +233,11 @@ impl AppBuilder {
         self.schedule().await
     }
 
-    /// Unlike the [`run()`] method, the `build` method is suitable for applications that do not contain scheduling logic.
+    /// Unlike the [`run`] method, the `build` method is suitable for applications that do not contain scheduling logic.
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     pub async fn build(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
-        self.config = TomlConfigRegistry::new(&self.config_path, self.env)?;
+        self.load_config_if_need()?;
 
         // 2. build plugin
         self.build_plugins().await;
@@ -232,6 +246,13 @@ impl AppBuilder {
         service::auto_inject_service(self)?;
 
         Ok(self.build_app())
+    }
+
+    fn load_config_if_need(&mut self) -> Result<()> {
+        if self.config.is_empty() {
+            self.config = TomlConfigRegistry::new(Path::new("./config/app.toml"), self.env)?;
+        }
+        Ok(())
     }
 
     async fn build_plugins(&mut self) {
@@ -310,7 +331,6 @@ impl Default for AppBuilder {
     fn default() -> Self {
         Self {
             env: Env::init(),
-            config_path: Path::new("./config/app.toml").to_path_buf(),
             layers: Default::default(),
             plugin_registry: Default::default(),
             config: Default::default(),
