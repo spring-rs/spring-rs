@@ -1,9 +1,11 @@
 use std::{any::Any, ops::Deref, sync::Arc};
 
+/// Component's dyn trait reference
 #[derive(Debug, Clone)]
 pub struct DynComponentRef(Arc<dyn Any + Send + Sync>);
 
 impl DynComponentRef {
+    /// constructor
     pub fn new<T>(component: T) -> Self
     where
         T: Any + Send + Sync,
@@ -11,6 +13,7 @@ impl DynComponentRef {
         Self(Arc::new(component))
     }
 
+    /// Downcast to the specified type
     pub fn downcast<T>(self) -> Option<ComponentRef<T>>
     where
         T: Any + Send + Sync,
@@ -19,6 +22,7 @@ impl DynComponentRef {
     }
 }
 
+/// A component reference of a specified type
 #[derive(Debug, Clone)]
 pub struct ComponentRef<T>(Arc<T>);
 
@@ -27,6 +31,8 @@ impl<T> ComponentRef<T> {
         Self(target_ref)
     }
 
+    /// Get the raw pointer of the component
+    #[inline]
     pub fn into_raw(self) -> *const T {
         Arc::into_raw(self.0)
     }

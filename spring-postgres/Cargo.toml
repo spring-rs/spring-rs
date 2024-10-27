@@ -2,6 +2,7 @@
 name = "spring-postgres"
 description = "Integrate tokio-postgres with spring-rs"
 version = "0.2.1"
+categories = ["database"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

@@ -19,6 +19,7 @@ pub enum Env {
 }
 
 impl Env {
+    /// Initializes environment variables from the `.env` file and reads `SPRING_ENV` to determine the active environment for the application.
     pub fn init() -> Self {
         match dotenvy::dotenv() {
             Ok(path) => log::debug!(
@@ -31,6 +32,8 @@ impl Env {
         Self::from_env()
     }
 
+    /// Read `SPRING_ENV` to determine the environment of the active application.
+    /// If there is no `SPRING_ENV` variable, it defaults to Dev
     pub fn from_env() -> Self {
         match env::var("SPRING_ENV") {
             Ok(var) => Self::from_string(var),
@@ -38,6 +41,7 @@ impl Env {
         }
     }
 
+    /// Parse the string to get the corresponding environment
     pub fn from_string<S: Into<String>>(str: S) -> Self {
         match str.into() {
             s if s.eq_ignore_ascii_case("dev") => Self::Dev,

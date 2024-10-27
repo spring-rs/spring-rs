@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.7
+
+- **added**: support `include_str!` compile configuration files into the application ([#85])
+- **changed**: rename `config_file` to `use_config_file` ([#85])
+
+[#85]: https://github.com/spring-rs/spring-rs/pull/85
+
 ## 0.2.6
 
 - **changed**: fix concurrent scheduler ([#81])

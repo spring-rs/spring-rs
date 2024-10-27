@@ -2,6 +2,8 @@
 name = "spring-sea-orm"
 description = "Integration of spring-rs framework and sea-orm"
 version = "0.2.3"
+categories = ["database"]
+keywords = ["orm", "sql-database", "spring"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true

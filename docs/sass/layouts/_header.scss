@@ -277,3 +277,12 @@ li.nav-item.dropdown:hover > .dropdown-menu {
 li.nav-item.dropdown:hover > .dropdown-menu > .dropdown-item {
   color: #212529;
 }
+
+li.nav-item.dropdown:hover>.dropdown-menu:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    top: -20px;
+}
