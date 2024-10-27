@@ -7,7 +7,7 @@
 spring-opentelemetry = "<version>"
 ```
 
-OTEL uses the [W3C format](https://github.com/w3c/trace-context) to pass context information for link tracing by default.
+OTEL uses the [W3C format](https://github.com/w3c/trace-context) to propagate context information for tracing by default.
 
 Optional features:
 * `jaeger`: Use [jaeger format](https://www.jaegertracing.io/docs/1.18/client-libraries/#propagation-format) to propagate context
