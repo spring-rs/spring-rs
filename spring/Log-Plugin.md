@@ -22,7 +22,7 @@ with_fields = [                     # Carry other fields when outputting logs, t
 "internal_errors",                  # Whether to output the internal errors contained when an error occurs
 ]
 override_filter = "info,axum=debug" # Override the default log filter level, and specify the log level for the crate library
-file = { enabled = true } # Whether to write logs to files, which is not enabled by default
+file = { enable = true } # Whether to write logs to files, which is not enabled by default
 ```
 
 > The [time_pattern](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/time/index.html) here is implemented using [chrono](https://docs.rs/chrono). If you need to customize it, you can refer to [chrono's formatting syntax](https://docs.rs/chrono/latest/chrono/format/strftime/index.html).
@@ -30,7 +30,7 @@ file = { enabled = true } # Whether to write logs to files, which is not enabled
 You can also configure the log file in more detail
 ```toml
 [logger.file]
-enabled = true      # Whether to write logs to files
+enable = true      # Whether to write logs to files
 non_blocking = true # Whether to enable non-blocking writing, which is enabled by default
 format = "compact"  # Log format supports compact, pretty, json, the default is compact
 rotation = "daily"  # Log rotation mode minutely, hourly, daily, never, the default is daily rotation
