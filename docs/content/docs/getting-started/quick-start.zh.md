@@ -98,7 +98,7 @@ port = 8000                  # 配置web服务端口，如果不配置默认就�
 uri = "mysql://user:password@127.0.0.1:3306"
 ```
 
-`spring-rs`支持多环境配置：dev(开发)、test(测试)、prod(生产)，分别对应着`app-dev.toml`、`app-dev.toml`、`app-prod.toml`三个配置文件。环境配置文件中的配置会覆盖`app.toml`主配置文件的配置项。
+`spring-rs`支持多环境配置：dev(开发)、test(测试)、prod(生产)，分别对应着`app-dev.toml`、`app-test.toml`、`app-prod.toml`三个配置文件。环境配置文件中的配置会覆盖`app.toml`主配置文件的配置项。
 
 `spring-rs`会根据`SPRING_ENV`环境变量激活对应环境的配置文件。
 
@@ -109,5 +109,3 @@ uri = "mysql://user:password@127.0.0.1:3306"
 ```sh
 cargo run
 ```
-
-
