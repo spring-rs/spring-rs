@@ -9,8 +9,10 @@ use crate::{
     plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
+use once_cell::sync::Lazy;
 use std::any::Any;
 use std::str::FromStr;
+use std::sync::RwLock;
 use std::{any, collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
 
@@ -18,6 +20,7 @@ type Registry<T> = DashMap<String, T>;
 type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
 /// Running Applications
+#[derive(Default)]
 pub struct App {
     env: Env,
     /// Component
@@ -82,7 +85,26 @@ impl App {
     pub fn get_components(&self) -> Vec<String> {
         self.components.iter().map(|e| e.key().clone()).collect()
     }
+
+    /// Returns an instance of the currently configured global [`App`].
+    /// 
+    /// **NOTE**: This global App is initialized after the application is built, 
+    /// please use it when the app is running, don't use it during the build process, 
+    /// such as during the plug-in build process.
+    pub fn global() -> Arc<App> {
+        GLOBAL_APP
+            .read()
+            .expect("GLOBAL_APP RwLock poisoned")
+            .clone()
+    }
+
+    fn set_global(app: Arc<App>) {
+        let mut global_app = GLOBAL_APP.write().expect("GLOBAL_APP RwLock poisoned");
+        *global_app = app;
+    }
 }
+
+static GLOBAL_APP: Lazy<RwLock<Arc<App>>> = Lazy::new(|| RwLock::new(Arc::new(App::default())));
 
 unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}
@@ -131,9 +153,9 @@ impl AppBuilder {
         self
     }
 
-    /// Use an existing toml string to configure the application. 
+    /// Use an existing toml string to configure the application.
     /// For example, use include_str!('app.toml') to compile the file into the program.
-    /// 
+    ///
     /// **Note**: This configuration method only supports one configuration content and does not support multiple environments.
     pub fn use_config_str(&mut self, toml_content: &str) -> &mut Self {
         self.config =
@@ -215,7 +237,7 @@ impl AppBuilder {
             Err(e) => {
                 log::error!("{:?}", e);
             }
-            Ok(_app) => { /* no return */ }
+            Ok(app) => App::set_global(app),
         }
     }
 

@@ -8,9 +8,10 @@ use std::{
 };
 
 /// App environment
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub enum Env {
     /// Development
+    #[default]
     Dev,
     /// Test
     Test,
