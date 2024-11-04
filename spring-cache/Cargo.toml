@@ -1,0 +1,16 @@
+[package]
+name = "spring-cache"
+description = "spring-rs framework provides cache support"
+version = "0.2.0"
+categories = ["date-and-time"]
+keywords = ["cache", "redis", "spring"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+spring = { path = "../spring", version = "0.2" }
+spring-macros = { path = "../spring-macros", version = "0.2" }
+anyhow = { workspace = true }
+serde = { workspace = true }
