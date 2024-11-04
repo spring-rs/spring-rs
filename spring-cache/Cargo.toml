@@ -14,3 +14,5 @@ spring = { path = "../spring", version = "0.2" }
 spring-macros = { path = "../spring-macros", version = "0.2" }
 anyhow = { workspace = true }
 serde = { workspace = true }
+dashmap = { workspace = true }
+moka = { workspace = true }
