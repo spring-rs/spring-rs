@@ -52,7 +52,7 @@ port = 8000 # Configure the web service port. If not configured, the default por
 uri = "mysql://user:password@127.0.0.1:3306"
 ```
 
-`spring-rs` supports multiple environment configurations: dev (development), test (testing), and prod (production), corresponding to the three configuration files `app-dev.toml`, `app-dev.toml`, and `app-prod.toml`. The configuration in the environment configuration file will override the configuration items of the `app.toml` main configuration file.
+`spring-rs` supports multiple environment configurations: dev (development), test (testing), and prod (production), corresponding to the three configuration files `app-dev.toml`, `app-test.toml`, and `app-prod.toml`. The configuration in the environment configuration file will override the configuration items of the `app.toml` main configuration file.
 
 `spring-rs` will activate the configuration file of the corresponding environment according to the `SPRING_ENV` environment variable.
 
