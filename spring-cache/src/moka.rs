@@ -12,13 +12,20 @@ pub struct MokaCacheManager<K: Hash + Eq, V> {
     caches: DashMap<String, MokaCache<K, V>>,
 }
 
-impl<K: Hash + Eq, V> CacheManagerTrait<K, V, MokaCache<K, V>> for MokaCacheManager<K, V> {
-    fn get_cache<S: Into<String>>(cache_name: S) -> MokaCache<K, V> {
+impl<K, V> CacheManagerTrait<K, V, MokaCache<K, V>> for MokaCacheManager<K, V>
+where
+    K: Hash + Eq + Send + Sync + 'static,
+    V: Clone + Sync + Send + 'static,
+{
+    #[inline]
+    fn get_cache<S: Into<String>>(&self, cache_name: S) -> MokaCache<K, V> {
+        // self.caches.entry(cache_name).or_insert_with(||)
         todo!()
     }
 
-    fn cache_names() -> Vec<String> {
-        todo!()
+    #[inline]
+    fn cache_names(&self) -> Vec<String> {
+        self.caches.iter().map(|e| e.key().clone()).collect()
     }
 }
 
@@ -30,21 +37,26 @@ pub struct MokaCache<K: Hash + Eq, V> {
 #[async_trait]
 impl<K, V> CacheTrait<K, V> for MokaCache<K, V>
 where
-    K: Hash + Eq,
+    K: Hash + Eq + Send + Sync + 'static,
+    V: Clone + Send + Sync + 'static,
 {
+    #[inline]
     fn name(&self) -> String {
         self.name.clone()
     }
 
-    async fn get(&self, key: &K) -> V {
+    #[inline]
+    async fn get(&self, key: &K) -> Option<V> {
         self.cache.get(key).await
     }
 
+    #[inline]
     async fn put(&self, key: K, value: V) {
         self.cache.insert(key, value).await
     }
 
-    async fn evict(&self, key: K) {
-        self.cache.evict(key).await
+    #[inline]
+    async fn evict(&self, key: &K) -> Option<V> {
+        self.cache.remove(key).await
     }
 }
