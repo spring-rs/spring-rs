@@ -5,13 +5,13 @@ use dashmap::DashMap;
 use spring::async_trait;
 
 #[derive(Default)]
-pub struct GenericCacheManager<C> {
-    caches: DashMap<String, C>,
+pub struct GenericCacheManager<CRef> {
+    caches: DashMap<String, CRef>,
 }
 
-impl<C> GenericCacheManager<C> {
+impl<CRef> GenericCacheManager<CRef> {
     #[inline]
-    fn get_cache<S: Into<String>>(&self, cache_name: S, cache_supplier: impl FnOnce() -> C) -> &C {
+    fn get_cache<S: Into<String>>(&self, cache_name: S, cache_supplier: impl FnOnce() -> CRef) -> &CRef {
         self.caches
             .entry(cache_name.into())
             .or_insert_with(cache_supplier)
