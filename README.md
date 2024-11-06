@@ -139,7 +139,6 @@ async fn fix_rate_job() {
 * [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](./spring-job/): Integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler)
 * [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](./spring-stream/): Integrate [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing such as redis-stream and kafka
 * [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](./spring-opentelemetry/): Integrate with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing
-* [ ] `spring-cache`: Caching is a great and simple technique that helps improve your app's performance. It acts as a temporary data store providing high performance data access.
 * [ ] `spring-tarpc`: Integrate[`tarpc`](https://github.com/google/tarpc) to implement RPC calls
 
 ## Ecosystem
