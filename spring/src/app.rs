@@ -325,7 +325,7 @@ impl AppBuilder {
 
         while let Some(handle) = handles.pop() {
             match handle.await? {
-                Err(e) => log::error!("{}", e),
+                Err(e) => log::error!("{:?}", e),
                 Ok(msg) => log::info!("scheduled result: {}", msg),
             }
         }
