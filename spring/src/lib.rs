@@ -28,6 +28,8 @@ pub mod error;
 pub mod log;
 /// Plugin system: Through the documentation of this module you will learn how to implement your own plugins
 pub mod plugin;
+/// Banner
+pub mod banner;
 
 pub use app::App;
 pub use async_trait::async_trait;

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.8
+
+- **added**: banner & Fancy Starting Logs ([#91])
+- **added**: add `App::global()` ([#d1fa98])
+
+[#91]: https://github.com/spring-rs/spring-rs/pull/91
+[#d1fa98]: https://github.com/spring-rs/spring-rs/commit/d1fa983bc41750777c4bb12c5fa03479d273e977
+
 ## 0.2.7
 
 - **added**: support `include_str!` compile configuration files into the application ([#85])
