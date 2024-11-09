@@ -1,3 +1,4 @@
+use crate::banner;
 use crate::config::env::Env;
 use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
@@ -244,6 +245,8 @@ impl AppBuilder {
     async fn inner_run(&mut self) -> Result<Arc<App>> {
         // 1. load toml config
         self.load_config_if_need()?;
+
+        banner::print_banner(self);
 
         // 2. build plugin
         self.build_plugins().await;

@@ -1,25 +1,34 @@
-pub const BANNER: &str = r"
+use nu_ansi_term::Color;
+
+use crate::{app::AppBuilder, config::env::Env};
+
+const BANNER: &str = r"
             ⌡
           _@▓▄                             ___
-     _,p@▒▒É▓▓L                            ▀▀▀ª
-  ⌡▒▒▒▓▒▒É▒▓▓▓▓  ▄█████  ████████_  ██████ ███ª █████████,  ▄████████
- ▄▒▓▒▒▓▒▒É▓▓▓▓▓  ▓██▄_   ███~ ~███, ███▀ª~ ███─ ▓███~~▓███ ███▀~~▓██▀
-δ▓▒▓▒▒▓▒▓▓▓▓▓▓█   ~▀███  ███_ _███'║███    ███  ███ª  ▓██▀ ███▄ _███L
-δ▓▒▓▒▒▓▓▓▓▓▓▓▀  Γ█████▀ ╔███▀████ª δ███   ε███  ███   ▓██L ~▀███▀███ª
-└▓▓▓▓▓▓▓▓▓▀ª`           Σ███                                ▄▄▄▄▄███
- ▓▀▀▀ⁿª^                ≡▀▀▀                                ▀▀▀▀▀▀▀~";
+     _,p@▒▒░▓▓L                            ▀▀▀ª
+  ⌡▒▒▒▓▒▒░▒▓▓▓▓  ▄█████  ████████_  ██████ ███ª █████████,  ▄████████
+ ▄▒▓▒▒▓▒▒░▓▓▓▓▓  ▓██▄_   ███~ ~███, ███▀ª~ ███─ ▓███~~▓███ ███▀~~▓██▀
+░▓▒▓▒▒▓▒▓▓▓▓▓▓█   ~▀███  ███_ _███'▐███    ███  ███ª  ▓██▀ ███▄ _███G
+░▓▒▓▒▒▓▓▓▓▓▓▓▀  ▀█████▀  ███▀████ª ▐███    ███  ███   ▓██N ~▀███▀███ª
+░▓▓▓▓▓▓▓▓▓▀ª`            ███                                ▄▄▄▄▄███
+ ▓▀▀▀ⁿª^                 ▀▀▀                                ▀▀▀▀▀▀▀~
+";
 
-pub fn print_banner() {
+pub(crate) fn print_banner(app: &AppBuilder) {
     println!("{BANNER}");
-    println!(" :: Spring ::                ({v3.3.1})");
-    if config.logger.enable {
-        println!("     logger: {}", config.logger.level.to_string().green());
-    } else {
-        println!("     logger: {}", "disabled".bright_red());
-    }
+    println!(
+        "     spring: {}",
+        Color::Green.paint(env!("CARGO_PKG_VERSION"))
+    );
+    let env = match app.env {
+        Env::Dev => Color::LightYellow.paint("Dev"),
+        Env::Test => Color::LightBlue.paint("Test"),
+        Env::Prod => Color::Green.paint("Prod"),
+    };
+    println!("environment: {}", env);
     if cfg!(debug_assertions) {
-        println!("compilation: {}", "debug".bright_red());
+        println!("compilation: {}", Color::LightRed.paint("Debug"));
     } else {
-        println!("compilation: {}", "release".green());
+        println!("compilation: {}", Color::Green.paint("Release"));
     }
 }
