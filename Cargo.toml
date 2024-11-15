@@ -12,7 +12,6 @@ members = [
     "spring-stream",
     "spring-mail",
     "spring-opentelemetry",
-    "contrib-plugins/*",
     "examples/*",
 ]
 default-members = ["spring", "spring-*"]
