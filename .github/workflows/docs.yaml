@@ -18,6 +18,13 @@ jobs:
     steps:
     - name: Checkout main
       uses: actions/checkout@v4
+    
+    - name: Checkout contrib-plugins as a subdirectory
+      uses: actions/checkout@v4
+      with:
+        repository: spring-rs/contrib-plugins
+        path: contrib-plugins
+
     - name: zola deploy
       uses: shalzz/zola-deploy-action@v0.19.1
       env:
