@@ -51,7 +51,7 @@ impl TomlConfigRegistry {
                 log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
                 return Ok(Table::new());
             }
-            Ok(content) => content,
+            Ok(content) => super::env::interpolate(&content),
         };
 
         let main_table = toml::from_str::<Table>(main_toml_str.as_str())
@@ -67,6 +67,7 @@ impl TomlConfigRegistry {
 
                 let env_toml_str = fs::read_to_string(env_path)
                     .with_context(|| format!("Failed to read configuration file {:?}", env_path))?;
+                let env_toml_str = super::env::interpolate(&env_toml_str);
                 let env_table =
                     toml::from_str::<Table>(env_toml_str.as_str()).with_context(|| {
                         format!("Failed to parse the toml file at path {:?}", env_path)

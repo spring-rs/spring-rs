@@ -49,3 +49,13 @@ impl Plugin for MyPlugin {
 * [`spring-web`](https://spring-rs.github.io/docs/plugins/spring-web/#read-configuration)
 * [`spring-job`](https://spring-rs.github.io/docs/plugins/spring-job/#read-configuration)
 * [`spring-stream`](https://spring-rs.github.io/docs/plugins/spring-stream/#read-configuration)
+
+## Using environment variables in configuration files
+
+spring-rs implements a simple interpolator.
+
+You can use the `${ENV_VAR_NAME}` placeholder in the toml configuration file to read the value of the environment variable.
+
+If the value does not exist, the placeholder is not replaced.
+
+You can specify the default value of the placeholder using the `${ENV_VAR_NAME:default_value}` syntax.
