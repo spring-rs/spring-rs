@@ -1,5 +1,5 @@
 [sea-orm]
-uri = "postgres://postgres:xudjf23adj213@localhost/postgres"
+uri = "${DATABASE_URL}"
 enable_logging = true
 
 [sea-orm-web]

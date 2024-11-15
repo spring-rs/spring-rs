@@ -34,3 +34,13 @@ impl Plugin for MyPlugin {
 * [`spring-web`](https://spring-rs.github.io/zh/docs/plugins/spring-web/#du-qu-pei-zhi)
 * [`spring-job`](https://spring-rs.github.io/zh/docs/plugins/spring-job/#du-qu-pei-zhi)
 * [`spring-stream`](https://spring-rs.github.io/zh/docs/plugins/spring-stream/#du-qu-pei-zhi)
+
+## 在配置文件中使用环境变量
+
+spring-rs实现了一个简单的插值器。
+
+可以在toml配置文件中使用`${ENV_VAR_NAME}`占位符读取环境变量的值。
+
+如果值不存在则不替换占位符。
+
+用`${ENV_VAR_NAME:default_value}`语法可以指定占位符的默认值。

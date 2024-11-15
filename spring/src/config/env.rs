@@ -69,6 +69,53 @@ impl Env {
     }
 }
 
+pub(crate) fn interpolate(template: &str) -> String {
+    let mut result = String::new();
+    let mut i = 0;
+    let chars: Vec<char> = template.chars().collect();
+
+    while i < chars.len() {
+        if chars[i] == '$' && i + 1 < chars.len() && chars[i + 1] == '{' {
+            // find "}"
+            let mut j = i + 2; // Skip `${`
+            while j < chars.len() && chars[j] != '}' {
+                j += 1;
+            }
+
+            if j < chars.len() && chars[j] == '}' {
+                // extract var_name & default_value
+                let placeholder: String = chars[i + 2..j].iter().collect();
+
+                // find default_value
+                if let Some(pos) = placeholder.find(':') {
+                    let var_name = &placeholder[..pos];
+                    if let Ok(value) = env::var(var_name) {
+                        result.push_str(&value);
+                    } else {
+                        result.push_str(&placeholder[pos + 1..]);
+                    }
+                } else if let Ok(value) = env::var(&placeholder) {
+                    result.push_str(&value);
+                } else {
+                    result.push_str("${");
+                    result.push_str(&placeholder);
+                    result.push('}');
+                }
+
+                i = j + 1; // move to next
+            } else {
+                result.push('$');
+                i += 1;
+            }
+        } else {
+            result.push(chars[i]);
+            i += 1;
+        }
+    }
+
+    result
+}
+
 mod tests {
     #[allow(unused_imports)]
     use super::Env;
@@ -149,5 +196,26 @@ mod tests {
             .write(true)
             .open(path)?;
         Ok(())
+    }
+
+    #[test]
+    fn test_interpolate() {
+        std::env::set_var("NAME", "Alice");
+
+        let template = "Hello, ${NAME:default_name}!";
+        let result = super::interpolate(template);
+        assert_eq!("Hello, Alice!", result);
+
+        std::env::remove_var("NAME");
+        let result = super::interpolate(template);
+        assert_eq!("Hello, default_name!", result);
+
+        let template = "Hello, ${UNKNOWN_NAME}!";
+        let result = super::interpolate(template);
+        assert_eq!("Hello, ${UNKNOWN_NAME}!", result);
+
+        let template = "你好, ${UNKNOWN_NAME:默认值}!";
+        let result = super::interpolate(template);
+        assert_eq!("你好, 默认值!", result);
     }
 }
