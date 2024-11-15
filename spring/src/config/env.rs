@@ -89,20 +89,17 @@ pub(crate) fn interpolate(template: &str) -> String {
                 // find default_value
                 if let Some(pos) = placeholder.find(':') {
                     let var_name = &placeholder[..pos];
-                    let default_value = Some(&placeholder[pos + 1..]);
                     if let Ok(value) = env::var(var_name) {
                         result.push_str(&value);
                     } else {
-                        result.push_str(default_value.unwrap());
+                        result.push_str(&placeholder[pos + 1..]);
                     }
+                } else if let Ok(value) = env::var(&placeholder) {
+                    result.push_str(&value);
                 } else {
-                    if let Ok(value) = env::var(&placeholder) {
-                        result.push_str(&value);
-                    } else {
-                        result.push_str("${");
-                        result.push_str(&placeholder);
-                        result.push('}');
-                    }
+                    result.push_str("${");
+                    result.push_str(&placeholder);
+                    result.push('}');
                 }
 
                 i = j + 1; // move to next
