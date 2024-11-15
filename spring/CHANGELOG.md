@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.9
+
+- **added**: toml support Environment variable interpolator ([#95])
+
+[#95]: https://github.com/spring-rs/spring-rs/pull/95
+
 ## 0.2.8
 
 - **added**: banner & Fancy Starting Logs ([#91])

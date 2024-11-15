@@ -59,3 +59,9 @@ You can use the `${ENV_VAR_NAME}` placeholder in the toml configuration file to 
 If the value does not exist, the placeholder is not replaced.
 
 You can specify the default value of the placeholder using the `${ENV_VAR_NAME:default_value}` syntax.
+
+```toml
+[sea-orm]
+uri = "${DATABASE_URL:postgres://postgres:xudjf23adj213@localhost/postgres}"
+enable_logging = true
+```

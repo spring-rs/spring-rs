@@ -44,3 +44,9 @@ spring-rs实现了一个简单的插值器。
 如果值不存在则不替换占位符。
 
 用`${ENV_VAR_NAME:default_value}`语法可以指定占位符的默认值。
+
+```toml
+[sea-orm]
+uri = "${DATABASE_URL:postgres://postgres:xudjf23adj213@localhost/postgres}"
+enable_logging = true
+```

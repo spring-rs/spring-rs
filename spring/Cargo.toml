@@ -1,7 +1,7 @@
 [package]
 name = "spring"
 description = "Rust microservice framework like spring boot in java"
-version = "0.2.8"
+version = "0.2.9"
 categories = ["config"]
 keywords = ["framework", "spring"]
 edition.workspace = true
