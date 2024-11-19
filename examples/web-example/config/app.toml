@@ -24,6 +24,7 @@ with_fields = [
     "line_number",
     "internal_errors",
 ]
+override_filter = "info,tower_http::trace=debug"
 
 [logger.file]
 enable = true
