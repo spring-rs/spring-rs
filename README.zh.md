@@ -156,3 +156,8 @@ async fn fix_rate_job() {
 <td><img src="docs/static/sponsor-alipay.jpg" alt="支付宝" height="400"/></td>
 </tr>
 </table>
+
+## 交流群
+
+![QQ交流群](https://github.com/user-attachments/assets/f9f2abcb-8d91-4aa1-a8f6-93e789339e45)
+
