@@ -24,7 +24,7 @@ pub struct MailerConfig {
 pub struct SmtpTransportConfig {
     /// SMTP host. for example: localhost, smtp.gmail.com etc.
     pub host: String,
-    /// SMTP port/
+    /// SMTP port
     pub port: u16,
     /// Enable TLS
     #[serde(default = "bool::default")]
