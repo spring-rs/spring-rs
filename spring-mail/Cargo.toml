@@ -1,7 +1,7 @@
 [package]
 name = "spring-mail"
 description = "Integrate lettre into spring-rs to send emails"
-version = "0.2.1"
+version = "0.2.2"
 categories = ["email"]
 keywords = ["email", "smtp", "spring"]
 edition.workspace = true

@@ -15,6 +15,7 @@ host = "smtp.gmail.com"                                 # SMTP邮件服务器地
 port = 465                                              # SMTP服务器端口号
 secure = true                                           # 开启TLS加密
 auth = { user = "user@gmail.com", password = "passwd" } # 认证信息
+test_connection = false                                 # 启动时是否测试邮件服务器连接
 ```
 
 ## 组件
