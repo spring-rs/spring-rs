@@ -42,6 +42,10 @@ cors = { enable = true, allow_origins = [
 static = { enable = true, uri = "/static", path = "static", precompressed = true, fallback = "index.html" }
 ```
 
+> **NOTE**: 通过上面的middleware配置可以集成tower生态中提供的中间件。当然如果你对tower生态非常熟悉，也可以不启用这些middleware，通过编写代码自行配置。下面是相关的文档链接：
+> * [tower](https://docs.rs/tower/latest/tower/)
+> * [tower-http](https://docs.rs/tower-http/latest/tower_http/)
+
 ## API接口
 
 App实现了[WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html)特征，可以通过该特征指定路由配置：

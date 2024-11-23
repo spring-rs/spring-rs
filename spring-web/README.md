@@ -42,6 +42,10 @@ cors = { enable = true, allow_origins = [
 static = { enable = true, uri = "/static", path = "static", precompressed = true, fallback = "index.html" }
 ```
 
+> **NOTE**: The above middleware configuration can integrate the middleware provided in the tower ecosystem. Of course, if you are very familiar with the tower ecosystem, you can also configure it yourself by writing code without enabling these middleware. The following are relevant document links:
+> * [tower](https://docs.rs/tower/latest/tower/)
+> * [tower-http](https://docs.rs/tower-http/latest/tower_http/)
+
 ## API interface
 
 App implements the [WebConfigurator](https://docs.rs/spring-web/latest/spring_web/trait.WebConfigurator.html) feature, which can be used to specify routing configuration:
