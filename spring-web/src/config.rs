@@ -2,6 +2,7 @@ use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::config::Configurable;
 use std::net::{IpAddr, Ipv4Addr};
+use tracing::Level;
 
 /// spring-web Config
 #[derive(Debug, Configurable, JsonSchema, Deserialize)]
@@ -41,7 +42,7 @@ pub struct Middlewares {
     pub limit_payload: Option<LimitPayloadMiddleware>,
     /// Middleware that improve the tracing logger and adding trace id for each
     /// request.
-    pub logger: Option<EnableMiddleware>,
+    pub logger: Option<TraceLoggerMiddleware>,
     /// catch any code panic and log the error.
     pub catch_panic: Option<EnableMiddleware>,
     /// Setting a global timeout for the requests
@@ -74,6 +75,46 @@ pub struct StaticAssetsMiddleware {
     /// Path for the assets
     #[serde(default = "default_assets_path")]
     pub path: String,
+}
+
+/// CORS middleware configuration
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+pub struct TraceLoggerMiddleware {
+    /// toggle enable
+    pub enable: bool,
+    pub level: LogLevel,
+}
+
+#[derive(Debug, Default, Clone, JsonSchema, Deserialize)]
+pub enum LogLevel {
+    /// The "trace" level.
+    #[serde(rename = "trace")]
+    Trace,
+    /// The "debug" level.
+    #[serde(rename = "debug")]
+    Debug,
+    /// The "info" level.
+    #[serde(rename = "info")]
+    #[default]
+    Info,
+    /// The "warn" level.
+    #[serde(rename = "warn")]
+    Warn,
+    /// The "error" level.
+    #[serde(rename = "error")]
+    Error,
+}
+
+impl Into<Level> for LogLevel {
+    fn into(self) -> Level {
+        match self {
+            Self::Trace => Level::TRACE,
+            Self::Debug => Level::DEBUG,
+            Self::Info => Level::INFO,
+            Self::Warn => Level::WARN,
+            Self::Error => Level::ERROR,
+        }
+    }
 }
 
 /// CORS middleware configuration

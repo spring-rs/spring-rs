@@ -11,6 +11,7 @@ pub mod error;
 pub mod extractor;
 /// axum route handler
 pub mod handler;
+pub mod middleware;
 
 pub use axum;
 pub use spring::async_trait;
@@ -38,10 +39,7 @@ pub use axum::Router;
 use anyhow::Context;
 use axum::Extension;
 use config::ServerConfig;
-use config::{
-    EnableMiddleware, LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware,
-    TimeoutRequestMiddleware, WebConfig,
-};
+use config::WebConfig;
 use spring::plugin::component::ComponentRef;
 use spring::{
     app::{App, AppBuilder},
@@ -49,16 +47,7 @@ use spring::{
     error::Result,
     plugin::Plugin,
 };
-use std::{net::SocketAddr, ops::Deref, path::PathBuf, str::FromStr, sync::Arc, time::Duration};
-use tower_http::{
-    catch_panic::CatchPanicLayer,
-    compression::CompressionLayer,
-    cors::CorsLayer,
-    limit::RequestBodyLimitLayer,
-    services::{ServeDir, ServeFile},
-    timeout::TimeoutLayer,
-    trace::TraceLayer,
-};
+use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
 /// Routers collection
 pub type Routers = Vec<Router>;
@@ -114,7 +103,7 @@ impl Plugin for WebPlugin {
             None => Router::new(),
         };
         if let Some(middlewares) = config.middlewares {
-            router = Self::apply_middleware(router, middlewares);
+            router = crate::middleware::apply_middleware(router, middlewares);
         }
 
         let server_conf = config.server;
@@ -157,116 +146,6 @@ impl WebPlugin {
         .context("start axum server failed")?;
 
         Ok("axum schedule finished".to_string())
-    }
-
-    fn apply_middleware(mut router: Router, middleware: Middlewares) -> Router {
-        if Some(EnableMiddleware { enable: true }) == middleware.catch_panic {
-            router = router.layer(CatchPanicLayer::new());
-        }
-        if Some(EnableMiddleware { enable: true }) == middleware.compression {
-            router = router.layer(CompressionLayer::new());
-        }
-        if Some(EnableMiddleware { enable: true }) == middleware.logger {
-            router = router.layer(TraceLayer::new_for_http());
-        }
-        if let Some(TimeoutRequestMiddleware { enable, timeout }) = middleware.timeout_request {
-            if enable {
-                router = router.layer(TimeoutLayer::new(Duration::from_millis(timeout)));
-            }
-        }
-        if let Some(LimitPayloadMiddleware { enable, body_limit }) = middleware.limit_payload {
-            if enable {
-                let limit = byte_unit::Byte::from_str(&body_limit)
-                    .unwrap_or_else(|_| panic!("parse limit payload str failed: {}", &body_limit));
-
-                let limit_payload = RequestBodyLimitLayer::new(limit.as_u64() as usize);
-                router = router.layer(limit_payload);
-            }
-        }
-        if let Some(cors) = middleware.cors {
-            if cors.enable {
-                let cors =
-                    Self::build_cors_middleware(&cors).expect("cors middleware build failed");
-                router = router.layer(cors);
-            }
-        }
-        if let Some(static_assets) = middleware.static_assets {
-            if static_assets.enable {
-                router = Self::apply_static_dir(router, static_assets);
-            }
-        }
-        router
-    }
-
-    fn apply_static_dir(router: Router, static_assets: StaticAssetsMiddleware) -> Router {
-        if static_assets.must_exist
-            && (!PathBuf::from(&static_assets.path).exists()
-                || !PathBuf::from(&static_assets.fallback).exists())
-        {
-            panic!(
-                "one of the static path are not found, Folder `{}` fallback: `{}`",
-                static_assets.path, static_assets.fallback
-            );
-        }
-
-        let serve_dir = ServeDir::new(static_assets.path)
-            .not_found_service(ServeFile::new(static_assets.fallback));
-
-        let service = if static_assets.precompressed {
-            tracing::info!("[Middleware] Enable precompressed static assets");
-            serve_dir.precompressed_gzip()
-        } else {
-            serve_dir
-        };
-
-        router.nest_service(&static_assets.uri, service)
-    }
-
-    fn build_cors_middleware(cors: &config::CorsMiddleware) -> Result<CorsLayer> {
-        let mut layer = CorsLayer::new();
-
-        if let Some(allow_origins) = &cors.allow_origins {
-            // testing CORS, assuming https://example.com in the allow list:
-            // $ curl -v --request OPTIONS 'localhost:5150/api/_ping' -H 'Origin: https://example.com' -H 'Access-Control-Request-Method: GET'
-            // look for '< access-control-allow-origin: https://example.com' in response.
-            // if it doesn't appear (test with a bogus domain), it is not allowed.
-            let mut origins = Vec::with_capacity(allow_origins.len());
-            for origin in allow_origins {
-                let origin = origin
-                    .parse()
-                    .with_context(|| format!("cors origin parse failed:{}", origin))?;
-                origins.push(origin);
-            }
-            layer = layer.allow_origin(origins);
-        }
-
-        if let Some(allow_headers) = &cors.allow_headers {
-            let mut headers = Vec::with_capacity(allow_headers.len());
-            for header in allow_headers {
-                let header = header
-                    .parse()
-                    .with_context(|| format!("http header parse failed:{}", header))?;
-                headers.push(header);
-            }
-            layer = layer.allow_headers(headers);
-        }
-
-        if let Some(allow_methods) = &cors.allow_methods {
-            let mut methods = Vec::with_capacity(allow_methods.len());
-            for method in allow_methods {
-                let method = method
-                    .parse()
-                    .with_context(|| format!("http method parse failed:{}", method))?;
-                methods.push(method);
-            }
-            layer = layer.allow_methods(methods);
-        }
-
-        if let Some(max_age) = cors.max_age {
-            layer = layer.max_age(Duration::from_secs(max_age));
-        }
-
-        Ok(layer)
     }
 }
 
