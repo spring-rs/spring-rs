@@ -100,40 +100,48 @@ fn build_cors_middleware(cors: &CorsMiddleware) -> Result<CorsLayer> {
     let mut layer = CorsLayer::new();
 
     if let Some(allow_origins) = &cors.allow_origins {
-        // testing CORS, assuming https://example.com in the allow list:
-        // $ curl -v --request OPTIONS 'localhost:5150/api/_ping' -H 'Origin: https://example.com' -H 'Access-Control-Request-Method: GET'
-        // look for '< access-control-allow-origin: https://example.com' in response.
-        // if it doesn't appear (test with a bogus domain), it is not allowed.
-        let mut origins = Vec::with_capacity(allow_origins.len());
-        for origin in allow_origins {
-            let origin = origin
-                .parse()
-                .with_context(|| format!("cors origin parse failed:{}", origin))?;
-            origins.push(origin);
+        if allow_origins.iter().any(|item| item == "*") {
+            layer = layer.allow_origin(cors::Any);
+        } else {
+            let mut origins = Vec::with_capacity(allow_origins.len());
+            for origin in allow_origins {
+                let origin = origin
+                    .parse()
+                    .with_context(|| format!("cors origin parse failed:{}", origin))?;
+                origins.push(origin);
+            }
+            layer = layer.allow_origin(origins);
         }
-        layer = layer.allow_origin(origins);
     }
 
     if let Some(allow_headers) = &cors.allow_headers {
-        let mut headers = Vec::with_capacity(allow_headers.len());
-        for header in allow_headers {
-            let header = header
-                .parse()
-                .with_context(|| format!("http header parse failed:{}", header))?;
-            headers.push(header);
+        if allow_headers.iter().any(|item| item == "*") {
+            layer = layer.allow_headers(cors::Any);
+        } else {
+            let mut headers = Vec::with_capacity(allow_headers.len());
+            for header in allow_headers {
+                let header = header
+                    .parse()
+                    .with_context(|| format!("http header parse failed:{}", header))?;
+                headers.push(header);
+            }
+            layer = layer.allow_headers(headers);
         }
-        layer = layer.allow_headers(headers);
     }
 
     if let Some(allow_methods) = &cors.allow_methods {
-        let mut methods = Vec::with_capacity(allow_methods.len());
-        for method in allow_methods {
-            let method = method
-                .parse()
-                .with_context(|| format!("http method parse failed:{}", method))?;
-            methods.push(method);
+        if allow_methods.iter().any(|item| item == "*") {
+            layer = layer.allow_methods(cors::Any);
+        } else {
+            let mut methods = Vec::with_capacity(allow_methods.len());
+            for method in allow_methods {
+                let method = method
+                    .parse()
+                    .with_context(|| format!("http method parse failed:{}", method))?;
+                methods.push(method);
+            }
+            layer = layer.allow_methods(methods);
         }
-        layer = layer.allow_methods(methods);
     }
 
     if let Some(max_age) = cors.max_age {
