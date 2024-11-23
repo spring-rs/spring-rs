@@ -105,6 +105,7 @@ pub enum LogLevel {
     Error,
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Level> for LogLevel {
     fn into(self) -> Level {
         match self {
