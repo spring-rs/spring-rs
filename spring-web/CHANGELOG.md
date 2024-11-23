@@ -2,6 +2,12 @@
 
 ## 0.2.4
 
+- **changed**: fix spring-web cors middleware support wildcard ([#102])
+
+[#102]: https://github.com/spring-rs/spring-rs/pull/102
+
+## 0.2.4
+
 - **changed**: upgrade `tower-http = "0.5"` to `tower-http = "0.6"` ([#76])
 
 [#76]: https://github.com/spring-rs/spring-rs/pull/76
