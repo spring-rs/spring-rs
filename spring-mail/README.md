@@ -13,8 +13,9 @@ spring-mail = { version = "<version>" }
 [mail]
 host = "smtp.gmail.com"    # SMTP mail server address,
 port = 465                 # SMTP server port number
-secure = true              # Response timeout, in milliseconds
+secure = true              # Enable TLS
 auth = { user = "user@gmail.com", password = "passwd" } # Authentication information
+test_connection = false    # Whether to test mail server connection on startup
 ```
 
 ## Components

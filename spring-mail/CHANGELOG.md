@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- **changed**: fix smtp tls transport bug ([#103])
+
+[#103]: https://github.com/spring-rs/spring-rs/pull/103
+
 ## 0.2.1
 
 - **changed**: fix spring MINOR version ([#62])

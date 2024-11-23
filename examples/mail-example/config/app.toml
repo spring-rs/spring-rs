@@ -1,4 +1,6 @@
 [mail]
 host = "smtp.163.com"
 port = 465
-stub = true
+secure = true
+auth = { user = "example@163.com", password = "xxxxx" }
+test_connection = true
