@@ -4,6 +4,7 @@
 
 pub mod config;
 
+use config::SmtpTransportConfig;
 use lettre::address::Envelope;
 pub use lettre::message::*;
 use lettre::transport::smtp::response::Category;
@@ -71,7 +72,24 @@ impl Plugin for MailPlugin {
         let mailer = if config.stub {
             Mailer::Stub(StubMailerTransport::new_ok())
         } else {
-            Mailer::Tokio(Self::build_mailer(&config).expect("build mail plugin failed"))
+            let sender = if let Some(uri) = config.uri {
+                TokioMailerTransport::from_url(&uri)
+                    .expect("build mail plugin failed")
+                    .build()
+            } else if let Some(transport) = config.transport {
+                Self::build_smtp_transport(&transport).expect("build mail plugin failed")
+            } else {
+                panic!("The mail plugin is missing necessary smtp transport configuration");
+            };
+            if config.test_connection
+                && !sender
+                    .test_connection()
+                    .await
+                    .expect("test mail connection failed")
+            {
+                panic!("Unable to connect to the mail server");
+            }
+            Mailer::Tokio(sender)
         };
 
         app.add_component(mailer);
@@ -79,9 +97,9 @@ impl Plugin for MailPlugin {
 }
 
 impl MailPlugin {
-    fn build_mailer(config: &MailerConfig) -> Result<TokioMailerTransport> {
-        let mut email_builder = if config.secure {
-            TokioMailerTransport::starttls_relay(&config.host)
+    fn build_smtp_transport(config: &SmtpTransportConfig) -> Result<TokioMailerTransport> {
+        let mut transport_builder = if config.secure {
+            TokioMailerTransport::relay(&config.host)
                 .with_context(|| format!("build mailer failed: {}", config.host))?
                 .port(config.port)
         } else {
@@ -90,9 +108,9 @@ impl MailPlugin {
 
         if let Some(auth) = config.auth.as_ref() {
             let credentials = Credentials::new(auth.user.clone(), auth.password.clone());
-            email_builder = email_builder.credentials(credentials);
+            transport_builder = transport_builder.credentials(credentials);
         }
 
-        Ok(email_builder.build())
+        Ok(transport_builder.build())
     }
 }

@@ -13,7 +13,7 @@ spring-mail = { version = "<version>" }
 [mail]
 host = "smtp.gmail.com"                                 # SMTP邮件服务器地址，
 port = 465                                              # SMTP服务器端口号
-secure = true                                           # 响应超时时间，单位毫秒
+secure = true                                           # 开启TLS加密
 auth = { user = "user@gmail.com", password = "passwd" } # 认证信息
 ```
 

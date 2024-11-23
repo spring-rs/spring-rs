@@ -22,9 +22,8 @@ async fn main() {
 #[get("/send")]
 async fn send_mail(Component(mailer): Component<Mailer>) -> Result<impl IntoResponse> {
     let email = Message::builder()
-        .from("NoBody <nobody@domain.tld>".parse().unwrap())
-        .reply_to("Yuin <yuin@domain.tld>".parse().unwrap())
-        .to("hff1996723@163.com".parse().unwrap())
+        .from("hff1996723@163.com".parse().unwrap())
+        .to("hff1996723@qq.com".parse().unwrap())
         .subject("Happy new year")
         .header(ContentType::TEXT_PLAIN)
         .body(String::from("Be happy!"))
