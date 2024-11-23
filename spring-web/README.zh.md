@@ -23,8 +23,8 @@ graceful = true          # 是否开启优雅停机, 默认false
 # web中间件配置
 [web.middlewares]
 compression = { enable = true }  # 开启压缩中间件
-logger = { enable = true }       # 开启日志中间件
 catch_panic = { enable = true }  # 捕获handler产生的panic
+logger = { enable = true, level = "info" }            # 开启日志中间件
 limit_payload = { enable = true, body_limit = "5MB" } # 限制请求体大小
 timeout_request = { enable = true, timeout = 60000 }  # 请求超时时间60s
 
