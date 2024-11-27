@@ -148,6 +148,11 @@ async fn fix_rate_job() {
 
 ![star history](https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Timeline)
 
+## 项目示例
+
+* [Raline](https://github.com/ralinejs/raline)
+* [AutoWDS](https://github.com/AutoWDS/autowds-backend)
+
 ## 请作者喝杯茶
 
 <table>
