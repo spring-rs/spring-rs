@@ -4,6 +4,7 @@ use crate::error::{Result, WebError};
 use crate::AppState;
 use axum::{async_trait, http::request::Parts};
 use spring::config::{ConfigRegistry, Configurable};
+use spring::plugin::ComponentRegistry;
 use std::ops::{Deref, DerefMut};
 use std::result::Result as StdResult;
 

@@ -1,6 +1,7 @@
 use crate::{JobId, JobScheduler};
 use spring::async_trait;
 use spring::config::ConfigRegistry;
+use spring::plugin::ComponentRegistry;
 use spring::{app::App, config::Configurable};
 use std::ops::{Deref, DerefMut};
 

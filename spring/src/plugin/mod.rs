@@ -6,7 +6,12 @@ pub mod service;
 
 use crate::app::AppBuilder;
 use async_trait::async_trait;
-use std::{any::Any, ops::Deref, sync::Arc};
+use component::ComponentRef;
+use std::{
+    any::{self, Any},
+    ops::Deref,
+    sync::Arc,
+};
 
 /// Plugin Reference
 #[derive(Clone)]
@@ -19,7 +24,7 @@ pub trait Plugin: Any + Send + Sync {
     async fn build(&self, _app: &mut AppBuilder) {}
 
     /// Configures the `App` to which this plugin is added.
-    /// The immediately plugin will not be added to the registry, 
+    /// The immediately plugin will not be added to the registry,
     /// and the plugin cannot obtain components registered in the registry.
     fn immediately_build(&self, _app: &mut AppBuilder) {}
 
@@ -52,4 +57,28 @@ impl Deref for PluginRef {
     fn deref(&self) -> &Self::Target {
         &*self.0
     }
+}
+
+/// Component Registry
+pub trait ComponentRegistry {
+    /// Get the component reference of the specified type
+    fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
+    where
+        T: Any + Send + Sync;
+
+    /// Get the component of the specified type
+    fn get_component<T>(&self) -> Option<T>
+    where
+        T: Clone + Send + Sync + 'static;
+
+    /// Get all built components. The return value is the full crate path of all components
+    fn get_components(&self) -> Vec<String>;
+}
+
+/// Mutable Component Registry
+pub trait MutableComponentRegistry: ComponentRegistry {
+    /// Add component to the registry
+    fn add_component<T>(&mut self, component: T) -> &mut Self
+    where
+        T: Clone + any::Any + Send + Sync;
 }

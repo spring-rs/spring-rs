@@ -9,7 +9,7 @@ use config::PgConfig;
 use spring::app::AppBuilder;
 use spring::async_trait;
 use spring::config::ConfigRegistry;
-use spring::plugin::Plugin;
+use spring::plugin::{MutableComponentRegistry, Plugin};
 use std::ops::Deref;
 use std::sync::Arc;
 use tokio_postgres::NoTls;

@@ -6,7 +6,6 @@ pub mod extractor;
 pub mod handler;
 pub mod job;
 
-use spring::plugin::component::ComponentRef;
 /////////////////job-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-job` dependency
 pub use spring_macros::cron;
@@ -18,6 +17,9 @@ use anyhow::Context;
 use job::Job;
 use spring::async_trait;
 use spring::error::Result;
+use spring::plugin::component::ComponentRef;
+use spring::plugin::ComponentRegistry;
+use spring::plugin::MutableComponentRegistry;
 use spring::{
     app::{App, AppBuilder},
     plugin::Plugin,

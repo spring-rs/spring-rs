@@ -4,7 +4,7 @@ use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
-use crate::plugin::{service, Plugin};
+use crate::plugin::{service, ComponentRegistry, MutableComponentRegistry, Plugin};
 use crate::{
     error::Result,
     plugin::{component::DynComponentRef, PluginRef},
@@ -62,35 +62,10 @@ impl App {
         self.env
     }
 
-    /// Get the component reference of the specified type
-    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
-    where
-        T: Any + Send + Sync,
-    {
-        let component_name = std::any::type_name::<T>();
-        let pair = self.components.get(component_name)?;
-        let component_ref = pair.value().clone();
-        component_ref.downcast::<T>()
-    }
-
-    /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<T>
-    where
-        T: Clone + Send + Sync + 'static,
-    {
-        let component_ref = self.get_component_ref();
-        component_ref.map(|c| T::clone(&c))
-    }
-
-    /// Get all built components. The return value is the full crate path of all components
-    pub fn get_components(&self) -> Vec<String> {
-        self.components.iter().map(|e| e.key().clone()).collect()
-    }
-
     /// Returns an instance of the currently configured global [`App`].
-    /// 
-    /// **NOTE**: This global App is initialized after the application is built, 
-    /// please use it when the app is running, don't use it during the build process, 
+    ///
+    /// **NOTE**: This global App is initialized after the application is built,
+    /// please use it when the app is running, don't use it during the build process,
     /// such as during the plug-in build process.
     pub fn global() -> Arc<App> {
         GLOBAL_APP
@@ -162,42 +137,6 @@ impl AppBuilder {
         self.config =
             TomlConfigRegistry::from_str(toml_content).expect("config content parse failed");
         self
-    }
-
-    /// Add component to the registry
-    pub fn add_component<T>(&mut self, component: T) -> &mut Self
-    where
-        T: Clone + any::Any + Send + Sync,
-    {
-        let component_name = std::any::type_name::<T>();
-        log::debug!("added component: {}", component_name);
-        if self.components.contains_key(component_name) {
-            panic!("Error adding component {component_name}: component was already added in application")
-        }
-        let component_name = component_name.to_string();
-        self.components
-            .insert(component_name, DynComponentRef::new(component));
-        self
-    }
-
-    /// Get the component of the specified type
-    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
-    where
-        T: Any + Send + Sync,
-    {
-        let component_name = std::any::type_name::<T>();
-        let pair = self.components.get(component_name)?;
-        let component_ref = pair.value().clone();
-        component_ref.downcast::<T>()
-    }
-
-    /// get cloned component
-    pub fn get_component<T>(&self) -> Option<T>
-    where
-        T: Clone + Send + Sync + 'static,
-    {
-        let component_ref = self.get_component_ref();
-        component_ref.map(|c| T::clone(&c))
     }
 
     /// add [tracing_subscriber::layer]
@@ -381,5 +320,57 @@ impl ConfigRegistry for AppBuilder {
         T: serde::de::DeserializeOwned + crate::config::Configurable,
     {
         self.config.get_config::<T>()
+    }
+}
+
+macro_rules! impl_component_registry {
+    ($ty:ident) => {
+        impl ComponentRegistry for $ty {
+            /// Get the component reference of the specified type
+            fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
+            where
+                T: Any + Send + Sync,
+            {
+                let component_name = std::any::type_name::<T>();
+                let pair = self.components.get(component_name)?;
+                let component_ref = pair.value().clone();
+                component_ref.downcast::<T>()
+            }
+
+            /// Get the component of the specified type
+            fn get_component<T>(&self) -> Option<T>
+            where
+                T: Clone + Send + Sync + 'static,
+            {
+                let component_ref = self.get_component_ref();
+                component_ref.map(|c| T::clone(&c))
+            }
+
+            /// Get all built components. The return value is the full crate path of all components
+            fn get_components(&self) -> Vec<String> {
+                self.components.iter().map(|e| e.key().clone()).collect()
+            }
+        }
+    };
+}
+
+impl_component_registry!(App);
+impl_component_registry!(AppBuilder);
+
+impl MutableComponentRegistry for AppBuilder {
+    /// Add component to the registry
+    fn add_component<T>(&mut self, component: T) -> &mut Self
+    where
+        T: Clone + any::Any + Send + Sync,
+    {
+        let component_name = std::any::type_name::<T>();
+        log::debug!("added component: {}", component_name);
+        if self.components.contains_key(component_name) {
+            panic!("Error adding component {component_name}: component was already added in application")
+        }
+        let component_name = component_name.to_string();
+        self.components
+            .insert(component_name, DynComponentRef::new(component));
+        self
     }
 }

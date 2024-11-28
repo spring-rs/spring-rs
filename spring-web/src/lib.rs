@@ -41,6 +41,8 @@ use axum::Extension;
 use config::ServerConfig;
 use config::WebConfig;
 use spring::plugin::component::ComponentRef;
+use spring::plugin::ComponentRegistry;
+use spring::plugin::MutableComponentRegistry;
 use spring::{
     app::{App, AppBuilder},
     config::ConfigRegistry,

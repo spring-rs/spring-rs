@@ -6,6 +6,8 @@ use crate::error::Result;
 pub use inventory::submit;
 pub use spring_macros::Service;
 
+use super::ComponentRegistry;
+
 /// Service is a special Component that can inject dependent Components as field members
 /// ```rust
 /// use spring::plugin::service::Service;
@@ -19,7 +21,13 @@ pub use spring_macros::Service;
 /// ```
 pub trait Service: Clone + Sized {
     /// Construct the Service component
-    fn build(app: &AppBuilder) -> Result<Self>;
+    fn build<R: ComponentRegistry>(registry: &R) -> Result<Self>;
+
+    /// Whether the service is a prototype service.
+    /// If it is a prototype service, each call to ComponentRegistry::get_component will rebuild a new Service object.
+    fn prototype() -> bool {
+        false
+    }
 }
 
 /// Install the Service component into the App

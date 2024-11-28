@@ -11,6 +11,7 @@ use config::RedisConfig;
 use redis::{aio::ConnectionManagerConfig, Client};
 use spring::async_trait;
 use spring::config::ConfigRegistry;
+use spring::plugin::MutableComponentRegistry;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use std::time::Duration;
 

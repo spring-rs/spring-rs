@@ -4,22 +4,23 @@
 
 pub mod config;
 
-use config::SmtpTransportConfig;
-use lettre::address::Envelope;
 pub use lettre::message::*;
-use lettre::transport::smtp::response::Category;
-use lettre::transport::smtp::response::Code;
-use lettre::transport::smtp::response::Detail;
 pub use lettre::transport::smtp::response::Response;
-use lettre::transport::smtp::response::Severity;
 pub use lettre::AsyncTransport;
 pub use lettre::Message;
 
 use anyhow::Context;
 use config::MailerConfig;
+use config::SmtpTransportConfig;
+use lettre::address::Envelope;
+use lettre::transport::smtp::response::Category;
+use lettre::transport::smtp::response::Code;
+use lettre::transport::smtp::response::Detail;
+use lettre::transport::smtp::response::Severity;
 use lettre::{transport::smtp::authentication::Credentials, Tokio1Executor};
 use spring::async_trait;
 use spring::config::ConfigRegistry;
+use spring::plugin::MutableComponentRegistry;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 
 pub type TokioMailerTransport = lettre::AsyncSmtpTransport<Tokio1Executor>;
