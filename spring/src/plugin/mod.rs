@@ -70,9 +70,6 @@ pub trait ComponentRegistry {
     fn get_component<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
-
-    /// Get all built components. The return value is the full crate path of all components
-    fn get_components(&self) -> Vec<String>;
 }
 
 /// Mutable Component Registry

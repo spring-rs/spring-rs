@@ -11,13 +11,13 @@ use crate::{
 };
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::str::FromStr;
 use std::sync::RwLock;
 use std::{any, collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
 
-type Registry<T> = DashMap<String, T>;
+type Registry<T> = DashMap<TypeId, T>;
 type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
 /// Running Applications
@@ -95,24 +95,25 @@ impl AppBuilder {
 
     /// add plugin
     pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
-        let plugin_name = plugin.name().to_string();
-        log::debug!("added plugin: {plugin_name}");
+        log::debug!("added plugin: {}", plugin.name());
         if plugin.immediately() {
             plugin.immediately_build(self);
             return self;
         }
-        if self.plugin_registry.contains_key(plugin.name()) {
+        let plugin_id = TypeId::of::<T>();
+        if self.plugin_registry.contains_key(&plugin_id) {
+            let plugin_name = plugin.name();
             panic!("Error adding plugin {plugin_name}: plugin was already added in application")
         }
         self.plugin_registry
-            .insert(plugin_name, PluginRef::new(plugin));
+            .insert(plugin_id, PluginRef::new(plugin));
         self
     }
 
     /// Returns `true` if the [`Plugin`] has already been added.
     #[inline]
     pub fn is_plugin_added<T: Plugin>(&self) -> bool {
-        self.plugin_registry.contains_key(any::type_name::<T>())
+        self.plugin_registry.contains_key(&TypeId::of::<T>())
     }
 
     /// The path of the configuration file, default is `./config/app.toml`.
@@ -331,8 +332,8 @@ macro_rules! impl_component_registry {
             where
                 T: Any + Send + Sync,
             {
-                let component_name = std::any::type_name::<T>();
-                let pair = self.components.get(component_name)?;
+                let component_id = TypeId::of::<T>();
+                let pair = self.components.get(&component_id)?;
                 let component_ref = pair.value().clone();
                 component_ref.downcast::<T>()
             }
@@ -344,11 +345,6 @@ macro_rules! impl_component_registry {
             {
                 let component_ref = self.get_component_ref();
                 component_ref.map(|c| T::clone(&c))
-            }
-
-            /// Get all built components. The return value is the full crate path of all components
-            fn get_components(&self) -> Vec<String> {
-                self.components.iter().map(|e| e.key().clone()).collect()
             }
         }
     };
@@ -363,14 +359,14 @@ impl MutableComponentRegistry for AppBuilder {
     where
         T: Clone + any::Any + Send + Sync,
     {
+        let component_id = TypeId::of::<T>();
         let component_name = std::any::type_name::<T>();
         log::debug!("added component: {}", component_name);
-        if self.components.contains_key(component_name) {
+        if self.components.contains_key(&component_id) {
             panic!("Error adding component {component_name}: component was already added in application")
         }
-        let component_name = component_name.to_string();
         self.components
-            .insert(component_name, DynComponentRef::new(component));
+            .insert(component_id, DynComponentRef::new(component));
         self
     }
 }
