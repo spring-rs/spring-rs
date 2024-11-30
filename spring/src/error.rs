@@ -4,6 +4,10 @@ use thiserror::Error;
 /// Spring custom error type
 #[derive(Error, Debug)]
 pub enum AppError {
+    /// not prototype service
+    #[error("{0} is not prototype service")]
+    NotPrototype(&'static str),
+
     /// `.env` file reading failed
     #[error(transparent)]
     EnvError(#[from] dotenvy::Error),

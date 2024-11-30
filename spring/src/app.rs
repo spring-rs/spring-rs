@@ -4,10 +4,10 @@ use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
-use crate::plugin::service::{PrototypeBuilder, Service};
+use crate::plugin::service::Service;
 use crate::plugin::{service, ComponentRegistry, MutableComponentRegistry, Plugin};
 use crate::{
-    error::Result,
+    error::{AppError, Result},
     plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
@@ -15,7 +15,7 @@ use once_cell::sync::Lazy;
 use std::any::{Any, TypeId};
 use std::str::FromStr;
 use std::sync::RwLock;
-use std::{any, collections::HashSet, future::Future, path::Path, sync::Arc};
+use std::{collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
 
 type Registry<T> = DashMap<TypeId, T>;
@@ -329,7 +329,6 @@ impl ConfigRegistry for AppBuilder {
 macro_rules! impl_component_registry {
     ($ty:ident) => {
         impl ComponentRegistry for $ty {
-            /// Get the component reference of the specified type
             fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
             where
                 T: Any + Send + Sync,
@@ -340,14 +339,31 @@ macro_rules! impl_component_registry {
                 component_ref.downcast::<T>()
             }
 
-            /// Get the component of the specified type
-            /// If it is a prototype service, each call get_component will rebuild a new Service object.
             fn get_component<T>(&self) -> Option<T>
             where
                 T: Clone + Send + Sync + 'static,
             {
                 let component_ref = self.get_component_ref();
                 component_ref.map(|arc| T::clone(&arc))
+            }
+
+            fn has_component<T>(&self) -> bool
+            where
+                T: Any + Send + Sync,
+            {
+                let component_id = TypeId::of::<T>();
+                self.components.contains_key(&component_id)
+            }
+
+            fn create_service<S>(&self) -> Result<S>
+            where
+                S: Service + Send + Sync,
+            {
+                if S::prototype() {
+                    S::build(self)
+                } else {
+                    Err(AppError::NotPrototype(std::any::type_name::<S>()))
+                }
             }
         }
     };
@@ -360,7 +376,7 @@ impl MutableComponentRegistry for AppBuilder {
     /// Add component to the registry
     fn add_component<C>(&mut self, component: C) -> &mut Self
     where
-        C: Clone + any::Any + Send + Sync,
+        C: Clone + Any + Send + Sync,
     {
         let component_id = TypeId::of::<C>();
         let component_name = std::any::type_name::<C>();
@@ -370,21 +386,6 @@ impl MutableComponentRegistry for AppBuilder {
         }
         self.components
             .insert(component_id, DynComponentRef::new(component));
-        self
-    }
-
-    fn add_prototype<S>(&mut self) -> &mut Self
-    where
-        S: Service + Send + Sync,
-    {
-        // let component_id = TypeId::of::<S>();
-        let component_name = std::any::type_name::<S>();
-        log::debug!("added component prototype: {}", component_name);
-        // if self.prototypes.contains_key(&component_id) {
-        //     panic!("Error adding component {component_name}: component was already added in application")
-        // }
-        // self.prototypes
-        //     .insert(component_id, DynComponentRef::new(prototype));
         self
     }
 }

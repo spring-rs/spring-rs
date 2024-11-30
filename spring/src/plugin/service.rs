@@ -4,7 +4,6 @@ use crate::app::AppBuilder;
 use crate::config::ConfigRegistry;
 use crate::error::Result;
 use crate::plugin::ComponentRegistry;
-use std::marker::PhantomData;
 
 pub use inventory::submit;
 pub use spring_macros::Service;
@@ -27,30 +26,9 @@ pub trait Service: Clone + Sized + 'static {
         R: ComponentRegistry + ConfigRegistry;
 
     /// Whether the service is a prototype service.
-    /// If it is a prototype service, each call to `ComponentRegistry::get_component` will rebuild a new Service object.
+    /// If it is a prototype service, call to `ComponentRegistry::create_service` will build a new Service object.
     fn prototype() -> bool {
         false
-    }
-}
-
-/// Constructor for constructing prototype service
-#[derive(Clone)]
-pub struct PrototypeBuilder<T: Service> {
-    _t: PhantomData<T>,
-}
-
-impl<T: Service> PrototypeBuilder<T> {
-    /// new
-    pub fn new() -> Self {
-        Self { _t: PhantomData }
-    }
-
-    /// Call Service::build to construct the prorotype Service
-    pub fn build<R>(self, app: &R) -> Result<T>
-    where
-        R: ComponentRegistry + ConfigRegistry,
-    {
-        T::build(app)
     }
 }
 

@@ -5,6 +5,7 @@ pub mod component;
 pub mod service;
 
 use crate::app::AppBuilder;
+use crate::error::Result;
 use async_trait::async_trait;
 use component::ComponentRef;
 use service::Service;
@@ -71,6 +72,16 @@ pub trait ComponentRegistry {
     fn get_component<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
+
+    /// Is there a component of the specified type in the registry?
+    fn has_component<T>(&self) -> bool
+    where
+        T: Any + Send + Sync;
+
+    /// Creating a prototype service
+    fn create_service<S>(&self) -> Result<S>
+    where
+        S: Service + Send + Sync;
 }
 
 /// Mutable Component Registry
@@ -79,9 +90,4 @@ pub trait MutableComponentRegistry: ComponentRegistry {
     fn add_component<C>(&mut self, component: C) -> &mut Self
     where
         C: Clone + any::Any + Send + Sync;
-
-    /// Add component prototype to the registry
-    fn add_prototype<S>(&mut self) -> &mut Self
-    where
-        S: Service + Send + Sync;
 }
