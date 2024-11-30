@@ -7,7 +7,7 @@ use crate::plugin::component::ComponentRef;
 use crate::plugin::service::Service;
 use crate::plugin::{service, ComponentRegistry, MutableComponentRegistry, Plugin};
 use crate::{
-    error::{AppError, Result},
+    error::Result,
     plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
@@ -359,11 +359,7 @@ macro_rules! impl_component_registry {
             where
                 S: Service + Send + Sync,
             {
-                if S::prototype() {
-                    S::build(self)
-                } else {
-                    Err(AppError::NotPrototype(std::any::type_name::<S>()))
-                }
+                S::build(self)
             }
         }
     };

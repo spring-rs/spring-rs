@@ -14,6 +14,10 @@ use spring_web::get;
 use spring_web::{
     axum::response::IntoResponse, error::Result, extractor::Component, WebConfigurator, WebPlugin,
 };
+use std::sync::{
+    atomic::{AtomicI32, Ordering},
+    Arc,
+};
 
 // Main function entry
 #[auto_config(WebConfigurator)] // auto config web router
@@ -31,6 +35,8 @@ async fn main() {
 struct UserConfig {
     username: String,
     project: String,
+    #[serde(default)]
+    init_count: i32,
 }
 
 #[derive(Clone, Service)]
@@ -39,11 +45,15 @@ struct UserService {
     db: ConnectPool,
     #[inject(config)]
     config: UserConfig,
+    #[inject(func = Self::init_count(&config))]
+    count: Arc<AtomicI32>,
 }
 
 impl UserService {
     pub async fn query_db(&self) -> Result<String> {
-        let UserConfig { username, project } = &self.config;
+        let UserConfig {
+            username, project, ..
+        } = &self.config;
 
         let version: String = sqlx::query("select version() as version")
             .fetch_one(&self.db)
@@ -51,9 +61,17 @@ impl UserService {
             .context("sqlx query failed")?
             .get("version");
 
+        let pv_count = self.count.fetch_add(1, Ordering::SeqCst);
         Ok(format!(
-            "The database used by {username}'s {project} is {version}"
+            r#"
+            The database used by {username}'s {project} is {version}.
+            Page view counter is {pv_count}
+            "#
         ))
+    }
+
+    fn init_count(config: &UserConfig) -> Arc<AtomicI32> {
+        Arc::new(AtomicI32::new(config.init_count))
     }
 }
 
@@ -62,11 +80,19 @@ impl UserService {
 struct UserServiceUseRef {
     db: ComponentRef<ConnectPool>,
     config: ConfigRef<UserConfig>,
+    #[inject(func = init_zero_count())]
+    count: Arc<AtomicI32>,
+}
+
+fn init_zero_count() -> Arc<AtomicI32> {
+    Arc::new(AtomicI32::new(0))
 }
 
 impl UserServiceUseRef {
     pub async fn query_db(&self) -> Result<String> {
-        let UserConfig { username, project } = &*self.config;
+        let UserConfig {
+            username, project, ..
+        } = &*self.config;
 
         let version: String = sqlx::query("select version() as version")
             .fetch_one(&*self.db)
@@ -74,8 +100,12 @@ impl UserServiceUseRef {
             .context("sqlx query failed")?
             .get("version");
 
+        let pv_count = self.count.fetch_add(1, Ordering::SeqCst);
         Ok(format!(
-            "The database used by {username}'s {project} is {version}"
+            r#"
+            The database used by {username}'s {project} is {version}.
+            Page view counter is {pv_count}
+            "#
         ))
     }
 }

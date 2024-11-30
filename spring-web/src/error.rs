@@ -240,9 +240,6 @@ pub enum WebError {
     #[error(transparent)]
     ResponseStatusError(#[from] KnownWebError),
 
-    #[error("Component of type {0} does not exist in the registry")]
-    ComponentNotExists(&'static str),
-
     #[error("get server config failed for typeof {0}, {1}")]
     ConfigDeserializeErr(&'static str, AppError),
 

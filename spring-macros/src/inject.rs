@@ -13,19 +13,32 @@ fn inject_error_tip() -> syn::Error {
 }
 
 enum InjectableType {
+    Option,
     Component(syn::Path),
     Config(syn::Path),
     ComponentRef(syn::Path),
     ConfigRef(syn::Path),
-    MethodCall(syn::ExprMethodCall),
+    FuncCall(syn::ExprCall),
+}
+
+impl InjectableType {
+    fn order(&self) -> u8 {
+        match self {
+            Self::Option => 0,
+            Self::Component(_) => 1,
+            Self::Config(_) => 2,
+            Self::ComponentRef(_) => 3,
+            Self::ConfigRef(_) => 4,
+            Self::FuncCall(_) => 5,
+        }
+    }
 }
 
 enum InjectableAttr {
     Component,
     Config,
-    MethodCall(syn::ExprMethodCall),
+    FuncCall(syn::ExprCall),
 }
-
 struct Injectable {
     ty: InjectableType,
     field_name: syn::Ident,
@@ -52,15 +65,18 @@ impl Injectable {
         if let Some(inject_attr) = inject_attr {
             if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
                 let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
-                return Ok(attr.to_type(ty));
+                return Ok(attr.make_type(ty));
             } else {
                 Err(syn::Error::new_spanned(
                     inject_attr,
-                    "invalid inject definition, expected #[inject(component|config|method(args))]",
+                    "invalid inject definition, expected #[inject(component|config|func(args))]",
                 ))?;
             }
         }
         let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
+        if last_path_segment.ident == "Option" {
+            return Ok(InjectableType::Option);
+        }
         if last_path_segment.ident == "ComponentRef" {
             return Ok(InjectableType::ComponentRef(Self::get_argument_type(
                 &last_path_segment.arguments,
@@ -79,7 +95,7 @@ impl Injectable {
         Err(syn::Error::new_spanned(
             &field,
             format!(
-                "{field_name} field missing inject definition, expected #[inject(component|config|method(args))]",
+                "{field_name} field missing inject definition, expected #[inject(component|config|func(args))]",
             ),
         ))
     }
@@ -106,24 +122,24 @@ impl syn::parse::Parse for InjectableAttr {
         if name.is_ident("config") {
             return Ok(Self::Config);
         }
-        if name.is_ident("method") {
+        if name.is_ident("func") {
             input.parse::<Token![=]>()?;
-            let method_call = input.parse::<syn::ExprMethodCall>()?;
-            return Ok(Self::MethodCall(method_call));
+            let func_call = input.parse::<syn::ExprCall>()?;
+            return Ok(Self::FuncCall(func_call));
         }
         Err(syn::Error::new(
             Span::call_site(),
-            "invalid inject definition, expected #[inject(component|config|method(args))]",
+            "invalid inject definition, expected #[inject(component|config|func(args))]",
         ))
     }
 }
 
 impl InjectableAttr {
-    fn to_type(self, ty: &syn::Path) -> InjectableType {
+    fn make_type(self, ty: &syn::Path) -> InjectableType {
         match self {
             Self::Component => InjectableType::Component(ty.clone()),
             Self::Config => InjectableType::Config(ty.clone()),
-            Self::MethodCall(method_call) => InjectableType::MethodCall(method_call),
+            Self::FuncCall(func_call) => InjectableType::FuncCall(func_call),
         }
     }
 }
@@ -132,6 +148,11 @@ impl ToTokens for Injectable {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self { ty, field_name } = self;
         match ty {
+            InjectableType::Option => {
+                tokens.extend(quote! {
+                    let #field_name = None;
+                });
+            }
             InjectableType::Component(type_path) => {
                 tokens.extend(quote! {
                     let #field_name = app.try_get_component::<#type_path>()?;
@@ -152,9 +173,9 @@ impl ToTokens for Injectable {
                     let #field_name = ::spring::config::ConfigRef::new(app.get_config::<#type_path>()?);
                 });
             }
-            InjectableType::MethodCall(method_call) => {
+            InjectableType::FuncCall(func_call) => {
                 tokens.extend(quote! {
-                    let #field_name = #method_call;
+                    let #field_name = #func_call;
                 });
             }
         }
@@ -167,10 +188,13 @@ struct Service {
 
 impl Service {
     fn new(fields: syn::Fields) -> syn::Result<Self> {
-        let fields = fields
+        let mut fields = fields
             .into_iter()
             .map(Injectable::new)
             .collect::<syn::Result<Vec<_>>>()?;
+
+        // Put FuncCall at the end
+        fields.sort_by_key(|f| f.ty.order());
         Ok(Self { fields })
     }
 }

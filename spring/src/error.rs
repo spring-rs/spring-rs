@@ -4,10 +4,6 @@ use thiserror::Error;
 /// Spring custom error type
 #[derive(Error, Debug)]
 pub enum AppError {
-    /// not prototype service
-    #[error("{0} is not prototype service")]
-    NotPrototype(&'static str),
-
     /// component not exists
     #[error("{0} component not exists")]
     ComponentNotExist(&'static str),

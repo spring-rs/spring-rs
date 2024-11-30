@@ -24,12 +24,6 @@ pub trait Service: Clone + Sized + 'static {
     fn build<R>(registry: &R) -> Result<Self>
     where
         R: ComponentRegistry + ConfigRegistry;
-
-    /// Whether the service is a prototype service.
-    /// If it is a prototype service, call to `ComponentRegistry::create_service` will build a new Service object.
-    fn prototype() -> bool {
-        false
-    }
 }
 
 //////////////////////////////////////////////////
