@@ -4,8 +4,8 @@
 pub mod component;
 pub mod service;
 
-use crate::app::AppBuilder;
 use crate::error::Result;
+use crate::{app::AppBuilder, error::AppError};
 use async_trait::async_trait;
 use component::ComponentRef;
 use service::Service;
@@ -68,10 +68,54 @@ pub trait ComponentRegistry {
     where
         T: Any + Send + Sync;
 
+    /// Get the component reference of the specified type.
+    /// If the component does not exist, it will panic.
+    fn get_expect_component_ref<T>(&self) -> ComponentRef<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        self.get_component_ref().expect(&format!(
+            "{} component not exists in registry",
+            std::any::type_name::<T>()
+        ))
+    }
+
+    /// Get the component reference of the specified type.
+    /// If the component does not exist, it will return AppError::ComponentNotExist.
+    fn try_get_component_ref<T>(&self) -> Result<ComponentRef<T>>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        self.get_component_ref()
+            .ok_or_else(|| AppError::ComponentNotExist(std::any::type_name::<T>()))
+    }
+
     /// Get the component of the specified type
     fn get_component<T>(&self) -> Option<T>
     where
         T: Clone + Send + Sync + 'static;
+
+    /// Get the component of the specified type.
+    /// If the component does not exist, it will panic.
+    fn get_expect_component<T>(&self) -> T
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        self.get_component().expect(&format!(
+            "{} component not exists in registry",
+            std::any::type_name::<T>()
+        ))
+    }
+
+    /// Get the component of the specified type.
+    /// If the component does not exist, it will return AppError::ComponentNotExist.
+    fn try_get_component<T>(&self) -> Result<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        self.get_component()
+            .ok_or_else(|| AppError::ComponentNotExist(std::any::type_name::<T>()))
+    }
 
     /// Is there a component of the specified type in the registry?
     fn has_component<T>(&self) -> bool

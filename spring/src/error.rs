@@ -8,6 +8,10 @@ pub enum AppError {
     #[error("{0} is not prototype service")]
     NotPrototype(&'static str),
 
+    /// component not exists
+    #[error("{0} component not exists")]
+    ComponentNotExist(&'static str),
+
     /// `.env` file reading failed
     #[error(transparent)]
     EnvError(#[from] dotenvy::Error),

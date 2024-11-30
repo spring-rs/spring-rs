@@ -35,9 +35,9 @@ struct UserConfig {
 
 #[derive(Clone, Service)]
 struct UserService {
-    #[component]
+    #[inject(component)]
     db: ConnectPool,
-    #[config]
+    #[inject(config)]
     config: UserConfig,
 }
 
