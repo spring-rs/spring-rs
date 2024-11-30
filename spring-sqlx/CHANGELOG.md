@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- **breaking**: refactor dependency inject ([#105])
+
+[#105]: https://github.com/spring-rs/spring-rs/pull/105
+
 ## 0.2.3
 
 - **changed**: upgrade `sqlx = "0.7"` to `sqlx = "0.8"` ([#76])

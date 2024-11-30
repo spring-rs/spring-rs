@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- **breaking**: refactor dependency inject ([#105])
+
+[#105]: https://github.com/spring-rs/spring-rs/pull/105
+
 ## 0.2.3
 
 - **changed**: upgrade `sea-orm = "1.0"` to `sea-orm = "1.1"` ([#76])
