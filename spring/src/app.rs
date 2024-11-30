@@ -4,6 +4,7 @@ use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
+use crate::plugin::service::{PrototypeBuilder, Service};
 use crate::plugin::{service, ComponentRegistry, MutableComponentRegistry, Plugin};
 use crate::{
     error::Result,
@@ -283,6 +284,7 @@ impl AppBuilder {
 
     fn build_app(&mut self) -> Arc<App> {
         let components = std::mem::take(&mut self.components);
+        // let prototypes = std::mem::take(&mut self.prototypes);
         let config = std::mem::take(&mut self.config);
         Arc::new(App {
             env: self.env,
@@ -339,12 +341,13 @@ macro_rules! impl_component_registry {
             }
 
             /// Get the component of the specified type
+            /// If it is a prototype service, each call get_component will rebuild a new Service object.
             fn get_component<T>(&self) -> Option<T>
             where
                 T: Clone + Send + Sync + 'static,
             {
                 let component_ref = self.get_component_ref();
-                component_ref.map(|c| T::clone(&c))
+                component_ref.map(|arc| T::clone(&arc))
             }
         }
     };
@@ -355,18 +358,33 @@ impl_component_registry!(AppBuilder);
 
 impl MutableComponentRegistry for AppBuilder {
     /// Add component to the registry
-    fn add_component<T>(&mut self, component: T) -> &mut Self
+    fn add_component<C>(&mut self, component: C) -> &mut Self
     where
-        T: Clone + any::Any + Send + Sync,
+        C: Clone + any::Any + Send + Sync,
     {
-        let component_id = TypeId::of::<T>();
-        let component_name = std::any::type_name::<T>();
+        let component_id = TypeId::of::<C>();
+        let component_name = std::any::type_name::<C>();
         log::debug!("added component: {}", component_name);
         if self.components.contains_key(&component_id) {
             panic!("Error adding component {component_name}: component was already added in application")
         }
         self.components
             .insert(component_id, DynComponentRef::new(component));
+        self
+    }
+
+    fn add_prototype<S>(&mut self) -> &mut Self
+    where
+        S: Service + Send + Sync,
+    {
+        // let component_id = TypeId::of::<S>();
+        let component_name = std::any::type_name::<S>();
+        log::debug!("added component prototype: {}", component_name);
+        // if self.prototypes.contains_key(&component_id) {
+        //     panic!("Error adding component {component_name}: component was already added in application")
+        // }
+        // self.prototypes
+        //     .insert(component_id, DynComponentRef::new(prototype));
         self
     }
 }

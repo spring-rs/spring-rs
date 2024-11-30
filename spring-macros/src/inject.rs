@@ -141,8 +141,10 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
 
     let output = quote! {
         impl ::spring::plugin::service::Service for #ident {
-            fn build(app: &::spring::app::AppBuilder) -> ::spring::error::Result<Self> {
-                use ::spring::config::ConfigRegistry;
+            fn build<R>(app: &R) -> ::spring::error::Result<Self>
+            where
+                R: ::spring::plugin::ComponentRegistry + ::spring::config::ConfigRegistry
+            {
                 Ok(#service)
             }
         }
@@ -150,6 +152,7 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
         struct #service_registrar;
         impl ::spring::plugin::service::ServiceRegistrar for #service_registrar{
             fn install_service(&self, app: &mut ::spring::app::AppBuilder)->::spring::error::Result<()> {
+                use ::spring::plugin::MutableComponentRegistry;
                 app.add_component(#ident::build(app)?);
                 Ok(())
             }

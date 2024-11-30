@@ -7,6 +7,7 @@ pub mod service;
 use crate::app::AppBuilder;
 use async_trait::async_trait;
 use component::ComponentRef;
+use service::Service;
 use std::{
     any::{self, Any},
     ops::Deref,
@@ -75,7 +76,12 @@ pub trait ComponentRegistry {
 /// Mutable Component Registry
 pub trait MutableComponentRegistry: ComponentRegistry {
     /// Add component to the registry
-    fn add_component<T>(&mut self, component: T) -> &mut Self
+    fn add_component<C>(&mut self, component: C) -> &mut Self
     where
-        T: Clone + any::Any + Send + Sync;
+        C: Clone + any::Any + Send + Sync;
+
+    /// Add component prototype to the registry
+    fn add_prototype<S>(&mut self) -> &mut Self
+    where
+        S: Service + Send + Sync;
 }
