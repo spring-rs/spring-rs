@@ -162,7 +162,6 @@ where
 }
 
 /// TypeHandler is used to configure the spring-macro marked job handler
-///
 
 pub trait TypedHandlerRegistrar: Send + Sync + 'static {
     fn install_job(&self, jobs: Jobs) -> Jobs;
