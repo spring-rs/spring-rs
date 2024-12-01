@@ -172,4 +172,4 @@ async fn fix_rate_job() {
 
 ## 帮助
 
-点击这里可以查看`spring-rs`使用过程中遇到的常见问题 [Help →](https://spring-rs.github.io/docs/help/faq/)
+点击这里可以查看`spring-rs`使用过程中遇到的常见问题 [Help →](https://spring-rs.github.io/zh/docs/help/faq/)
