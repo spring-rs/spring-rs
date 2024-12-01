@@ -1,7 +1,7 @@
 <div align="center">
-    <img src="docs/static/logo-rust.svg" alt="Logo" width="200"/>
+    <img src="https://raw.githubusercontent.com/spring-rs/spring-rs/refs/heads/master/docs/static/logo-rust.svg" alt="Logo" width="200"/>
     <h3>spring-rs is application framework written in Rust, inspired by Java's SpringBoot</h3>
-    <p>English ｜ <a href="./README.zh.md">中文</a></p>
+    <p>English ｜ <a href="https://spring-rs.github.io/zh/docs/getting-started/introduction/">中文</a></p>
     <p>
         <a href="https://crates.io/crates/spring">
             <img src="https://img.shields.io/crates/v/spring.svg" alt="crates.io"/>
@@ -130,15 +130,15 @@ async fn fix_rate_job() {
 
 ## Supported plugins
 
-* [x] ![spring-web](https://img.shields.io/crates/v/spring-web.svg)[`spring-web`](./spring-web/): Based on [`axum`](https://github.com/tokio-rs/axum)
-* [x] ![spring-sqlx](https://img.shields.io/crates/v/spring-sqlx.svg)[`spring-sqlx`](./spring-sqlx/): Integrated with [`sqlx`](https://github.com/launchbadge/sqlx)
-* [x] ![spring-postgres](https://img.shields.io/crates/v/spring-postgres.svg)[`spring-postgres`](./spring-postgres/): Integrated with [`rust-postgres`](https://github.com/sfackler/rust-postgres)
-* [x] ![spring-sea-orm](https://img.shields.io/crates/v/spring-sea-orm.svg)[`spring-sea-orm`](./spring-sea-orm/): Integrated with [`sea-orm`](https://www.sea-ql.org/SeaORM/)
-* [x] ![spring-redis](https://img.shields.io/crates/v/spring-redis.svg)[`spring-redis`](./spring-redis/): Integrated with [`redis`](https://github.com/redis-rs/redis-rs)
-* [x] ![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)[`spring-mail`](./spring-mail/): Integrated with [`lettre`](https://github.com/lettre/lettre)
-* [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](./spring-job/): Integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler)
-* [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](./spring-stream/): Integrate [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing such as redis-stream and kafka
-* [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](./spring-opentelemetry/): Integrate with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing
+* [x] ![spring-web](https://img.shields.io/crates/v/spring-web.svg)[`spring-web`](https://spring-rs.github.io/docs/plugins/spring-web/): Based on [`axum`](https://github.com/tokio-rs/axum)
+* [x] ![spring-sqlx](https://img.shields.io/crates/v/spring-sqlx.svg)[`spring-sqlx`](https://spring-rs.github.io/docs/plugins/spring-sqlx/): Integrated with [`sqlx`](https://github.com/launchbadge/sqlx)
+* [x] ![spring-postgres](https://img.shields.io/crates/v/spring-postgres.svg)[`spring-postgres`](https://spring-rs.github.io/docs/plugins/spring-postgres/): Integrated with [`rust-postgres`](https://github.com/sfackler/rust-postgres)
+* [x] ![spring-sea-orm](https://img.shields.io/crates/v/spring-sea-orm.svg)[`spring-sea-orm`](https://spring-rs.github.io/docs/plugins/spring-sea-orm/): Integrated with [`sea-orm`](https://www.sea-ql.org/SeaORM/)
+* [x] ![spring-redis](https://img.shields.io/crates/v/spring-redis.svg)[`spring-redis`](https://spring-rs.github.io/docs/plugins/spring-redis/): Integrated with [`redis`](https://github.com/redis-rs/redis-rs)
+* [x] ![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)[`spring-mail`](https://spring-rs.github.io/docs/plugins/spring-mail/): Integrated with [`lettre`](https://github.com/lettre/lettre)
+* [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](https://spring-rs.github.io/docs/plugins/spring-job/): Integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler)
+* [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](https://spring-rs.github.io/docs/plugins/spring-stream/): Integrate [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing such as redis-stream and kafka
+* [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/): Integrate with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing
 * [ ] `spring-tarpc`: Integrate[`tarpc`](https://github.com/google/tarpc) to implement RPC calls
 
 ## Ecosystem
@@ -150,3 +150,11 @@ async fn fix_rate_job() {
 
 * [Raline](https://github.com/ralinejs/raline)
 * [AutoWDS](https://github.com/AutoWDS/autowds-backend)
+
+## Contribution
+
+We also welcome community experts to contribute their own plugins. [Contributing →](https://github.com/spring-rs/spring-rs)
+
+## Help
+
+Click here to view common problems encountered when using `spring-rs` [Help →](../../help/faq/)

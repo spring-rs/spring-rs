@@ -34,3 +34,4 @@ docs/public
 perf*
 flamegraph.svg
 logs/
+contrib-plugins/

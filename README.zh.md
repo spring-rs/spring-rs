@@ -1,7 +1,7 @@
 <div align="center">
-    <img src="docs/static/logo-rust.svg" alt="Logo" width="200"/>
+    <img src="https://raw.githubusercontent.com/spring-rs/spring-rs/refs/heads/master/docs/static/logo-rust.svg" alt="Logo" width="200"/>
     <h3>spring-rs是Rust编写的应用框架，类似于java生态的SpringBoot</h3>
-    <p><a href="./README.md">English</a> ｜ 中文</p>
+    <p><a href="https://spring-rs.github.io/docs/getting-started/introduction/">English</a> ｜ 中文</p>
     <p>
         <a href="https://crates.io/crates/spring">
             <img src="https://img.shields.io/crates/v/spring.svg" alt="crates.io"/>
@@ -146,7 +146,7 @@ async fn fix_rate_job() {
 * ![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg) [`spring-opendal`](https://github.com/spring-rs/contrib-plugins/tree/master/spring-opendal)
 
 
-![star history](https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Timeline)
+<img alt="star history" src="https://api.star-history.com/svg?repos=spring-rs/spring-rs&type=Timeline" style="width: 100%"/>
 
 ## 项目示例
 
@@ -157,8 +157,8 @@ async fn fix_rate_job() {
 
 <table>
 <tr>
-<td><img src="docs/static/sponsor-wechat.jpg" alt="微信" height="400"/></td>
-<td><img src="docs/static/sponsor-alipay.jpg" alt="支付宝" height="400"/></td>
+<td><img src="https://github.com/spring-rs/spring-rs/blob/master/docs/static/sponsor-wechat.jpg" alt="微信" height="400"/></td>
+<td><img src="https://github.com/spring-rs/spring-rs/blob/master/docs/static/sponsor-alipay.jpg" alt="支付宝" height="400"/></td>
 </tr>
 </table>
 
@@ -166,3 +166,10 @@ async fn fix_rate_job() {
 
 <img src="https://github.com/user-attachments/assets/f9f2abcb-8d91-4aa1-a8f6-93e789339e45" alt="QQ交流群" height="400"/>
 
+## 贡献
+
+也欢迎社区的大牛贡献自己的插件。 [Contributing →](https://github.com/spring-rs/spring-rs)
+
+## 帮助
+
+点击这里可以查看`spring-rs`使用过程中遇到的常见问题 [Help →](../../help/faq/)
