@@ -157,8 +157,8 @@ async fn fix_rate_job() {
 
 <table>
 <tr>
-<td><img src="https://github.com/spring-rs/spring-rs/blob/master/docs/static/sponsor-wechat.jpg" alt="微信" height="400"/></td>
-<td><img src="https://github.com/spring-rs/spring-rs/blob/master/docs/static/sponsor-alipay.jpg" alt="支付宝" height="400"/></td>
+<td><img src="https://github.com/user-attachments/assets/fe69c992-2da3-409e-9f61-507be436baeb" alt="微信" height="400"/></td>
+<td><img src="https://github.com/user-attachments/assets/25668103-f41e-482f-925f-0007c40a917d" alt="支付宝" height="400"/></td>
 </tr>
 </table>
 
