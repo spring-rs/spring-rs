@@ -157,4 +157,4 @@ We also welcome community experts to contribute their own plugins. [Contributing
 
 ## Help
 
-Click here to view common problems encountered when using `spring-rs` [Help →](../../help/faq/)
+Click here to view common problems encountered when using `spring-rs` [Help →](https://spring-rs.github.io/docs/help/faq/)
