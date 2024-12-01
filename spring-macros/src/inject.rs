@@ -93,7 +93,7 @@ impl Injectable {
             .map(|ident| ident.to_string())
             .ok_or_else(inject_error_tip)?;
         Err(syn::Error::new_spanned(
-            &field,
+            field,
             format!(
                 "{field_name} field missing inject definition, expected #[inject(component|config|func(args))]",
             ),
