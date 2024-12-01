@@ -15,7 +15,7 @@ pub use spring_macros::Service;
 ///
 /// #[derive(Clone, Service)]
 /// struct UserService {
-///     #[component]
+///     #[inject(component)]
 ///     db: ConnectPool
 /// }
 /// ```
