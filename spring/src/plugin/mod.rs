@@ -74,10 +74,12 @@ pub trait ComponentRegistry {
     where
         T: Clone + Send + Sync + 'static,
     {
-        self.get_component_ref().expect(&format!(
-            "{} component not exists in registry",
-            std::any::type_name::<T>()
-        ))
+        self.get_component_ref().unwrap_or_else(|| {
+            panic!(
+                "{} component not exists in registry",
+                std::any::type_name::<T>()
+            )
+        })
     }
 
     /// Get the component reference of the specified type.
@@ -101,10 +103,12 @@ pub trait ComponentRegistry {
     where
         T: Clone + Send + Sync + 'static,
     {
-        self.get_component().expect(&format!(
-            "{} component not exists in registry",
-            std::any::type_name::<T>()
-        ))
+        self.get_component().unwrap_or_else(|| {
+            panic!(
+                "{} component not exists in registry",
+                std::any::type_name::<T>()
+            )
+        })
     }
 
     /// Get the component of the specified type.
