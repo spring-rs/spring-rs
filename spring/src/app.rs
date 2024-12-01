@@ -4,20 +4,21 @@ use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
-use crate::plugin::{service, Plugin};
+use crate::plugin::service::Service;
+use crate::plugin::{service, ComponentRegistry, MutableComponentRegistry, Plugin};
 use crate::{
     error::Result,
     plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::str::FromStr;
 use std::sync::RwLock;
-use std::{any, collections::HashSet, future::Future, path::Path, sync::Arc};
+use std::{collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
 
-type Registry<T> = DashMap<String, T>;
+type Registry<T> = DashMap<TypeId, T>;
 type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
 /// Running Applications
@@ -62,35 +63,10 @@ impl App {
         self.env
     }
 
-    /// Get the component reference of the specified type
-    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
-    where
-        T: Any + Send + Sync,
-    {
-        let component_name = std::any::type_name::<T>();
-        let pair = self.components.get(component_name)?;
-        let component_ref = pair.value().clone();
-        component_ref.downcast::<T>()
-    }
-
-    /// Get the component of the specified type
-    pub fn get_component<T>(&self) -> Option<T>
-    where
-        T: Clone + Send + Sync + 'static,
-    {
-        let component_ref = self.get_component_ref();
-        component_ref.map(|c| T::clone(&c))
-    }
-
-    /// Get all built components. The return value is the full crate path of all components
-    pub fn get_components(&self) -> Vec<String> {
-        self.components.iter().map(|e| e.key().clone()).collect()
-    }
-
     /// Returns an instance of the currently configured global [`App`].
-    /// 
-    /// **NOTE**: This global App is initialized after the application is built, 
-    /// please use it when the app is running, don't use it during the build process, 
+    ///
+    /// **NOTE**: This global App is initialized after the application is built,
+    /// please use it when the app is running, don't use it during the build process,
     /// such as during the plug-in build process.
     pub fn global() -> Arc<App> {
         GLOBAL_APP
@@ -120,24 +96,25 @@ impl AppBuilder {
 
     /// add plugin
     pub fn add_plugin<T: Plugin>(&mut self, plugin: T) -> &mut Self {
-        let plugin_name = plugin.name().to_string();
-        log::debug!("added plugin: {plugin_name}");
+        log::debug!("added plugin: {}", plugin.name());
         if plugin.immediately() {
             plugin.immediately_build(self);
             return self;
         }
-        if self.plugin_registry.contains_key(plugin.name()) {
+        let plugin_id = TypeId::of::<T>();
+        if self.plugin_registry.contains_key(&plugin_id) {
+            let plugin_name = plugin.name();
             panic!("Error adding plugin {plugin_name}: plugin was already added in application")
         }
         self.plugin_registry
-            .insert(plugin_name, PluginRef::new(plugin));
+            .insert(plugin_id, PluginRef::new(plugin));
         self
     }
 
     /// Returns `true` if the [`Plugin`] has already been added.
     #[inline]
     pub fn is_plugin_added<T: Plugin>(&self) -> bool {
-        self.plugin_registry.contains_key(any::type_name::<T>())
+        self.plugin_registry.contains_key(&TypeId::of::<T>())
     }
 
     /// The path of the configuration file, default is `./config/app.toml`.
@@ -162,42 +139,6 @@ impl AppBuilder {
         self.config =
             TomlConfigRegistry::from_str(toml_content).expect("config content parse failed");
         self
-    }
-
-    /// Add component to the registry
-    pub fn add_component<T>(&mut self, component: T) -> &mut Self
-    where
-        T: Clone + any::Any + Send + Sync,
-    {
-        let component_name = std::any::type_name::<T>();
-        log::debug!("added component: {}", component_name);
-        if self.components.contains_key(component_name) {
-            panic!("Error adding component {component_name}: component was already added in application")
-        }
-        let component_name = component_name.to_string();
-        self.components
-            .insert(component_name, DynComponentRef::new(component));
-        self
-    }
-
-    /// Get the component of the specified type
-    pub fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
-    where
-        T: Any + Send + Sync,
-    {
-        let component_name = std::any::type_name::<T>();
-        let pair = self.components.get(component_name)?;
-        let component_ref = pair.value().clone();
-        component_ref.downcast::<T>()
-    }
-
-    /// get cloned component
-    pub fn get_component<T>(&self) -> Option<T>
-    where
-        T: Clone + Send + Sync + 'static,
-    {
-        let component_ref = self.get_component_ref();
-        component_ref.map(|c| T::clone(&c))
     }
 
     /// add [tracing_subscriber::layer]
@@ -343,6 +284,7 @@ impl AppBuilder {
 
     fn build_app(&mut self) -> Arc<App> {
         let components = std::mem::take(&mut self.components);
+        // let prototypes = std::mem::take(&mut self.prototypes);
         let config = std::mem::take(&mut self.config);
         Arc::new(App {
             env: self.env,
@@ -381,5 +323,65 @@ impl ConfigRegistry for AppBuilder {
         T: serde::de::DeserializeOwned + crate::config::Configurable,
     {
         self.config.get_config::<T>()
+    }
+}
+
+macro_rules! impl_component_registry {
+    ($ty:ident) => {
+        impl ComponentRegistry for $ty {
+            fn get_component_ref<T>(&self) -> Option<ComponentRef<T>>
+            where
+                T: Any + Send + Sync,
+            {
+                let component_id = TypeId::of::<T>();
+                let pair = self.components.get(&component_id)?;
+                let component_ref = pair.value().clone();
+                component_ref.downcast::<T>()
+            }
+
+            fn get_component<T>(&self) -> Option<T>
+            where
+                T: Clone + Send + Sync + 'static,
+            {
+                let component_ref = self.get_component_ref();
+                component_ref.map(|arc| T::clone(&arc))
+            }
+
+            fn has_component<T>(&self) -> bool
+            where
+                T: Any + Send + Sync,
+            {
+                let component_id = TypeId::of::<T>();
+                self.components.contains_key(&component_id)
+            }
+
+            fn create_service<S>(&self) -> Result<S>
+            where
+                S: Service + Send + Sync,
+            {
+                S::build(self)
+            }
+        }
+    };
+}
+
+impl_component_registry!(App);
+impl_component_registry!(AppBuilder);
+
+impl MutableComponentRegistry for AppBuilder {
+    /// Add component to the registry
+    fn add_component<C>(&mut self, component: C) -> &mut Self
+    where
+        C: Clone + Any + Send + Sync,
+    {
+        let component_id = TypeId::of::<C>();
+        let component_name = std::any::type_name::<C>();
+        log::debug!("added component: {}", component_name);
+        if self.components.contains_key(&component_id) {
+            panic!("Error adding component {component_name}: component was already added in application")
+        }
+        self.components
+            .insert(component_id, DynComponentRef::new(component));
+        self
     }
 }

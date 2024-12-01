@@ -42,6 +42,7 @@ use opentelemetry_semantic_conventions::attribute;
 use spring::async_trait;
 use spring::config::env::Env;
 use spring::plugin::component::ComponentRef;
+use spring::plugin::{ComponentRegistry, MutableComponentRegistry};
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use std::time::Duration;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};

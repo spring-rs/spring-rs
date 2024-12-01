@@ -4,6 +4,10 @@ use thiserror::Error;
 /// Spring custom error type
 #[derive(Error, Debug)]
 pub enum AppError {
+    /// component not exists
+    #[error("{0} component not exists")]
+    ComponentNotExist(&'static str),
+
     /// `.env` file reading failed
     #[error(transparent)]
     EnvError(#[from] dotenvy::Error),

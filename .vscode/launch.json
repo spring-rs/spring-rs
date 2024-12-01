@@ -370,5 +370,26 @@
             },
             "cwd": "${workspaceFolder}/examples/opentelemetry-example"
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'dependency-inject-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=dependency-inject-example",
+                    "--package=dependency-inject-example"
+                ],
+                "filter": {
+                    "name": "dependency-inject-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/dependency-inject-example"
+        },
     ]
 }

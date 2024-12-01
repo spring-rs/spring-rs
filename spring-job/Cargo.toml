@@ -1,7 +1,7 @@
 [package]
 name = "spring-job"
 description = "Integrate tokio-cron-scheduler with spring-rs framework"
-version = "0.2.2"
+version = "0.3.0"
 categories = ["date-and-time"]
 keywords = ["cron-scheduler", "task-scheduling", "cron-job", "spring"]
 edition.workspace = true
@@ -10,8 +10,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-spring = { path = "../spring", version = "0.2" }
-spring-macros = { path = "../spring-macros", version = "0.2" }
+spring = { path = "../spring", version = "0.3" }
+spring-macros = { path = "../spring-macros", version = "0.3" }
 tokio-cron-scheduler = { workspace = true, features = ["signal"] }
 anyhow = { workspace = true }
 serde = { workspace = true }

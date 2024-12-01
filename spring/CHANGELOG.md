@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.0
+
+- **breaking**: refactor dependency inject ([#105])
+- **changed**: use `TypeId` instead of `type_name` to improve performance ([#105])
+
+[#105]: https://github.com/spring-rs/spring-rs/pull/105
+
+**Migrating from 0.2 to 0.3**
+
+```diff
+ #[derive(Clone, Service)]
+ struct UserService {
+-    #[component]
++    #[inject(component)]
+     db: ConnectPool,
+-    #[config]
++    #[inject(config)]
+     config: UserConfig,
+ }
+```
+
 ## 0.2.9
 
 - **added**: toml support Environment variable interpolator ([#95])

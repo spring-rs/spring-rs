@@ -9,6 +9,7 @@ use anyhow::Context;
 use config::SeaOrmConfig;
 use sea_orm::{ConnectOptions, Database};
 use spring::config::ConfigRegistry;
+use spring::plugin::{ComponentRegistry, MutableComponentRegistry};
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use spring::{async_trait, App};
 use std::sync::Arc;

@@ -17,7 +17,6 @@ pub use sea_streamer::redis;
 #[cfg(feature = "stdio")]
 pub use sea_streamer::stdio;
 pub use sea_streamer::ConsumerMode;
-use spring::plugin::component::ComponentRef;
 /////////////////stream-macros/////////////////////
 pub use spring_macros::stream_listener;
 
@@ -32,6 +31,8 @@ use serde::Serialize;
 use spring::async_trait;
 use spring::config::ConfigRegistry;
 use spring::error::Result;
+use spring::plugin::component::ComponentRef;
+use spring::plugin::{ComponentRegistry, MutableComponentRegistry};
 use spring::{
     app::{App, AppBuilder},
     plugin::Plugin,

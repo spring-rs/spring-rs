@@ -1,7 +1,9 @@
 //! Service is a special Component that supports dependency injection at compile time
 #![doc = include_str!("../../DI.md")]
 use crate::app::AppBuilder;
+use crate::config::ConfigRegistry;
 use crate::error::Result;
+use crate::plugin::ComponentRegistry;
 
 pub use inventory::submit;
 pub use spring_macros::Service;
@@ -17,11 +19,14 @@ pub use spring_macros::Service;
 ///     db: ConnectPool
 /// }
 /// ```
-pub trait Service: Clone + Sized {
+pub trait Service: Clone + Sized + 'static {
     /// Construct the Service component
-    fn build(app: &AppBuilder) -> Result<Self>;
+    fn build<R>(registry: &R) -> Result<Self>
+    where
+        R: ComponentRegistry + ConfigRegistry;
 }
 
+//////////////////////////////////////////////////
 /// Install the Service component into the App
 pub trait ServiceRegistrar: Send + Sync + 'static {
     /// Install the Service component into the App

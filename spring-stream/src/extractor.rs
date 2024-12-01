@@ -10,6 +10,7 @@ pub use sea_streamer::Timestamp;
 use spring::app::App;
 use spring::config::ConfigRegistry;
 use spring::config::Configurable;
+use spring::plugin::ComponentRegistry;
 use std::ops::Deref;
 use std::ops::DerefMut;
 

@@ -9,7 +9,7 @@ use config::SqlxConfig;
 use spring::app::AppBuilder;
 use spring::config::ConfigRegistry;
 use spring::error::Result;
-use spring::plugin::Plugin;
+use spring::plugin::{ComponentRegistry, MutableComponentRegistry, Plugin};
 use spring::{async_trait, App};
 use sqlx::{Database, Pool};
 use std::sync::Arc;
@@ -58,9 +58,12 @@ impl SqlxPlugin {
         Self::establish_connection(opt, &config.uri).await
     }
 
-    fn configure_pool<T>(mut opt: sqlx::pool::PoolOptions<T>, config: &SqlxConfig) -> sqlx::pool::PoolOptions<T>
+    fn configure_pool<T>(
+        mut opt: sqlx::pool::PoolOptions<T>,
+        config: &SqlxConfig,
+    ) -> sqlx::pool::PoolOptions<T>
     where
-        T: Database
+        T: Database,
     {
         opt = opt
             .max_connections(config.max_connections)
@@ -80,10 +83,11 @@ impl SqlxPlugin {
     }
 
     async fn establish_connection<T>(opt: sqlx::pool::PoolOptions<T>, uri: &str) -> Result<Pool<T>>
-        where
-        T: Database
+    where
+        T: Database,
     {
-        Ok(opt.connect(uri)
+        Ok(opt
+            .connect(uri)
             .await
             .with_context(|| format!("Failed to connect to database: {}", uri))?)
     }

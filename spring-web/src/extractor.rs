@@ -2,8 +2,10 @@ pub use axum::extract::*;
 
 use crate::error::{Result, WebError};
 use crate::AppState;
+use anyhow::Context;
 use axum::{async_trait, http::request::Parts};
 use spring::config::{ConfigRegistry, Configurable};
+use spring::plugin::ComponentRegistry;
 use std::ops::{Deref, DerefMut};
 use std::result::Result as StdResult;
 
@@ -27,10 +29,11 @@ impl RequestPartsExt for Parts {
     }
 
     fn get_component<T: Clone + Send + Sync + 'static>(&self) -> Result<T> {
-        match self.get_app_state().app.get_component_ref::<T>() {
-            Some(component) => Ok(T::clone(&component)),
-            None => Err(WebError::ComponentNotExists(std::any::type_name::<T>())),
-        }
+        Ok(self
+            .get_app_state()
+            .app
+            .try_get_component()
+            .context("get_component failed")?)
     }
 
     fn get_config<T: serde::de::DeserializeOwned + Configurable>(&self) -> Result<T> {
