@@ -12,4 +12,4 @@ toc = true
 top = false
 +++
 
-{{ include(path="../../../contrib-plugins/README.md") }}
+{{ include(path="../../contrib-plugins/README.md") }}
