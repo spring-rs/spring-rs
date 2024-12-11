@@ -30,7 +30,7 @@ Compared with SpringBoot in java, spring-rs has higher performance and lower mem
 
 **web**
 
-```rust, no_run
+```rust,no_run
 use spring::{auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
@@ -76,7 +76,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 
 **job**
 
-```rust, no_run
+```rust,no_run
 use anyhow::Context;
 use spring::{auto_config, App};
 use spring_job::{cron, fix_delay, fix_rate};
