@@ -70,11 +70,13 @@ impl Job {
                     Box::pin(Self::call(handler.clone(), job_id, jobs, app.clone()))
                 },
             ),
-            Trigger::Cron(schedule) => {
-                tokio_cron_scheduler::Job::new_async(schedule.as_str(), move |job_id, jobs| {
+            Trigger::Cron(schedule) => tokio_cron_scheduler::Job::new_async_tz(
+                schedule.as_str(),
+                chrono::Local,
+                move |job_id, jobs| {
                     Box::pin(Self::call(handler.clone(), job_id, jobs, app.clone()))
-                })
-            }
+                },
+            ),
         }
         .context("build job failed")
         .unwrap()
