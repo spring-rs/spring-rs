@@ -1,5 +1,9 @@
 # Changelog
 
+- **changed**: use Local timezone instead of utc timezone ([#111])
+
+[#111]: https://github.com/spring-rs/spring-rs/pull/111
+
 ## 0.3.0
 
 - **breaking**: refactor dependency inject ([#105])
