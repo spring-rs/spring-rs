@@ -226,7 +226,7 @@ pub fn derive_config(input: TokenStream) -> TokenStream {
 }
 
 /// Injectable Servcie
-#[proc_macro_derive(Service, attributes(inject))]
+#[proc_macro_derive(Service, attributes(prototype, inject))]
 pub fn derive_service(input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input as DeriveInput);
 

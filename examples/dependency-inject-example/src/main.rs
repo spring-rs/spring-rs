@@ -49,6 +49,19 @@ struct UserService {
     count: Arc<AtomicI32>,
 }
 
+#[derive(Clone, Service)]
+#[prototype]
+struct UserProtoService {
+    #[inject(component)]
+    db: ConnectPool,
+    #[inject(config)]
+    config: UserConfig,
+    #[inject(func = init_zero_count())]
+    count: Arc<AtomicI32>,
+    // x: i64,
+    // y: i32,
+}
+
 impl UserService {
     pub async fn query_db(&self) -> Result<String> {
         let UserConfig {
