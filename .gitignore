@@ -28,6 +28,10 @@ rust-project.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 
+### IDEA RustRover ###
+.idea/
+*.iml
+
 docs/public
 
 ### flamegraph

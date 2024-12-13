@@ -211,7 +211,9 @@ impl AppBuilder {
         // 3. service dependency inject
         service::auto_inject_service(self)?;
 
-        Ok(self.build_app())
+        let app = self.build_app();
+        App::set_global(app.clone());
+        Ok(app)
     }
 
     fn load_config_if_need(&mut self) -> Result<()> {
@@ -284,7 +286,6 @@ impl AppBuilder {
 
     fn build_app(&mut self) -> Arc<App> {
         let components = std::mem::take(&mut self.components);
-        // let prototypes = std::mem::take(&mut self.prototypes);
         let config = std::mem::take(&mut self.config);
         Arc::new(App {
             env: self.env,
@@ -383,5 +384,55 @@ impl MutableComponentRegistry for AppBuilder {
         self.components
             .insert(component_id, DynComponentRef::new(component));
         self
+    }
+}
+
+#[allow(unused_imports)]
+mod tests {
+    use crate::plugin::{ComponentRegistry, MutableComponentRegistry};
+    use crate::App;
+
+    #[tokio::test]
+    async fn test_component_registry() {
+        #[derive(Clone)]
+        struct UnitComponent;
+
+        #[derive(Clone)]
+        struct TupleComponent(i32, i32);
+
+        #[derive(Clone)]
+        struct StructComponent {
+            x: i32,
+            y: i32,
+        }
+
+        #[derive(Clone)]
+        struct Point<T> {
+            x: T,
+            y: T,
+        }
+
+        let app = App::new()
+            .add_component(UnitComponent)
+            .add_component(TupleComponent(1, 2))
+            .add_component(StructComponent { x: 3, y: 4 })
+            .add_component(Point { x: 5i64, y: 6i64 })
+            .build()
+            .await;
+        let app = app.expect("app build failed");
+
+        let _ = app.get_expect_component::<UnitComponent>();
+        let t = app.get_expect_component::<TupleComponent>();
+        assert_eq!(t.0, 1);
+        assert_eq!(t.1, 2);
+        let s = app.get_expect_component::<StructComponent>();
+        assert_eq!(s.x, 3);
+        assert_eq!(s.y, 4);
+        let p = app.get_expect_component::<Point<i64>>();
+        assert_eq!(p.x, 5);
+        assert_eq!(p.y, 6);
+
+        let p = app.get_component::<Point<i32>>();
+        assert!(p.is_none())
     }
 }
