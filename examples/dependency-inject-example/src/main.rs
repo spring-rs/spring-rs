@@ -4,7 +4,7 @@ use serde::Deserialize;
 use spring::{
     auto_config,
     config::{ConfigRef, Configurable},
-    plugin::{component::ComponentRef, service::Service, ComponentRegistry, MutableComponentRegistry},
+    plugin::{component::ComponentRef, service::Service, MutableComponentRegistry},
     App,
 };
 use spring_sqlx::{
