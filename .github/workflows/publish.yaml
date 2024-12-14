@@ -22,4 +22,8 @@ jobs:
       - name: Run tests
         run: cargo test --workspace --verbose
       - name: Run Publish
-        run: sed -i 's/"examples.*,//' Cargo.toml && cp README.md ./spring/ && cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}} --allow-dirty
+        run: |
+          sed -i 's/"examples.*,//' Cargo.toml &&
+          cp README.md ./spring/ &&
+          sed -i 's/include_str!("../../README.md")/include_str!("../README.md")/' spring/src/lib.rs
+          cargo ws publish --publish-as-is --token=${{secrets.CARGO_TOKEN}} --allow-dirty
