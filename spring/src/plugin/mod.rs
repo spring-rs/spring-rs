@@ -8,7 +8,6 @@ use crate::error::Result;
 use crate::{app::AppBuilder, error::AppError};
 use async_trait::async_trait;
 use component::ComponentRef;
-use service::Service;
 use std::{
     any::{self, Any},
     ops::Deref,
@@ -125,11 +124,6 @@ pub trait ComponentRegistry {
     fn has_component<T>(&self) -> bool
     where
         T: Any + Send + Sync;
-
-    /// Creating a prototype service
-    fn create_service<S>(&self) -> Result<S>
-    where
-        S: Service + Send + Sync;
 }
 
 /// Mutable Component Registry

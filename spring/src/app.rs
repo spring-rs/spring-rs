@@ -4,7 +4,6 @@ use crate::config::toml::TomlConfigRegistry;
 use crate::config::ConfigRegistry;
 use crate::log::{BoxLayer, LogPlugin};
 use crate::plugin::component::ComponentRef;
-use crate::plugin::service::Service;
 use crate::plugin::{service, ComponentRegistry, MutableComponentRegistry, Plugin};
 use crate::{
     error::Result,
@@ -179,11 +178,11 @@ impl AppBuilder {
             Err(e) => {
                 log::error!("{:?}", e);
             }
-            Ok(app) => App::set_global(app),
+            _ => { /* ignore */ }
         }
     }
 
-    async fn inner_run(&mut self) -> Result<Arc<App>> {
+    async fn inner_run(&mut self) -> Result<()> {
         // 1. load toml config
         self.load_config_if_need()?;
 
@@ -211,9 +210,7 @@ impl AppBuilder {
         // 3. service dependency inject
         service::auto_inject_service(self)?;
 
-        let app = self.build_app();
-        App::set_global(app.clone());
-        Ok(app)
+        Ok(self.build_app())
     }
 
     fn load_config_if_need(&mut self) -> Result<()> {
@@ -258,7 +255,7 @@ impl AppBuilder {
         self.plugin_registry = registry;
     }
 
-    async fn schedule(&mut self) -> Result<Arc<App>> {
+    async fn schedule(&mut self) -> Result<()> {
         let app = self.build_app();
 
         let schedulers = std::mem::take(&mut self.schedulers);
@@ -281,17 +278,19 @@ impl AppBuilder {
             let result = Box::into_pin(hook(app.clone())).await?;
             log::info!("shutdown result: {result}");
         }
-        Ok(app)
+        Ok(())
     }
 
     fn build_app(&mut self) -> Arc<App> {
         let components = std::mem::take(&mut self.components);
         let config = std::mem::take(&mut self.config);
-        Arc::new(App {
+        let app = Arc::new(App {
             env: self.env,
             components,
             config,
-        })
+        });
+        App::set_global(app.clone());
+        app
     }
 }
 
@@ -354,13 +353,6 @@ macro_rules! impl_component_registry {
             {
                 let component_id = TypeId::of::<T>();
                 self.components.contains_key(&component_id)
-            }
-
-            fn create_service<S>(&self) -> Result<S>
-            where
-                S: Service + Send + Sync,
-            {
-                S::build(self)
             }
         }
     };

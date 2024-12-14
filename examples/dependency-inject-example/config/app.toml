@@ -4,3 +4,9 @@ project = "spring-rs"
 
 [sqlx]
 uri = "postgres://postgres:xudjf23adj213@127.0.0.1:5432"
+
+[logger]
+pretty_backtrace = true
+
+[web]
+graceful = true
