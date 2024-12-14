@@ -36,10 +36,7 @@ impl InjectableType {
     }
 
     fn is_arg(&self) -> bool {
-        match self {
-            Self::PrototypeArg(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::PrototypeArg(_))
     }
 }
 
@@ -100,7 +97,7 @@ impl Injectable {
             )?));
         }
         if is_prototype {
-            return Ok(InjectableType::PrototypeArg(ty.clone()));
+            Ok(InjectableType::PrototypeArg(ty.clone()))
         } else {
             if last_path_segment.ident == "Option" {
                 return Ok(InjectableType::Option);
@@ -313,7 +310,7 @@ impl ToTokens for Service {
             Some(Prototype { build }) => {
                 let fn_name = syn::Ident::new(&build.value(), build.span());
                 let (args, fields): (Vec<&Injectable>, Vec<&Injectable>) =
-                    fields.into_iter().partition(|f| f.ty.is_arg());
+                    fields.iter().partition(|f| f.ty.is_arg());
                 quote! {
                     impl #ident {
                         pub fn #fn_name(#(#args),*) -> ::spring::error::Result<Self> {
