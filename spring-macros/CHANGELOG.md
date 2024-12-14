@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+- **added**: Added prototype service derived macro generation `build` function ([#112])
+
+[#112]: https://github.com/spring-rs/spring-rs/pull/112
+
 ## 0.3.0
 
 - **breaking**: refactor dependency inject ([#105])
