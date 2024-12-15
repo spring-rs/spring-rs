@@ -19,7 +19,7 @@ enum InjectableType {
     ComponentRef(syn::Path),
     ConfigRef(syn::Path),
     FuncCall(syn::ExprCall),
-    PrototypeArg(syn::Path),
+    PrototypeArg(syn::Type),
 }
 
 impl InjectableType {
@@ -64,44 +64,42 @@ impl Injectable {
     }
 
     fn compute_type(field: &syn::Field, is_prototype: bool) -> syn::Result<InjectableType> {
-        let ty = if let syn::Type::Path(path) = &field.ty {
-            &path.path
-        } else {
-            Err(inject_error_tip())?
-        };
-        let inject_attr = field
-            .attrs
-            .iter()
-            .find(|attr| attr.path().is_ident("inject"));
+        if let syn::Type::Path(path) = &field.ty {
+            let ty = &path.path;
+            let inject_attr = field
+                .attrs
+                .iter()
+                .find(|attr| attr.path().is_ident("inject"));
 
-        if let Some(inject_attr) = inject_attr {
-            if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
-                let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
-                return Ok(attr.make_type(ty));
-            } else {
-                Err(syn::Error::new_spanned(
-                    inject_attr,
-                    "invalid inject definition, expected #[inject(component|config|func(args))]",
-                ))?;
+            if let Some(inject_attr) = inject_attr {
+                if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
+                    let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
+                    return Ok(attr.make_type(ty));
+                } else {
+                    Err(syn::Error::new_spanned(
+                inject_attr,
+                "invalid inject definition, expected #[inject(component|config|func(args))]",
+                    ))?;
+                }
             }
-        }
-        let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
-        if last_path_segment.ident == "ComponentRef" {
-            return Ok(InjectableType::ComponentRef(Self::get_argument_type(
-                &last_path_segment.arguments,
-            )?));
-        }
-        if last_path_segment.ident == "ConfigRef" {
-            return Ok(InjectableType::ConfigRef(Self::get_argument_type(
-                &last_path_segment.arguments,
-            )?));
-        }
-        if is_prototype {
-            Ok(InjectableType::PrototypeArg(ty.clone()))
-        } else {
-            if last_path_segment.ident == "Option" {
+            let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
+            if last_path_segment.ident == "ComponentRef" {
+                return Ok(InjectableType::ComponentRef(Self::get_argument_type(
+                    &last_path_segment.arguments,
+                )?));
+            }
+            if last_path_segment.ident == "ConfigRef" {
+                return Ok(InjectableType::ConfigRef(Self::get_argument_type(
+                    &last_path_segment.arguments,
+                )?));
+            }
+            if !is_prototype && last_path_segment.ident == "Option" {
                 return Ok(InjectableType::Option);
             }
+        }
+        if is_prototype {
+            Ok(InjectableType::PrototypeArg(field.ty.clone()))
+        } else {
             let field_name = &field
                 .ident
                 .clone()
@@ -111,8 +109,7 @@ impl Injectable {
             field,
             format!(
                 "{field_name} field missing inject definition, expected #[inject(component|config|func(args))]",
-            ),
-        ))
+            )))
         }
     }
 
@@ -233,6 +230,7 @@ impl ToTokens for Injectable {
 }
 
 struct Service {
+    generics: syn::Generics,
     ident: proc_macro2::Ident,
     prototype: Option<Prototype>,
     fields: Vec<Injectable>,
@@ -241,7 +239,11 @@ struct Service {
 impl Service {
     fn new(input: syn::DeriveInput) -> syn::Result<Self> {
         let syn::DeriveInput {
-            ident, attrs, data, ..
+            attrs,
+            ident,
+            generics,
+            data,
+            ..
         } = input;
         let prototype = attrs.iter().find(|a| a.path().is_ident("prototype"));
         let prototype = match prototype {
@@ -261,6 +263,7 @@ impl Service {
 
         // Put FuncCall at the end
         Ok(Self {
+            generics,
             ident,
             prototype,
             fields,
@@ -300,6 +303,7 @@ impl Prototype {
 impl ToTokens for Service {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self {
+            generics,
             ident,
             prototype,
             fields,
@@ -311,8 +315,14 @@ impl ToTokens for Service {
                 let fn_name = syn::Ident::new(&build.value(), build.span());
                 let (args, fields): (Vec<&Injectable>, Vec<&Injectable>) =
                     fields.iter().partition(|f| f.ty.is_arg());
+                let syn::Generics {
+                    lt_token,
+                    params,
+                    gt_token,
+                    ..
+                } = generics;
                 quote! {
-                    impl #ident {
+                    impl #lt_token #params #gt_token #ident #generics {
                         pub fn #fn_name(#(#args),*) -> ::spring::error::Result<Self> {
                             use ::spring::plugin::ComponentRegistry;
                             use ::spring::config::ConfigRegistry;

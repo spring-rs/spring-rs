@@ -54,16 +54,20 @@ struct UserService {
     count: Arc<AtomicI32>,
 }
 
-#[derive(Clone, Service)]
+#[derive(Service)]
 #[prototype]
 struct UserProtoService {
     #[inject(component)]
-    db: ConnectPool,
-    #[inject(config)]
-    config: UserConfig,
-    #[inject(component)]
     count: PageView,
     step: i32,
+}
+
+#[derive(Service)]
+#[prototype]
+struct UserProtoServiceWithLifetime<'s> {
+    #[inject(component)]
+    count: PageView,
+    step: &'s i32,
 }
 
 impl UserService {
@@ -128,24 +132,27 @@ impl UserServiceUseRef {
 }
 
 impl UserProtoService {
-    pub async fn query_db(&self) -> Result<String> {
-        let UserConfig {
-            username, project, ..
-        } = &self.config;
-
-        let version: String = sqlx::query("select version() as version")
-            .fetch_one(&self.db)
-            .await
-            .context("sqlx query failed")?
-            .get("version");
-
+    pub fn pv_count(&self) -> Result<String> {
         let Self { step, .. } = self;
 
         let pv_count = self.count.fetch_add(*step, Ordering::SeqCst);
 
         Ok(format!(
             r#"
-            The database used by {username}'s {project} is {version}.
+            Page view counter is {pv_count}
+            "#
+        ))
+    }
+}
+
+impl<'s> UserProtoServiceWithLifetime<'s>{
+    pub fn pv_count(&self) -> Result<String> {
+        let Self { step, .. } = self;
+
+        let pv_count = self.count.fetch_add(**step, Ordering::SeqCst);
+
+        Ok(format!(
+            r#"
             Page view counter is {pv_count}
             "#
         ))
@@ -167,5 +174,11 @@ async fn hello_ref(
 #[get("/prototype-service")]
 async fn prototype_service() -> Result<impl IntoResponse> {
     let service = UserProtoService::build(5).context("build service failed")?;
-    Ok(service.query_db().await?)
+    Ok(service.pv_count()?)
+}
+
+#[get("/prototype-service-lifetime")]
+async fn prototype_service_with_lifetime() -> Result<impl IntoResponse> {
+    let service = UserProtoServiceWithLifetime::build(&10).context("build service failed")?;
+    Ok(service.pv_count()?)
 }
