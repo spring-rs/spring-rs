@@ -48,7 +48,7 @@ use spring_web::extractor::Component;
 use spring_web::error::Result;
 use anyhow::Context;
 
-#[get("/:id")]
+#[get("/{id}")]
 async fn get_todo_list(
     Component(db): Component<DbConn>,
     Path(id): Path<i32>
