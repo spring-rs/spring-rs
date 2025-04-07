@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- **breaking**: upgrade axum to 0.8 ([#122])
+
+[#122]: https://github.com/spring-rs/spring-rs/pull/122
+
 ## 0.3.0
 
 - **breaking**: refactor dependency inject ([#105])
