@@ -145,6 +145,6 @@ impl JobPlugin {
         // Start the scheduler
         sched.start().await.context("job scheduler start failed")?;
 
-        Ok("job schedule finished".to_string())
+        Ok("job schedule started".to_string())
     }
 }

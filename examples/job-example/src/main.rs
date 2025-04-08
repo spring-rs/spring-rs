@@ -14,10 +14,14 @@ async fn main() {
     App::new()
         .add_plugin(JobPlugin)
         .add_plugin(SqlxPlugin)
+        .add_scheduler(|_| Box::new(wait_for_job()))
         .run()
         .await;
+}
 
+async fn wait_for_job() -> spring::error::Result<String> {
     tokio::time::sleep(Duration::from_secs(100)).await;
+    Ok("100s finished".to_string())
 }
 
 #[cron("1/10 * * * * *")]
