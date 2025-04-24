@@ -379,7 +379,7 @@ impl MutableComponentRegistry for AppBuilder {
     }
 }
 
-#[allow(unused_imports)]
+#[cfg(test)]
 mod tests {
     use crate::plugin::{ComponentRegistry, MutableComponentRegistry};
     use crate::App;

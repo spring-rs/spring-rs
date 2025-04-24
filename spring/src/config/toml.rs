@@ -102,7 +102,7 @@ impl FromStr for TomlConfigRegistry {
     }
 }
 
-#[allow(unused_imports)]
+#[cfg(test)]
 mod tests {
     use super::Env;
     use super::TomlConfigRegistry;

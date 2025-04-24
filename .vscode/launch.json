@@ -373,6 +373,27 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Debug executable 'hello-world-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=hello-world-example",
+                    "--package=hello-world-example"
+                ],
+                "filter": {
+                    "name": "hello-world-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/hello-world-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Debug executable 'dependency-inject-example'",
             "cargo": {
                 "args": [

@@ -1,7 +1,7 @@
 [package]
 name = "spring"
 description = "Rust microservice framework like spring boot in java"
-version = "0.3.2"
+version = "0.3.3"
 categories = ["config"]
 keywords = ["framework", "spring"]
 edition.workspace = true
@@ -18,6 +18,7 @@ log = { workspace = true }
 nu-ansi-term = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
 tracing-appender = { workspace = true }
+tracing-error = { workspace = true }
 tracing-subscriber = { workspace = true, features = [
     "json",
     "env-filter",

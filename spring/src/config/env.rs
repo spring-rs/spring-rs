@@ -116,8 +116,8 @@ pub(crate) fn interpolate(template: &str) -> String {
     result
 }
 
+#[cfg(test)]
 mod tests {
-    #[allow(unused_imports)]
     use super::Env;
     use crate::error::Result;
     use std::{fs, path::PathBuf};

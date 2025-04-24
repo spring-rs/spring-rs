@@ -1,5 +1,4 @@
 #![doc = include_str!("../../Log-Plugin.md")]
-
 mod config;
 
 use crate::app::AppBuilder;
@@ -7,6 +6,7 @@ use crate::config::ConfigRegistry;
 use crate::plugin::Plugin;
 use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
 use nu_ansi_term::Color;
+use tracing_error::ErrorLayer;
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::filter::EnvFilter;
@@ -60,6 +60,7 @@ impl Plugin for LogPlugin {
         tracing_subscriber::registry()
             .with(layers)
             .with(env_filter)
+            .with(ErrorLayer::default())
             .init();
     }
 
