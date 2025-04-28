@@ -29,6 +29,7 @@ pub struct HttpLayer {
     level: Level,
     kind: SpanKind,
     with_headers: bool,
+    export_trace_id: bool,
 }
 
 impl HttpLayer {
@@ -38,6 +39,7 @@ impl HttpLayer {
             level,
             kind: SpanKind::Server,
             with_headers: true,
+            export_trace_id: false,
         }
     }
 
@@ -47,11 +49,17 @@ impl HttpLayer {
             level,
             kind: SpanKind::Client,
             with_headers: true,
+            export_trace_id: false,
         }
     }
 
     pub fn with_headers(mut self, with_headers: bool) -> Self {
         self.with_headers = with_headers;
+        self
+    }
+
+    pub fn export_trace_id(mut self, export_trace_id: bool) -> Self {
+        self.export_trace_id = export_trace_id;
         self
     }
 }
@@ -65,6 +73,7 @@ impl<S> Layer<S> for HttpLayer {
             level: self.level,
             kind: self.kind,
             with_headers: self.with_headers,
+            export_trace_id: self.export_trace_id,
         }
     }
 }
@@ -76,6 +85,7 @@ pub struct HttpService<S> {
     level: Level,
     kind: SpanKind,
     with_headers: bool,
+    export_trace_id: bool,
 }
 
 impl<S, ReqBody, ResBody> Service<Request<ReqBody>> for HttpService<S>
@@ -103,6 +113,7 @@ where
             span,
             kind: self.kind,
             with_headers: self.with_headers,
+            export_trace_id: self.export_trace_id,
         }
     }
 }
@@ -182,6 +193,7 @@ pub struct ResponseFuture<F> {
     span: Span,
     kind: SpanKind,
     with_headers: bool,
+    export_trace_id: bool,
 }
 
 impl<F, ResBody, E> Future for ResponseFuture<F>
@@ -198,6 +210,9 @@ where
         match ready!(this.inner.poll(cx)) {
             Ok(response) => {
                 Self::record_response(this.span, *this.kind, *this.with_headers, &response);
+                // if self.export_trace_id {
+                //     response.headers_mut().append(key, Context::current().get().unwrap().s)
+                // }
                 Poll::Ready(Ok(response))
             }
             Err(err) => {

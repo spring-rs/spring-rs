@@ -9,6 +9,8 @@ authors.workspace = true
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
 spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
-spring-opentelemetry = { path = "../../spring-opentelemetry" }
+spring-opentelemetry = { path = "../../spring-opentelemetry", features = [
+    "grpc",
+] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
