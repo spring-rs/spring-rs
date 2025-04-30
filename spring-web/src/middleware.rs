@@ -93,7 +93,11 @@ fn apply_static_dir(router: Router, static_assets: StaticAssetsMiddleware) -> Ro
         serve_dir
     };
 
-    router.nest_service(&static_assets.uri, service)
+    if static_assets.uri == "/" {
+        router.fallback_service(service)
+    } else {
+        router.nest_service(&static_assets.uri, service)
+    }
 }
 
 fn build_cors_middleware(cors: &CorsMiddleware) -> Result<CorsLayer> {
