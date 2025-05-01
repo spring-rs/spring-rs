@@ -59,10 +59,7 @@ impl StreamConfig {
 
     pub fn new_consumer_options(&self, ConsumerOpts(opts): ConsumerOpts) -> SeaConsumerOptions {
         let _mode = opts.mode().ok();
-        let _group = match opts.consumer_group() {
-            Ok(group) => Some(group),
-            _ => None,
-        };
+        let _group = opts.consumer_group().ok();
         #[cfg(feature = "kafka")]
         if let Some(kafka) = &self.kafka {
             let mut consumer_options = kafka.new_consumer_options(_mode, _group);
