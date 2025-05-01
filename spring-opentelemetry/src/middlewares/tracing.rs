@@ -1,6 +1,7 @@
 //! Middleware that adds tracing to a [`Service`] that handles HTTP requests.
 
-use http::{Request, Response};
+use http::{HeaderName, HeaderValue, Request, Response};
+use opentelemetry::trace::TraceContextExt;
 use opentelemetry_http::{HeaderExtractor, HeaderInjector};
 use opentelemetry_semantic_conventions::attribute;
 use pin_project::pin_project;
@@ -208,11 +209,22 @@ where
         let _enter = this.span.enter();
 
         match ready!(this.inner.poll(cx)) {
-            Ok(response) => {
+            Ok(mut response) => {
                 Self::record_response(this.span, *this.kind, *this.with_headers, &response);
-                // if self.export_trace_id {
-                //     response.headers_mut().append(key, Context::current().get().unwrap().s)
-                // }
+                if *this.export_trace_id {
+                    let trace_id = this
+                        .span
+                        .context()
+                        .span()
+                        .span_context()
+                        .trace_id()
+                        .to_string();
+                    if let Ok(value) = HeaderValue::from_str(&trace_id) {
+                        response
+                            .headers_mut()
+                            .insert(HeaderName::from_static("x-trace-id"), value);
+                    }
+                }
                 Poll::Ready(Ok(response))
             }
             Err(err) => {

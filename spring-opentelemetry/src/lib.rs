@@ -82,16 +82,28 @@ impl Plugin for OpenTelemetryPlugin {
 
 impl OpenTelemetryPlugin {
     fn init_logs(resource: Resource) -> SdkLoggerProvider {
-        #[cfg(feature = "http")]
-        let exporter = LogExporter::builder()
-            .with_http()
-            .build()
-            .expect("build http log exporter failed");
-        #[cfg(feature = "grpc")]
-        let exporter = LogExporter::builder()
-            .with_tonic()
-            .build()
-            .expect("build grpc log exporter failed");
+        let exporter = {
+            #[cfg(feature = "http")]
+            {
+                LogExporter::builder()
+                    .with_http()
+                    .build()
+                    .expect("build http log exporter failed")
+            }
+
+            #[cfg(all(not(feature = "http"), feature = "grpc"))]
+            {
+                LogExporter::builder()
+                    .with_tonic()
+                    .build()
+                    .expect("build grpc log exporter failed")
+            }
+
+            #[cfg(not(any(feature = "http", feature = "grpc")))]
+            compile_error!(
+                "You must enable either the 'http' or 'grpc' feature for the log exporter."
+            );
+        };
         SdkLoggerProvider::builder()
             .with_resource(resource)
             .with_batch_exporter(exporter)
@@ -99,16 +111,28 @@ impl OpenTelemetryPlugin {
     }
 
     fn init_metrics(resource: Resource) -> SdkMeterProvider {
-        #[cfg(feature = "http")]
-        let exporter = MetricExporter::builder()
-            .with_http()
-            .build()
-            .expect("build http metric exporter failed");
-        #[cfg(feature = "grpc")]
-        let exporter = MetricExporter::builder()
-            .with_tonic()
-            .build()
-            .expect("build grpc metric exporter failed");
+        let exporter = {
+            #[cfg(feature = "http")]
+            {
+                MetricExporter::builder()
+                    .with_http()
+                    .build()
+                    .expect("build http metric exporter failed")
+            }
+
+            #[cfg(all(not(feature = "http"), feature = "grpc"))]
+            {
+                MetricExporter::builder()
+                    .with_tonic()
+                    .build()
+                    .expect("build grpc metric exporter failed")
+            }
+
+            #[cfg(not(any(feature = "http", feature = "grpc")))]
+            compile_error!(
+                "You must enable either the 'http' or 'grpc' feature for the log exporter."
+            );
+        };
 
         let provider = SdkMeterProvider::builder()
             .with_resource(resource)
@@ -122,16 +146,28 @@ impl OpenTelemetryPlugin {
     }
 
     fn init_tracer(resource: Resource) -> SdkTracerProvider {
-        #[cfg(feature = "http")]
-        let exporter = SpanExporter::builder()
-            .with_http()
-            .build()
-            .expect("build http span exporter failed");
-        #[cfg(feature = "grpc")]
-        let exporter = SpanExporter::builder()
-            .with_tonic()
-            .build()
-            .expect("build grpc span exporter failed");
+        let exporter = {
+            #[cfg(feature = "http")]
+            {
+                SpanExporter::builder()
+                    .with_http()
+                    .build()
+                    .expect("build http span exporter failed")
+            }
+
+            #[cfg(all(not(feature = "http"), feature = "grpc"))]
+            {
+                SpanExporter::builder()
+                    .with_tonic()
+                    .build()
+                    .expect("build grpc span exporter failed")
+            }
+
+            #[cfg(not(any(feature = "http", feature = "grpc")))]
+            compile_error!(
+                "You must enable either the 'http' or 'grpc' feature for the log exporter."
+            );
+        };
 
         global::set_text_map_propagator(TextMapCompositePropagator::new(vec![
             Box::new(BaggagePropagator::new()),
