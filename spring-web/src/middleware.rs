@@ -83,8 +83,8 @@ fn apply_static_dir(router: Router, static_assets: StaticAssetsMiddleware) -> Ro
         );
     }
 
-    let serve_dir =
-        ServeDir::new(static_assets.path).not_found_service(ServeFile::new(static_assets.fallback));
+    let fallback = ServeFile::new(format!("{}/{}", static_assets.path, static_assets.fallback));
+    let serve_dir = ServeDir::new(static_assets.path).not_found_service(fallback);
 
     let service = if static_assets.precompressed {
         tracing::info!("[Middleware] Enable precompressed static assets");
