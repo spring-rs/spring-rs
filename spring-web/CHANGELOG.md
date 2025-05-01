@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- **added**: fix *Nesting at the root is no longer supported. Use fallback_service instead* (#56805b)
+
+[#56805b]: https://github.com/spring-rs/spring-rs/commit/56805baea3de500287d0ef447ff48c28b095e4ba
+
 ## 0.4.0
 
 - **breaking**: upgrade axum to 0.8 ([#122])
