@@ -190,10 +190,7 @@ impl OpenTelemetryPlugin {
     }
 
     fn build_resource(app: &AppBuilder) -> Resource {
-        let mut key_values = match app.get_component::<KeyValues>() {
-            Some(r) => r,
-            None => vec![],
-        };
+        let mut key_values = app.get_component::<KeyValues>().unwrap_or_default();
         key_values.push(KeyValue::new(
             attribute::DEPLOYMENT_ENVIRONMENT_NAME,
             format!("{:?}", app.get_env()),
