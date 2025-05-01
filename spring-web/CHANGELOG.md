@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- **added**: add static_dir for fallback (#ccf3dd)
+
+[#ccf3dd]: https://github.com/spring-rs/spring-rs/commit/ccf3dd139cd9e67854940343163f027457ac2dc8
+
 ## 0.4.1
 
 - **added**: fix *Nesting at the root is no longer supported. Use fallback_service instead* (#56805b)
