@@ -65,7 +65,7 @@ impl WebConfigurator for AppBuilder {
         if let Some(routers) = self.get_component_ref::<Routers>() {
             unsafe {
                 let raw_ptr = ComponentRef::into_raw(routers);
-                let routers = &mut *(raw_ptr as *mut Vec<Router>);
+                let routers = &mut *(raw_ptr as *mut Routers);
                 routers.push(router);
             }
             self
