@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- **added**: support export trace id ([#127])
+- **changed**: upgrade opentelemetry `0.26` to `0.29` ([#127])
+
+[#127]: https://github.com/spring-rs/spring-rs/pull/127
+
 ## 0.3.0
 
 - **breaking**: refactor dependency inject ([#105])
