@@ -15,6 +15,7 @@ authors.workspace = true
 repository.workspace = true
 
 [features]
+default = ["grpc"]
 jaeger = ["opentelemetry-jaeger-propagator"]
 zipkin = ["opentelemetry-zipkin"]
 more-resource = ["opentelemetry-resource-detectors"]
