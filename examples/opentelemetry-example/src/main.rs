@@ -14,6 +14,9 @@ use spring_web::{
     axum::response::IntoResponse,
     error::Result,
     extractor::{Component, Path},
+    middleware::trace::{
+        DefaultMakeSpan, DefaultOnEos, DefaultOnRequest, DefaultOnResponse, TraceLayer,
+    },
     Router, WebConfigurator, WebPlugin,
 };
 use spring_web::{get, route};
@@ -35,9 +38,17 @@ async fn main() {
 }
 
 fn router() -> Router {
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(DefaultMakeSpan::default())
+        .on_request(DefaultOnRequest::default())
+        .on_response(DefaultOnResponse::default())
+        .on_eos(DefaultOnEos::default());
     let http_tracing_layer =
         middlewares::tracing::HttpLayer::server(Level::INFO).export_trace_id(true);
-    spring_web::handler::auto_router().layer(http_tracing_layer)
+    // Note: http_tracing_layer must be added after trace_layer, because axum defaults to adding it first and executing it later.
+    spring_web::handler::auto_router()
+        .layer(trace_layer)
+        .layer(http_tracing_layer)
 }
 
 // The get macro specifies the Http Method and request path.
