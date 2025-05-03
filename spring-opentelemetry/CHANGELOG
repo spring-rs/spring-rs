@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+- **breaking**: Refactoring the code ([#130])
+- **added**: opentelemetry instrument support capturing HTTP request and response headers ([#130])
+
+[#130]: https://github.com/spring-rs/spring-rs/pull/130
+
 ## 0.3.1
 
 - **added**: support export trace id ([#127])
