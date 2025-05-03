@@ -42,9 +42,12 @@ opentelemetry-zipkin = { workspace = true, optional = true }
 opentelemetry-resource-detectors = { workspace = true, optional = true }
 tonic = { workspace = true }
 http = { workspace = true }
+http-body = { workspace = true }
 tracing-opentelemetry = { workspace = true }
 tracing-subscriber = { workspace = true }
 tower = { workspace = true }
+tower-layer = { workspace = true }
+tower-service = { workspace = true }
 axum = { workspace = true }
 futures-util = { workspace = true }
 pin-project = { workspace = true }
