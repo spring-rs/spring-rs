@@ -3,8 +3,10 @@ use spring::{
     tracing::{info, info_span, Instrument, Level},
     App,
 };
+use spring_opentelemetry::trace as otel_trace;
+use spring_opentelemetry::{global, metrics as otel_metrics};
 use spring_opentelemetry::{
-    middlewares, KeyValue, OpenTelemetryPlugin, ResourceConfigurator, SERVICE_NAME, SERVICE_VERSION,
+    KeyValue, OpenTelemetryPlugin, ResourceConfigurator, SERVICE_NAME, SERVICE_VERSION,
 };
 use spring_sqlx::{
     sqlx::{self, Row},
@@ -38,17 +40,19 @@ async fn main() {
 }
 
 fn router() -> Router {
+    let meter = global::meter(env!("CARGO_PKG_NAME"));
+    let otel_metrics_layer = otel_metrics::HttpLayer::server(&meter);
     let trace_layer = TraceLayer::new_for_http()
         .make_span_with(DefaultMakeSpan::default())
         .on_request(DefaultOnRequest::default())
         .on_response(DefaultOnResponse::default())
         .on_eos(DefaultOnEos::default());
-    let http_tracing_layer =
-        middlewares::tracing::HttpLayer::server(Level::INFO).export_trace_id(true);
+    let otel_trace_layer = otel_trace::HttpLayer::server(Level::INFO).export_trace_id(true);
     // Note: http_tracing_layer must be added after trace_layer, because axum defaults to adding it first and executing it later.
     spring_web::handler::auto_router()
+        .layer(otel_metrics_layer)
         .layer(trace_layer)
-        .layer(http_tracing_layer)
+        .layer(otel_trace_layer)
 }
 
 // The get macro specifies the Http Method and request path.

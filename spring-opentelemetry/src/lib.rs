@@ -2,7 +2,9 @@
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
-pub mod middlewares;
+pub mod metrics;
+pub mod trace;
+pub mod util;
 
 use opentelemetry_otlp::{LogExporter, MetricExporter, SpanExporter};
 #[rustfmt::skip]
