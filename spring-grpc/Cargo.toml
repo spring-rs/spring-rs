@@ -1,5 +1,5 @@
 [package]
-name = "spring-gprc"
+name = "spring-grpc"
 description = "Integration of rust application framework spring-rs and tonic gRPC framework"
 version = "0.3.0"
 categories = ["web-programming", "network-programming"]

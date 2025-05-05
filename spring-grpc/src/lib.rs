@@ -6,7 +6,7 @@ pub struct GrpcPlugin;
 
 #[async_trait]
 impl Plugin for GrpcPlugin {
-    async fn build(&self, app: &mut AppBuilder) {
-        
+    async fn build(&self, _app: &mut AppBuilder) {
+        // TODO: Implement the integration logic for the GrpcPlugin
     }
 }
