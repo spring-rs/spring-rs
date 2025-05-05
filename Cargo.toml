@@ -4,6 +4,7 @@ members = [
     "spring",
     "spring-macros",
     "spring-web",
+    "spring-grpc",
     "spring-job",
     "spring-redis",
     "spring-sqlx",
