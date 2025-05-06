@@ -233,6 +233,7 @@ struct Service {
     generics: syn::Generics,
     ident: proc_macro2::Ident,
     prototype: Option<Prototype>,
+    grpc: Option<Grpc>,
     fields: Vec<Injectable>,
 }
 
@@ -246,8 +247,19 @@ impl Service {
             ..
         } = input;
         let prototype = attrs.iter().find(|a| a.path().is_ident("prototype"));
+        let grpc = attrs.iter().find(|a| a.path().is_ident("grpc"));
+        if grpc.is_some() && prototype.is_some() {
+            return Err(syn::Error::new(
+                Span::call_site(),
+                "grpc and prototype are mutually exclusive, gRPC services do not support prototype mode",
+            ));
+        }
         let prototype = match prototype {
             Some(attr) => Some(Prototype::new(attr)?),
+            None => None,
+        };
+        let grpc = match grpc {
+            Some(attr) => Some(Grpc::new(attr)?),
             None => None,
         };
         let is_prototype = prototype.is_some();
@@ -266,8 +278,31 @@ impl Service {
             generics,
             ident,
             prototype,
+            grpc,
             fields,
         })
+    }
+}
+
+struct Grpc {
+    server: syn::Path,
+}
+
+impl Grpc {
+    fn new(attr: &syn::Attribute) -> syn::Result<Self> {
+        if let Meta::NameValue(name_value) = &attr.meta {
+            if name_value.path.is_ident("grpc") {
+                if let syn::Expr::Path(syn::ExprPath { path, .. }) = &name_value.value {
+                    return Ok(Self {
+                        server: path.clone(),
+                    });
+                }
+            }
+        }
+        Err(syn::Error::new(
+            Span::call_site(),
+            "invalid grpc service definition, expected #[grpc = \"my_crate::GrpcServer\"]",
+        ))
     }
 }
 
@@ -295,7 +330,7 @@ impl Prototype {
         }
         Err(syn::Error::new(
             Span::call_site(),
-            "invalid service definition, expected #[prototype] or #[prototype = \"build_func_name\"]",
+            "invalid prototype service definition, expected #[prototype] or #[prototype = \"build_func_name\"]",
         ))
     }
 }
@@ -306,6 +341,7 @@ impl ToTokens for Service {
             generics,
             ident,
             prototype,
+            grpc,
             fields,
         } = self;
         let field_names: Vec<&syn::Ident> = fields.iter().map(|f| &f.field_name).collect();
