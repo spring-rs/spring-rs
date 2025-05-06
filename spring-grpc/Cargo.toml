@@ -21,5 +21,8 @@ tracing = { workspace = true, features = ["log"] }
 tokio = { workspace = true, features = ["full"] }
 tower = { workspace = true, features = ["full"] }
 tower-http = { workspace = true, features = ["full"] }
+serde = { workspace = true }
+axum = { workspace = true }
+http = { workspace = true }
 schemars = { workspace = true }
 inventory = { workspace = true }
