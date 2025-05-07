@@ -259,7 +259,6 @@ impl Service {
             Some(ServiceAttr::Prototype(_)) => true,
             _ => false,
         };
-        eprintln!("is_prototype: {is_prototype}");
         let mut fields = if let syn::Data::Struct(data) = data {
             data.fields
                 .into_iter()

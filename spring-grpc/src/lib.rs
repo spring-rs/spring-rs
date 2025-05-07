@@ -1,4 +1,4 @@
-mod config;
+pub mod config;
 
 pub use tonic;
 
@@ -115,19 +115,52 @@ impl GrpcPlugin {
         server = Self::apply_middleware(server);
 
         let addr = SocketAddr::new(config.binding, config.port);
-
         tracing::info!("tonic grpc service bind tcp listener: {}", addr);
 
-        server
-            .add_routes(routes)
-            .serve(addr)
-            .await
-            .with_context(|| format!("bind tcp listener failed:{}", addr))?;
-
+        let router = server.add_routes(routes);
+        if config.graceful {
+            router
+                .serve_with_shutdown(addr, shutdown_signal())
+                .await
+                .with_context(|| format!("bind tcp listener failed:{}", addr))?;
+        } else {
+            router
+                .serve(addr)
+                .await
+                .with_context(|| format!("bind tcp listener failed:{}", addr))?;
+        }
         Ok("tonic server schedule finished".to_string())
     }
 
     fn apply_middleware(_server: Server) -> Server {
         todo!()
+    }
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {
+            tracing::info!("Received Ctrl+C signal, waiting for tonic grpc server shutdown")
+        },
+        _ = terminate => {
+            tracing::info!("Received kill signal, waiting for tonic grpc server shutdown")
+        },
     }
 }
