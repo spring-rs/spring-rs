@@ -54,7 +54,7 @@ struct UserService {
     count: Arc<AtomicI32>,
 }
 
-#[derive(Service)]
+#[derive(Clone, Service)]
 #[service(prototype)] // default builder fn is `build`
 struct UserProtoService {
     #[inject(component)]

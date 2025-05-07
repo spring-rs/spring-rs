@@ -238,7 +238,7 @@ struct Service {
 
 enum ServiceAttr {
     Grpc(syn::Path),
-    Prototype(Option<syn::LitStr>),
+    Prototype(syn::LitStr),
 }
 
 impl Service {
@@ -280,7 +280,7 @@ impl Service {
     }
     fn parse_service_attr(input: syn::parse::ParseStream) -> syn::Result<ServiceAttr> {
         let mut grpc: Option<syn::Path> = None;
-        let mut prototype: Option<Option<syn::LitStr>> = None;
+        let mut prototype: Option<syn::LitStr> = None;
 
         while !input.is_empty() {
             let ident: syn::Ident = input.parse()?;
@@ -306,7 +306,7 @@ impl Service {
                                 "Only one of `grpc` or `prototype` is allowed",
                             ));
                         }
-                        prototype = Some(Some(value));
+                        prototype = Some(value);
                     }
                     other => {
                         return Err(syn::Error::new_spanned(
@@ -325,7 +325,8 @@ impl Service {
                                 "Only one of `grpc` or `prototype` is allowed",
                             ));
                         }
-                        prototype = Some(None);
+                        prototype = Some(syn::LitStr::new("build", Span::call_site()));
+                        // 默认build
                     }
                     "grpc" => {
                         return Err(syn::Error::new_spanned(
@@ -371,7 +372,7 @@ impl ToTokens for Service {
         let field_names: Vec<&syn::Ident> = fields.iter().map(|f| &f.field_name).collect();
 
         let output = match attr {
-            Some(ServiceAttr::Prototype(Some(build))) => {
+            Some(ServiceAttr::Prototype(build)) => {
                 let fn_name = syn::Ident::new(&build.value(), build.span());
                 let (args, fields): (Vec<&Injectable>, Vec<&Injectable>) =
                     fields.iter().partition(|f| f.ty.is_arg());
@@ -395,7 +396,7 @@ impl ToTokens for Service {
             _ => {
                 let service_registrar =
                     syn::Ident::new(&format!("__ServiceRegistrarFor_{ident}"), ident.span());
-                let grpc_service = match attr {
+                let service_installer = match attr {
                     Some(ServiceAttr::Grpc(server)) => {
                         quote! {
                             use ::spring::plugin::MutableComponentRegistry;
@@ -426,7 +427,7 @@ impl ToTokens for Service {
                     struct #service_registrar;
                     impl ::spring::plugin::service::ServiceRegistrar for #service_registrar{
                         fn install_service(&self, app: &mut ::spring::app::AppBuilder)->::spring::error::Result<()> {
-                            #grpc_service
+                            #service_installer
                             Ok(())
                         }
                     }
