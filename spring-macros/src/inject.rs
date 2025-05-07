@@ -1,8 +1,8 @@
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{
-    spanned::Spanned, AngleBracketedGenericArguments, GenericArgument, Meta, MetaList,
-    PathArguments, Token, Type, TypePath,
+    AngleBracketedGenericArguments, GenericArgument, Meta, MetaList, PathArguments, Token, Type,
+    TypePath,
 };
 
 fn inject_error_tip() -> syn::Error {
@@ -232,9 +232,13 @@ impl ToTokens for Injectable {
 struct Service {
     generics: syn::Generics,
     ident: proc_macro2::Ident,
-    prototype: Option<Prototype>,
-    grpc: Option<Grpc>,
+    attr: Option<ServiceAttr>,
     fields: Vec<Injectable>,
+}
+
+enum ServiceAttr {
+    Grpc(syn::Path),
+    Prototype(Option<syn::LitStr>),
 }
 
 impl Service {
@@ -246,23 +250,16 @@ impl Service {
             data,
             ..
         } = input;
-        let prototype = attrs.iter().find(|a| a.path().is_ident("prototype"));
-        let grpc = attrs.iter().find(|a| a.path().is_ident("grpc"));
-        if grpc.is_some() && prototype.is_some() {
-            return Err(syn::Error::new(
-                Span::call_site(),
-                "grpc and prototype are mutually exclusive, gRPC services do not support prototype mode",
-            ));
-        }
-        let prototype = match prototype {
-            Some(attr) => Some(Prototype::new(attr)?),
-            None => None,
+        let service_attr = attrs
+            .iter()
+            .find(|a| a.path().is_ident("service"))
+            .and_then(|attr| attr.parse_args_with(Self::parse_service_attr).ok());
+
+        let is_prototype = match &service_attr {
+            Some(ServiceAttr::Prototype(_)) => true,
+            _ => false,
         };
-        let grpc = match grpc {
-            Some(attr) => Some(Grpc::new(attr)?),
-            None => None,
-        };
-        let is_prototype = prototype.is_some();
+        eprintln!("is_prototype: {is_prototype}");
         let mut fields = if let syn::Data::Struct(data) = data {
             data.fields
                 .into_iter()
@@ -277,61 +274,70 @@ impl Service {
         Ok(Self {
             generics,
             ident,
-            prototype,
-            grpc,
+            attr: service_attr,
             fields,
         })
     }
-}
 
-struct Grpc {
-    server: syn::Path,
-}
+    fn parse_service_attr(input: syn::parse::ParseStream) -> syn::Result<ServiceAttr> {
+        let mut grpc: Option<syn::Path> = None;
+        let mut prototype: Option<Option<syn::LitStr>> = None;
 
-impl Grpc {
-    fn new(attr: &syn::Attribute) -> syn::Result<Self> {
-        if let Meta::NameValue(name_value) = &attr.meta {
-            if name_value.path.is_ident("grpc") {
-                if let syn::Expr::Path(syn::ExprPath { path, .. }) = &name_value.value {
-                    return Ok(Self {
-                        server: path.clone(),
+        while !input.is_empty() {
+            let ident: syn::Ident = input.parse()?;
+            input.parse::<syn::Token![=]>()?;
+
+            let value: syn::LitStr = input.parse()?;
+
+            match ident.to_string().as_str() {
+                "grpc" => {
+                    if grpc.is_some() || prototype.is_some() {
+                        return Err(syn::Error::new_spanned(
+                            ident,
+                            "Only one of `grpc` or `prototype` is allowed",
+                        ));
+                    }
+                    grpc = Some(value.parse()?);
+                }
+                "prototype" => {
+                    if prototype.is_some() || grpc.is_some() {
+                        return Err(syn::Error::new_spanned(
+                            ident,
+                            "Only one of `grpc` or `prototype` is allowed",
+                        ));
+                    }
+                    prototype = Some(if value.value().is_empty() {
+                        None
+                    } else {
+                        Some(value)
                     });
                 }
-            }
-        }
-        Err(syn::Error::new(
-            Span::call_site(),
-            "invalid grpc service definition, expected #[grpc = \"my_crate::GrpcServer\"]",
-        ))
-    }
-}
-
-struct Prototype {
-    build: syn::LitStr,
-}
-
-impl Prototype {
-    fn new(attr: &syn::Attribute) -> syn::Result<Self> {
-        if let Meta::Path(path) = &attr.meta {
-            return Ok(Self {
-                build: syn::LitStr::new("build", path.span()),
-            });
-        }
-        if let Meta::NameValue(name_value) = &attr.meta {
-            if name_value.path.is_ident("prototype") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit),
-                    ..
-                }) = &name_value.value
-                {
-                    return Ok(Self { build: lit.clone() });
+                other => {
+                    return Err(syn::Error::new_spanned(
+                        ident,
+                        format!(
+                            "Unknown key `{}` in #[service(...)], expected `grpc` or `prototype`",
+                            other
+                        ),
+                    ));
                 }
             }
+
+            // 如果还有逗号，跳过
+            if input.peek(syn::Token![,]) {
+                input.parse::<syn::Token![,]>()?;
+            }
         }
-        Err(syn::Error::new(
-            Span::call_site(),
-            "invalid prototype service definition, expected #[prototype] or #[prototype = \"build_func_name\"]",
-        ))
+
+        match (grpc, prototype) {
+            (Some(path), None) => Ok(ServiceAttr::Grpc(path)),
+            (None, Some(litstr_opt)) => Ok(ServiceAttr::Prototype(litstr_opt)),
+            (None, None) => Err(syn::Error::new(
+                input.span(),
+                "Expected at least one of `grpc` or `prototype`",
+            )),
+            _ => unreachable!(), // 逻辑上已经排除
+        }
     }
 }
 
@@ -340,14 +346,13 @@ impl ToTokens for Service {
         let Self {
             generics,
             ident,
-            prototype,
-            grpc,
+            attr,
             fields,
         } = self;
         let field_names: Vec<&syn::Ident> = fields.iter().map(|f| &f.field_name).collect();
 
-        let output = match prototype {
-            Some(Prototype { build }) => {
+        let output = match attr {
+            Some(ServiceAttr::Prototype(Some(build))) => {
                 let fn_name = syn::Ident::new(&build.value(), build.span());
                 let (args, fields): (Vec<&Injectable>, Vec<&Injectable>) =
                     fields.iter().partition(|f| f.ty.is_arg());
@@ -368,9 +373,26 @@ impl ToTokens for Service {
                     }
                 }
             }
-            None => {
+            _ => {
                 let service_registrar =
                     syn::Ident::new(&format!("__ServiceRegistrarFor_{ident}"), ident.span());
+                let grpc_service = match attr {
+                    Some(ServiceAttr::Grpc(server)) => {
+                        quote! {
+                            use ::spring::plugin::MutableComponentRegistry;
+                            use ::spring_grpc::GrpcConfigurator;
+                            let service = #ident::build(app)?;
+                            let grpc_server = #server::new(service.clone());
+                            app.add_component(service).add_service(grpc_server);
+                        }
+                    }
+                    _ => {
+                        quote! {
+                            use ::spring::plugin::MutableComponentRegistry;
+                            app.add_component(#ident::build(app)?);
+                        }
+                    }
+                };
                 quote! {
                     impl ::spring::plugin::service::Service for #ident {
                         fn build<R>(app: &R) -> ::spring::error::Result<Self>
@@ -385,8 +407,7 @@ impl ToTokens for Service {
                     struct #service_registrar;
                     impl ::spring::plugin::service::ServiceRegistrar for #service_registrar{
                         fn install_service(&self, app: &mut ::spring::app::AppBuilder)->::spring::error::Result<()> {
-                            use ::spring::plugin::MutableComponentRegistry;
-                            app.add_component(#ident::build(app)?);
+                            #grpc_service
                             Ok(())
                         }
                     }

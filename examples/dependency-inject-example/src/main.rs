@@ -55,7 +55,7 @@ struct UserService {
 }
 
 #[derive(Service)]
-#[prototype]
+#[service(prototype)]
 struct UserProtoService {
     #[inject(component)]
     count: PageView,
@@ -63,7 +63,7 @@ struct UserProtoService {
 }
 
 #[derive(Service)]
-#[prototype]
+#[service(prototype = "build")]
 struct UserProtoServiceWithLifetime<'s> {
     #[inject(component)]
     count: PageView,
@@ -145,7 +145,7 @@ impl UserProtoService {
     }
 }
 
-impl<'s> UserProtoServiceWithLifetime<'s>{
+impl<'s> UserProtoServiceWithLifetime<'s> {
     pub fn pv_count(&self) -> Result<String> {
         let Self { step, .. } = self;
 

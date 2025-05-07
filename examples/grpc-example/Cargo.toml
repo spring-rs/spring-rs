@@ -1,0 +1,20 @@
+[package]
+name = "grpc-example"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+spring-grpc = { path = "../../spring-grpc" }
+prost = { workspace = true }
+tonic = { workspace = true }
+tokio = { workspace = true, features = ["full", "tracing"] }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[build-dependencies]
+tonic-build = "0.13"

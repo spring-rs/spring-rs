@@ -1,5 +1,7 @@
 mod config;
 
+pub use tonic;
+
 use anyhow::Context;
 use config::GrpcConfig;
 use http::Request;
