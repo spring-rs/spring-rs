@@ -278,52 +278,71 @@ impl Service {
             fields,
         })
     }
-
     fn parse_service_attr(input: syn::parse::ParseStream) -> syn::Result<ServiceAttr> {
         let mut grpc: Option<syn::Path> = None;
         let mut prototype: Option<Option<syn::LitStr>> = None;
 
         while !input.is_empty() {
             let ident: syn::Ident = input.parse()?;
-            input.parse::<syn::Token![=]>()?;
 
-            let value: syn::LitStr = input.parse()?;
+            if input.peek(syn::Token![=]) {
+                input.parse::<syn::Token![=]>()?;
+                let value: syn::LitStr = input.parse()?;
 
-            match ident.to_string().as_str() {
-                "grpc" => {
-                    if grpc.is_some() || prototype.is_some() {
+                match ident.to_string().as_str() {
+                    "grpc" => {
+                        if grpc.is_some() || prototype.is_some() {
+                            return Err(syn::Error::new_spanned(
+                                ident,
+                                "Only one of `grpc` or `prototype` is allowed",
+                            ));
+                        }
+                        grpc = Some(value.parse()?);
+                    }
+                    "prototype" => {
+                        if prototype.is_some() || grpc.is_some() {
+                            return Err(syn::Error::new_spanned(
+                                ident,
+                                "Only one of `grpc` or `prototype` is allowed",
+                            ));
+                        }
+                        prototype = Some(Some(value));
+                    }
+                    other => {
                         return Err(syn::Error::new_spanned(
                             ident,
-                            "Only one of `grpc` or `prototype` is allowed",
+                            format!("Unknown key `{}` in #[service(...)], expected `grpc` or `prototype`", other),
                         ));
                     }
-                    grpc = Some(value.parse()?);
                 }
-                "prototype" => {
-                    if prototype.is_some() || grpc.is_some() {
+            } else {
+                // 标志形式：#[service(prototype)]
+                match ident.to_string().as_str() {
+                    "prototype" => {
+                        if prototype.is_some() || grpc.is_some() {
+                            return Err(syn::Error::new_spanned(
+                                ident,
+                                "Only one of `grpc` or `prototype` is allowed",
+                            ));
+                        }
+                        prototype = Some(None);
+                    }
+                    "grpc" => {
                         return Err(syn::Error::new_spanned(
                             ident,
-                            "Only one of `grpc` or `prototype` is allowed",
+                            "`grpc` must have a value like `grpc = \"...\"`",
                         ));
                     }
-                    prototype = Some(if value.value().is_empty() {
-                        None
-                    } else {
-                        Some(value)
-                    });
-                }
-                other => {
-                    return Err(syn::Error::new_spanned(
-                        ident,
-                        format!(
-                            "Unknown key `{}` in #[service(...)], expected `grpc` or `prototype`",
-                            other
-                        ),
-                    ));
+                    other => {
+                        return Err(syn::Error::new_spanned(
+                            ident,
+                            format!("Unknown key `{}` in #[service(...)]", other),
+                        ));
+                    }
                 }
             }
 
-            // 如果还有逗号，跳过
+            // 跳过逗号
             if input.peek(syn::Token![,]) {
                 input.parse::<syn::Token![,]>()?;
             }
@@ -336,7 +355,7 @@ impl Service {
                 input.span(),
                 "Expected at least one of `grpc` or `prototype`",
             )),
-            _ => unreachable!(), // 逻辑上已经排除
+            _ => unreachable!(),
         }
     }
 }

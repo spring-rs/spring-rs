@@ -55,7 +55,7 @@ struct UserService {
 }
 
 #[derive(Service)]
-#[service(prototype)]
+#[service(prototype)] // default builder fn is `build`
 struct UserProtoService {
     #[inject(component)]
     count: PageView,
