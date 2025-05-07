@@ -10,8 +10,9 @@ use spring::{
     config::ConfigRegistry,
     error::Result,
     plugin::{component::ComponentRef, ComponentRegistry, MutableComponentRegistry, Plugin},
+    App,
 };
-use std::{convert::Infallible, net::SocketAddr};
+use std::{convert::Infallible, net::SocketAddr, sync::Arc};
 use tonic::{
     async_trait,
     body::Body,
@@ -73,21 +74,24 @@ impl Plugin for GrpcPlugin {
             .get_config::<GrpcConfig>()
             .expect("grpc plugin config load failed");
 
-        let routes_builder = app.get_component::<RoutesBuilder>();
-
-        if let Some(routes_builder) = routes_builder {
-            let routes = routes_builder.routes();
-            app.add_scheduler(move |_app| Box::new(Self::schedule(config, routes)));
-        } else {
-            tracing::warn!(
-                "The grpc plugin does not register any routes, so no scheduling is performed"
-            );
-        }
+        app.add_scheduler(move |app| Box::new(Self::schedule(app, config)));
     }
 }
 
 impl GrpcPlugin {
-    async fn schedule(config: GrpcConfig, routes: Routes) -> Result<String> {
+    async fn schedule(app: Arc<App>, config: GrpcConfig) -> Result<String> {
+        // Get the router in the final schedule step
+        let routes_builder = app.get_component::<RoutesBuilder>();
+
+        let routes = if let Some(routes_builder) = routes_builder {
+            routes_builder.routes()
+        } else {
+            return Ok(
+                "The grpc plugin does not register any routes, so no scheduling is performed"
+                    .to_string(),
+            );
+        };
+
         let mut server = Server::builder()
             .accept_http1(config.accept_http1)
             .http2_adaptive_window(config.http2_adaptive_window)
@@ -133,7 +137,8 @@ impl GrpcPlugin {
     }
 
     fn apply_middleware(_server: Server) -> Server {
-        todo!()
+        // TODO: add middleware
+        _server
     }
 }
 
