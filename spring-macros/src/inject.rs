@@ -255,10 +255,7 @@ impl Service {
             .find(|a| a.path().is_ident("service"))
             .and_then(|attr| attr.parse_args_with(Self::parse_service_attr).ok());
 
-        let is_prototype = match &service_attr {
-            Some(ServiceAttr::Prototype(_)) => true,
-            _ => false,
-        };
+        let is_prototype = matches!(&service_attr, Some(ServiceAttr::Prototype(_)));
         let mut fields = if let syn::Data::Struct(data) = data {
             data.fields
                 .into_iter()
