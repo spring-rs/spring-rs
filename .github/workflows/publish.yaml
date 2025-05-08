@@ -15,8 +15,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
       - name: Install dependency
-        run: cargo install cargo-workspaces && apt-get install protobuf-compiler
+        run: cargo install cargo-workspaces
       - name: Build
         run: cargo build --workspace --verbose
       - name: Run tests
