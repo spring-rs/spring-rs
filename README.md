@@ -139,7 +139,7 @@ async fn fix_rate_job() {
 * [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](https://spring-rs.github.io/docs/plugins/spring-job/): Integrated with [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler)
 * [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](https://spring-rs.github.io/docs/plugins/spring-stream/): Integrate [`sea-streamer`](https://github.com/SeaQL/sea-streamer) to implement message processing such as redis-stream and kafka
 * [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/): Integrate with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing
-* [ ] `spring-tarpc`: Integrate[`tarpc`](https://github.com/google/tarpc) to implement RPC calls
+* [x] ![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)[`spring-grpc`](https://spring-rs.github.io/docs/plugins/spring-grpc/): Integrate[`tonic`](https://github.com/hyperium/tonic) to implement gRPC calls
 
 ## Ecosystem
 

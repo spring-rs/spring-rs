@@ -137,8 +137,8 @@ async fn fix_rate_job() {
 * [x] ![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)[`spring-mail`](./spring-mail/README.zh.md)(整合了[`lettre`](https://github.com/lettre/lettre))
 * [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](./spring-job/README.zh.md)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
 * [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](./spring-stream/README.zh.md)(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现redis-stream、kafka等消息处理)
-* [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`]((./spring-opentelemetry/README.zh.md))(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
-* [ ] `spring-tarpc`(整合了[`tarpc`](https://github.com/google/tarpc)实现RPC调用)
+* [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](./spring-opentelemetry/README.zh.md)(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
+* [x] ![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)[`spring-grpc`](./spring-grpc/README.zh.md)(整合了[`tonic`](https://github.com/hyperium/tonic)实现gRPC调用)
 
 ## 生态
 

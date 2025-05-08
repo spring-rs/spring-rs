@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.4
+
+- **changed**: upgrade `spring-macros` 0.3 to 0.4 ([#132])
+
+[#132]: https://github.com/spring-rs/spring-rs/pull/132
+
 ## 0.3.1
 
 - **breaking**: remove `ComponentRegistry::create_service` ([#112])

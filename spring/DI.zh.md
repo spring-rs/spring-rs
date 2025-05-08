@@ -26,3 +26,5 @@ struct UserService {
 ```
 
 完整代码参考[`dependency-inject-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/dependency-inject-example)。
+
+> Service还支持grpc模式，可结合[spring-grpc](https://spring-rs.github.io/zh/docs/plugins/spring-grpc/)插件一起使用

@@ -15,7 +15,7 @@ optional **features**: `http2`, `multipart`, `ws`.
 
 ```toml
 [web]
-binding = "172.20.10.4"  # IP address of the network card to bind, default 0.0.0.0
+binding = "172.20.10.4"  # IP address of the network interface to bind, default 0.0.0.0
 port = 8000              # Port number to bind, default 8080
 connect_info = false     # Whether to use client connection information, default false
 graceful = true          # Whether to enable graceful shutdown, default false

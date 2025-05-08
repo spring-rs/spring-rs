@@ -27,3 +27,5 @@ struct UserService {
 ```
 
 For the complete code, see [`dependency-inject-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/dependency-inject-example).
+
+> Service also supports grpc mode and can be used in conjunction with the [spring-grpc](https://spring-rs.github.io/docs/plugins/spring-grpc/) plug-in

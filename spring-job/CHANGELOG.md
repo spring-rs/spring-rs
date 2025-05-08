@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.3.1
+
 - **changed**: use Local timezone instead of utc timezone ([#111])
 
 [#111]: https://github.com/spring-rs/spring-rs/pull/111

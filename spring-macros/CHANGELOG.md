@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- **breaking**: Refactor service macro to support grpc service ([#132])
+
+[#132]: https://github.com/spring-rs/spring-rs/pull/132
+
 ## 0.3.1
 
 - **added**: Added prototype service derived macro generation `build` function ([#112])
