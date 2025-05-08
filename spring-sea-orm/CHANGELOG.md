@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- **breaking**: upgrade `spring` 0.3 to 0.4 ([#132])
+
+[#132]: https://github.com/spring-rs/spring-rs/pull/132
+
 ## 0.3.1
 
 - **changed**: upgrade axum to 0.8 ([#122])

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- **breaking**: upgrade `spring-macros` 0.3 to 0.4 ([#132])
+
+[#132]: https://github.com/spring-rs/spring-rs/pull/132
+
 ## 0.3.1
 
 - **changed**: use Local timezone instead of utc timezone ([#111])

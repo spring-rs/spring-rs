@@ -1,10 +1,24 @@
 # Changelog
 
-## 0.3.4
+## 0.4.0
 
-- **changed**: upgrade `spring-macros` 0.3 to 0.4 ([#132])
+- **breaking**: upgrade `spring-macros` 0.3 to 0.4 ([#132])
 
 [#132]: https://github.com/spring-rs/spring-rs/pull/132
+
+**Migrating from 0.3 to 0.4**
+
+```diff
+ #[derive(Clone, Service)]
++#[service(prototype = "build")]
+-#[prototype = "build"]
+ struct UserService {
+     #[inject(component)]
+     db: ConnectPool,
+     #[inject(config)]
+     config: UserConfig,
+ }
+```
 
 ## 0.3.1
 

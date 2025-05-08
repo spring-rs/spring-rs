@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- **breaking**: upgrade `spring` and `spring-macros` 0.3 to 0.4 ([#132])
+
+[#132]: https://github.com/spring-rs/spring-rs/pull/132
+
 ## 0.4.2
 
 - **added**: add static_dir for fallback (#ccf3dd)
