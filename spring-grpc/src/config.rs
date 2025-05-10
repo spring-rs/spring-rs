@@ -104,6 +104,7 @@ pub struct GrpcConfig {
     /// return confusing (but correct) protocol errors.
     ///
     /// Default is `false`.
+    #[serde(default)]
     pub(crate) accept_http1: bool,
 
     #[serde(default)]
@@ -115,5 +116,5 @@ fn default_binding() -> IpAddr {
 }
 
 fn default_port() -> u16 {
-    8000
+    9090
 }
