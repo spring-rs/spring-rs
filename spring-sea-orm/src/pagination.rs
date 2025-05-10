@@ -106,7 +106,7 @@ pub struct Page<T> {
 }
 
 impl<T> Page<T> {
-    pub fn new(content: Vec<T>, pagination: Pagination, total: u64) -> Self {
+    pub fn new(content: Vec<T>, pagination: &Pagination, total: u64) -> Self {
         Self {
             content,
             size: pagination.size,
@@ -164,7 +164,7 @@ where
     C: ConnectionTrait,
 {
     /// pagination
-    async fn page(self, db: &'db C, pagination: Pagination) -> PageResult<M>;
+    async fn page(self, db: &'db C, pagination: &Pagination) -> PageResult<M>;
 }
 
 #[async_trait]
@@ -174,7 +174,7 @@ where
     E: EntityTrait<Model = M>,
     M: FromQueryResult + Sized + Send + Sync + 'db,
 {
-    async fn page(self, db: &'db C, pagination: Pagination) -> PageResult<M> {
+    async fn page(self, db: &'db C, pagination: &Pagination) -> PageResult<M> {
         let total = self.clone().paginate(db, 1).num_items().await?;
         let content = self
             .paginate(db, pagination.size)

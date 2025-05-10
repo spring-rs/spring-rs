@@ -52,7 +52,7 @@ async fn get_todo_list(
 ) -> Result<impl IntoResponse> {
     let rows = TodoList::find()
         .filter(query)
-        .page(&db, pagination)
+        .page(&db, &pagination)
         .await
         .context("query todo list failed")?;
     Ok(Json(rows))
