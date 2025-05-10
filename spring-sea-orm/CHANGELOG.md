@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- **changed**: use pagination ref ([#df3adf])
+
+[#df3adf]: https://github.com/spring-rs/spring-rs/commit/df3adf8805947d826b9a696b19e09e790efcee02
+
 ## 0.4.0
 
 - **breaking**: upgrade `spring` 0.3 to 0.4 ([#132])
