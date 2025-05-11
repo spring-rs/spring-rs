@@ -42,10 +42,20 @@ use opentelemetry_sdk::metrics::SdkMeterProvider;
 use opentelemetry_sdk::propagation::{BaggagePropagator, TraceContextPropagator};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_semantic_conventions::attribute;
+use schemars::JsonSchema;
+use serde::Deserialize;
+use spring::config::{ConfigRegistry, Configurable};
 use spring::plugin::component::ComponentRef;
 use spring::plugin::{ComponentRegistry, MutableComponentRegistry};
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
+
+#[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
+#[config_prefix = "opentelemetry"]
+struct OpenTelemetryConfig {
+    #[serde(default)]
+    enable: bool,
+}
 
 /// Routers collection
 pub type KeyValues = Vec<KeyValue>;
@@ -54,6 +64,12 @@ pub struct OpenTelemetryPlugin;
 
 impl Plugin for OpenTelemetryPlugin {
     fn immediately_build(&self, app: &mut AppBuilder) {
+        let config = app
+            .get_config::<OpenTelemetryConfig>()
+            .expect("opentelemetry plugin config load failed");
+        if !config.enable {
+            return;
+        }
         let resource = Self::build_resource(app);
         let log_provider = Self::init_logs(resource.clone());
         let meter_provider = Self::init_metrics(resource.clone());
