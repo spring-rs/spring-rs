@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "在这个页面，我会介绍spring-rs如何快速上手spring-rs"
+lead = "在这个页面，我会介绍如何快速上手spring-rs"
 toc = true
 top = false
 +++
