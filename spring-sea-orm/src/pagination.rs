@@ -147,6 +147,11 @@ impl<T> Page<T> {
             total_pages,
         }
     }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.content.is_empty()
+    }
 }
 
 #[derive(Debug, Error)]
