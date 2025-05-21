@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- **added**: add `Page::is_first()` & `Page::is_last()` ([#d07dc7])
+
+[#d07dc7]: https://github.com/spring-rs/spring-rs/commit/d07dc71aaa317e3f8eb061bedce6e3094e85576f
+
 ## 0.4.2
 
 - **added**: add `Page::is_empty()` ([#51ef1b])

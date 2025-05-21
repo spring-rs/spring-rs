@@ -1,7 +1,7 @@
 [package]
 name = "spring-sea-orm"
 description = "Integration of spring-rs framework and sea-orm"
-version = "0.4.2"
+version = "0.4.3"
 categories = ["database"]
 keywords = ["orm", "sql-database", "spring"]
 edition.workspace = true
