@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- **added**: add `Page::is_empty()` ([#51ef1b])
+
+[#51ef1b]: https://github.com/spring-rs/spring-rs/commit/51ef1b8878656b35577de20d558ac9c8907343a3
+
 ## 0.4.1
 
 - **changed**: use pagination ref ([#df3adf])
