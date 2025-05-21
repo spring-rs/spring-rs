@@ -55,7 +55,10 @@ mod web {
         size: Option<u64>,
     }
 
-    impl<S> FromRequestParts<S> for Pagination where S: Sync {
+    impl<S> FromRequestParts<S> for Pagination
+    where
+        S: Sync,
+    {
         type Rejection = SeaOrmWebErr;
 
         async fn from_request_parts(
@@ -151,6 +154,16 @@ impl<T> Page<T> {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.content.is_empty()
+    }
+
+    #[inline]
+    pub fn is_first(&self) -> bool {
+        self.page <= 0
+    }
+
+    #[inline]
+    pub fn is_last(&self) -> bool {
+        self.page + 1 >= self.total_pages
     }
 }
 
