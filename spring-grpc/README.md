@@ -83,7 +83,8 @@ async fn main() {
     App::new().add_plugin(GrpcPlugin).run().await
 }
 
-/// Derive Service and specify Grpc Server. The Grpc plug-in will automatically register the service on tonic
+/// Derive Service and specify Grpc Server.
+/// The GrpcPlugin will automatically register the service on tonic
 #[derive(Clone, Service)]
 #[service(grpc = "GreeterServer")]
 struct MyGreeter;

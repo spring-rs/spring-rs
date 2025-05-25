@@ -83,7 +83,8 @@ async fn main() {
     App::new().add_plugin(GrpcPlugin).run().await
 }
 
-/// 派生Service，并指定Grpc Server，Grpc插件会自动将服务注册到tonic上
+/// 派生Service，并指定Grpc Server
+/// Grpc插件会自动将服务注册到tonic上
 #[derive(Clone, Service)]
 #[service(grpc = "GreeterServer")]
 struct MyGreeter;
