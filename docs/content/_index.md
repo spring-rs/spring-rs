@@ -7,9 +7,6 @@ title = "spring-rs"
 lead = "<b>spring-rs</b> is a application framework written in rust inspired by java's spring-boot"
 url = "/docs/getting-started/introduction/"
 url_button = "Get started"
-repo_version = "GitHub v0.4.x"
-repo_license = "Open-source MIT License."
-repo_url = "https://github.com/spring-rs/spring-rs"
 logo = "logo.svg"
 
 # Menu items
