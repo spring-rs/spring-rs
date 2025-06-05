@@ -3,6 +3,7 @@
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
 mod auto;
+mod cache;
 mod config;
 mod inject;
 mod job;
@@ -233,4 +234,39 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
     inject::expand_derive(input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
+}
+
+/// `#[cache]` - Transparent Redis-based caching for async functions.
+///
+/// This macro wraps an async function to automatically cache its result
+/// in Redis. It checks for a cached value before executing the function.
+/// If a cached result is found, it is deserialized and returned directly.
+/// Otherwise, the function runs normally and its result is stored in Redis.
+///
+/// # Syntax
+/// ```plain
+/// #[cache("key_pattern", expire = 600)]
+/// ```
+///
+/// # Attributes
+/// - `"key_pattern"`: (**required**) A cache key expression using standard `format!()` syntax.
+/// - `expire = <integer>`: (**optional**) Time-to-live in seconds for the cached value.
+///
+/// # Function Requirements
+/// - Must be an `async fn`
+/// - Can return either a `Result<T, E>` or a plain value `T`
+/// - The return type must implement `serde::Serialize` and `serde::Deserialize`
+/// - Generics, attributes, and visibility will be preserved
+///
+/// # Example
+/// ```rust
+/// #[cached("user:{user_id}", expire = 600)]
+/// async fn get_user(user_id: u64) -> Result<User, MyError> {
+///     // Fetch user from database
+///     no_implementation!()
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
+    cache::cache(args, input)
 }
