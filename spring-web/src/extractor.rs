@@ -40,7 +40,7 @@ impl RequestPartsExt for Parts {
         self.get_app_state()
             .app
             .get_config::<T>()
-            .map_err(|e| WebError::ConfigDeserializeErr(std::any::type_name::<T>(), e))
+            .map_err(|e| WebError::ConfigDeserializeErr(std::any::type_name::<T>(), Box::new(e)))
     }
 }
 
@@ -50,7 +50,7 @@ pub struct Component<T: Clone>(pub T);
 impl<T, S> FromRequestParts<S> for Component<T>
 where
     T: Clone + Send + Sync + 'static,
-    S: Sync
+    S: Sync,
 {
     type Rejection = WebError;
 
@@ -80,7 +80,7 @@ where
 impl<T, S> FromRequestParts<S> for Config<T>
 where
     T: serde::de::DeserializeOwned + Configurable,
-    S: Sync
+    S: Sync,
 {
     type Rejection = WebError;
 

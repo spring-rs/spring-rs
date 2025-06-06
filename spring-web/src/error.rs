@@ -241,7 +241,7 @@ pub enum WebError {
     ResponseStatusError(#[from] KnownWebError),
 
     #[error("get server config failed for typeof {0}, {1}")]
-    ConfigDeserializeErr(&'static str, AppError),
+    ConfigDeserializeErr(&'static str, Box<AppError>),
 
     #[error(transparent)]
     ServerError(#[from] anyhow::Error),
