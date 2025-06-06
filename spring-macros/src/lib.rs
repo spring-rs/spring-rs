@@ -260,10 +260,18 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// # Example
 /// ```rust
-/// #[cached("user:{user_id}", expire = 600)]
+/// #[derive(serde::Serialize, serde::Deserialize)]
+/// struct User {
+///     id: u64,
+///     name: String,
+/// }
+/// 
+/// struct MyError;
+/// 
+/// #[cache("user:{user_id}", expire = 600)]
 /// async fn get_user(user_id: u64) -> Result<User, MyError> {
 ///     // Fetch user from database
-///     no_implementation!()
+///     unimplemented!("do something")
 /// }
 /// ```
 #[proc_macro_attribute]
