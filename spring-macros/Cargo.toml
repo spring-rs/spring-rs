@@ -22,4 +22,5 @@ tokio = { workspace = true }
 spring = { path = "../spring" }
 spring-web = { path = "../spring-web" }
 spring-job = { path = "../spring-job" }
+spring-redis = { path = "../spring-redis" }
 serde = { workspace = true }
