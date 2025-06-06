@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- **added**: feat: ✨ add cache macros support ([#137])
+
+[#137]: https://github.com/spring-rs/spring-rs/pull/137
+
 ## 0.4.0
 
 - **breaking**: Refactor service macro to support grpc service ([#132])
