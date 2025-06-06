@@ -260,6 +260,8 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// # Example
 /// ```rust
+/// use spring_macros::cache;
+/// 
 /// #[derive(serde::Serialize, serde::Deserialize)]
 /// struct User {
 ///     id: u64,
