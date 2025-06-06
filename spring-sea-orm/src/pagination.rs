@@ -158,7 +158,7 @@ impl<T> Page<T> {
 
     #[inline]
     pub fn is_first(&self) -> bool {
-        self.page <= 0
+        self.page == 0
     }
 
     #[inline]

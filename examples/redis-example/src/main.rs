@@ -1,6 +1,6 @@
 use anyhow::Context;
 use spring::{auto_config, App};
-use spring_redis::{redis::AsyncCommands, Redis, RedisPlugin};
+use spring_redis::{cache, redis::AsyncCommands, Redis, RedisPlugin};
 use spring_web::{
     axum::response::{IntoResponse, Json},
     error::Result,
@@ -25,7 +25,7 @@ async fn list_redis_key(Component(mut redis): Component<Redis>) -> Result<impl I
     Ok(Json(keys))
 }
 
-#[get("/{key}")]
+#[get("/get/{key}")]
 async fn get_content(
     Component(mut redis): Component<Redis>,
     Path(key): Path<String>,
@@ -34,7 +34,7 @@ async fn get_content(
     Ok(v)
 }
 
-#[post("/{key}")]
+#[post("/put/{key}")]
 async fn set_content(
     Component(mut redis): Component<Redis>,
     Path(key): Path<String>,
@@ -42,4 +42,14 @@ async fn set_content(
 ) -> Result<impl IntoResponse> {
     let v: String = redis.set(key, body).await.context("redis request failed")?;
     Ok(v)
+}
+
+#[get("/cache/{key}")]
+async fn test_cache(Path(key): Path<String>) -> Result<impl IntoResponse> {
+    Ok(cachable_func(&key).await)
+}
+
+#[cache("redis-cache:{key}", expire = 60)]
+async fn cachable_func(key: &str) -> String {
+    format!("cached value for key: {key}")
 }

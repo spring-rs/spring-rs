@@ -41,6 +41,27 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 }
 ```
 
+## `cache` macro
+
+`spring-redis` provides a transparent cache for asynchronous functions based on Redis. Add the `cache` macro to the async method to cache the function result.
+
+The example is as follows:
+
+```rust
+#[cache("redis-cache:{key}", expire = 60)]
+async fn cachable_func(key: &str) -> String {
+    format!("cached value for key: {key}")
+}
+```
+
+Where `expire` is an optional parameter.
+
+The function wrapped by `cache` must meet the following requirements:
+
+- Must be `async fn`
+- Can return `Result<T, E>` or a normal value `T`
+- The return type must implement `serde::Serialize` and `serde::Deserialize`, and the underlying `serde_json` is used for serialization
+
 Complete code reference [`redis-example`][redis-example]
 
 [redis-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/redis-example

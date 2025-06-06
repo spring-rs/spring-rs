@@ -41,4 +41,24 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 }
 ```
 
+## `cache`宏
+
+`spring-redis`提供了基于 Redis 的异步函数透明缓存。在async方法上添加`cache`宏即可对函数结果进行缓存。
+
+示例如下：
+
+```rust
+#[cache("redis-cache:{key}", expire = 60)]
+async fn cachable_func(key: &str) -> String {
+    format!("cached value for key: {key}")
+}
+```
+
+其中`expire`是可选参数。
+
+`cache`包装的函数需满足以下要求：
+- 必须是 `async fn`
+- 可以返回 `Result<T, E>` 或普通值 `T`
+- 返回类型必须实现 `serde::Serialize` 和 `serde::Deserialize`，底层使用`serde_json`进行序列化
+
 完整代码参考[`redis-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/redis-example)

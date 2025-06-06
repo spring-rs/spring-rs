@@ -1,7 +1,7 @@
 [package]
 name = "spring-redis"
 description = "Integrate redis-rs with spring-rs"
-version = "0.4.0"
+version = "0.4.1"
 keywords = ["redis", "database", "spring"]
 edition.workspace = true
 license.workspace = true
@@ -10,6 +10,7 @@ repository.workspace = true
 
 [dependencies]
 spring = { path = "../spring", version = "0.4" }
+spring-macros = { path = "../spring-macros", version = "0.4" }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true, features = ["log"] }

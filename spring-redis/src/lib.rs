@@ -5,6 +5,7 @@
 pub mod config;
 
 pub use redis;
+pub use spring_macros::cache;
 
 use anyhow::Context;
 use config::RedisConfig;
