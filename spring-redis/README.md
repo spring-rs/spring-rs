@@ -43,7 +43,7 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 
 ## `cache` macro
 
-`spring-redis` provides a transparent cache for asynchronous functions based on Redis. Add the `cache` macro to the async method to cache the function result.
+`spring-redis` provides a transparent cache for asynchronous functions based on Redis. Add the [`cache`](https://docs.rs/spring-redis/latest/spring_redis/attr.cache.html) macro to the async method to cache the function result.
 
 The example is as follows:
 

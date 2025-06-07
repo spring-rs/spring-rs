@@ -43,7 +43,7 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 
 ## `cache`宏
 
-`spring-redis`提供了基于 Redis 的异步函数透明缓存。在async方法上添加`cache`宏即可对函数结果进行缓存。
+`spring-redis`提供了基于 Redis 的异步函数透明缓存。在async方法上添加[`cache`](https://docs.rs/spring-redis/latest/spring_redis/attr.cache.html)宏即可对函数结果进行缓存。
 
 示例如下：
 
