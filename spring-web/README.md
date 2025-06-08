@@ -201,6 +201,29 @@ async fn problem_middleware(Component(db): Component<ConnectPool>, request: Requ
 }
 ```
 
+Then you can apply this middleware to your routes using the `middlewares` macro:
+
+```rust
+use spring_web::{middlewares, get, axum::middleware};
+use std::time::Duration;
+
+#[middlewares(
+    middleware::from_fn(problem_middleware),
+)]
+mod routes {
+    use super::*;
+
+    #[get("/")]
+    async fn hello_world() -> impl IntoResponse {
+        "hello world"
+    }
+
+}
+```
+
+This middleware will:
+- Intercept all responses from routes in the module
+
 Complete code reference [`web-middleware-example`][web-middleware-example]
 
 [web-middleware-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example
