@@ -1,9 +1,9 @@
 use anyhow::Context;
-use spring::App;
+use spring::{auto_config, App};
 use spring_sqlx::sqlx::Row;
 use spring_sqlx::{sqlx, ConnectPool, SqlxPlugin};
 use spring_web::error::KnownWebError;
-use spring_web::get;
+use spring_web::{middlewares, WebConfigurator};
 use spring_web::{
     axum::{
         body,
@@ -13,46 +13,54 @@ use spring_web::{
     error::Result,
     extractor::Component,
     extractor::Request,
-    Router, WebConfigurator, WebPlugin,
+    WebPlugin,
 };
 use std::time::Duration;
 use tower_http::timeout::TimeoutLayer;
+use spring_web::get;
 
+#[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(WebPlugin)
         .add_plugin(SqlxPlugin)
-        .add_router(router())
         .run()
         .await
 }
 
-fn router() -> Router {
-    Router::new()
-        .merge(spring_web::handler::auto_router())
-        .layer(TimeoutLayer::new(Duration::from_secs(10)))
-        .layer(middleware::from_fn(problem_middleware))
+#[middlewares(
+    middleware::from_fn(problem_middleware),
+    TimeoutLayer::new(Duration::from_secs(10))
+)]
+mod routes {
+    use super::*;
+
+    #[get("/")]
+    async fn hello_world() -> impl IntoResponse {
+        "hello world"
+    }
+
+    #[get("/version")]
+    async fn sql_version(Component(pool): Component<ConnectPool>) -> Result<String> {
+        let version = sqlx::query("select version() as version")
+            .fetch_one(&pool)
+            .await
+            .context("sqlx query failed")?
+            .get("version");
+        Ok(version)
+    }
+
+    #[get("/error")]
+    async fn error_request() -> Result<String> {
+        Err(KnownWebError::bad_request("request error"))?
+    }
+
 }
 
-#[get("/")]
-async fn hello_world() -> impl IntoResponse {
-    "hello world"
-}
-
-#[get("/version")]
-async fn sql_version(Component(pool): Component<ConnectPool>) -> Result<String> {
-    let version = sqlx::query("select version() as version")
-        .fetch_one(&pool)
-        .await
-        .context("sqlx query failed")?
-        .get("version");
-    Ok(version)
-}
-
-#[get("/error")]
-async fn error_request() -> Result<String> {
-    Err(KnownWebError::bad_request("request error"))?
+#[get("/goodbye")]
+async fn goodbye_world() -> impl IntoResponse {
+    "goodbye world"
 }
 
 /// ProblemDetail: https://www.rfc-editor.org/rfc/rfc7807
