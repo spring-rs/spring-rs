@@ -43,9 +43,11 @@ fn middlewares_inner(args: TokenStream, input: TokenStream) -> syn::Result<Token
     let module_name = &module.ident;
     let registrar_struct_name = syn::Ident::new(&format!("{}MiddlewareRegistrar", module_name), module.ident.span());
 
-    let route_info = collect_and_strip_route_info(&mut module)?;
+    let nest_prefix = extract_nest_prefix(&module)?;
 
-    let (route_registrations, middleware_layers) = generate_middleware_components(
+    let route_info = collect_and_strip_route_info(&mut module, nest_prefix.as_deref())?;
+
+    let (route_registrations, middleware_expressions) = generate_middleware_components(
         &middleware_list.middlewares,
         &route_info,
     )?;
@@ -61,9 +63,13 @@ fn middlewares_inner(args: TokenStream, input: TokenStream) -> syn::Result<Token
                 fn install_route(&self, mut __router: ::spring_web::Router) -> ::spring_web::Router {
                     use ::spring_web::handler::TypeRouter;
                     
+                    let mut __module_router = ::spring_web::Router::new();
+                    
                     #(#route_registrations)*
                     
-                    #(#middleware_layers)*
+                    #(let __module_router = __module_router.layer(#middleware_expressions);)*
+                    
+                    __router = __router.merge(__module_router);
                     
                     __router
                 }
@@ -93,7 +99,7 @@ struct RouteInfo {
     methods: Vec<String>,
 }
 
-fn collect_and_strip_route_info(module: &mut syn::ItemMod) -> syn::Result<Vec<RouteInfo>> {
+fn collect_and_strip_route_info(module: &mut syn::ItemMod, nest_prefix: Option<&str>) -> syn::Result<Vec<RouteInfo>> {
     let mut route_info = Vec::new();
     
     if let Some((_, items)) = &mut module.content {
@@ -142,9 +148,15 @@ fn collect_and_strip_route_info(module: &mut syn::ItemMod) -> syn::Result<Vec<Ro
                     };
                     
                     if let Ok(path_lit) = attr.parse_args::<syn::LitStr>() {
+                        let path = if let Some(prefix) = nest_prefix {
+                            format!("{}{}", prefix, path_lit.value())
+                        } else {
+                            path_lit.value()
+                        };
+                        
                         route_info.push(RouteInfo {
                             func_name: fun.sig.ident.clone(),
-                            path: path_lit.value(),
+                            path,
                             methods: vec![method.to_string()],
                         });
                     }
@@ -160,10 +172,10 @@ fn generate_middleware_components(
     middleware_list: &Punctuated<Expr, Token![,]>,
     route_info: &[RouteInfo],
 ) -> syn::Result<(Vec<TokenStream2>, Vec<TokenStream2>)> {
-    let middleware_layers: Vec<TokenStream2> = middleware_list
+    let middleware_expressions: Vec<TokenStream2> = middleware_list
         .iter()
         .map(|middleware| {
-            quote! { __router = __router.layer(#middleware); }
+            quote! { #middleware }
         })
         .collect();
 
@@ -183,10 +195,21 @@ fn generate_middleware_components(
             quote! { 
                 let __method_router = ::spring_web::MethodRouter::new();
                 #(let __method_router = ::spring_web::MethodRouter::on(__method_router, #methods, #func_name);)*
-                __router = ::spring_web::Router::route(__router, #path, __method_router);
+                __module_router = ::spring_web::Router::route(__module_router, #path, __method_router);
             }
         })
         .collect();
 
-    Ok((route_registrations, middleware_layers))
+    Ok((route_registrations, middleware_expressions))
+}
+
+fn extract_nest_prefix(module: &syn::ItemMod) -> syn::Result<Option<String>> {
+    for attr in &module.attrs {
+        if attr.path().is_ident("nest") {
+            if let Ok(path_lit) = attr.parse_args::<syn::LitStr>() {
+                return Ok(Some(path_lit.value()));
+            }
+        }
+    }
+    Ok(None)
 }

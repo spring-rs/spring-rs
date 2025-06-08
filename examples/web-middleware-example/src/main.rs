@@ -18,6 +18,8 @@ use spring_web::{
 use std::time::Duration;
 use tower_http::timeout::TimeoutLayer;
 use spring_web::get;
+use tower_http::cors::CorsLayer;
+use spring_web::nest;
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -29,6 +31,13 @@ async fn main() {
         .await
 }
 
+/// Example #1:
+
+/// Example of using `middlewares` macro to apply middleware to all routes in a module.
+/// This module includes a problem detail middleware that handles errors and logs them to the database.
+/// It also includes a timeout layer to limit request processing time.
+/// The `hello_world` route returns a simple greeting, while the `sql_version` route
+/// queries the database for its version. The `error_request` route demonstrates error handling.
 #[middlewares(
     middleware::from_fn(problem_middleware),
     TimeoutLayer::new(Duration::from_secs(10))
@@ -56,11 +65,6 @@ mod routes {
         Err(KnownWebError::bad_request("request error"))?
     }
 
-}
-
-#[get("/goodbye")]
-async fn goodbye_world() -> impl IntoResponse {
-    "goodbye world"
 }
 
 /// ProblemDetail: https://www.rfc-editor.org/rfc/rfc7807
@@ -93,3 +97,79 @@ async fn problem_middleware(
         response
     }
 }
+
+/// Example #2:
+/// This example demonstrates how to use the `middlewares` macro to apply multiple middleware layers to a module.
+/// It includes a logging middleware, an authentication middleware, and a timeout layer.
+/// The `protected` route is protected by the authentication middleware, which checks for an `Authorization` header.
+/// If the header is missing, it returns a 401 Unauthorized response.
+
+#[middlewares(
+    middleware::from_fn(logging_middleware),
+    middleware::from_fn(auth_middleware),
+    TimeoutLayer::new(Duration::from_secs(10)),
+    CorsLayer::permissive()
+)]
+mod protected_routes {
+    use super::*;
+
+    #[get("/protected")]
+    async fn protected() -> impl IntoResponse {
+        "Protected endpoint!"
+    }
+}
+
+async fn logging_middleware(
+    request: Request,
+    next: Next,
+) -> Response {
+    println!("🔍 [LOGGING] {} {}", request.method(), request.uri().path());
+    let response = next.run(request).await;
+    println!("✅ [LOGGING] Response completed");
+    response
+}
+
+async fn auth_middleware(
+    request: Request,
+    next: Next,
+) -> Response {
+    println!("🔐 [AUTH] Checking authentication for: {}", request.uri().path());
+    
+    if request.headers().get("Authorization").is_none() {
+        return Response::builder()
+            .status(401)
+            .body("Unauthorized".into())
+            .unwrap();
+    }
+
+    next.run(request).await
+}
+
+/// Example #3:
+
+#[middlewares(
+    middleware::from_fn(logging_middleware),
+    middleware::from_fn(auth_middleware),
+    TimeoutLayer::new(Duration::from_secs(10)),
+    CorsLayer::permissive()
+)]
+#[nest("/api")]
+mod api {
+
+    use super::*;
+
+    #[get("/hello")]
+    pub async fn hello() -> impl IntoResponse {
+        "Hello, world!"
+    }
+}
+
+/// Example #4:
+/// This route demonstrates a simple goodbye endpoint without any middleware.
+/// It returns a static string "goodbye world" when accessed.
+
+#[get("/goodbye")]
+async fn goodbye_world() -> impl IntoResponse {
+    "goodbye world"
+}
+
