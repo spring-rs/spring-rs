@@ -7,6 +7,7 @@ mod cache;
 mod config;
 mod inject;
 mod job;
+mod middlewares;
 mod nest;
 mod route;
 mod stream;
@@ -144,6 +145,44 @@ method_macro!(Patch, patch);
 #[proc_macro_attribute]
 pub fn nest(args: TokenStream, input: TokenStream) -> TokenStream {
     nest::with_nest(args, input)
+}
+
+/// Applies middleware layers to all route handlers within a module.
+///
+/// # Syntax
+/// ```plain
+/// #[middlewares(middleware1, middleware2, ...)]
+/// mod module_name {
+///     // route handlers
+/// }
+/// ```
+///
+/// # Arguments
+/// - `middleware1`, `middleware2`, etc. - Middleware expressions that will be applied to all routes in the module
+///
+/// # Example
+/// ```
+/// # use spring_web::{axum::middleware, Router};
+/// # use tower_http::timeout::TimeoutLayer;
+/// # use std::time::Duration;
+/// #[middlewares(
+///     middleware::from_fn(my_middleware),
+///     TimeoutLayer::new(Duration::from_secs(10))
+/// )]
+/// mod api {
+///     # use spring_web::{get, axum::response::IntoResponse};
+///     #[get("/hello")]
+///     async fn hello() -> impl IntoResponse {
+///         "Hello, world!"
+///     }
+/// }
+/// ```
+///
+/// This macro generates a router function that applies the specified middleware
+/// to all route handlers defined within the module.
+#[proc_macro_attribute]
+pub fn middlewares(args: TokenStream, input: TokenStream) -> TokenStream {
+    middlewares::middlewares(args, input)
 }
 
 fn input_and_compile_error(mut item: TokenStream, err: syn::Error) -> TokenStream {

@@ -20,6 +20,7 @@ pub use spring::async_trait;
 pub use spring_macros::delete;
 pub use spring_macros::get;
 pub use spring_macros::head;
+pub use spring_macros::middlewares;
 pub use spring_macros::nest;
 pub use spring_macros::options;
 pub use spring_macros::patch;
