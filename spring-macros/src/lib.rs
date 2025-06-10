@@ -161,20 +161,28 @@ pub fn nest(args: TokenStream, input: TokenStream) -> TokenStream {
 /// - `middleware1`, `middleware2`, etc. - Middleware expressions that will be applied to all routes in the module
 ///
 /// # Example
-/// ```
-/// # use spring_web::{axum::middleware, Router};
-/// # use tower_http::timeout::TimeoutLayer;
-/// # use std::time::Duration;
+/// ```rust
+/// use spring_web::{axum::{middleware::{self, Next}, response::Response}, extractor::Request, Router, middlewares};
+/// use spring_web::middleware::timeout::TimeoutLayer;
+/// use std::time::Duration;
+///
 /// #[middlewares(
 ///     middleware::from_fn(my_middleware),
 ///     TimeoutLayer::new(Duration::from_secs(10))
 /// )]
 /// mod api {
-///     # use spring_web::{get, axum::response::IntoResponse};
+///     use spring_web::{get, axum::response::IntoResponse};
 ///     #[get("/hello")]
 ///     async fn hello() -> impl IntoResponse {
 ///         "Hello, world!"
 ///     }
+/// }
+///
+/// async fn my_middleware(
+///     request: Request,
+///     next: Next,
+/// ) -> Response {
+///     unimplemented!("do something")
 /// }
 /// ```
 ///
@@ -300,15 +308,15 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 /// # Example
 /// ```rust
 /// use spring_macros::cache;
-/// 
+///
 /// #[derive(serde::Serialize, serde::Deserialize)]
 /// struct User {
 ///     id: u64,
 ///     name: String,
 /// }
-/// 
+///
 /// struct MyError;
-/// 
+///
 /// #[cache("user:{user_id}", expire = 600)]
 /// async fn get_user(user_id: u64) -> Result<User, MyError> {
 ///     // Fetch user from database
