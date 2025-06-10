@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4
+
+- **added**: feat: ✨ add middlewares macro ([#139])
+
+[#139]: https://github.com/spring-rs/spring-rs/pull/139
+
 ## 0.4.3
 
 - **breaking**: upgrade `spring` and `spring-macros` 0.3 to 0.4 ([#132])

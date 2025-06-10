@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- **added**: feat: ✨ add middlewares macro ([#139])
+
+[#139]: https://github.com/spring-rs/spring-rs/pull/139
+
 ## 0.4.1
 
 - **added**: feat: ✨ add cache macros support ([#137])
