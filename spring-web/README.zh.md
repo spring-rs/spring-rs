@@ -177,6 +177,20 @@ async fn problem_middleware(Component(db): Component<ConnectPool>, request: Requ
 
     response
 }
+
+/// 你可以通过middlewares宏来使用上面定义的middleware
+#[middlewares(
+    middleware::from_fn(problem_middleware),
+)]
+mod routes {
+    use super::*;
+
+    #[get("/")]
+    async fn hello_world() -> impl IntoResponse {
+        "hello world"
+    }
+
+}
 ```
 
 

@@ -192,6 +192,8 @@ You can also use [Extractor in middleware](https://docs.rs/axum/latest/axum/midd
 ```rust
 use spring_web::{axum::{response::Response, middleware::Next}, extractor::{Request, Component}};
 use spring_sqlx::ConnectPool;
+use spring_web::{middlewares, get, axum::middleware};
+use std::time::Duration;
 
 async fn problem_middleware(Component(db): Component<ConnectPool>, request: Request, next: Next) -> Response {
     // do something
@@ -199,14 +201,8 @@ async fn problem_middleware(Component(db): Component<ConnectPool>, request: Requ
 
     response
 }
-```
 
-Then you can apply this middleware to your routes using the `middlewares` macro:
-
-```rust
-use spring_web::{middlewares, get, axum::middleware};
-use std::time::Duration;
-
+/// Then you can apply this middleware to your routes using the `middlewares` macro:
 #[middlewares(
     middleware::from_fn(problem_middleware),
 )]
