@@ -189,8 +189,8 @@ Complete code reference [`web-example`][web-example]
 
 You can also use [Extractor in middleware](https://docs.rs/axum/latest/axum/middleware/fn.from_fn.html), but please note that you need to follow the rules of axum.
 
-```rust
-use spring_web::{axum::{response::Response, middleware::Next}, extractor::{Request, Component}};
+```no_run, rust
+use spring_web::{axum::{response::Response, middleware::Next，response::IntoResponse}, extractor::{Request, Component}};
 use spring_sqlx::ConnectPool;
 use spring_web::{middlewares, get, axum::middleware};
 use std::time::Duration;
