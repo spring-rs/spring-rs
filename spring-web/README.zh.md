@@ -168,24 +168,24 @@ b = true
 你也可以在[middleware中使用Extractor](https://docs.rs/axum/latest/axum/middleware/fn.from_fn.html)，注意需要遵循axum的规则。
 
 ```rust
-use spring_web::{axum::{response::Response, middleware::Next，response::IntoResponse}, extractor::{Request, Component}};
-use spring_sqlx::ConnectPool;
-use spring_web::{middlewares, get, axum::middleware};
-use std::time::Duration;
-
-async fn problem_middleware(Component(db): Component<ConnectPool>, request: Request, next: Next) -> Response {
-    // do something
-    let response = next.run(request).await;
-
-    response
-}
+use spring_web::{middlewares, axum::middleware};
 
 /// 你可以通过middlewares宏来使用上面定义的middleware
 #[middlewares(
     middleware::from_fn(problem_middleware),
 )]
 mod routes {
-    use super::*;
+    use spring_web::{axum::{response::Response, middleware::Next, response::IntoResponse}, extractor::{Request, Component}};
+    use spring_sqlx::ConnectPool;
+    use spring_web::{middlewares, get, axum::middleware};
+    use std::time::Duration;
+
+    async fn problem_middleware(Component(db): Component<ConnectPool>, request: Request, next: Next) -> Response {
+        // do something
+        let response = next.run(request).await;
+
+        response
+    }
 
     #[get("/")]
     async fn hello_world() -> impl IntoResponse {
