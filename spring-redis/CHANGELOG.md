@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- **added**: feat: ✨ enhanced cache macros support condition & unless attr ([#141])
+
+[#141]: https://github.com/spring-rs/spring-rs/pull/141
+
 ## 0.4.1
 
 - **added**: feat: ✨ add cache macros support ([#137])
