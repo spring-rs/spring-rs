@@ -266,12 +266,24 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// # Syntax
 /// ```plain
-/// #[cache("key_pattern", expire = 600)]
+/// #[cache("key_pattern", expire = <seconds>, condition = <bool_expr>, unless = <bool_expr>)]
 /// ```
 ///
 /// # Attributes
-/// - `"key_pattern"`: (**required**) A cache key expression using standard `format!()` syntax.
-/// - `expire = <integer>`: (**optional**) Time-to-live in seconds for the cached value.
+/// - `"key_pattern"` (**required**):
+///   A format string used to generate the cache key. Function arguments can be interpolated using standard `format!` syntax.
+/// - `expire = <integer>` (**optional**):
+///   The number of seconds before the cached value expires. If omitted, the key will be stored without expiration.
+/// - `condition = <expression>` (**optional**):
+///   A boolean expression evaluated **before** executing the function.
+///   If this evaluates to `false`, caching is completely bypassed — no lookup and no insertion.
+///   The expression can access function parameters directly.
+/// - `unless = <expression>` (**optional**):
+///   A boolean expression evaluated **after** executing the function.
+///   If this evaluates to `true`, the result will **not** be written to the cache.
+///   The expression can access both parameters and a `result` variable (the return value).
+///   NOTE: If your function returns Result<T, E>, the `result` variable in unless refers to the inner Ok value (T), not the entire Result.
+///   This allows you to write expressions like result.is_none() for Result<Option<_>, _> functions.
 ///
 /// # Function Requirements
 /// - Must be an `async fn`
@@ -291,8 +303,8 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// struct MyError;
 ///
-/// #[cache("user:{user_id}", expire = 600)]
-/// async fn get_user(user_id: u64) -> Result<User, MyError> {
+/// #[cache("user:{user_id}", expire = 600, condition = user_id % 2 == 0, unless = result.is_none())]
+/// async fn get_user(user_id: u64) -> Result<Option<User>, MyError> {
 ///     // Fetch user from database
 ///     unimplemented!("do something")
 /// }
