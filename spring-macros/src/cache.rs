@@ -134,17 +134,17 @@ pub fn cache(attr: TokenStream, item: TokenStream) -> TokenStream {
         },
         None => quote! {},
     };
-    let unless_check = match &args.unless {
-        Some(expr) => quote! {
-            if (#expr) {
-                return result;
-            }
-        },
-        None => quote! {},
-    };
 
     let gen_code = match extract_ok_type_from_result(ret_type) {
         Some(inner_type) => {
+            let unless_check = match &args.unless {
+                Some(expr) => quote! {
+                    if (#expr) {
+                        return Ok(result);
+                    }
+                },
+                None => quote! {},
+            };
             quote! {
                 #(#attrs)*
                 #vis #asyncness fn #ident #generics(#inputs) #output #where_clause {
@@ -187,6 +187,14 @@ pub fn cache(attr: TokenStream, item: TokenStream) -> TokenStream {
             }
         }
         None => {
+            let unless_check = match &args.unless {
+                Some(expr) => quote! {
+                    if (#expr) {
+                        return result;
+                    }
+                },
+                None => quote! {},
+            };
             quote! {
                 #(#attrs)*
                 #vis #asyncness fn #ident #generics(#inputs) #output #where_clause {
