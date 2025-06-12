@@ -48,13 +48,13 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 The example is as follows:
 
 ```rust
-#[cache("redis-cache:{key}", expire = 60)]
+#[cache("redis-cache:{key}", expire = 60, condition = key.len() > 3)]
 async fn cachable_func(key: &str) -> String {
     format!("cached value for key: {key}")
 }
 ```
 
-Where `expire` is an optional parameter.
+The `cache` macro supports three optional parameters: `expire`, `condition`, and `unless`. For details, please refer to the [`cache`](https://docs.rs/spring-redis/latest/spring_redis/attr.cache.html) document.
 
 The function wrapped by `cache` must meet the following requirements:
 

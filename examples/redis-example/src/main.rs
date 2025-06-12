@@ -49,7 +49,13 @@ async fn test_cache(Path(key): Path<String>) -> Result<impl IntoResponse> {
     Ok(cachable_func(&key).await)
 }
 
-#[cache("redis-cache:{key}", expire = 60)]
+#[cache(
+    "redis-cache:{key}",
+    expire = 60,
+    condition = key.len() > 3,
+    unless = result.len() > 30
+)]
 async fn cachable_func(key: &str) -> String {
+    println!("cachable_func called with key: {}", key);
     format!("cached value for key: {key}")
 }

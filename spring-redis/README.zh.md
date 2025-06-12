@@ -48,13 +48,13 @@ async fn list_all_redis_key(Component(mut redis): Component<Redis>) -> Result<im
 示例如下：
 
 ```rust
-#[cache("redis-cache:{key}", expire = 60)]
+#[cache("redis-cache:{key}", expire = 60, condition = key.len() > 3)]
 async fn cachable_func(key: &str) -> String {
     format!("cached value for key: {key}")
 }
 ```
 
-其中`expire`是可选参数。
+`cache`宏支持`expire`、`condition`、`unless`三个可选参数。具体可以参考[`cache`](https://docs.rs/spring-redis/latest/spring_redis/attr.cache.html)文档。
 
 `cache`包装的函数需满足以下要求：
 - 必须是 `async fn`
