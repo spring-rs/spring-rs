@@ -223,3 +223,5 @@ This middleware will:
 Complete code reference [`web-middleware-example`][web-middleware-example]
 
 [web-middleware-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example
+
+spring-web is a thin wrapper around axum, adding some macros to simplify development. [The examples of axum](https://github.com/tokio-rs/axum/tree/main/examples) can be run in spring-web.

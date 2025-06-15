@@ -197,3 +197,5 @@ mod routes {
 
 
 完整代码参考[`web-middleware-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example)
+
+spring-web是围绕axum的一层薄薄的封装, 提供了一些宏以简化开发. [axum官方的examples](https://github.com/tokio-rs/axum/tree/main/examples)大多只要稍作修改即可运行在spring-web中。
