@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- **changed**: fix Immediately built plugins can't access config ([#145])
+
+[#145]: https://github.com/spring-rs/spring-rs/pull/145
+
 ## 0.4.0
 
 - **breaking**: upgrade `spring-macros` 0.3 to 0.4 ([#132])
