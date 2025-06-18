@@ -183,9 +183,7 @@ impl AppBuilder {
     }
 
     async fn inner_run(&mut self) -> Result<()> {
-        // 1. load toml config
-        self.load_config_if_need()?;
-
+        // 1. print banner
         banner::print_banner(self);
 
         // 2. build plugin
@@ -201,23 +199,13 @@ impl AppBuilder {
     /// Unlike the [`run`] method, the `build` method is suitable for applications that do not contain scheduling logic.
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     pub async fn build(&mut self) -> Result<Arc<App>> {
-        // 1. load toml config
-        self.load_config_if_need()?;
-
-        // 2. build plugin
+        // 1. build plugin
         self.build_plugins().await;
 
-        // 3. service dependency inject
+        // 2. service dependency inject
         service::auto_inject_service(self)?;
 
         Ok(self.build_app())
-    }
-
-    fn load_config_if_need(&mut self) -> Result<()> {
-        if self.config.is_empty() {
-            self.config = TomlConfigRegistry::new(Path::new("./config/app.toml"), self.env)?;
-        }
-        Ok(())
     }
 
     async fn build_plugins(&mut self) {
@@ -296,11 +284,14 @@ impl AppBuilder {
 
 impl Default for AppBuilder {
     fn default() -> Self {
+        let env = Env::init();
+        let config = TomlConfigRegistry::new(Path::new("./config/app.toml"), env)
+            .expect("toml config load failed");
         Self {
-            env: Env::init(),
+            env,
+            config,
             layers: Default::default(),
             plugin_registry: Default::default(),
-            config: Default::default(),
             components: Default::default(),
             schedulers: Default::default(),
             shutdown_hooks: Default::default(),
