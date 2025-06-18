@@ -288,7 +288,7 @@ impl Default for AppBuilder {
         let config = TomlConfigRegistry::new(Path::new("./config/app.toml"), env)
             .expect("toml config load failed");
         Self {
-            env: env,
+            env,
             config,
             layers: Default::default(),
             plugin_registry: Default::default(),
