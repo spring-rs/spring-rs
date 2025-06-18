@@ -86,11 +86,6 @@ impl TomlConfigRegistry {
 
         Ok(config_table)
     }
-
-    #[inline]
-    pub(crate) fn is_empty(&self) -> bool {
-        self.config.is_empty()
-    }
 }
 
 impl FromStr for TomlConfigRegistry {
