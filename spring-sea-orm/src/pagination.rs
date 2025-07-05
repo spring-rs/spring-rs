@@ -1,4 +1,6 @@
-use sea_orm::{ConnectionTrait, EntityTrait, FromQueryResult, PaginatorTrait, Select};
+use sea_orm::{
+    ConnectionTrait, EntityTrait, FromQueryResult, PaginatorTrait, Select, Selector, SelectorTrait,
+};
 use serde::{Deserialize, Serialize};
 use spring::async_trait;
 use thiserror::Error;
@@ -193,12 +195,23 @@ where
     M: FromQueryResult + Sized + Send + Sync + 'db,
 {
     async fn page(self, db: &'db C, pagination: &Pagination) -> PageResult<M> {
-        let total = self.clone().paginate(db, 1).num_items().await?;
-        let content = self
-            .paginate(db, pagination.size)
-            .fetch_page(pagination.page)
-            .await?;
+        let paginator = self.paginate(db, pagination.size);
+        let total = paginator.num_items().await?;
+        let content = paginator.fetch_page(pagination.page).await?;
+        Ok(Page::new(content, pagination, total))
+    }
+}
 
+#[async_trait]
+impl<'db, C, S> PaginationExt<'db, C, S::Item> for Selector<S>
+where
+    C: ConnectionTrait,
+    S: SelectorTrait + Send + Sync + 'db,
+{
+    async fn page(self, db: &'db C, pagination: &Pagination) -> PageResult<S::Item> {
+        let paginator = self.paginate(db, pagination.size);
+        let total = paginator.num_items().await?;
+        let content = paginator.fetch_page(pagination.page).await?;
         Ok(Page::new(content, pagination, total))
     }
 }
