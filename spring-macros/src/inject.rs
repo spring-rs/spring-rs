@@ -307,7 +307,7 @@ impl Service {
                     other => {
                         return Err(syn::Error::new_spanned(
                             ident,
-                            format!("Unknown key `{}` in #[service(...)], expected `grpc` or `prototype`", other),
+                            format!("Unknown key `{other}` in #[service(...)], expected `grpc` or `prototype`"),
                         ));
                     }
                 }
@@ -333,7 +333,7 @@ impl Service {
                     other => {
                         return Err(syn::Error::new_spanned(
                             ident,
-                            format!("Unknown key `{}` in #[service(...)]", other),
+                            format!("Unknown key `{other}` in #[service(...)]"),
                         ));
                     }
                 }

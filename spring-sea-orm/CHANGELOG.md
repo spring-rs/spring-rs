@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4
+
+- **added**: add `PaginationExt` for `Selector` ([#148])
+
+[#148]: https://github.com/spring-rs/spring-rs/pull/148
+
 ## 0.4.3
 
 - **added**: add `Page::is_first()` & `Page::is_last()` ([#d07dc7])
