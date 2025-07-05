@@ -48,14 +48,14 @@ impl TomlConfigRegistry {
         let config_file_content = fs::read_to_string(config_path);
         let main_toml_str = match config_file_content {
             Err(e) => {
-                log::warn!("Failed to read configuration file {:?}: {}", config_path, e);
+                log::warn!("Failed to read configuration file {config_path:?}: {e}");
                 return Ok(Table::new());
             }
             Ok(content) => super::env::interpolate(&content),
         };
 
         let main_table = toml::from_str::<Table>(main_toml_str.as_str())
-            .with_context(|| format!("Failed to parse the toml file at path {:?}", config_path))?;
+            .with_context(|| format!("Failed to parse the toml file at path {config_path:?}"))?;
 
         let config_table: Table = match env.get_config_path(config_path) {
             Ok(env_path) => {
@@ -63,23 +63,23 @@ impl TomlConfigRegistry {
                 if !env_path.exists() {
                     return Ok(main_table);
                 }
-                log::info!("The profile of the {:?} environment is active", env);
+                log::info!("The profile of the {env:?} environment is active");
 
                 let env_toml_str = fs::read_to_string(env_path)
-                    .with_context(|| format!("Failed to read configuration file {:?}", env_path))?;
+                    .with_context(|| format!("Failed to read configuration file {env_path:?}"))?;
                 let env_toml_str = super::env::interpolate(&env_toml_str);
                 let env_table =
                     toml::from_str::<Table>(env_toml_str.as_str()).with_context(|| {
-                        format!("Failed to parse the toml file at path {:?}", env_path)
+                        format!("Failed to parse the toml file at path {env_path:?}")
                     })?;
                 merge_tables(main_table, env_table)
                     .map_err(|e| AppError::TomlMergeError(e.to_string()))
                     .with_context(|| {
-                        format!("Failed to merge files {:?} and {:?}", config_path, env_path)
+                        format!("Failed to merge files {config_path:?} and {env_path:?}")
                     })?
             }
             Err(_) => {
-                log::debug!("{:?} config not found", env);
+                log::debug!("{env:?} config not found");
                 main_table
             }
         };

@@ -23,11 +23,10 @@ impl Env {
     /// Initializes environment variables from the `.env` file and reads `SPRING_ENV` to determine the active environment for the application.
     pub fn init() -> Self {
         match dotenvy::dotenv() {
-            Ok(path) => log::debug!(
-                "Loaded the environment variable file under the path: \"{:?}\"",
-                path
-            ),
-            Err(e) => log::debug!("Environment variable file not found: {}", e),
+            Ok(path) => {
+                log::debug!("Loaded the environment variable file under the path: \"{path:?}\"",)
+            }
+            Err(e) => log::debug!("Environment variable file not found: {e}"),
         }
 
         Self::from_env()
@@ -57,7 +56,7 @@ impl Env {
         let ext = path.extension().and_then(OsStr::to_str).unwrap_or("");
         let canonicalize = path
             .canonicalize()
-            .with_context(|| format!("canonicalize {:?} failed", path))?;
+            .with_context(|| format!("canonicalize {path:?} failed"))?;
         let parent = canonicalize
             .parent()
             .ok_or_else(|| AppError::from_io(ErrorKind::NotFound, "config file path not found"))?;

@@ -256,10 +256,10 @@ impl IntoResponse for WebError {
                 (e.status_code, e.msg)
             }
             _other => {
-                tracing::error!("internal server error:{:?}", _other);
+                tracing::error!("internal server error:{_other:?}");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Something went wrong: {}", _other),
+                    format!("Something went wrong: {_other}"),
                 )
             }
         }

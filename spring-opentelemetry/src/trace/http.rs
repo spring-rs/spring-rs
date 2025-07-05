@@ -147,7 +147,7 @@ impl<S> HttpService<S> {
             if capture_request_headers.contains(&header_name) {
                 if let Ok(attribute_value) = header_value.to_str() {
                     // attribute::HTTP_REQUEST_HEADER
-                    let attribute_name = format!("http.request.header.{}", header_name);
+                    let attribute_name = format!("http.request.header.{header_name}");
                     span.set_attribute(attribute_name, attribute_value.to_owned());
                 }
             }
@@ -238,7 +238,7 @@ where
             let header_name = header_name.as_str().to_lowercase();
             if capture_response_headers.contains(&header_name) {
                 if let Ok(attribute_value) = header_value.to_str() {
-                    let attribute_name: String = format!("http.response.header.{}", header_name);
+                    let attribute_name: String = format!("http.response.header.{header_name}");
                     span.set_attribute(attribute_name, attribute_value.to_owned());
                 }
             }

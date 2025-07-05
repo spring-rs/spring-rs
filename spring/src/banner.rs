@@ -25,7 +25,7 @@ pub(crate) fn print_banner(app: &AppBuilder) {
         Env::Test => Color::LightBlue.paint("Test"),
         Env::Prod => Color::Green.paint("Prod"),
     };
-    println!("environment: {}", env);
+    println!("environment: {env}");
     if cfg!(debug_assertions) {
         println!("compilation: {}", Color::LightRed.paint("Debug"));
     } else {

@@ -176,7 +176,7 @@ impl AppBuilder {
     pub async fn run(&mut self) {
         match self.inner_run().await {
             Err(e) => {
-                log::error!("{:?}", e);
+                log::error!("{e:?}");
             }
             _ => { /* ignore */ }
         }
@@ -256,8 +256,8 @@ impl AppBuilder {
 
         while let Some(handle) = handles.pop() {
             match handle.await? {
-                Err(e) => log::error!("{:?}", e),
-                Ok(msg) => log::info!("scheduled result: {}", msg),
+                Err(e) => log::error!("{e:?}"),
+                Ok(msg) => log::info!("scheduled result: {msg}"),
             }
         }
 
@@ -360,7 +360,7 @@ impl MutableComponentRegistry for AppBuilder {
     {
         let component_id = TypeId::of::<C>();
         let component_name = std::any::type_name::<C>();
-        log::debug!("added component: {}", component_name);
+        log::debug!("added component: {component_name}");
         if self.components.contains_key(&component_id) {
             panic!("Error adding component {component_name}: component was already added in application")
         }

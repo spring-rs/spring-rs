@@ -89,7 +89,7 @@ impl SqlxPlugin {
         Ok(opt
             .connect(uri)
             .await
-            .with_context(|| format!("Failed to connect to database: {}", uri))?)
+            .with_context(|| format!("Failed to connect to database: {uri}"))?)
     }
 
     async fn close_db_connection(app: Arc<App>) -> Result<String> {

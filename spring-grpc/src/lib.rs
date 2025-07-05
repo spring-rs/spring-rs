@@ -129,12 +129,12 @@ impl GrpcPlugin {
             router
                 .serve_with_shutdown(addr, shutdown_signal())
                 .await
-                .with_context(|| format!("bind tcp listener failed:{}", addr))?;
+                .with_context(|| format!("bind tcp listener failed:{addr}"))?;
         } else {
             router
                 .serve(addr)
                 .await
-                .with_context(|| format!("bind tcp listener failed:{}", addr))?;
+                .with_context(|| format!("bind tcp listener failed:{addr}"))?;
         }
         Ok("tonic server schedule finished".to_string())
     }
