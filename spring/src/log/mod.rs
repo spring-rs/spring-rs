@@ -6,9 +6,9 @@ use crate::config::ConfigRegistry;
 use crate::plugin::Plugin;
 use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
 use nu_ansi_term::Color;
-use tracing_error::ErrorLayer;
 use std::sync::OnceLock;
 use tracing_appender::non_blocking::WorkerGuard;
+use tracing_error::ErrorLayer;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
 use tracing_subscriber::layer::SubscriberExt;
@@ -40,7 +40,7 @@ impl Plugin for LogPlugin {
                 LogLevel::Warn => Color::Yellow.paint("WARN "),
                 LogLevel::Error => Color::Red.paint("ERROR"),
             };
-            println!("     logger: {}\n", level);
+            println!("     logger: {level}\n");
         } else {
             println!("     logger: {}\n", Color::LightRed.paint("Disabled"));
         }

@@ -138,7 +138,7 @@ impl<S> GrpcService<S> {
             if capture_request_headers.contains(&header_name) {
                 if let Ok(attribute_value) = header_value.to_str() {
                     // attribute::RPC_GRPC_REQUEST_METADATA
-                    let attribute_name = format!("rpc.grpc.request.metadata.{}", header_name);
+                    let attribute_name = format!("rpc.grpc.request.metadata.{header_name}");
                     span.set_attribute(attribute_name, attribute_value.to_owned());
                 }
             }
@@ -210,7 +210,7 @@ where
             if capture_response_headers.contains(&header_name) {
                 if let Ok(attribute_value) = header_value.to_str() {
                     let attribute_name: String =
-                        format!("rpc.grpc.response.metadata.{}", header_name);
+                        format!("rpc.grpc.response.metadata.{header_name}");
                     span.set_attribute(attribute_name, attribute_value.to_owned());
                 }
             }

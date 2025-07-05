@@ -55,7 +55,7 @@ impl syn::parse::Parse for CacheArgs {
                 Some(name) => {
                     return Err(syn::Error::new_spanned(
                         assign.left,
-                        format!("unknown named parameter `{}`", name),
+                        format!("unknown named parameter `{name}`"),
                     ));
                 }
                 None => {

@@ -111,7 +111,7 @@ fn build_cors_middleware(cors: &CorsMiddleware) -> Result<CorsLayer> {
             for origin in allow_origins {
                 let origin = origin
                     .parse()
-                    .with_context(|| format!("cors origin parse failed:{}", origin))?;
+                    .with_context(|| format!("cors origin parse failed:{origin}"))?;
                 origins.push(origin);
             }
             layer = layer.allow_origin(origins);
@@ -126,7 +126,7 @@ fn build_cors_middleware(cors: &CorsMiddleware) -> Result<CorsLayer> {
             for header in allow_headers {
                 let header = header
                     .parse()
-                    .with_context(|| format!("http header parse failed:{}", header))?;
+                    .with_context(|| format!("http header parse failed:{header}"))?;
                 headers.push(header);
             }
             layer = layer.allow_headers(headers);
@@ -141,7 +141,7 @@ fn build_cors_middleware(cors: &CorsMiddleware) -> Result<CorsLayer> {
             for method in allow_methods {
                 let method = method
                     .parse()
-                    .with_context(|| format!("http method parse failed:{}", method))?;
+                    .with_context(|| format!("http method parse failed:{method}"))?;
                 methods.push(method);
             }
             layer = layer.allow_methods(methods);

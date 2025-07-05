@@ -121,8 +121,8 @@ impl WebPlugin {
         let addr = SocketAddr::from((config.binding, config.port));
         let listener = tokio::net::TcpListener::bind(addr)
             .await
-            .with_context(|| format!("bind tcp listener failed:{}", addr))?;
-        tracing::info!("bind tcp listener: {}", addr);
+            .with_context(|| format!("bind tcp listener failed:{addr}"))?;
+        tracing::info!("bind tcp listener: {addr}");
 
         // 3. axum server
         let router = router.layer(Extension(AppState { app }));

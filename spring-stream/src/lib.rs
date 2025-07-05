@@ -121,14 +121,14 @@ impl Streamer {
         for key in stream_keys {
             consumer_stream_keys.push(
                 StreamKey::new(*key)
-                    .with_context(|| format!("consumer stream key \"{}\" is valid", key))?,
+                    .with_context(|| format!("consumer stream key \"{key}\" is valid"))?,
             );
         }
         Ok(self
             .streamer
             .create_consumer(&consumer_stream_keys, consumer_options)
             .await
-            .with_context(|| format!("create stream consumer failed: {:?}", stream_keys))?)
+            .with_context(|| format!("create stream consumer failed: {stream_keys:?}"))?)
     }
 
     async fn create_generic_producer(&self) -> Result<Producer> {
@@ -162,7 +162,7 @@ impl Producer {
 
     pub async fn send_to<S: Buffer>(&self, stream_key: &str, payload: S) -> Result<MessageHeader> {
         let producer_stream_key = StreamKey::new(stream_key)
-            .with_context(|| format!("producer stream key \"{}\" is valid", stream_key))?;
+            .with_context(|| format!("producer stream key \"{stream_key}\" is valid"))?;
 
         let header = self
             .0

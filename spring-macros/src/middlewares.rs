@@ -41,7 +41,7 @@ fn middlewares_inner(args: TokenStream, input: TokenStream) -> syn::Result<Token
     })?;
 
     let module_name = &module.ident;
-    let registrar_struct_name = syn::Ident::new(&format!("{}MiddlewareRegistrar", module_name), module.ident.span());
+    let registrar_struct_name = syn::Ident::new(&format!("{module_name}MiddlewareRegistrar"), module.ident.span());
 
     let nest_prefix = extract_nest_prefix(&module)?;
 
