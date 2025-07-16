@@ -1,0 +1,21 @@
+[package]
+name = "spring-openai"
+description = "Integrate the OpenAI API client into spring-rs"
+version = "0.4.0"
+categories = ["api-bindings"]
+keywords = ["ai", "openai", "spring"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+openai-api-rs = { workspace = true }
+spring = { path = "../spring", version = "0.4" }
+serde = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+schemars = { workspace = true }
+
+[dev-dependencies]
+spring-web = { path = "../spring-web" }
