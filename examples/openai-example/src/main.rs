@@ -1,29 +1,25 @@
 use anyhow::Context;
 use spring::{auto_config, App};
+use spring_openai::config::OpenAIConfig;
 use spring_openai::v1::chat_completion;
 use spring_openai::v1::chat_completion::ChatCompletionRequest;
-use spring_openai::OpenAIClient;
-use spring_openai::OpenAIPlugin;
+use spring_web::extractor::Config;
 use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
     error::Result,
-    extractor::Component,
     WebConfigurator, WebPlugin,
 };
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
 async fn main() {
-    App::new()
-        .add_plugin(OpenAIPlugin)
-        .add_plugin(WebPlugin)
-        .run()
-        .await
+    App::new().add_plugin(WebPlugin).run().await
 }
 
 #[get("/chat")]
-async fn send_mail(Component(mut openai): Component<OpenAIClient>) -> Result<impl IntoResponse> {
+async fn send_mail(Config(config): Config<OpenAIConfig>) -> Result<impl IntoResponse> {
+    let mut openai = config.build()?;
     let req = ChatCompletionRequest::new(
         "deepseek/deepseek-r1-0528-qwen3-8b:free".to_string(),
         vec![chat_completion::ChatCompletionMessage {
