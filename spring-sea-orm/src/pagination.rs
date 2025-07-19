@@ -13,11 +13,18 @@ pub struct Pagination {
     #[serde(default = "default_size")]
     pub size: u64,
 }
+
 fn default_page() -> u64 {
     0
 }
 fn default_size() -> u64 {
     20
+}
+
+impl Pagination {
+    pub fn empty_page<T>(&self) -> Page<T> {
+        Page::new(vec![], self, 0)
+    }
 }
 
 #[cfg(feature = "with-web")]
