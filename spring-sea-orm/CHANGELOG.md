@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.5
+
+- **added**: serde derive
+
 ## 0.4.4
 
 - **added**: add `PaginationExt` for `Selector` ([#148])

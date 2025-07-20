@@ -13,7 +13,7 @@ repository.workspace = true
 spring-macros = { path = "../spring-macros", version = "0.4" }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"]}
 log = { workspace = true }
 nu-ansi-term = { workspace = true }
 tracing = { workspace = true, features = ["log"] }

@@ -1,7 +1,7 @@
 [package]
 name = "spring-stream"
 description = "Integrate sea-streamer with spring-rs"
-version = "0.4.0"
+version = "0.4.1"
 categories = ["concurrency"]
 keywords = ["stream-processing", "stream", "redis-stream", "kafka", "spring"]
 edition.workspace = true
@@ -13,7 +13,7 @@ repository.workspace = true
 spring = { path = "../spring", version = "0.4" }
 spring-macros = { path = "../spring-macros", version = "0.4" }
 sea-streamer = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, optional = true }
 schemars = { workspace = true }
 anyhow = { workspace = true }

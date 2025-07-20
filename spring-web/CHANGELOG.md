@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.5
+
+- **added**: serde derive
+
 ## 0.4.4
 
 - **added**: feat: ✨ add middlewares macro ([#139])

@@ -1,7 +1,7 @@
 [package]
 name = "spring-web"
 description = "Integration of rust application framework spring-rs and Axum web framework"
-version = "0.4.4"
+version = "0.4.5"
 categories = ["web-programming::http-server"]
 keywords = ["web-programming", "web-server", "spring"]
 edition.workspace = true
@@ -19,7 +19,7 @@ ws = ["axum/ws"]
 spring = { path = "../spring", version = "0.4" }
 spring-macros = { path = "../spring-macros", version = "0.4" }
 axum = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true, features = ["log"] }

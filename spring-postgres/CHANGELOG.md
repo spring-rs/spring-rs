@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- **added**: serde derive
+
 ## 0.4.0
 
 - **breaking**: upgrade `spring` 0.3 to 0.4 ([#132])
