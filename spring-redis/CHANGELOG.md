@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- **changed**: upgrade `redis-rs` 0.29 to 0.32 ([#154])
+
+[#154]: https://github.com/spring-rs/spring-rs/pull/154
+
 ## 0.4.2
 
 - **added**: feat: ✨ enhanced cache macros support condition & unless attr ([#141])

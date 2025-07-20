@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2
+
+- **changed**: upgrade `toml` 0.8 to 0.9 ([#154])
+- **changed**: upgrade `tokio` 1.44 to 1.46 ([#154])
+- **changed**: upgrade `serde-toml-merge` 0.3.8 to 0.3.10 ([#154])
+
+[#154]: https://github.com/spring-rs/spring-rs/pull/154
+
 ## 0.4.1
 
 - **changed**: fix Immediately built plugins can't access config ([#145])
