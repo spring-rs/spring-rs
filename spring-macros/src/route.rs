@@ -1,9 +1,8 @@
-use std::collections::HashSet;
-
 use crate::input_and_compile_error;
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
+use std::collections::HashSet;
 use syn::{punctuated::Punctuated, LitStr, Path, Token};
 
 macro_rules! standard_http_method {
@@ -68,7 +67,7 @@ impl TryFrom<&syn::LitStr> for Method {
 #[derive(Debug)]
 pub(crate) struct RouteArgs {
     pub(crate) path: LitStr,
-    pub(crate) options: Punctuated<syn::MetaNameValue, Token![,]>,
+    pub(crate) options: Punctuated<syn::Meta, Token![,]>,
 }
 
 impl syn::parse::Parse for RouteArgs {
@@ -106,7 +105,7 @@ impl syn::parse::Parse for RouteArgs {
         }
 
         // zero or more options: name = "foo"
-        let options = input.parse_terminated(syn::MetaNameValue::parse, Token![,])?;
+        let options = input.parse_terminated(syn::Meta::parse, Token![,])?;
 
         Ok(Self { path, options })
     }
@@ -115,6 +114,7 @@ impl syn::parse::Parse for RouteArgs {
 struct Args {
     path: syn::LitStr,
     methods: HashSet<Method>,
+    debug: bool,
 }
 
 impl Args {
@@ -125,42 +125,49 @@ impl Args {
         if let Some(method) = method {
             methods.insert(method);
         }
-
-        for nv in args.options {
-            if nv.path.is_ident("method") {
-                if !is_route_macro {
-                    return Err(syn::Error::new_spanned(
-                        &nv,
-                        "HTTP method forbidden here; to handle multiple methods, use `route` instead",
-                    ));
-                } else if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit),
-                    ..
-                }) = nv.value.clone()
-                {
-                    if !methods.insert(Method::try_from(&lit)?) {
+        let mut debug = false;
+        for meta in args.options {
+            match meta {
+                syn::Meta::Path(path) if path.is_ident("debug") => {
+                    debug = true;
+                }
+                syn::Meta::NameValue(nv) if nv.path.is_ident("method") => {
+                    if !is_route_macro {
+                        return Err(syn::Error::new_spanned(
+                            &nv,
+                            "HTTP method forbidden here; to handle multiple methods, use `route` instead",
+                        ));
+                    } else if let syn::Expr::Lit(syn::ExprLit {
+                        lit: syn::Lit::Str(lit),
+                        ..
+                    }) = nv.value.clone()
+                    {
+                        if !methods.insert(Method::try_from(&lit)?) {
+                            return Err(syn::Error::new_spanned(
+                                nv.value,
+                                format!("HTTP method defined more than once: `{}`", lit.value()),
+                            ));
+                        }
+                    } else {
                         return Err(syn::Error::new_spanned(
                             nv.value,
-                            format!("HTTP method defined more than once: `{}`", lit.value()),
+                            "Attribute method expects literal string",
                         ));
                     }
-                } else {
+                }
+                other => {
                     return Err(syn::Error::new_spanned(
-                        nv.value,
-                        "Attribute method expects literal string",
+                        other,
+                        "Unknown attribute; allowed: `method = \"METHOD\"`, `debug`",
                     ));
                 }
-            } else {
-                return Err(syn::Error::new_spanned(
-                    nv.path,
-                    "Unknown attribute key is specified; allowed: method",
-                ));
             }
         }
 
         Ok(Args {
             path: args.path,
             methods,
+            debug,
         })
     }
 }
@@ -179,6 +186,9 @@ struct Route {
 
     /// The doc comment attributes to copy to generated struct, if any.
     doc_attributes: Vec<syn::Attribute>,
+
+    /// Whether to apply `#[axum::debug_handler]`
+    debug: bool,
 }
 
 impl Route {
@@ -195,6 +205,7 @@ impl Route {
             .collect();
 
         let args = Args::new(args, method)?;
+        let debug = args.debug;
 
         if args.methods.is_empty() {
             return Err(syn::Error::new(
@@ -222,11 +233,13 @@ impl Route {
             args: vec![args],
             ast,
             doc_attributes,
+            debug,
         })
     }
 
     /// routers
     fn multiple(args: Vec<Args>, ast: syn::ItemFn) -> syn::Result<Self> {
+        let debug = args.iter().any(|a| a.debug);
         let name = ast.sig.ident.clone();
 
         // Try and pull out the doc comments so that we can reapply them to the generated struct.
@@ -250,6 +263,7 @@ impl Route {
             args,
             ast,
             doc_attributes,
+            debug,
         })
     }
 }
@@ -261,6 +275,7 @@ impl ToTokens for Route {
             ast,
             args,
             doc_attributes,
+            debug,
         } = self;
 
         #[allow(unused_variables)] // used when force-pub feature is disabled
@@ -269,7 +284,7 @@ impl ToTokens for Route {
         let registrations: TokenStream2 = args
             .iter()
             .map(|args| {
-                let Args { path, methods } = args;
+                let Args { path, methods,.. } = args;
 
                 let method_binder = methods
                     .iter()
@@ -282,6 +297,20 @@ impl ToTokens for Route {
                 }
             })
             .collect();
+        let handler_fn = if *debug {
+            let sig = &ast.sig;
+            let vis = &ast.vis;
+            let attrs = &ast.attrs;
+            let block = &ast.block;
+
+            quote! {
+                #[::spring_web::axum::debug_handler]
+                #(#attrs)*
+                #vis #sig #block
+            }
+        } else {
+            quote! { #ast }
+        };
 
         let stream = quote! {
             #(#doc_attributes)*
@@ -290,7 +319,7 @@ impl ToTokens for Route {
 
             impl ::spring_web::handler::TypedHandlerRegistrar for #name {
                 fn install_route(&self, mut __router: ::spring_web::Router) -> ::spring_web::Router{
-                    #ast
+                    #handler_fn
                     #registrations
 
                     __router
