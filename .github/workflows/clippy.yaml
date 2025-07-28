@@ -9,6 +9,11 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v3
 
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+
       - name: Install Rust stable with Clippy
         uses: actions-rs/toolchain@v1
         with:
