@@ -20,14 +20,8 @@ once_cell = { workspace = true }
 
 # Optional dependencies.
 tokio = { workspace = true, optional = true }
-
-[dependencies.prometheus]
-version = "0.14"
-optional = true
-
-[dependencies.prometheus-client]
-version = "0.23"
-optional = true
+prometheus = { workspace = true, optional = true }
+prometheus-client = { workspace = true, optional = true }
 
 [features]
 services-all = [
@@ -151,5 +145,5 @@ layers-await-tree = ["opendal/layers-await-tree"]
 layers-async-backtrace = ["opendal/layers-async-backtrace"]
 layers-dtrace = ["opendal/layers-dtrace"]
 
-# This is flag for testing, you should never use it in production.
-test-layers = []
+[dev-dependencies]
+tokio = { workspace = true }
