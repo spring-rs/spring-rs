@@ -13,6 +13,7 @@ members = [
     "spring-stream",
     "spring-mail",
     "spring-opentelemetry",
+    "spring-opendal",
     "examples/*",
 ]
 default-members = ["spring", "spring-*"]
@@ -80,3 +81,4 @@ prost = "0.13"
 http = "1"
 http-body = "1"
 once_cell = "1"
+opendal = "0.54"
