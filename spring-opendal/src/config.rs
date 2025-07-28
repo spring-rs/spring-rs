@@ -97,6 +97,6 @@ impl Display for Layers {
             Layers::AsyncBacktrace => "async-backtrace",
             Layers::Dtrace => "dtrace",
         };
-        write!(f, "{}", lf)
+        write!(f, "{lf}")
     }
 }

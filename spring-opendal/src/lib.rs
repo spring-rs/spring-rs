@@ -39,7 +39,7 @@ impl OpenDALPlugin {
 
         if let Some(layers) = config.layers {
             for layer in layers {
-                log::debug!("layer-{} enable", layer);
+                log::debug!("layer-{layer} enable");
                 match layer {
                     #[cfg(feature = "layers-chaos")]
                     Layers::Chaos { error_ratio } => {
@@ -109,10 +109,7 @@ impl OpenDALPlugin {
                     }
                     #[allow(unreachable_patterns)]
                     _ => {
-                        panic!(
-                            "Maybe you forgotten to enable the [services-{}] feature!",
-                            layer
-                        );
+                        panic!("Maybe you forgotten to enable the [services-{layer}] feature!");
                     }
                 }
             }
@@ -136,11 +133,11 @@ mod tests {
             layers: None,
         };
 
-        debug!("config: {:?}", config);
+        debug!("config: {config:?}");
 
         let op = OpenDALPlugin::operator(config).unwrap();
         let o = op.write("test", b"test".to_vec()).await;
-        assert!(o.is_ok(), "Write operation failed: {:?}", o);
+        assert!(o.is_ok(), "Write operation failed: {o:?}");
 
         let res = op.read("test").await.unwrap();
 
