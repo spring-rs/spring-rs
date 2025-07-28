@@ -412,5 +412,26 @@
             },
             "cwd": "${workspaceFolder}/examples/dependency-inject-example"
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'spring-opendal-example'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=spring-opendal-example",
+                    "--package=spring-opendal-example"
+                ],
+                "filter": {
+                    "name": "spring-opendal-example",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/spring-opendal-example"
+        },
     ]
 }

@@ -1,0 +1,17 @@
++++
+title = "opendal Plugin"
+description = "How to use the opendal plugin"
+draft = false
+weight = 22
+sort_by = "weight"
+template = "docs/page.html"
+
+[extra]
+lead = "OpenDAL offers a unified data access layer, empowering users to seamlessly and efficiently retrieve data from diverse storage services."
+toc = true
+top = false
++++
+
+![OpenDAL](https://opendal.apache.org/img/external/e90fb803e25e12f621eafa3d092fe628.png)
+
+{{ include(path="../../spring-opendal/README.md") }}
