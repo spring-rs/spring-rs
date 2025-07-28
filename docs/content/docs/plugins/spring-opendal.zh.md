@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "OpenDAL 代表开放数据访问层。愿景是一层接口访问所有存储。"
+lead = "OpenDAL 提供了统一的数据访问层, 可以方便的访问各种存储系统。"
 toc = true
 top = false
 +++

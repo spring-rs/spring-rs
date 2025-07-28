@@ -7,7 +7,7 @@ sort_by = "weight"
 template = "docs/page.html"
 
 [extra]
-lead = "OpenDAL represents Open Data Access Layer. Vision is One Layer, All Storage."
+lead = "OpenDAL offers a unified data access layer, empowering users to seamlessly and efficiently retrieve data from diverse storage services."
 toc = true
 top = false
 +++
