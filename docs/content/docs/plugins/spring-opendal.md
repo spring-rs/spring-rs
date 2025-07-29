@@ -12,6 +12,6 @@ toc = true
 top = false
 +++
 
-![OpenDAL](https://opendal.apache.org/img/external/e90fb803e25e12f621eafa3d092fe628.png)
+<img style="width:100%" src="https://opendal.apache.org/img/external/e90fb803e25e12f621eafa3d092fe628.png" alt="OpenDAL"/>
 
 {{ include(path="../../spring-opendal/README.md") }}
