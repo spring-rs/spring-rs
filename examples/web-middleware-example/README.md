@@ -65,31 +65,63 @@ curl -H "Authorization: Bearer any-token" http://localhost:8080/protected
 
 ### API Routes (Nested + Authentication)
 
-| Endpoint | Method | Middleware | Auth Required |
-|----------|--------|------------|---------------|
-| `/api/hello` | GET | Logging, Auth, Timeout, CORS | ✅ |
+| Endpoint     | Method | Module Middleware             | Route Middleware | Auth Required  |
+|--------------|--------|------------------------------ |------------------| ---------------|
+| `/api/hello` | GET    | Logging, Auth, Timeout, CORS  | Problem          | ✅             |
+| `/api/error` | GET    | Logging, Auth, Timeout, CORS  |                  | ✅             |
 
 **Examples:**
 ```bash
 # Without authorization (401 Unauthorized)
 curl http://localhost:8080/api/hello
 
-# With authorization (200 OK)  
+# With authorization (400 Bad Request)  
 curl -H "Authorization: Bearer any-token" http://localhost:8080/api/hello
-# Returns: "Hello, world!"
+# Returns: {"detail":"request error","instance":"/api/hello","title":"Bad Request"}
+
+# With authorization (200 OK)  
+curl -H "Authorization: Bearer any-token" http://localhost:8080/api/hello/Ferris
+# Returns: Hello, Ferris!
+
+# Without authorization (401 Unauthorized)
+curl http://localhost:8080/api/error
+
+# With authorization (500 Internal Server Error)  
+curl -H "Authorization: Bearer any-token" http://localhost:8080/api/error 
+# Returns: "error!"
+
+# Unexisting API route (401 Unauthorized)
+curl http://localhost:8080/api/unknown
+# Returns: "Unauthorized"
+
+# With authorization (404 Not Found)
+curl -H "Authorization: Bearer any-token" http://localhost:8080/api/unknown
+# Returns without body
+# Status: 404 Not Found
+# Logged in Console:
+# 🔍 [LOGGING] GET /api/unknown
+# 🔐 [AUTH] Checking authentication for: /api/unknown
+# ✅ [LOGGING] Response completed
 ```
 
-### Standalone Routes (No Middleware)
+### Standalone Routes
 
-| Endpoint | Method | Middleware | Auth Required |
-|----------|--------|------------|---------------|
-| `/goodbye` | GET | None | ❌ |
+| Endpoint         | Method | Middleware    | Auth Required |
+|------------------|--------|---------------|---------------|
+| `/goodbye`       | GET    | None          | ❌            |
+| `/another_route` | GET    | Logging       | ❌            |
 
 **Examples:**
 ```bash
 # No middleware applied
 curl http://localhost:8080/goodbye
 # Returns: "goodbye world"
+
+# Logged in Console:
+# 🔍 [LOGGING] GET /another_route
+# ✅ [LOGGING] Response completed
+curl http://localhost:8080/goodbye
+# Returns: "Another Route"
 ```
 
 ## Code Structure

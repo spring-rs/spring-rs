@@ -41,7 +41,7 @@ impl OpenDALPlugin {
         let mut op = Operator::via_iter(scheme, options)?;
 
         if let Some(layers) = config.layers {
-            for layer in layers {
+            if let Some(layer) = layers.into_iter().next() {
                 log::debug!("layer-{layer} enable");
                 match layer {
                     #[cfg(feature = "layers-chaos")]
