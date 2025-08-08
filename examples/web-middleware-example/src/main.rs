@@ -146,6 +146,10 @@ async fn auth_middleware(
 }
 
 /// Example #3:
+/// Middlewares can also be applied to specific routes within a module.
+/// This example demonstrates how to use the `middlewares` macro to apply 
+/// middlewares to a specific route and apply the module's middlewares to the 
+/// method router too.
 
 #[middlewares(
     middleware::from_fn(logging_middleware),
@@ -156,15 +160,41 @@ async fn auth_middleware(
 #[nest("/api")]
 mod api {
 
+    use spring_web::extractor::Path;
+
     use super::*;
 
+    #[middlewares(
+        middleware::from_fn(problem_middleware)
+    )]
     #[get("/hello")]
-    pub async fn hello() -> impl IntoResponse {
-        "Hello, world!"
+    #[get("/hello/")]
+    #[get("/hello/{user}")]
+    pub async fn hello(user: Option<Path<String>>) -> Result<String> {
+        let Some(user) = user else {
+            return Err(KnownWebError::bad_request("request error"))?;
+        };
+
+        Ok(format!("Hello, {}!", user.0))
+    }
+
+    #[get("/error")]
+    async fn error_request() -> Result<String> {
+        Err(KnownWebError::internal_server_error("error!"))?
     }
 }
 
 /// Example #4:
+/// This example demonstrates how to use the `middlewares` macro to apply middleware to specific routes.
+/// It includes a logging middleware and a second route with its own logging middleware.
+
+#[middlewares(middleware::from_fn(logging_middleware))]
+#[get("/another_route")]
+async fn another_route() -> impl IntoResponse {
+    "Another Route"
+}
+
+/// Example #5:
 /// This route demonstrates a simple goodbye endpoint without any middleware.
 /// It returns a static string "goodbye world" when accessed.
 
