@@ -1,6 +1,6 @@
 +++
-title = "opentelemetry插件"
-description = "opentelemetry插件如何使用"
+title = "opendal插件"
+description = "opendal插件如何使用"
 draft = false
 weight = 22
 sort_by = "weight"
