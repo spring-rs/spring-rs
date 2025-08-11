@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.7
+
+- feat: ✨ Enhance middleware functionality with route-specific middleware support ([#157])
+
+[#157]: https://github.com/spring-rs/spring-rs/pull/157
+
+## 0.4.6
+
+- feat: ✨ spring macros support debug_handler ([#156])
+
+[#156]: https://github.com/spring-rs/spring-rs/pull/156
+
 ## 0.4.5
 
 - **added**: serde derive
