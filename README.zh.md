@@ -144,7 +144,6 @@ async fn fix_rate_job() {
 ## 生态
 
 * ![spring-sqlx-migration-plugin](https://img.shields.io/crates/v/spring-sqlx-migration-plugin.svg) [`spring-sqlx-migration-plugin`](https://github.com/Phosphorus-M/spring-sqlx-migration-plugin)
-* ![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg) [`spring-opendal`](https://github.com/spring-rs/contrib-plugins/tree/master/spring-opendal)
 
 [更多>>](https://crates.io/crates/spring/reverse_dependencies)
 
