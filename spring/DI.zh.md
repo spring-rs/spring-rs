@@ -23,6 +23,14 @@ struct UserService {
     #[inject(config)]
     config: UserConfig,
 }
+
+#[derive(Clone, Service)]
+struct UserWithOptionalComponentService {
+    #[inject(component)]
+    db: Option<ConnectPool>, // 如果ConnectPool不存在，则输入None
+    #[inject(config)]
+    config: UserConfig,
+}
 ```
 
 完整代码参考[`dependency-inject-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/dependency-inject-example)。

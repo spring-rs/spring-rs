@@ -14,7 +14,10 @@ fn inject_error_tip() -> syn::Error {
 
 enum InjectableType {
     Option,
-    Component(syn::Path),
+    Component {
+        optional: bool,
+        component_type: syn::Path,
+    },
     Config(syn::Path),
     ComponentRef(syn::Path),
     ConfigRef(syn::Path),
@@ -26,7 +29,7 @@ impl InjectableType {
     fn order(&self) -> u8 {
         match self {
             Self::Option => 0,
-            Self::Component(_) => 1,
+            Self::Component { .. } => 1,
             Self::Config(_) => 2,
             Self::ComponentRef(_) => 3,
             Self::ConfigRef(_) => 4,
@@ -74,7 +77,7 @@ impl Injectable {
             if let Some(inject_attr) = inject_attr {
                 if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
                     let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
-                    return Ok(attr.make_type(ty));
+                    return attr.make_type(ty);
                 } else {
                     Err(syn::Error::new_spanned(
                 inject_attr,
@@ -84,12 +87,12 @@ impl Injectable {
             }
             let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
             if last_path_segment.ident == "ComponentRef" {
-                return Ok(InjectableType::ComponentRef(Self::get_argument_type(
+                return Ok(InjectableType::ComponentRef(get_argument_type(
                     &last_path_segment.arguments,
                 )?));
             }
             if last_path_segment.ident == "ConfigRef" {
-                return Ok(InjectableType::ConfigRef(Self::get_argument_type(
+                return Ok(InjectableType::ConfigRef(get_argument_type(
                     &last_path_segment.arguments,
                 )?));
             }
@@ -111,18 +114,6 @@ impl Injectable {
                 "{field_name} field missing inject definition, expected #[inject(component|config|func(args))]",
             )))
         }
-    }
-
-    fn get_argument_type(path_args: &PathArguments) -> syn::Result<syn::Path> {
-        if let PathArguments::AngleBracketed(AngleBracketedGenericArguments { args, .. }) =
-            path_args
-        {
-            let ty = args.last().ok_or_else(inject_error_tip)?;
-            if let GenericArgument::Type(Type::Path(TypePath { path, .. })) = ty {
-                return Ok(path.clone());
-            }
-        }
-        Err(inject_error_tip())
     }
 }
 
@@ -148,12 +139,25 @@ impl syn::parse::Parse for InjectableAttr {
 }
 
 impl InjectableAttr {
-    fn make_type(self, ty: &syn::Path) -> InjectableType {
-        match self {
-            Self::Component => InjectableType::Component(ty.clone()),
+    fn make_type(self, ty: &syn::Path) -> syn::Result<InjectableType> {
+        Ok(match self {
+            Self::Component => {
+                let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
+                if last_path_segment.ident == "Option" {
+                    InjectableType::Component {
+                        optional: true,
+                        component_type: get_argument_type(&last_path_segment.arguments)?,
+                    }
+                } else {
+                    InjectableType::Component {
+                        optional: false,
+                        component_type: ty.clone(),
+                    }
+                }
+            }
             Self::Config => InjectableType::Config(ty.clone()),
             Self::FuncCall(func_call) => InjectableType::FuncCall(func_call),
-        }
+        })
     }
 }
 
@@ -170,15 +174,30 @@ impl ToTokens for Injectable {
                     let #field_name = None;
                 });
             }
-            InjectableType::Component(type_path) => {
-                if *is_prototype {
-                    tokens.extend(quote! {
-                        let #field_name = ::spring::App::global().try_get_component::<#type_path>()?;
+            InjectableType::Component {
+                optional,
+                component_type,
+            } => {
+                if *optional {
+                    if *is_prototype {
+                        tokens.extend(quote! {
+                        let #field_name = ::spring::App::global().get_component::<#component_type>();
                     });
+                    } else {
+                        tokens.extend(quote! {
+                            let #field_name = app.get_component::<#component_type>();
+                        });
+                    }
                 } else {
-                    tokens.extend(quote! {
-                        let #field_name = app.try_get_component::<#type_path>()?;
+                    if *is_prototype {
+                        tokens.extend(quote! {
+                        let #field_name = ::spring::App::global().try_get_component::<#component_type>()?;
                     });
+                    } else {
+                        tokens.extend(quote! {
+                            let #field_name = app.try_get_component::<#component_type>()?;
+                        });
+                    }
                 }
             }
             InjectableType::Config(type_path) => {
@@ -433,6 +452,16 @@ impl ToTokens for Service {
         };
         tokens.extend(output);
     }
+}
+
+fn get_argument_type(path_args: &PathArguments) -> syn::Result<syn::Path> {
+    if let PathArguments::AngleBracketed(AngleBracketedGenericArguments { args, .. }) = path_args {
+        let ty = args.last().ok_or_else(inject_error_tip)?;
+        if let GenericArgument::Type(Type::Path(TypePath { path, .. })) = ty {
+            return Ok(path.clone());
+        }
+    }
+    Err(inject_error_tip())
 }
 
 pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream> {

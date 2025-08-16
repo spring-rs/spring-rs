@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- **added**: Service support inject None ([#160])
+
+[#160]: https://github.com/spring-rs/spring-rs/pull/160
+
 ## 0.4.2
 
 - **changed**: upgrade `toml` 0.8 to 0.9 ([#154])

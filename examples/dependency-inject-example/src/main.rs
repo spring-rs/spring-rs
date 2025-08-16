@@ -44,10 +44,15 @@ struct UserConfig {
     init_count: i32,
 }
 
+#[derive(Clone)]
+struct OptionalComponent;
+
 #[derive(Clone, Service)]
 struct UserService {
     #[inject(component)]
     db: ConnectPool,
+    #[inject(component)]
+    optional_comp: Option<OptionalComponent>, // OptionalComponent does not exist, so it is none
     #[inject(config)]
     config: UserConfig,
     #[inject(func = Self::init_count(&config))]
@@ -59,6 +64,8 @@ struct UserService {
 struct UserProtoService {
     #[inject(component)]
     count: PageView,
+    #[inject(component)]
+    optional_comp: Option<OptionalComponent>, // OptionalComponent does not exist, so it is none
     step: i32,
 }
 
@@ -161,6 +168,7 @@ impl<'s> UserProtoServiceWithLifetime<'s> {
 
 #[get("/")]
 async fn hello(Component(user_service): Component<UserService>) -> Result<impl IntoResponse> {
+    assert!(user_service.optional_comp.is_none());
     Ok(user_service.query_db().await?)
 }
 
@@ -174,6 +182,7 @@ async fn hello_ref(
 #[get("/prototype-service")]
 async fn prototype_service() -> Result<impl IntoResponse> {
     let service = UserProtoService::build(5).context("build service failed")?;
+    assert!(service.optional_comp.is_none());
     Ok(service.pv_count()?)
 }
 
