@@ -181,8 +181,8 @@ impl ToTokens for Injectable {
                 if *optional {
                     if *is_prototype {
                         tokens.extend(quote! {
-                        let #field_name = ::spring::App::global().get_component::<#component_type>();
-                    });
+                            let #field_name = ::spring::App::global().get_component::<#component_type>();
+                        });
                     } else {
                         tokens.extend(quote! {
                             let #field_name = app.get_component::<#component_type>();
@@ -191,8 +191,8 @@ impl ToTokens for Injectable {
                 } else {
                     if *is_prototype {
                         tokens.extend(quote! {
-                        let #field_name = ::spring::App::global().try_get_component::<#component_type>()?;
-                    });
+                            let #field_name = ::spring::App::global().try_get_component::<#component_type>()?;
+                        });
                     } else {
                         tokens.extend(quote! {
                             let #field_name = app.try_get_component::<#component_type>()?;
