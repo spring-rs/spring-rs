@@ -178,6 +178,7 @@ impl ToTokens for Injectable {
                 optional,
                 component_type,
             } => {
+                #[allow(clippy::collapsible_else_if)]
                 if *optional {
                     if *is_prototype {
                         tokens.extend(quote! {
