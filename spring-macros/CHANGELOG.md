@@ -1,10 +1,16 @@
 # Changelog
 
-## 0.4.4
+## 0.4.5
 
 - **added**: Service support inject None ([#160])
 
 [#160]: https://github.com/spring-rs/spring-rs/pull/160
+
+## 0.4.4
+
+- **added**: Service support inject None ([#157])
+
+[#157]: https://github.com/spring-rs/spring-rs/pull/157
 
 ## 0.4.3
 
