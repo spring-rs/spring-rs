@@ -109,14 +109,18 @@ impl Plugin for WebPlugin {
             router = crate::middleware::apply_middleware(router, middlewares);
         }
 
+        app.add_component(router);
+
         let server_conf = config.server;
 
-        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(router, app, server_conf)));
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(app, server_conf)));
     }
 }
 
 impl WebPlugin {
-    async fn schedule(router: Router, app: Arc<App>, config: ServerConfig) -> Result<String> {
+    async fn schedule(app: Arc<App>, config: ServerConfig) -> Result<String> {
+        let router = app.get_expect_component::<Router>();
+
         // 2. bind tcp listener
         let addr = SocketAddr::from((config.binding, config.port));
         let listener = tokio::net::TcpListener::bind(addr)
