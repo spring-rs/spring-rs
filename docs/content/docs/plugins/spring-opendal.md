@@ -1,8 +1,8 @@
 +++
-title = "opendal Plugin"
+title = "spring-opendal Plugin"
 description = "How to use the opendal plugin"
 draft = false
-weight = 22
+weight = 21
 sort_by = "weight"
 template = "docs/page.html"
 

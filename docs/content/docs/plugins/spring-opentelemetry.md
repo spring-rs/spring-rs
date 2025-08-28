@@ -23,6 +23,7 @@ top = false
 * In early 2019, two existing open source projects: OpenTracing and OpenCensus were announced to be merged into the [OpenTelemetry](https://opentelemetry.io/) project, and Log and Metrics were merged.
 * In 2021, OpenTelemetry released V1.0.0, which provided stability guarantees for the client's link tracing part.
 * 2023 is a milestone for OpenTelemetry, because its three basic signals, link tracing, metrics and logs, have all reached [stable versions](https://opentelemetry.io/status/).
+* In 2024, [OpenTelemetry v1.3.0](https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v1.3.0) was released, adding [profiling signals](https://opentelemetry.io/blog/2024/state-profiling/). In June of the same year, Elastic donated an EBPf-based [profiler agent](https://github.com/open-telemetry/opentelemetry-ebpf-profiler).
 
 > [CNCF](https://landscape.cncf.io/?group=projects-and-products&view-mode=card&license=oss&classify=category&sort-by=stars&sort-direction=desc#observability-and-analysis--observability) has many observability backend implementations available for use.
 

@@ -23,6 +23,7 @@ top = false
 * 2019年初，两个现有开源项目：OpenTracing 和 OpenCensus 被宣布合并为 [OpenTelemetry](https://opentelemetry.io/) 项目，并将Log和Metrics整合进观测性标准。
 * 2021年， OpenTelemetry 发布了V1.0.0，为客户端的链路追踪部分提供了稳定性保证。
 * 2023年对于 OpenTelemetry 来说是一个里程碑，因为其三个基本信号，链路追踪、指标和日志，都达到了[稳定版本](https://opentelemetry.io/status/)。
+* 2024年 [OpenTelemetry v1.3.0](https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v1.3.0)发布，新增[Profiling信号](https://opentelemetry.io/blog/2024/state-profiling/)，同年6月Elastic捐赠了基于ebpf的[profiler agent](https://github.com/open-telemetry/opentelemetry-ebpf-profiler)。
 
 > [CNCF](https://landscape.cncf.io/?group=projects-and-products&view-mode=card&license=oss&classify=category&sort-by=stars&sort-direction=desc#observability-and-analysis--observability)已有众多可观测性后端实现可供使用。
 

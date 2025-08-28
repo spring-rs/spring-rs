@@ -2,7 +2,7 @@
 title = "logger Plugin"
 description = "How to use the logger plugin"
 draft = false
-weight = 21
+weight = 22
 sort_by = "weight"
 template = "docs/page.html"
 
