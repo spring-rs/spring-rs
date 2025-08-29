@@ -12,7 +12,6 @@ use tracing_error::ErrorLayer;
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt::time::{ChronoLocal, ChronoUtc, FormatTime, SystemTime, Uptime};
 use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Registry;
 use tracing_subscriber::{
     fmt::{self, MakeWriter},
@@ -57,11 +56,15 @@ impl Plugin for LogPlugin {
 
         let env_filter = config.build_env_filter();
 
-        tracing_subscriber::registry()
+        let subscriber = tracing_subscriber::registry()
             .with(layers)
             .with(env_filter)
-            .with(ErrorLayer::default())
-            .init();
+            .with(ErrorLayer::default());
+
+        if tracing_subscriber::util::SubscriberInitExt::try_init(subscriber).is_err() {
+            log::warn!("Global tracing subscriber already set, skipping LogPlugin initialization");
+        }
+
     }
 
     fn immediately(&self) -> bool {

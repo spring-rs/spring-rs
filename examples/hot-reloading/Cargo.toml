@@ -1,0 +1,20 @@
+[package]
+name = "hot-reloading"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[features]
+default = []
+hot-reload = ["spring/hot-reload"]
+
+[dependencies]
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+spring-sqlx = { path = "../../spring-sqlx", features = ["sqlite"] }
+tokio = { workspace = true, features = ["full", "tracing"] }
+tower = { workspace = true }
+tower-http = { workspace = true }
+subsecond = { git = "https://github.com/DioxusLabs/dioxus.git"}
+dioxus-devtools = { git = "https://github.com/DioxusLabs/dioxus.git", features = ["serve"]}

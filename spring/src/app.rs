@@ -16,6 +16,7 @@ use std::str::FromStr;
 use std::sync::RwLock;
 use std::{collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
+use tokio::sync::broadcast;
 
 type Registry<T> = DashMap<TypeId, T>;
 type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
@@ -81,6 +82,7 @@ impl App {
 }
 
 static GLOBAL_APP: Lazy<RwLock<Arc<App>>> = Lazy::new(|| RwLock::new(Arc::new(App::default())));
+static HOT_RELOAD_SHUTDOWN: Lazy<RwLock<Option<tokio::sync::broadcast::Sender<()>>>> = Lazy::new(|| RwLock::new(None));
 
 unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}
@@ -193,7 +195,11 @@ impl AppBuilder {
         service::auto_inject_service(self)?;
 
         // 4. schedule
-        self.schedule().await
+        if cfg!(feature = "hot-reload") {
+            self.schedule_hot_reload().await
+        } else {
+            self.schedule().await
+        }
     }
 
     /// Unlike the [`run`] method, the `build` method is suitable for applications that do not contain scheduling logic.
@@ -266,6 +272,59 @@ impl AppBuilder {
             let result = Box::into_pin(hook(app.clone())).await?;
             log::info!("shutdown result: {result}");
         }
+        Ok(())
+    }
+
+    async fn schedule_hot_reload(&mut self) -> Result<()> {
+        let app = self.build_app();
+        let schedulers = std::mem::take(&mut self.schedulers);
+
+        if schedulers.is_empty() {
+            return Ok(());
+        }
+
+        let (shutdown_tx, _) = broadcast::channel(1);
+
+        {
+            let mut shutdown_guard = HOT_RELOAD_SHUTDOWN.write().unwrap();
+            if let Some(old_sender) = shutdown_guard.take() {
+                let _ = old_sender.send(());
+                log::info!("Sent shutdown signal to previous schedulers");
+            }
+            *shutdown_guard = Some(shutdown_tx.clone());
+        }
+
+        // Spawn every scheduler in its own task - This could be improved I guess but works for now
+        let mut handles = vec![];
+        for (index, task) in schedulers.into_iter().enumerate() {
+            let poll_future = task(app.clone());
+            let poll_future = Box::into_pin(poll_future);
+            let mut shutdown_rx = shutdown_tx.subscribe();
+
+            let handle = tokio::spawn(async move {
+                tokio::select! {
+                    result = poll_future => {
+                        match result {
+                            Ok(_) => log::info!("Scheduler {} completed normally", index),
+                            Err(e) => log::error!("Scheduler {} error: {e:?}", index),
+                        }
+                    }
+                    _ = shutdown_rx.recv() => {
+                        log::info!("Scheduler {} aborted for hot reload", index);
+                    }
+                }
+            });
+            handles.push(handle);
+        }
+
+        log::info!("All {} schedulers started in background for hot reload", handles.len());
+
+        // FILO: The hooks added by the plugin built first should be executed later
+        while let Some(hook) = self.shutdown_hooks.pop() {
+            let result = Box::into_pin(hook(app.clone())).await?;
+            log::info!("shutdown result: {result}");
+        }
+
         Ok(())
     }
 
