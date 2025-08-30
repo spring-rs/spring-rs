@@ -1,8 +1,10 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::config::Configurable;
+use spring::{config::Configurable, submit_config_schema};
 use std::net::{IpAddr, Ipv4Addr};
 use tracing::Level;
+
+submit_config_schema!("web", WebConfig);
 
 /// spring-web Config
 #[derive(Debug, Configurable, JsonSchema, Deserialize)]

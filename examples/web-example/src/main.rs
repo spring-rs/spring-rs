@@ -2,6 +2,7 @@ mod jwt;
 
 use axum::http::StatusCode;
 use jwt::Claims;
+use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::config::Configurable;
 use spring::{auto_config, App};
@@ -59,7 +60,7 @@ async fn login(Json(credentials): Json<LoginCredentials>) -> Result<impl IntoRes
     }
 }
 
-#[derive(Configurable, Deserialize)]
+#[derive(Configurable, JsonSchema, Deserialize)]
 #[config_prefix = "custom"]
 struct CustomConfig {
     user_info_detail: String,

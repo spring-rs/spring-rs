@@ -14,13 +14,15 @@ use sea_streamer::{
     SeaProducerOptions,
 };
 use serde::Deserialize;
-use spring::config::Configurable;
+use spring::{config::Configurable, submit_config_schema};
+
+submit_config_schema!("stream", StreamConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "stream"]
 pub struct StreamConfig {
     /// [streamer server uri][config]
-    /// 
+    ///
     /// [config]: https://docs.rs/sea-streamer-types/latest/sea_streamer_types/struct.StreamerUri.html
     pub(crate) uri: String,
 

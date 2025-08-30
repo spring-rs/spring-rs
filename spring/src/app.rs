@@ -123,7 +123,7 @@ impl AppBuilder {
     /// The environment configuration file has a higher priority and will
     /// overwrite the configuration items of the main configuration file.
     ///
-    /// For specific supported environments, see the [Env](../config/env/enum.Env.html) enum.
+    /// For specific supported environments, see the [`Env`] enum.
     pub fn use_config_file(&mut self, config_path: &str) -> &mut Self {
         self.config = TomlConfigRegistry::new(Path::new(config_path), self.env)
             .expect("config file load failed");
@@ -196,7 +196,7 @@ impl AppBuilder {
         self.schedule().await
     }
 
-    /// Unlike the [`run`] method, the `build` method is suitable for applications that do not contain scheduling logic.
+    /// Unlike the [`Self::run`] method, the `build` method is suitable for applications that do not contain scheduling logic.
     /// This method returns the built App, and developers can implement logic such as command lines and task scheduling by themselves.
     pub async fn build(&mut self) -> Result<Arc<App>> {
         // 1. build plugin

@@ -6,9 +6,13 @@ pub mod env;
 /// Implement reading toml configuration
 pub mod toml;
 
+pub use inventory::submit;
+pub use schemars::schema_for;
+pub use schemars::Schema;
 pub use spring_macros::Configurable;
 
 use crate::error::Result;
+use serde_json::json;
 use std::{ops::Deref, sync::Arc};
 
 /// The Configurable trait marks whether the struct can read configuration from the [ConfigRegistry]
@@ -46,4 +50,56 @@ where
     fn deref(&self) -> &Self::Target {
         &self.0
     }
+}
+
+/// Collects all configured schema generation information
+pub struct ConfigSchema {
+    /// [`Configurable::config_prefix`]
+    pub prefix: &'static str,
+    /// Generate the [`Schema`] for this configuration
+    pub schema: fn() -> Schema,
+}
+
+inventory::collect!(ConfigSchema);
+
+/// register config schema
+#[macro_export]
+macro_rules! submit_config_schema {
+    ($prefix:expr, $ty:ty) => {
+        ::spring::config::submit! {
+            ::spring::config::ConfigSchema {
+                prefix: $prefix,
+                schema: || ::spring::config::schema_for!($ty),
+            }
+        }
+    };
+}
+
+/// Get all registered schemas
+pub fn auto_config_schemas() -> Vec<(String, Schema)> {
+    inventory::iter::<ConfigSchema>
+        .into_iter()
+        .map(|c| (c.prefix.to_string(), (c.schema)()))
+        .collect()
+}
+
+/// Merge all config schemas into one json schema
+pub fn merge_all_schemas() -> serde_json::Value {
+    let mut properties = serde_json::Map::new();
+
+    for (prefix, schema) in auto_config_schemas() {
+        // Put each schema under the corresponding prefix
+        properties.insert(prefix, serde_json::to_value(schema).unwrap());
+    }
+
+    json!({
+        "type": "object",
+        "properties": properties
+    })
+}
+
+/// write merged json schema to file
+pub fn write_merged_schema_to_file(path: &str) -> std::io::Result<()> {
+    let merged = merge_all_schemas();
+    std::fs::write(path, serde_json::to_string_pretty(&merged).unwrap())
 }

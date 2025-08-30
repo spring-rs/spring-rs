@@ -9,3 +9,7 @@ authors.workspace = true
 spring = { path = "../../spring" }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true }
+schemars = { workspace = true }
+
+[build-dependencies]
+spring = { path = "../../spring" }

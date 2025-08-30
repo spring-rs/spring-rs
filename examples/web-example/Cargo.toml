@@ -12,6 +12,7 @@ spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
 tokio = { workspace = true, features = ["full", "tracing"] }
 anyhow = { workspace = true }
 serde = { workspace = true }
+schemars = { workspace = true }
 serde_json = { workspace = true }
 jsonwebtoken = "8.3"
 pem = "3.0"

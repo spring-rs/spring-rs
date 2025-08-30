@@ -13,7 +13,7 @@ repository.workspace = true
 spring-macros = { path = "../spring-macros", version = "0.4" }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-serde = { workspace = true, features = ["derive"]}
+serde = { workspace = true, features = ["derive"] }
 log = { workspace = true }
 nu-ansi-term = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
@@ -31,6 +31,7 @@ toml = { workspace = true, features = ["parse"] }
 serde-toml-merge = { workspace = true }
 async-trait = { workspace = true }
 schemars = { workspace = true }
+serde_json = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 dashmap = { workspace = true }
 once_cell = { workspace = true }
