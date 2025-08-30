@@ -8,10 +8,9 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
     let output = quote! {
         impl ::spring::config::Configurable for #ident {
             fn config_prefix() -> &'static str {
-                    #prefix
+                #prefix
             }
         }
-        ::spring::submit_config!(#prefix, #ident);
     };
 
     Ok(output)

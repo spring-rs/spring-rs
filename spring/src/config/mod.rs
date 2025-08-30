@@ -64,7 +64,7 @@ inventory::collect!(ConfigSchema);
 
 /// register config schema
 #[macro_export]
-macro_rules! submit_config {
+macro_rules! submit_config_schema {
     ($prefix:expr, $ty:ty) => {
         ::spring::config::submit! {
             ::spring::config::ConfigSchema {

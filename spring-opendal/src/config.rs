@@ -1,8 +1,11 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::config::Configurable;
+use spring::submit_config_schema;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
+
+submit_config_schema!("opendal", OpenDALConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "opendal"]
