@@ -1,5 +1,6 @@
 use anyhow::Context;
 use derive_more::derive::Deref;
+use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::{
     auto_config,
@@ -35,7 +36,7 @@ async fn main() {
         .await
 }
 
-#[derive(Clone, Configurable, Deserialize)]
+#[derive(Clone, Configurable, JsonSchema, Deserialize)]
 #[config_prefix = "user"]
 struct UserConfig {
     username: String,

@@ -11,6 +11,7 @@ pub(crate) fn expand_derive(input: syn::DeriveInput) -> syn::Result<TokenStream>
                     #prefix
             }
         }
+        ::spring::submit_config!(#prefix, #ident);
     };
 
     Ok(output)

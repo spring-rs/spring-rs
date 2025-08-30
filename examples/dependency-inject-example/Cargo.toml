@@ -10,6 +10,7 @@ spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
 spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
 tokio = { workspace = true, features = ["full", "tracing"] }
+schemars = { workspace = true }
 anyhow = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
