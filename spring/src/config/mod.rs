@@ -98,7 +98,7 @@ pub fn merge_all_schemas() -> serde_json::Value {
     })
 }
 
-/// 
+/// write merged json schema to file
 pub fn write_merged_schema_to_file(path: &str) -> std::io::Result<()> {
     let merged = merge_all_schemas();
     std::fs::write(path, serde_json::to_string_pretty(&merged).unwrap())
