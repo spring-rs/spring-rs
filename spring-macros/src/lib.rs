@@ -381,7 +381,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ### Using the multi-thread runtime
 ///
-/// ```rust
+/// ```rust,ignore
 /// #[tokio::main]
 /// async fn main() {
 ///     println!("Hello world");
@@ -390,7 +390,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Equivalent code not using `#[tokio::main]`
 ///
-/// ```rust
+/// ```rust,ignore
 /// fn main() {
 ///     tokio::runtime::Builder::new_multi_thread()
 ///         .enable_all()
@@ -406,7 +406,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// The basic scheduler is single-threaded.
 ///
-/// ```rust
+/// ```rust,ignore
 /// #[tokio::main(flavor = "current_thread")]
 /// async fn main() {
 ///     println!("Hello world");
@@ -415,7 +415,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Equivalent code not using `#[tokio::main]`
 ///
-/// ```rust
+/// ```rust,ignore
 /// fn main() {
 ///     tokio::runtime::Builder::new_current_thread()
 ///         .enable_all()
@@ -429,7 +429,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ### Set number of worker threads
 ///
-/// ```rust
+/// ```rust,ignore
 /// #[tokio::main(worker_threads = 2)]
 /// async fn main() {
 ///     println!("Hello world");
@@ -438,7 +438,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Equivalent code not using `#[tokio::main]`
 ///
-/// ```rust
+/// ```rust,ignore
 /// fn main() {
 ///     tokio::runtime::Builder::new_multi_thread()
 ///         .worker_threads(2)
@@ -453,7 +453,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ### Configure the runtime to start with time paused
 ///
-/// ```rust
+/// ```rust,ignore
 /// #[tokio::main(flavor = "current_thread", start_paused = true)]
 /// async fn main() {
 ///     println!("Hello world");
@@ -462,7 +462,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Equivalent code not using `#[tokio::main]`
 ///
-/// ```rust
+/// ```rust,ignore
 /// fn main() {
 ///     tokio::runtime::Builder::new_current_thread()
 ///         .enable_all()
@@ -479,7 +479,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ### Rename package
 ///
-/// ```rust
+/// ```rust,ignore
 /// use tokio as tokio1;
 ///
 /// #[tokio1::main(crate = "tokio1")]
@@ -490,7 +490,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Equivalent code not using `#[tokio::main]`
 ///
-/// ```rust
+/// ```rust,ignore
 /// use tokio as tokio1;
 ///
 /// fn main() {

@@ -285,14 +285,13 @@ impl AppBuilder {
 
         let (shutdown_tx, _) = broadcast::channel(1);
 
-        {
-            let mut shutdown_guard = HOT_RELOAD_SHUTDOWN.write().unwrap();
-            if let Some(old_sender) = shutdown_guard.take() {
-                let _ = old_sender.send(());
-                log::info!("Sent shutdown signal to previous schedulers");
-            }
-            *shutdown_guard = Some(shutdown_tx.clone());
+        let mut shutdown_guard = HOT_RELOAD_SHUTDOWN.write().unwrap();
+        if let Some(old_sender) = shutdown_guard.take() {
+            let _ = old_sender.send(());
+            log::info!("Sent shutdown signal to previous schedulers");
         }
+        *shutdown_guard = Some(shutdown_tx.clone());
+        drop(shutdown_guard);
 
         // Spawn every scheduler in its own task - This could be improved I guess but works for now
         let mut handles = vec![];
@@ -318,12 +317,28 @@ impl AppBuilder {
         }
 
         log::info!("All {} schedulers started in background for hot reload", handles.len());
+        let shutdown_hooks = std::mem::take(&mut self.shutdown_hooks);
+        let mut future_collector = Vec::new();
+        for task in shutdown_hooks.into_iter() {
+            let poll_future = task(app.clone());
+            let poll_future = Box::into_pin(poll_future);
 
-        // FILO: The hooks added by the plugin built first should be executed later
-        while let Some(hook) = self.shutdown_hooks.pop() {
-            let result = Box::into_pin(hook(app.clone())).await?;
-            log::info!("shutdown result: {result}");
+            future_collector.push(poll_future);
         }
+
+        tokio::spawn(async move  {
+            while let Some(handle) = handles.pop() {
+                let _ = handle.await; 
+            }
+            // FILO: The hooks added by the plugin built first should be executed later
+            while let Some(hook) = future_collector.pop() {
+                match hook.await {
+                    Ok(v) => log::info!("HOT-RELOADING SHUTDOWN sucessfuled: {v}"),
+                    Err(e) => log::error!("HOT-RELOADING SHUTDOWN failed: {e}")
+                }
+            }
+        });
+
 
         Ok(())
     }

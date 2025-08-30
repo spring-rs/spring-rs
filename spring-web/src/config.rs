@@ -30,7 +30,7 @@ fn default_binding() -> IpAddr {
 }
 
 fn default_port() -> u16 {
-    8080
+    8090
 }
 
 /// Server middleware configuration structure.

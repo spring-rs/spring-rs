@@ -41,10 +41,8 @@ pub fn auto_router() -> Router {
 
     for handler in inventory::iter::<&dyn TypedHandlerRegistrar> {
         if handlers_registered.contains(&handler.get_name()) {
-            println!("Skipping duplicate typed route: {}", handler.get_name());
             continue;
         } else {
-            println!("Registering typed route: {}", handler.get_name());
             router = handler.install_route(router);
             handlers_registered.push(handler.get_name());
         }
