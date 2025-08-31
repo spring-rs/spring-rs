@@ -39,5 +39,5 @@ jobs:
       uses: shalzz/zola-deploy-action@v0.19.1
       env:
         BUILD_DIR: ./docs/
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         REPOSITORY: spring-rs/spring-rs.github.io
