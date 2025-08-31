@@ -50,3 +50,15 @@ spring-rs实现了一个简单的插值器。
 uri = "${DATABASE_URL:postgres://postgres:xudjf23adj213@localhost/postgres}"
 enable_logging = true
 ```
+
+## 配置文件的自动补全提示
+
+安装[vscode toml](https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml)插件，然后在`toml`配置文件第一行加上spring-rs的schema文件
+
+```toml
+#:schema https://spring-rs.github.io/config-schema.json
+[web]
+port = 18080
+graceful = true
+connect_info = true
+```

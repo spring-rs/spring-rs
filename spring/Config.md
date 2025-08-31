@@ -65,3 +65,15 @@ You can specify the default value of the placeholder using the `${ENV_VAR_NAME:d
 uri = "${DATABASE_URL:postgres://postgres:xudjf23adj213@localhost/postgres}"
 enable_logging = true
 ```
+
+## Auto-completion tips for the configuration file
+
+Install the [vscode toml](https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml) plugin, then add the spring-rs schema file to the first line of the `toml` configuration file.
+
+```toml
+#:schema https://spring-rs.github.io/config-schema.json
+[web]
+port = 18080
+graceful = true
+connect_info = true
+```
