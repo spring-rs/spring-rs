@@ -1,6 +1,8 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::config::Configurable;
+use spring::{config::Configurable, submit_config_schema};
+
+submit_config_schema!("redis", RedisConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "redis"]

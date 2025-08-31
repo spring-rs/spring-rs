@@ -1,3 +1,4 @@
+#:schema ../../../target/config-schema.json
 [my-plugin]
 a = 1
 b = true

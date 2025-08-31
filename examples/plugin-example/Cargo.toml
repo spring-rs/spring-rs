@@ -9,3 +9,19 @@ authors.workspace = true
 spring = { path = "../../spring" }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true }
+schemars = { workspace = true }
+
+[build-dependencies]
+spring = { path = "../../spring" }
+# generate plugin config schema
+spring-grpc = { path = "../../spring-grpc" }
+spring-job = { path = "../../spring-job" }
+spring-mail = { path = "../../spring-mail" }
+spring-opendal = { path = "../../spring-opendal" }
+spring-opentelemetry = { path = "../../spring-opentelemetry" }
+spring-postgres = { path = "../../spring-postgres" }
+spring-redis = { path = "../../spring-redis" }
+spring-sea-orm = { path = "../../spring-sea-orm" }
+spring-sqlx = { path = "../../spring-sqlx" }
+spring-stream = { path = "../../spring-stream" }
+spring-web = { path = "../../spring-web" }

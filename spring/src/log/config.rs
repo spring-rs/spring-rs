@@ -9,6 +9,13 @@ impl Configurable for LoggerConfig {
     }
 }
 
+crate::config::submit! {
+    crate::config::ConfigSchema {
+        prefix: "logger",
+        schema: || crate::config::schema_for!(LoggerConfig),
+    }
+}
+
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub(crate) struct LoggerConfig {
     #[serde(default = "default_true")]

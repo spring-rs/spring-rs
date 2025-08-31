@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::async_trait;
 use spring::config::{ConfigRegistry, Configurable};
@@ -26,7 +27,7 @@ impl Plugin for MyPlugin {
     }
 }
 
-#[derive(Debug, Configurable, Deserialize)]
+#[derive(Debug, Configurable, JsonSchema, Deserialize)]
 #[config_prefix = "my-plugin"]
 struct Config {
     a: u32,
@@ -36,7 +37,7 @@ struct Config {
     e: ConfigEnum,
 }
 
-#[derive(PartialEq, Debug, Deserialize)]
+#[derive(PartialEq, Debug, JsonSchema, Deserialize)]
 enum ConfigEnum {
     EA,
     EB,
@@ -44,7 +45,7 @@ enum ConfigEnum {
     ED,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, JsonSchema, Deserialize)]
 struct ConfigInner {
     f: u32,
     g: String,
