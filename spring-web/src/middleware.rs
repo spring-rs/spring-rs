@@ -3,8 +3,8 @@ use crate::config::{
     EnableMiddleware, LimitPayloadMiddleware, Middlewares, StaticAssetsMiddleware,
     TimeoutRequestMiddleware, TraceLoggerMiddleware,
 };
+use crate::Router;
 use anyhow::Context;
-use axum::Router;
 use spring::error::Result;
 use std::path::PathBuf;
 use std::str::FromStr;

@@ -35,7 +35,10 @@ pub use axum::routing::MethodFilter;
 /// MethodRouter with AppState
 pub use axum::routing::MethodRouter;
 /// Router with AppState
-pub use axum::Router;
+#[cfg(feature = "openapi")]
+pub type Router = aide::axum::ApiRouter;
+#[cfg(not(feature = "openapi"))]
+pub type Router = axum::Router;
 
 use anyhow::Context;
 use axum::Extension;
@@ -53,7 +56,10 @@ use spring::{
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
 /// Routers collection
-pub type Routers = Vec<Router>;
+#[cfg(feature = "openapi")]
+pub type Routers = Vec<aide::axum::ApiRouter>;
+#[cfg(not(feature = "openapi"))]
+pub type Routers = Vec<axum::Router>;
 
 /// Web Configurator
 pub trait WebConfigurator {
