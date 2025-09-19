@@ -14,9 +14,9 @@ use sea_streamer::{
     SeaProducerOptions,
 };
 use serde::Deserialize;
-use spring::{config::Configurable, submit_config_schema};
+use spring::config::Configurable;
 
-submit_config_schema!("stream", StreamConfig);
+spring::submit_config_schema!("stream", StreamConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "stream"]

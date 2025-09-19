@@ -1,8 +1,8 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::{config::Configurable, submit_config_schema};
+use spring::config::Configurable;
 
-submit_config_schema!("mail", MailerConfig);
+spring::submit_config_schema!("mail", MailerConfig);
 
 /// SMTP mailer configuration structure.
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]

@@ -47,11 +47,10 @@ use serde::Deserialize;
 use spring::config::{ConfigRegistry, Configurable};
 use spring::plugin::component::ComponentRef;
 use spring::plugin::{ComponentRegistry, MutableComponentRegistry};
-use spring::submit_config_schema;
 use spring::{app::AppBuilder, error::Result, plugin::Plugin};
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
 
-submit_config_schema!("opentelemetry", OpenTelemetryConfig);
+spring::submit_config_schema!("opentelemetry", OpenTelemetryConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "opentelemetry"]
