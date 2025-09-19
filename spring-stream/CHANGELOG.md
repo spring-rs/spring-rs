@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- **added**: reexport `sea_streamer`
+
 ## 0.4.1
 
 - **added**: serde derive

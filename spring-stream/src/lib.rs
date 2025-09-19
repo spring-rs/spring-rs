@@ -8,6 +8,7 @@ pub mod extractor;
 pub mod handler;
 
 pub use consumer::{ConsumerOpts, Consumers};
+pub use sea_streamer;
 #[cfg(feature = "file")]
 pub use sea_streamer::file;
 #[cfg(feature = "kafka")]
@@ -16,7 +17,6 @@ pub use sea_streamer::kafka;
 pub use sea_streamer::redis;
 #[cfg(feature = "stdio")]
 pub use sea_streamer::stdio;
-pub use sea_streamer::ConsumerMode;
 /////////////////stream-macros/////////////////////
 pub use spring_macros::stream_listener;
 
