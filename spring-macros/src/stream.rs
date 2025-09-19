@@ -36,9 +36,9 @@ impl StreamListenerArgs {
         let Self { topics, opts } = self;
         if let Some(mode) = &opts.mode {
             match mode {
-                ConsumerMode::RealTime=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::ConsumerMode::RealTime)}),
-                ConsumerMode::Resumable=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::ConsumerMode::Resumable)}),
-                ConsumerMode::LoadBalanced=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::ConsumerMode::LoadBalanced)}),
+                ConsumerMode::RealTime=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::sea_streamer::ConsumerMode::RealTime)}),
+                ConsumerMode::Resumable=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::sea_streamer::ConsumerMode::Resumable)}),
+                ConsumerMode::LoadBalanced=>tokens.extend(quote!{::spring_stream::consumer::Consumer::mode(::spring_stream::sea_streamer::ConsumerMode::LoadBalanced)}),
             }
         } else {
             tokens.extend(quote! {::spring_stream::consumer::Consumer::default()});

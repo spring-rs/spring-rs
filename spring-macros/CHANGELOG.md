@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.6
+
+- **changed**: migrate `::spring_stream::ConsumerMode` to `::spring_stream::sea_streamer::ConsumerMode`
+
 ## 0.4.5
 
 - **added**: Service support inject None ([#160])
