@@ -3,6 +3,7 @@
 ## 0.4.2
 
 - **added**: reexport `sea_streamer`
+- **added**: use `spring::submit_config_schema`
 
 ## 0.4.1
 

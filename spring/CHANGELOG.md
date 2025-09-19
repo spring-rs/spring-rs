@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.4
+
+- **added**: export `spring::submit_config_schema`
+
 ## 0.4.3
 
 - **added**: Service support inject None ([#160])
