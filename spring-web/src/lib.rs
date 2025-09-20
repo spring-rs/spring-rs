@@ -245,10 +245,9 @@ fn enable_openapi(
 
     let router = router.nest_api_service(&openapi_conf.doc_prefix, docs_routes(&openapi_conf));
 
-    let mut api = app.get_component::<OpenApi>().unwrap_or_else(|| {
-        let mut default_openapi = OpenApi::default();
-        default_openapi.info = openapi_conf.info;
-        default_openapi
+    let mut api = app.get_component::<OpenApi>().unwrap_or_else(|| OpenApi {
+        info: openapi_conf.info,
+        ..Default::default()
     });
 
     let router = if let Some(api_docs) = app.get_component::<OpenApiTransformer>() {
@@ -287,9 +286,8 @@ pub fn docs_routes(OpenApiConfig { doc_prefix, info }: &OpenApiConfig) -> aide::
             .with_title(_doc_title)
             .axum_route(),
     );
-    let router = router.route("/openapi.json", axum::routing::get(serve_docs));
 
-    router
+    router.route("/openapi.json", axum::routing::get(serve_docs))
 }
 
 async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl aide::axum::IntoApiResponse {
