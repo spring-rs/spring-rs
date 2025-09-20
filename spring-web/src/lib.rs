@@ -17,11 +17,13 @@ pub use axum;
 pub use spring::async_trait;
 /////////////////web-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-web` dependency
+pub use spring_macros::middlewares;
+pub use spring_macros::nest;
+
+// route macros
 pub use spring_macros::delete;
 pub use spring_macros::get;
 pub use spring_macros::head;
-pub use spring_macros::middlewares;
-pub use spring_macros::nest;
 pub use spring_macros::options;
 pub use spring_macros::patch;
 pub use spring_macros::post;
@@ -30,15 +32,45 @@ pub use spring_macros::route;
 pub use spring_macros::routes;
 pub use spring_macros::trace;
 
+#[cfg(feature = "openapi")]
+pub use spring_macros::api_route;
+#[cfg(feature = "openapi")]
+pub use spring_macros::api_routes;
+#[cfg(feature = "openapi")]
+pub use spring_macros::delete_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::get_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::head_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::options_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::patch_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::post_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::put_api;
+#[cfg(feature = "openapi")]
+pub use spring_macros::trace_api;
+
 /// axum::routing::MethodFilter re-export
 pub use axum::routing::MethodFilter;
-/// MethodRouter with AppState
-pub use axum::routing::MethodRouter;
+
 /// Router with AppState
-#[cfg(feature = "openapi")]
-pub type Router = aide::axum::ApiRouter;
 #[cfg(not(feature = "openapi"))]
 pub type Router = axum::Router;
+/// MethodRouter with AppState
+pub use axum::routing::MethodRouter;
+
+#[cfg(feature = "openapi")]
+pub use aide::openapi::OpenApi;
+#[cfg(feature = "openapi")]
+pub type Router = aide::axum::ApiRouter;
+#[cfg(feature = "openapi")]
+pub use aide::axum::routing::ApiMethodRouter;
+
+#[cfg(feature = "openapi")]
+use aide::transform::TransformOpenApi;
 
 use anyhow::Context;
 use axum::Extension;
@@ -61,10 +93,22 @@ pub type Routers = Vec<aide::axum::ApiRouter>;
 #[cfg(not(feature = "openapi"))]
 pub type Routers = Vec<axum::Router>;
 
+/// OpenAPI
+#[cfg(feature = "openapi")]
+type OpenApiTransformer = fn(TransformOpenApi) -> TransformOpenApi;
+
 /// Web Configurator
 pub trait WebConfigurator {
     /// add route to app registry
     fn add_router(&mut self, router: Router) -> &mut Self;
+
+    /// Initialize OpenAPI Documents
+    #[cfg(feature = "openapi")]
+    fn openapi(&mut self, openapi: OpenApi) -> &mut Self;
+
+    /// Defining OpenAPI Documents
+    #[cfg(feature = "openapi")]
+    fn api_docs(&mut self, api_docs: OpenApiTransformer) -> &mut Self;
 }
 
 impl WebConfigurator for AppBuilder {
@@ -79,6 +123,17 @@ impl WebConfigurator for AppBuilder {
         } else {
             self.add_component(vec![router])
         }
+    }
+
+    /// Initialize OpenAPI Documents
+    #[cfg(feature = "openapi")]
+    fn openapi(&mut self, openapi: OpenApi) -> &mut Self {
+        self.add_component(openapi)
+    }
+
+    #[cfg(feature = "openapi")]
+    fn api_docs(&mut self, api_docs: OpenApiTransformer) -> &mut Self {
+        self.add_component(api_docs)
     }
 }
 
@@ -134,7 +189,11 @@ impl WebPlugin {
             .with_context(|| format!("bind tcp listener failed:{addr}"))?;
         tracing::info!("bind tcp listener: {addr}");
 
-        // 3. axum server
+        // 3. openapi
+        #[cfg(feature = "openapi")]
+        let router = enable_openapi(&app, router);
+
+        // 4. axum server
         let router = router.layer(Extension(AppState { app }));
 
         tracing::info!("axum server started");
@@ -160,6 +219,25 @@ impl WebPlugin {
 
         Ok("axum schedule finished".to_string())
     }
+}
+
+#[cfg(feature = "openapi")]
+fn enable_openapi(app: &App, router: aide::axum::ApiRouter) -> axum::Router {
+    aide::generate::on_error(|error| {
+        tracing::error!("{error}");
+    });
+
+    aide::generate::extract_schemas(true);
+
+    let mut api = app.get_component::<OpenApi>().unwrap_or_default();
+
+    let router = if let Some(api_docs) = app.get_component::<OpenApiTransformer>() {
+        router.finish_api_with(&mut api, api_docs)
+    } else {
+        router.finish_api(&mut api)
+    };
+
+    router.layer(Extension(Arc::new(api)))
 }
 
 async fn shutdown_signal() {

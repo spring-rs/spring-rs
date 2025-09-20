@@ -189,10 +189,18 @@ struct Route {
 
     /// Whether to apply `#[axum::debug_handler]`
     debug: bool,
+
+    /// Whether to enable `openapi`
+    openapi: bool,
 }
 
 impl Route {
-    pub fn new(args: RouteArgs, ast: syn::ItemFn, method: Option<Method>) -> syn::Result<Self> {
+    pub fn new(
+        args: RouteArgs,
+        ast: syn::ItemFn,
+        method: Option<Method>,
+        openapi: bool,
+    ) -> syn::Result<Self> {
         let name = ast.sig.ident.clone();
 
         // Try and pull out the doc comments so that we can reapply them to the generated struct.
@@ -234,11 +242,12 @@ impl Route {
             ast,
             doc_attributes,
             debug,
+            openapi,
         })
     }
 
     /// routers
-    fn multiple(args: Vec<Args>, ast: syn::ItemFn) -> syn::Result<Self> {
+    fn multiple(args: Vec<Args>, ast: syn::ItemFn, openapi: bool) -> syn::Result<Self> {
         let debug = args.iter().any(|a| a.debug);
         let name = ast.sig.ident.clone();
 
@@ -264,6 +273,7 @@ impl Route {
             ast,
             doc_attributes,
             debug,
+            openapi,
         })
     }
 }
@@ -276,6 +286,7 @@ impl ToTokens for Route {
             args,
             doc_attributes,
             debug,
+            openapi,
         } = self;
 
         #[allow(unused_variables)] // used when force-pub feature is disabled
@@ -286,14 +297,26 @@ impl ToTokens for Route {
             .map(|args| {
                 let Args { path, methods,.. } = args;
 
-                let method_binder = methods
-                    .iter()
-                    .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
+                if *openapi {
+                    let method_binder = methods
+                        .iter()
+                        .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
 
-                quote! {
-                    let __method_router = ::spring_web::MethodRouter::new();
-                    #(#method_binder)*
-                    __router = ::spring_web::Router::route(__router, #path, __method_router);
+                    quote! {
+                        let __method_router = ::spring_web::MethodRouter::new();
+                        #(#method_binder)*
+                        __router = ::spring_web::Router::api_route(__router, #path, __method_router);
+                    }
+                } else {
+                    let method_binder = methods
+                        .iter()
+                        .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
+
+                    quote! {
+                        let __method_router = ::spring_web::MethodRouter::new();
+                        #(#method_binder)*
+                        __router = ::spring_web::Router::route(__router, #path, __method_router);
+                    }
                 }
             })
             .collect();
@@ -337,6 +360,7 @@ pub(crate) fn with_method(
     method: Option<Method>,
     args: TokenStream,
     input: TokenStream,
+    openapi: bool,
 ) -> TokenStream {
     let args = match syn::parse(args) {
         Ok(args) => args,
@@ -350,14 +374,14 @@ pub(crate) fn with_method(
         Err(err) => return input_and_compile_error(input, err),
     };
 
-    match Route::new(args, ast, method) {
+    match Route::new(args, ast, method, openapi) {
         Ok(route) => route.into_token_stream().into(),
         // on macro related error, make IDEs happy; see fn docs
         Err(err) => input_and_compile_error(input, err),
     }
 }
 
-pub(crate) fn with_methods(input: TokenStream) -> TokenStream {
+pub(crate) fn with_methods(input: TokenStream, openapi: bool) -> TokenStream {
     let mut ast = match syn::parse::<syn::ItemFn>(input.clone()) {
         Ok(ast) => ast,
         // on parse error, make IDEs happy; see fn docs
@@ -397,7 +421,7 @@ pub(crate) fn with_methods(input: TokenStream) -> TokenStream {
         Err(err) => return input_and_compile_error(input, err),
     };
 
-    match Route::multiple(methods, ast) {
+    match Route::multiple(methods, ast, openapi) {
         Ok(route) => route.into_token_stream().into(),
         // on macro related error, make IDEs happy; see fn docs
         Err(err) => input_and_compile_error(input, err),
