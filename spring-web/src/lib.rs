@@ -87,6 +87,9 @@ use spring::{
 };
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
+#[cfg(feature = "openapi")]
+use crate::config::OpenApiConfig;
+
 /// Routers collection
 #[cfg(feature = "openapi")]
 pub type Routers = Vec<aide::axum::ApiRouter>;
@@ -173,13 +176,20 @@ impl Plugin for WebPlugin {
         app.add_component(router);
 
         let server_conf = config.server;
+        let openapi_conf = config.openapi;
 
-        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(app, server_conf)));
+        app.add_scheduler(move |app: Arc<App>| {
+            Box::new(Self::schedule(app, server_conf, openapi_conf))
+        });
     }
 }
 
 impl WebPlugin {
-    async fn schedule(app: Arc<App>, config: ServerConfig) -> Result<String> {
+    async fn schedule(
+        app: Arc<App>,
+        config: ServerConfig,
+        openapi_conf: OpenApiConfig,
+    ) -> Result<String> {
         let router = app.get_expect_component::<Router>();
 
         // 2. bind tcp listener
@@ -191,7 +201,7 @@ impl WebPlugin {
 
         // 3. openapi
         #[cfg(feature = "openapi")]
-        let router = enable_openapi(&app, router);
+        let router = enable_openapi(&app, router, openapi_conf);
 
         // 4. axum server
         let router = router.layer(Extension(AppState { app }));
@@ -222,14 +232,24 @@ impl WebPlugin {
 }
 
 #[cfg(feature = "openapi")]
-fn enable_openapi(app: &App, router: aide::axum::ApiRouter) -> axum::Router {
+fn enable_openapi(
+    app: &App,
+    router: aide::axum::ApiRouter,
+    openapi_conf: OpenApiConfig,
+) -> axum::Router {
     aide::generate::on_error(|error| {
         tracing::error!("{error}");
     });
 
     aide::generate::extract_schemas(true);
 
-    let mut api = app.get_component::<OpenApi>().unwrap_or_default();
+    let router = router.nest_api_service(&openapi_conf.doc_prefix, docs_routes(&openapi_conf));
+
+    let mut api = app.get_component::<OpenApi>().unwrap_or_else(|| {
+        let mut default_openapi = OpenApi::default();
+        default_openapi.info = openapi_conf.info;
+        default_openapi
+    });
 
     let router = if let Some(api_docs) = app.get_component::<OpenApiTransformer>() {
         router.finish_api_with(&mut api, api_docs)
@@ -238,6 +258,42 @@ fn enable_openapi(app: &App, router: aide::axum::ApiRouter) -> axum::Router {
     };
 
     router.layer(Extension(Arc::new(api)))
+}
+
+#[cfg(feature = "openapi")]
+pub fn docs_routes(OpenApiConfig { doc_prefix, info }: &OpenApiConfig) -> aide::axum::ApiRouter {
+    let router = aide::axum::ApiRouter::new();
+    let _openapi_path = &format!("{doc_prefix}/openapi.json");
+    let _doc_title = &info.title;
+
+    #[cfg(feature = "openapi-scalar")]
+    let router = router.route(
+        "/scalar",
+        aide::scalar::Scalar::new(_openapi_path)
+            .with_title(_doc_title)
+            .axum_route(),
+    );
+    #[cfg(feature = "openapi-redoc")]
+    let router = router.route(
+        "/redoc",
+        aide::redoc::Redoc::new(_openapi_path)
+            .with_title(_doc_title)
+            .axum_route(),
+    );
+    #[cfg(feature = "openapi-swagger")]
+    let router = router.route(
+        "/swagger",
+        aide::swagger::Swagger::new(_openapi_path)
+            .with_title(_doc_title)
+            .axum_route(),
+    );
+    let router = router.route("/openapi.json", axum::routing::get(serve_docs));
+
+    router
+}
+
+async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl aide::axum::IntoApiResponse {
+    axum::response::IntoResponse::into_response(axum::Json(api))
 }
 
 async fn shutdown_signal() {

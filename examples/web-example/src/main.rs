@@ -13,7 +13,7 @@ use spring_web::{
     extractor::{Config, Json, Path},
     WebConfigurator, WebPlugin,
 };
-use spring_web::{get, nest, post, route, routes};
+use spring_web::{get, get_api, nest, post, route, routes};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -75,6 +75,15 @@ async fn protected_user_info(
     format!("get user info of id#{}: {}", user_id, conf.user_info_detail)
 }
 
+#[get_api("/user-info-api")]
+async fn protected_user_info_api(
+    claims: Claims,
+    Config(conf): Config<CustomConfig>,
+) -> impl IntoResponse {
+    let user_id = claims.uid;
+    format!("get user info of id#{}: {}", user_id, conf.user_info_detail)
+}
+
 #[nest("/sql")]
 mod sql {
     use anyhow::Context;
@@ -82,7 +91,7 @@ mod sql {
         sqlx::{self, Row},
         ConnectPool,
     };
-    use spring_web::error::Result;
+    use spring_web::{error::Result, get_api};
     use spring_web::extractor::Component;
     use spring_web::get;
     use std::ops::Deref;
@@ -97,7 +106,7 @@ mod sql {
         Ok(version)
     }
 
-    #[get("/now")]
+    #[get_api("/now")]
     pub async fn sqlx_time_handler(pool: Component<ConnectPool>) -> Result<String> {
         let time = sqlx::query("select DATE_FORMAT(now(),'%Y-%m-%d %H:%i:%s') as time")
             .fetch_one(pool.deref())

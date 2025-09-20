@@ -305,7 +305,7 @@ impl ToTokens for Route {
                     quote! {
                         let __method_router = ::spring_web::MethodRouter::new();
                         #(#method_binder)*
-                        ::spring_web::ApiMethodRouter::from(__method_router);
+                        let __method_router = ::spring_web::ApiMethodRouter::from(__method_router);
                         __router = ::spring_web::Router::api_route(__router, #path, __method_router);
                     }
                 } else {
