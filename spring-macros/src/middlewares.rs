@@ -86,7 +86,7 @@ fn middlewares_inner(args: TokenStream, input: TokenStream) -> syn::Result<Token
         .map_err(|err| invalid_args_error(err.span()))?;
 
     if let Ok(function) = syn::parse::<syn::ItemFn>(input.clone()) {
-        return handle_function_middlewares(&middleware_list.middlewares, &function);
+        return handle_function_middlewares(&middleware_list.middlewares, function);
     }
 
     handle_module_middlewares(middleware_list, input)
@@ -165,6 +165,10 @@ fn add_registrar_to_module(
                 };
                 
                 __router
+            }
+
+            fn get_name(&self) -> &'static str {
+                stringify!(#registrar_struct_name)
             }
         }
     })?;
@@ -327,12 +331,20 @@ fn extract_function_middlewares(attrs: &[syn::Attribute]) -> syn::Result<Vec<syn
 
 fn handle_function_middlewares(
     middleware_list: &Punctuated<Expr, Token![,]>,
-    function: &syn::ItemFn,
+    mut function: syn::ItemFn,
 ) -> syn::Result<TokenStream> {
-    let mut function_copy = function.clone();
     
-    let route_info = extract_route_info_from_function(&function_copy)?;
+    let func_name = &function.sig.ident;
+    let original_func_name = func_name.to_string();
     
+    let uuid = uuid::Uuid::now_v7().simple().to_string();
+    let struct_name = format!("{}_{}", func_name, uuid);
+    let func_name = syn::Ident::new(&struct_name, Span::call_site());
+
+    function.sig.ident = func_name.clone();
+
+    let route_info = extract_route_info_from_function(&function)?;
+
     if route_info.is_empty() {
         return Err(syn::Error::new(
             function.sig.ident.span(),
@@ -340,9 +352,8 @@ fn handle_function_middlewares(
         ));
     }
     
-    remove_processed_attributes(&mut function_copy.attrs);
+    remove_processed_attributes(&mut function.attrs);
     
-    let func_name = &function.sig.ident;
     let registrar_struct_name = syn::Ident::new(
         &format!("{func_name}MiddlewareRegistrar"),
         function.sig.ident.span()
@@ -356,11 +367,11 @@ fn handle_function_middlewares(
     
     let route_registrations = route_info
         .iter()
-        .map(|route| generate_function_route_registration(route, func_name, &middleware_expressions))
+        .map(|route| generate_function_route_registration(route, &func_name, &middleware_expressions))
         .collect::<Vec<_>>();
     
     Ok(quote! {
-        #function_copy
+        #function
         
         #[allow(non_camel_case_types, missing_docs)]
         struct #registrar_struct_name;
@@ -372,6 +383,10 @@ fn handle_function_middlewares(
                 #(#route_registrations)*
                 
                 __router
+            }
+
+            fn get_name(&self) -> &'static str { 
+                stringify!(#original_func_name)
             }
         }
         

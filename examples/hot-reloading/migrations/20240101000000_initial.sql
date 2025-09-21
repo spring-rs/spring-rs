@@ -1,0 +1,2 @@
+-- Add your initial migration here
+-- This is just a placeholder since we're using an in-memory database
