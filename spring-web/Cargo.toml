@@ -12,8 +12,29 @@ repository.workspace = true
 [features]
 default = ["http2"]
 http2 = ["axum/http2"]
-multipart = ["axum/multipart"]
-ws = ["axum/ws"]
+multipart = ["axum/multipart", "aide/axum-multipart"]
+ws = ["axum/ws", "aide/axum-ws"]
+openapi = [
+    "aide",
+    "aide/axum",
+    "aide/axum-tokio",
+    "aide/axum-extra",
+    "aide/axum-extra-cookie",
+    "aide/axum-extra-cookie-private",
+    "aide/axum-extra-form",
+    "aide/axum-extra-headers",
+    "aide/axum-extra-json-deserializer",
+    "aide/axum-extra-query",
+    "aide/axum-extra-typed-routing",
+    "aide/axum-form",
+    "aide/axum-json",
+    "aide/axum-matched-path",
+    "aide/axum-original-uri",
+    "aide/axum-query",
+]
+openapi-redoc = ["aide/redoc"]
+openapi-scalar = ["aide/scalar"]
+openapi-swagger = ["aide/swagger"]
 
 [dependencies]
 spring = { path = "../spring", version = "0.4" }
@@ -29,6 +50,7 @@ tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 inventory = { workspace = true }
+aide = { workspace = true, optional = true }
 
 [dev-dependencies]
 spring-sqlx = { path = "../spring-sqlx" }
