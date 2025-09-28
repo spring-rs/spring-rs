@@ -141,6 +141,7 @@ async fn fix_rate_job() {
 * [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/): Integrate with [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust) to implement full observability of logging, metrics, tracing
 * [x] ![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)[`spring-grpc`](https://spring-rs.github.io/docs/plugins/spring-grpc/): Integrate[`tonic`](https://github.com/hyperium/tonic) to implement gRPC calls
 * [x] ![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)[`spring-opendal`](https://spring-rs.github.io/docs/plugins/spring-opendal/): Integrate with [`opendal`](https://github.com/apache/opendal) to implement unified data access layer
+* [x] ![spring-websocket](https://img.shields.io/crates/v/spring-websocket.svg)[`spring-websocket`](https://spring-rs.github.io/docs/plugins/spring-websocket/): Integrate with [`tokio-tungstenite`](https://github.com/snapview/tokio-tungstenite) to implement WebSocket real-time communication
 
 ## Ecosystem
 

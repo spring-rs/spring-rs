@@ -1,0 +1,16 @@
+[package]
+name = "websocket-example"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+spring = { version = "0.4.0", path = "../../spring" }
+spring-web = { version = "0.4.0", path = "../../spring-web" }
+spring-websocket = { version = "0.4.0", path = "../../spring-websocket" }
+spring-macros = { version = "0.4.0", path = "../../spring-macros" }
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
