@@ -2,12 +2,16 @@
 
 /// Component definition
 pub mod component;
+/// Lazy component loading for circular dependencies
+pub mod lazy;
+/// Service is a special Component that supports dependency injection at compile time
 pub mod service;
 
 use crate::error::Result;
 use crate::{app::AppBuilder, error::AppError};
 use async_trait::async_trait;
 use component::ComponentRef;
+pub use lazy::LazyComponent;
 use std::{
     any::{self, Any},
     ops::Deref,
