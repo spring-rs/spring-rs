@@ -43,6 +43,9 @@ For the complete code, see [`dependency-inject-example`](https://github.com/spri
 spring-rs supports multi-level dependency injection. For example, if `UserService` depends on `OtherService`, and `OtherService` depends on `DatabaseService`, then when you inject `UserService`, `OtherService` and `DatabaseService` will be automatically injected.
 
 ```rust
+use spring::plugin::LazyComponent;
+use spring::plugin::service::Service;
+
 #[derive(Clone, Service)]
 struct DatabaseService {
     // ...
@@ -67,6 +70,8 @@ When two services reference each other, Rust's type system prevents direct circu
 
 ```rust
 use spring::plugin::LazyComponent;
+use spring::plugin::service::Service;
+
 #[derive(Clone, Service)]
 struct UserService {
     #[inject(component)] // It's optional to use #[inject] in this case

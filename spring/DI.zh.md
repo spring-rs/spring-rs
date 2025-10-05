@@ -44,6 +44,9 @@ spring-rs 支持多层级的依赖注入。
 那么当你注入 `UserService` 时，`OtherService` 和 `DatabaseService` 也会被自动注入。
 
 ```rust
+use spring::plugin::LazyComponent;
+use spring::plugin::service::Service;
+
 #[derive(Clone, Service)]
 struct DatabaseService {
     // ...
@@ -70,6 +73,9 @@ struct UserService {
 为了解决这个问题，你可以使用 `LazyComponent<T>` 来打破循环依赖。
 
 ```rust
+use spring::plugin::LazyComponent;
+use spring::plugin::service::Service;
+
 use spring::plugin::LazyComponent;
 #[derive(Clone, Service)]
 struct UserService {

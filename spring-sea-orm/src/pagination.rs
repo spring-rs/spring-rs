@@ -130,7 +130,7 @@ impl<T> Page<T> {
 
     /// Compute the number of pages for the current page
     fn total_pages(total: u64, size: u64) -> u64 {
-        (total / size) + (total % size > 0) as u64
+        (total / size) + !total.is_multiple_of(size) as u64
     }
 
     /// iterator for content

@@ -17,6 +17,7 @@ use std::{
     ops::Deref,
     sync::Arc,
 };
+pub use service::Service;
 
 /// Plugin Reference
 #[derive(Clone)]
