@@ -18,6 +18,9 @@ enum InjectableType {
         optional: bool,
         component_type: syn::Path,
     },
+    LazyComponent {
+        component_type: syn::Path,
+    },
     Config(syn::Path),
     ComponentRef(syn::Path),
     ConfigRef(syn::Path),
@@ -30,6 +33,7 @@ impl InjectableType {
         match self {
             Self::Option => 0,
             Self::Component { .. } => 1,
+            Self::LazyComponent { .. } => 1,
             Self::Config(_) => 2,
             Self::ComponentRef(_) => 3,
             Self::ConfigRef(_) => 4,
@@ -62,30 +66,21 @@ impl Injectable {
         Ok(Self {
             is_prototype,
             ty,
-            field_name,
+            field_name
         })
     }
 
     fn compute_type(field: &syn::Field, is_prototype: bool) -> syn::Result<InjectableType> {
         if let syn::Type::Path(path) = &field.ty {
             let ty = &path.path;
-            let inject_attr = field
-                .attrs
-                .iter()
-                .find(|attr| attr.path().is_ident("inject"));
-
-            if let Some(inject_attr) = inject_attr {
-                if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
-                    let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
-                    return attr.make_type(ty);
-                } else {
-                    Err(syn::Error::new_spanned(
-                inject_attr,
-                "invalid inject definition, expected #[inject(component|config|func(args))]",
-                    ))?;
-                }
-            }
             let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
+            
+            let type_name = &last_path_segment.ident;
+            if type_name == "LazyComponent" {
+                return Ok(InjectableType::LazyComponent {
+                    component_type: get_argument_type(&last_path_segment.arguments)?,
+                });
+            }
             if last_path_segment.ident == "ComponentRef" {
                 return Ok(InjectableType::ComponentRef(get_argument_type(
                     &last_path_segment.arguments,
@@ -98,6 +93,23 @@ impl Injectable {
             }
             if !is_prototype && last_path_segment.ident == "Option" {
                 return Ok(InjectableType::Option);
+            }
+            
+            let inject_attr = field
+                .attrs
+                .iter()
+                .find(|attr| attr.path().is_ident("inject"));
+            
+            if let Some(inject_attr) = inject_attr {
+                if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
+                    let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
+                    return attr.make_type(ty);
+                } else {
+                    Err(syn::Error::new_spanned(
+                inject_attr,
+                "invalid inject definition, expected #[inject(component|config|func(args))]",
+                    ))?;
+                }
             }
         }
         if is_prototype {
@@ -143,16 +155,16 @@ impl InjectableAttr {
         Ok(match self {
             Self::Component => {
                 let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
-                if last_path_segment.ident == "Option" {
-                    InjectableType::Component {
-                        optional: true,
-                        component_type: get_argument_type(&last_path_segment.arguments)?,
-                    }
+                
+                let (optional, component_type) = if last_path_segment.ident == "Option" {
+                    (true, get_argument_type(&last_path_segment.arguments)?)
                 } else {
-                    InjectableType::Component {
-                        optional: false,
-                        component_type: ty.clone(),
-                    }
+                    (false, ty.clone())
+                };
+                
+                InjectableType::Component {
+                    optional,
+                    component_type,
                 }
             }
             Self::Config => InjectableType::Config(ty.clone()),
@@ -200,6 +212,13 @@ impl ToTokens for Injectable {
                         });
                     }
                 }
+            }
+            InjectableType::LazyComponent { component_type } => {
+                // For lazy components, wrap the component type in LazyComponent
+                // This allows circular dependencies by deferring resolution
+                tokens.extend(quote! {
+                    let #field_name = ::spring::plugin::LazyComponent::<#component_type>::new();
+                });
             }
             InjectableType::Config(type_path) => {
                 if *is_prototype {

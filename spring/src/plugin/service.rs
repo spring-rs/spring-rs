@@ -47,8 +47,36 @@ macro_rules! submit_service {
 
 /// Find all ServiceRegistrar and install them into the app
 pub fn auto_inject_service(app: &mut AppBuilder) -> Result<()> {
-    for registrar in inventory::iter::<&dyn ServiceRegistrar> {
-        registrar.install_service(app)?;
+    let registrars: Vec<&'static &dyn ServiceRegistrar> = inventory::iter::<&dyn ServiceRegistrar>().collect();
+    let total = registrars.len();
+    let mut pending: Vec<&'static &dyn ServiceRegistrar> = registrars;
+    let mut installed = 0;
+    
+    while !pending.is_empty() {
+        let mut next_pending = Vec::new();
+        let mut progress_made = false;
+        
+        for registrar in pending {
+            match registrar.install_service(app) {
+                Ok(()) => {
+                    installed += 1;
+                    progress_made = true;
+                }
+                Err(_) => {
+                    next_pending.push(registrar);
+                }
+            }
+        }
+        
+        if !progress_made && !next_pending.is_empty() {
+            if let Some(first) = next_pending.first() {
+                return first.install_service(app);
+            }
+        }
+        
+        pending = next_pending;
     }
+    
+    log::debug!("Installed {}/{} services", installed, total);
     Ok(())
 }

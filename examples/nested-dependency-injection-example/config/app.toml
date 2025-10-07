@@ -1,0 +1,9 @@
+[user]
+username = "holmofy"
+project = "spring-rs"
+
+[logger]
+pretty_backtrace = true
+
+[web]
+graceful = true
