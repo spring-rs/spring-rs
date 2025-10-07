@@ -165,7 +165,13 @@ async fn fix_rate_job() {
 
 ## 交流群
 
-<img src="https://github.com/user-attachments/assets/f9f2abcb-8d91-4aa1-a8f6-93e789339e45" alt="QQ交流群" height="400"/>
+
+<table>
+<tr>
+<td><img src="https://github.com/user-attachments/assets/f9f2abcb-8d91-4aa1-a8f6-93e789339e45" alt="QQ交流群" height="400"/></td>
+<td><img src="https://github.com/user-attachments/assets/d52abd39-be68-468f-8153-93c3e54ff72f" alt="微信交流群" height="400"/></td>
+</tr>
+</table>
 
 ## 贡献
 

@@ -1,3 +1,8 @@
+## 0.4.2
+
+- **added**: serde derive
+- **added**: export `spring::submit_config_schema`
+
 ## 0.4.1
 
 - **added**: serde derive

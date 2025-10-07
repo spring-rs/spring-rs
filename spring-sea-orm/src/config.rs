@@ -1,10 +1,10 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::{config::Configurable, submit_config_schema};
+use spring::config::Configurable;
 
-submit_config_schema!("sea-orm", SeaOrmConfig);
+spring::submit_config_schema!("sea-orm", SeaOrmConfig);
 #[cfg(feature = "with-web")]
-submit_config_schema!("sea-orm-web", SeaOrmWebConfig);
+spring::submit_config_schema!("sea-orm-web", SeaOrmWebConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "sea-orm"]

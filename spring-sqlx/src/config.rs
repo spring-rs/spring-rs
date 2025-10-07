@@ -1,8 +1,8 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::{config::Configurable, submit_config_schema};
+use spring::config::Configurable;
 
-submit_config_schema!("sqlx", SqlxConfig);
+spring::submit_config_schema!("sqlx", SqlxConfig);
 
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
 #[config_prefix = "sqlx"]

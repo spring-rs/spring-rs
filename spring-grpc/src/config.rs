@@ -1,12 +1,12 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::{config::Configurable, submit_config_schema};
+use spring::config::Configurable;
 use std::{
     net::{IpAddr, Ipv4Addr},
     time::Duration,
 };
 
-submit_config_schema!("grpc", GrpcConfig);
+spring::submit_config_schema!("grpc", GrpcConfig);
 
 /// spring-grpc Config
 #[derive(Debug, Configurable, JsonSchema, Deserialize)]
