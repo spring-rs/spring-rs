@@ -140,6 +140,7 @@ async fn fix_rate_job() {
 * [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](./spring-opentelemetry/README.zh.md)(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
 * [x] ![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)[`spring-grpc`](./spring-grpc/README.zh.md)(整合了[`tonic`](https://github.com/hyperium/tonic)实现gRPC调用)
 * [x] ![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)[`spring-opendal`](https://spring-rs.github.io/docs/plugins/spring-opendal/): 整合[`opendal`](https://github.com/apache/opendal)实现统一的数据访问层
+* [x] ![spring-websocket](https://img.shields.io/crates/v/spring-websocket.svg)[`spring-websocket`](./spring-websocket/README.zh.md): 整合[`tokio-tungstenite`](https://github.com/snapview/tokio-tungstenite)实现WebSocket实时通信
 
 ## 生态
 

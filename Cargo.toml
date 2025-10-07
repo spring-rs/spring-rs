@@ -14,7 +14,8 @@ members = [
     "spring-mail",
     "spring-opentelemetry",
     "spring-opendal",
-    "examples/*",
+    "examples/*", 
+    "spring-websocket",
 ]
 default-members = ["spring", "spring-*"]
 exclude = ["examples/**"]
@@ -29,7 +30,7 @@ repository = "https://github.com/spring-rs/spring-rs"
 [workspace.dependencies]
 thiserror = "2.0"
 anyhow = "1.0"
-serde = "1.0"
+serde = "1.0.228"
 serde_json = "1.0"
 tokio = "1.47"
 log = "0.4"
@@ -64,23 +65,23 @@ schemars = "1.0"
 dashmap = "6.1"
 uuid = "1"
 chrono = "0.4"
-opentelemetry = "0.30"
-opentelemetry_sdk = "0.30"
-opentelemetry-otlp = "0.30"
-opentelemetry-http = "0.30"
-opentelemetry-appender-tracing = "0.30"
-opentelemetry-jaeger-propagator = "0.30"
-opentelemetry-semantic-conventions = "0.30"
-opentelemetry-prometheus = "0.30"
-opentelemetry-zipkin = "0.30"
+opentelemetry = "0.31.0"
+opentelemetry_sdk = "0.31.0"
+opentelemetry-otlp = "0.31.0"
+opentelemetry-http = "0.31.0"
+opentelemetry-appender-tracing = "0.31.0"
+opentelemetry-jaeger-propagator = "0.31.0"
+opentelemetry-semantic-conventions = "0.31.0"
+opentelemetry-prometheus = "0.29.1"
+opentelemetry-zipkin = "0.31.0"
 opentelemetry-resource-detectors = "0.9"
 tracing-opentelemetry = "0.31"
 pin-project = "1"
-tonic = "0.13"
-prost = "0.13"
+tonic = "0.14.2"
+prost = "0.14.1"
 http = "1"
 http-body = "1"
 once_cell = "1"
 opendal = "0.54"
 prometheus = "0.14"
-prometheus-client = "0.23"
+prometheus-client = "0.24.0"
