@@ -1,3 +1,5 @@
+mod openapi;
+
 use crate::input_and_compile_error;
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
@@ -28,6 +30,12 @@ macro_rules! standard_http_method {
                 match () {
                     $(_ if method.is_ident(stringify!($lower)) => Ok(Self::$variant),)+
                     _ => Err(()),
+                }
+            }
+
+            pub(crate) fn as_str(&self) -> &'static str {
+                match self {
+                    $(Self::$variant => stringify!($upper),)+
                 }
             }
         }
@@ -156,9 +164,12 @@ impl Args {
                     }
                 }
                 other => {
+                    let attr = other.path().to_token_stream();
                     return Err(syn::Error::new_spanned(
                         other,
-                        "Unknown attribute; allowed: `method = \"METHOD\"`, `debug`",
+                        format!(
+                            "Unknown attribute `{attr}`; allowed: `method = \"METHOD\"`, `debug`"
+                        ),
                     ));
                 }
             }
@@ -298,15 +309,29 @@ impl ToTokens for Route {
                 let Args { path, methods,.. } = args;
 
                 if *openapi {
+                    let fn_name = name.to_string();
+                    let operation = openapi::parse_doc_attributes(doc_attributes, &fn_name);
                     let method_binder = methods
                         .iter()
                         .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
+                    let operation_binder = methods
+                        .iter()
+                        .map(|m| {
+                            let method_str = m.as_str();
+                            quote! {__router.operations.insert(#method_str, __operation);}
+                        });
 
                     quote! {
                         let __method_router = ::spring_web::MethodRouter::new();
                         #(#method_binder)*
                         let __method_router = ::spring_web::ApiMethodRouter::from(__method_router);
+                        let mut __operation = #operation;
                         __router = ::spring_web::Router::api_route(__router, #path, __method_router);
+
+                        let t = transform(::spring_web::aide::transform::TransformOperation::new(&mut __operation));
+                        if !t.hidden {
+                            #(#operation_binder)*
+                        }
                     }
                 } else {
                     let method_binder = methods

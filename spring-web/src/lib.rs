@@ -63,6 +63,8 @@ pub type Router = axum::Router;
 pub use axum::routing::MethodRouter;
 
 #[cfg(feature = "openapi")]
+pub use aide;
+#[cfg(feature = "openapi")]
 pub use aide::openapi::OpenApi;
 #[cfg(feature = "openapi")]
 pub type Router = aide::axum::ApiRouter;
@@ -290,8 +292,9 @@ pub fn docs_routes(OpenApiConfig { doc_prefix, info }: &OpenApiConfig) -> aide::
     router.route("/openapi.json", axum::routing::get(serve_docs))
 }
 
+#[cfg(feature = "openapi")]
 async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl aide::axum::IntoApiResponse {
-    axum::response::IntoResponse::into_response(axum::Json(api))
+    axum::response::IntoResponse::into_response(axum::Json(api.as_ref()))
 }
 
 async fn shutdown_signal() {
