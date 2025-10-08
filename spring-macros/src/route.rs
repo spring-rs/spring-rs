@@ -123,6 +123,7 @@ struct Args {
     path: syn::LitStr,
     methods: HashSet<Method>,
     debug: bool,
+    transform: Option<syn::ExprPath>,
 }
 
 impl Args {
@@ -134,32 +135,60 @@ impl Args {
             methods.insert(method);
         }
         let mut debug = false;
+        let mut transform = None;
         for meta in args.options {
             match meta {
                 syn::Meta::Path(path) if path.is_ident("debug") => {
                     debug = true;
                 }
-                syn::Meta::NameValue(nv) if nv.path.is_ident("method") => {
-                    if !is_route_macro {
-                        return Err(syn::Error::new_spanned(
-                            &nv,
-                            "HTTP method forbidden here; to handle multiple methods, use `route` instead",
-                        ));
-                    } else if let syn::Expr::Lit(syn::ExprLit {
-                        lit: syn::Lit::Str(lit),
-                        ..
-                    }) = nv.value.clone()
-                    {
-                        if !methods.insert(Method::try_from(&lit)?) {
+                syn::Meta::NameValue(nv) => {
+                    if nv.path.is_ident("method") {
+                        if !is_route_macro {
+                            return Err(syn::Error::new_spanned(
+                                &nv,
+                                "HTTP method forbidden here; to handle multiple methods, use `route` instead",
+                            ));
+                        } else if let syn::Expr::Lit(syn::ExprLit {
+                            lit: syn::Lit::Str(lit),
+                            ..
+                        }) = nv.value.clone()
+                        {
+                            if !methods.insert(Method::try_from(&lit)?) {
+                                return Err(syn::Error::new_spanned(
+                                    nv.value,
+                                    format!(
+                                        "HTTP method defined more than once: `{}`",
+                                        lit.value()
+                                    ),
+                                ));
+                            }
+                        } else {
                             return Err(syn::Error::new_spanned(
                                 nv.value,
-                                format!("HTTP method defined more than once: `{}`", lit.value()),
+                                "Attribute method expects literal string",
+                            ));
+                        }
+                    } else if nv.path.is_ident("transform") {
+                        if let syn::Expr::Lit(syn::ExprLit {
+                            lit: syn::Lit::Str(lit),
+                            ..
+                        }) = nv.value.clone()
+                        {
+                            let expr: syn::ExprPath = syn::parse_str(&lit.value())?;
+                            transform = Some(expr);
+                        } else {
+                            return Err(syn::Error::new_spanned(
+                                nv.value,
+                                "transform expects string literal path",
                             ));
                         }
                     } else {
+                        let attr = nv.path.to_token_stream();
                         return Err(syn::Error::new_spanned(
-                            nv.value,
-                            "Attribute method expects literal string",
+                            nv,
+                            format!(
+                                "Unknown attribute `{attr}`; allowed: `method = \"METHOD\"`, `transform = \"path::to::fn\"`, `debug`"
+                            ),
                         ));
                     }
                 }
@@ -179,6 +208,7 @@ impl Args {
             path: args.path,
             methods,
             debug,
+            transform,
         })
     }
 }
@@ -306,7 +336,7 @@ impl ToTokens for Route {
         let registrations: TokenStream2 = args
             .iter()
             .map(|args| {
-                let Args { path, methods,.. } = args;
+                let Args { path, methods, transform,.. } = args;
 
                 if *openapi {
                     let fn_name = name.to_string();
@@ -318,20 +348,21 @@ impl ToTokens for Route {
                         .iter()
                         .map(|m| {
                             let method_str = m.as_str();
-                            quote! {__router.operations.insert(#method_str, __operation);}
+                            quote! {__router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), transform);}
                         });
-
+                    let transform_ts = if let Some(t) = transform {
+                        quote! { let transform = #t; }
+                    } else {
+                        quote! { let transform = |path_item: ::spring_web::aide::transform::TransformPathItem<'_>| path_item; }
+                    };
                     quote! {
                         let __method_router = ::spring_web::MethodRouter::new();
                         #(#method_binder)*
                         let __method_router = ::spring_web::ApiMethodRouter::from(__method_router);
                         let mut __operation = #operation;
                         __router = ::spring_web::Router::api_route(__router, #path, __method_router);
-
-                        let t = transform(::spring_web::aide::transform::TransformOperation::new(&mut __operation));
-                        if !t.hidden {
-                            #(#operation_binder)*
-                        }
+                        #transform_ts
+                        #(#operation_binder)*
                     }
                 } else {
                     let method_binder = methods
