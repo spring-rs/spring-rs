@@ -103,17 +103,17 @@ pub fn parse_doc_attributes(attrs: &[syn::Attribute], fn_name: &str) -> Operatio
         let line = line.trim();
         if summary.is_none() && !line.is_empty() && !line.starts_with('@') {
             summary = Some(line.to_string());
-        } else if line.starts_with("@tag ") {
-            tags.push(line["@tag ".len()..].trim().to_string());
-        } else if line.starts_with("@id ") {
-            id = Some(line["@id ".len()..].trim().to_string());
-        } else if line.starts_with("@deprecated") {
-            deprecated = true;
-        } else if line.starts_with("@see ") {
+        } else if let Some(stripped) = line.strip_prefix("@tag ") {
+            tags.push(stripped.trim().to_string());
+        } else if let Some(stripped) = line.strip_prefix("@id ") {
+            id = Some(stripped.trim().to_string());
+        } else if let Some(stripped) = line.strip_prefix("@see ") {
             external_docs = Some(ExternalDocumentation {
-                url: line["@see ".len()..].trim().to_string(),
+                url: stripped.trim().to_string(),
                 description: None,
             });
+        } else if line.starts_with("@deprecated") {
+            deprecated = true;
         } else if !line.starts_with('@') {
             description.push_str(line);
             description.push('\n');
