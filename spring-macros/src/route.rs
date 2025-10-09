@@ -1,6 +1,6 @@
 mod openapi;
 
-use crate::input_and_compile_error;
+use crate::{input_and_compile_error, utils};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
@@ -33,9 +33,9 @@ macro_rules! standard_http_method {
                 }
             }
 
-            pub(crate) fn as_str(&self) -> &'static str {
+            pub(crate) fn as_lowercase_str(&self) -> &'static str {
                 match self {
-                    $(Self::$variant => stringify!($upper),)+
+                    $(Self::$variant => stringify!($lower),)+
                 }
             }
         }
@@ -341,13 +341,14 @@ impl ToTokens for Route {
                 if *openapi {
                     let fn_name = name.to_string();
                     let operation = openapi::parse_doc_attributes(doc_attributes, &fn_name);
+                    let (input_tys, output_ty) = utils::extract_fn_types(&ast);
                     let method_binder = methods
                         .iter()
                         .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
                     let operation_binder = methods
                         .iter()
                         .map(|m| {
-                            let method_str = m.as_str();
+                            let method_str = m.as_lowercase_str();
                             quote! {__router = __router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), __transform);}
                         });
                     let transform_ts = if let Some(t) = transform {
@@ -357,11 +358,26 @@ impl ToTokens for Route {
                             let __transform = ::spring_web::default_transform;
                         }
                     };
+                    let gen_output = if let Some(ty) = output_ty {
+                        quote! {
+                            for (code, res) in <#ty as ::spring_web::aide::OperationOutput>::inferred_responses(ctx, &mut __operation) {
+                                ::spring_web::openapi::set_inferred_response(ctx, &mut __operation, code, res);
+                            }
+                        }
+                    } else {
+                        quote! {}
+                    };
                     quote! {
                         let __method_router = ::spring_web::MethodRouter::new();
                         #(#method_binder)*
                         let __method_router = ::spring_web::ApiMethodRouter::from(__method_router);
                         let mut __operation = #operation;
+                        ::spring_web::aide::generate::in_context(|ctx| {
+                            #(
+                                <#input_tys as ::spring_web::aide::OperationInput>::operation_input(ctx, &mut __operation);
+                            )*
+                            #gen_output
+                        });
                         __router = ::spring_web::Router::api_route(__router, #path, __method_router);
                         #transform_ts
                         #(#operation_binder)*

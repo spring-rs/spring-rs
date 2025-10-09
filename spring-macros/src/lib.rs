@@ -11,6 +11,7 @@ mod middlewares;
 mod nest;
 mod route;
 mod stream;
+mod utils;
 
 use proc_macro::TokenStream;
 use syn::DeriveInput;

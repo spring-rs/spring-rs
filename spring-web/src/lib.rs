@@ -12,6 +12,8 @@ pub mod extractor;
 /// axum route handler
 pub mod handler;
 pub mod middleware;
+#[cfg(feature = "openapi")]
+pub mod openapi;
 
 pub use axum;
 pub use spring::async_trait;
@@ -203,7 +205,7 @@ impl WebPlugin {
 
         // 3. openapi
         #[cfg(feature = "openapi")]
-        let router = enable_openapi(&app, router, openapi_conf);
+        let router = finish_openapi(&app, router, openapi_conf);
 
         // 4. axum server
         let router = router.layer(Extension(AppState { app }));
@@ -234,17 +236,19 @@ impl WebPlugin {
 }
 
 #[cfg(feature = "openapi")]
-fn enable_openapi(
+pub fn enable_openapi() {
+    aide::generate::on_error(|error| {
+        tracing::error!("{error}");
+    });
+    aide::generate::extract_schemas(false);
+}
+
+#[cfg(feature = "openapi")]
+fn finish_openapi(
     app: &App,
     router: aide::axum::ApiRouter,
     openapi_conf: OpenApiConfig,
 ) -> axum::Router {
-    aide::generate::on_error(|error| {
-        tracing::error!("{error}");
-    });
-
-    aide::generate::extract_schemas(true);
-
     let router = router.nest_api_service(&openapi_conf.doc_prefix, docs_routes(&openapi_conf));
 
     let mut api = app.get_component::<OpenApi>().unwrap_or_else(|| OpenApi {
@@ -298,7 +302,9 @@ async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl aide::axum:
 }
 
 #[cfg(feature = "openapi")]
-pub fn default_transform<'a>(path_item: aide::transform::TransformPathItem<'a>) -> aide::transform::TransformPathItem<'a> {
+pub fn default_transform<'a>(
+    path_item: aide::transform::TransformPathItem<'a>,
+) -> aide::transform::TransformPathItem<'a> {
     path_item
 }
 

@@ -4,6 +4,7 @@ use axum_extra::TypedHeader;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
+use spring_web::aide::OperationInput;
 use spring_web::axum::http::request::Parts;
 use spring_web::axum::RequestPartsExt;
 use spring_web::error::{KnownWebError, Result, WebError};
@@ -54,6 +55,8 @@ where
         Ok(claims)
     }
 }
+
+impl OperationInput for Claims {}
 
 /// JWT encode
 pub fn encode(claims: Claims) -> Result<String> {
