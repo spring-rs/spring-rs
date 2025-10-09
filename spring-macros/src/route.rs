@@ -342,22 +342,6 @@ impl ToTokens for Route {
                     let fn_name = name.to_string();
                     let operation = openapi::parse_doc_attributes(doc_attributes, &fn_name);
                     let (input_tys, output_ty) = utils::extract_fn_types(&ast);
-                    let method_binder = methods
-                        .iter()
-                        .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
-                    let operation_binder = methods
-                        .iter()
-                        .map(|m| {
-                            let method_str = m.as_lowercase_str();
-                            quote! {__router = __router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), __transform);}
-                        });
-                    let transform_ts = if let Some(t) = transform {
-                        quote! { let __transform = #t; }
-                    } else {
-                        quote! {
-                            let __transform = ::spring_web::default_transform;
-                        }
-                    };
                     let gen_output = if let Some(ty) = output_ty {
                         quote! {
                             for (code, res) in <#ty as ::spring_web::aide::OperationOutput>::inferred_responses(ctx, &mut __operation) {
@@ -367,17 +351,35 @@ impl ToTokens for Route {
                     } else {
                         quote! {}
                     };
+                    let method_binder = methods
+                        .iter()
+                        .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
+                    let operation_binder = methods
+                        .iter()
+                        .map(|m| {
+                            let method_str = m.as_lowercase_str();
+                            quote! {
+                                let mut __operation = #operation;
+                                ::spring_web::aide::generate::in_context(|ctx| {
+                                    #(
+                                        <#input_tys as ::spring_web::aide::OperationInput>::operation_input(ctx, &mut __operation);
+                                    )*
+                                    #gen_output
+                                });
+                                __router = __router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), __transform);
+                            }
+                        });
+                    let transform_ts = if let Some(t) = transform {
+                        quote! { let __transform = #t; }
+                    } else {
+                        quote! {
+                            let __transform = ::spring_web::default_transform;
+                        }
+                    };
                     quote! {
                         let __method_router = ::spring_web::MethodRouter::new();
                         #(#method_binder)*
                         let __method_router = ::spring_web::ApiMethodRouter::from(__method_router);
-                        let mut __operation = #operation;
-                        ::spring_web::aide::generate::in_context(|ctx| {
-                            #(
-                                <#input_tys as ::spring_web::aide::OperationInput>::operation_input(ctx, &mut __operation);
-                            )*
-                            #gen_output
-                        });
                         __router = ::spring_web::Router::api_route(__router, #path, __method_router);
                         #transform_ts
                         #(#operation_binder)*
