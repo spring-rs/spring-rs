@@ -297,6 +297,11 @@ async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl aide::axum:
     axum::response::IntoResponse::into_response(axum::Json(api.as_ref()))
 }
 
+#[cfg(feature = "openapi")]
+pub fn default_transform<'a>(path_item: aide::transform::TransformPathItem<'a>) -> aide::transform::TransformPathItem<'a> {
+    path_item
+}
+
 async fn shutdown_signal() {
     let ctrl_c = async {
         tokio::signal::ctrl_c()

@@ -333,7 +333,7 @@ impl ToTokens for Route {
         #[allow(unused_variables)] // used when force-pub feature is disabled
         let vis = &ast.vis;
 
-        let registrations: TokenStream2 = args
+        let registrations = args
             .iter()
             .map(|args| {
                 let Args { path, methods, transform,.. } = args;
@@ -348,12 +348,14 @@ impl ToTokens for Route {
                         .iter()
                         .map(|m| {
                             let method_str = m.as_str();
-                            quote! {__router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), transform);}
+                            quote! {__router = __router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), __transform);}
                         });
                     let transform_ts = if let Some(t) = transform {
-                        quote! { let transform = #t; }
+                        quote! { let __transform = #t; }
                     } else {
-                        quote! { let transform = |path_item: ::spring_web::aide::transform::TransformPathItem<'_>| path_item; }
+                        quote! {
+                            let __transform = ::spring_web::default_transform;
+                        }
                     };
                     quote! {
                         let __method_router = ::spring_web::MethodRouter::new();
@@ -375,8 +377,7 @@ impl ToTokens for Route {
                         __router = ::spring_web::Router::route(__router, #path, __method_router);
                     }
                 }
-            })
-            .collect();
+            });
         let handler_fn = if *debug {
             let sig = &ast.sig;
             let vis = &ast.vis;
@@ -400,7 +401,7 @@ impl ToTokens for Route {
             impl ::spring_web::handler::TypedHandlerRegistrar for #name {
                 fn install_route(&self, mut __router: ::spring_web::Router) -> ::spring_web::Router{
                     #handler_fn
-                    #registrations
+                    #(#registrations)*
 
                     __router
                 }
