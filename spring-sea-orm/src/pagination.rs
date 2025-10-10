@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use sea_orm::{
     ConnectionTrait, EntityTrait, FromQueryResult, PaginatorTrait, Select, Selector, SelectorTrait,
 };
@@ -6,7 +7,7 @@ use spring::async_trait;
 use thiserror::Error;
 
 /// pagination information.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Pagination {
     #[serde(default = "default_page")]
     pub page: u64,
@@ -106,7 +107,7 @@ mod web {
 /// A page is a sublist of a list of objects.
 /// It allows gain information about the position of it in the containing entire list.
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct Page<T> {
     pub content: Vec<T>,
     pub size: u64,
