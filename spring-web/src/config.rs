@@ -1,3 +1,4 @@
+#[cfg(feature = "openapi")]
 use aide::openapi::Info;
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -6,6 +7,9 @@ use std::net::{IpAddr, Ipv4Addr};
 use tracing::Level;
 
 spring::submit_config_schema!("web", WebConfig);
+
+#[cfg(feature = "socket_io")]
+spring::submit_config_schema!("socket_io", SocketIOConfig);
 
 /// spring-web Config
 #[derive(Debug, Configurable, JsonSchema, Deserialize)]
@@ -30,6 +34,7 @@ pub struct ServerConfig {
     pub(crate) graceful: bool,
 }
 
+#[cfg(feature = "openapi")]
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct OpenApiConfig {
     #[serde(default = "default_doc_prefix")]
@@ -46,6 +51,7 @@ fn default_port() -> u16 {
     8080
 }
 
+#[cfg(feature = "openapi")]
 fn default_doc_prefix() -> String {
     "/docs".into()
 }
@@ -186,4 +192,18 @@ fn default_assets_uri() -> String {
 
 fn default_fallback() -> String {
     "index.html".to_string()
+}
+
+/// SocketIO configuration
+#[cfg(feature = "socket_io")]
+#[derive(Debug, Configurable, JsonSchema, Deserialize)]
+#[config_prefix = "socket_io"]
+pub struct SocketIOConfig {
+    #[serde(default = "default_namespace")]
+    pub default_namespace: String,
+}
+
+#[cfg(feature = "socket_io")]
+fn default_namespace() -> String {
+    "/".to_string()
 }

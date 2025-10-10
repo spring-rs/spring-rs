@@ -15,6 +15,9 @@ pub mod middleware;
 #[cfg(feature = "openapi")]
 pub mod openapi;
 
+#[cfg(feature = "socket_io")]
+pub use { socketioxide, rmpv };
+
 pub use axum;
 pub use spring::async_trait;
 /////////////////web-macros/////////////////////
@@ -34,6 +37,17 @@ pub use spring_macros::route;
 pub use spring_macros::routes;
 pub use spring_macros::trace;
 
+/// SocketIO macros
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_connection;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_disconnect;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_fallback;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::subscribe_message;
+
+/// OpenAPI macros
 #[cfg(feature = "openapi")]
 pub use spring_macros::api_route;
 #[cfg(feature = "openapi")]
@@ -90,6 +104,9 @@ use spring::{
     plugin::Plugin,
 };
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
+
+#[cfg(feature = "socket_io")]
+use config::SocketIOConfig;
 
 #[cfg(feature = "openapi")]
 use crate::config::OpenApiConfig;
@@ -161,6 +178,9 @@ impl Plugin for WebPlugin {
             .get_config::<WebConfig>()
             .expect("web plugin config load failed");
 
+        #[cfg(feature = "socket_io")]
+        let socketio_config = app.get_config::<SocketIOConfig>().ok();
+
         // 1. collect router
         let routers = app.get_component_ref::<Routers>();
         let mut router: Router = match routers {
@@ -177,13 +197,40 @@ impl Plugin for WebPlugin {
             router = crate::middleware::apply_middleware(router, middlewares);
         }
 
+        #[cfg(feature = "socket_io")]
+        if let Some(socketio_config) = socketio_config {
+            use spring::tracing::info;
+            
+            info!("Configuring SocketIO with namespace: {}", socketio_config.default_namespace);
+            
+            let (layer, io) = socketioxide::SocketIo::builder()
+                .build_layer();
+            
+            let ns_path = socketio_config.default_namespace.clone();
+            let ns_path_for_closure = ns_path.clone();
+            io.ns(ns_path, move |socket: socketioxide::extract::SocketRef| {
+                use spring::tracing::info;
+                
+                info!(socket_id = ?socket.id, "New socket connected to namespace: {}", ns_path_for_closure);
+                
+                crate::handler::auto_socketio_setup(&socket);
+            });
+            
+            router = router.layer(layer);
+            app.add_component(io);
+        }
+
         app.add_component(router);
 
         let server_conf = config.server;
-        let openapi_conf = config.openapi;
+        #[cfg(feature = "openapi")]
+        {
+            let openapi_conf = config.openapi;
+            app.add_component(openapi_conf.clone());
+        }
 
         app.add_scheduler(move |app: Arc<App>| {
-            Box::new(Self::schedule(app, server_conf, openapi_conf))
+            Box::new(Self::schedule(app, server_conf))
         });
     }
 }
@@ -192,7 +239,6 @@ impl WebPlugin {
     async fn schedule(
         app: Arc<App>,
         config: ServerConfig,
-        openapi_conf: OpenApiConfig,
     ) -> Result<String> {
         let router = app.get_expect_component::<Router>();
 
@@ -205,7 +251,10 @@ impl WebPlugin {
 
         // 3. openapi
         #[cfg(feature = "openapi")]
-        let router = finish_openapi(&app, router, openapi_conf);
+        let router = {
+            let openapi_conf = app.get_expect_component::<OpenApiConfig>();
+            finish_openapi(&app, router, openapi_conf)
+        };
 
         // 4. axum server
         let router = router.layer(Extension(AppState { app }));
