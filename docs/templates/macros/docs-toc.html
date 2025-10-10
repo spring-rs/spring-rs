@@ -1,21 +1,64 @@
 {% macro docs_toc(page) %}
   {% if page.extra.toc %}
+  {% set lines = page.content | split(pat="\n") %}
+  {% set in_code_block = false %}
+  {% set in_h2 = false %}
+
   <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
   	<div class="page-links">
   			<h3>On this page</h3>
   			<nav id="TableOfContents">
-  					<ul>
-  							{% for h1 in page.toc %}
-  							<li><a href="{{ h1.permalink | safe}}">{{ h1.title }}</a></li>
-  							{% if h1.children %}
-  									<ul>
-  											{% for h2 in h1.children %}
-  											<li><a href="{{ h2.permalink | safe }}">{{ h2.title }}</a></li>
-  											{% endfor %}
-  									</ul>
-  							{% endif %}
-  							{% endfor %}
-  					</ul>
+			{% if page.toc | length == 0 %}
+				<ul>
+				{% for line in lines %}
+					{% if line is matching("^```") %}
+						{% set_global in_code_block = not in_code_block %}
+						{% continue %}
+					{% endif %}
+
+					{% if in_code_block %}
+						{% continue %}
+					{% endif %}
+
+					{% if line is matching("^# ") %}
+						{% if in_h2 %}
+							{% set_global in_h2 = false %}
+							</ul>
+						{% endif %}
+						{% set id = line | lower | replace(from="#", to="") | trim | replace(from=" ", to="-") %}
+						<li><a href="#{{ id }}">{{ line | replace(from="#", to="") | trim }}</a></li>
+					{% elif line is matching("^## ") %}
+						{% if not in_h2 %}
+							{% set_global in_h2 = true %}
+							<ul>
+						{% endif %}
+						{% set id = line | lower | replace(from="#", to="") | trim | replace(from=" ", to="-") %}
+						<li class="ml-4"><a href="#{{ id }}">{{ line | replace(from="#", to="") | trim }}</a></li>
+					{% endif %}
+				{% endfor %}
+				{% if in_h2 %}
+					{% set_global in_h2 = false %}
+					</ul>
+				{% endif %}
+				</ul>
+			{% else %}
+				<ul>
+					{% for h1 in page.toc %}
+						<li><a href="{{ h1.permalink | safe}}">{{ h1.title }}</a></li>
+						{% if h1.children %}
+							<ul>
+								{% for h2 in h1.children %}
+									<li><a href="{{ h2.permalink | safe }}">{{ h2.title }}</a></li>
+								{% endfor %}
+							</ul>
+						{% endif %}
+					{% endfor %}
+				</ul>
+			{% endif %}
+
+
+
+
   			</nav>
   	</div>
   </nav>
