@@ -32,6 +32,7 @@ impl Pagination {
 mod web {
     use super::Pagination;
     use crate::config::SeaOrmWebConfig;
+    use schemars::JsonSchema;
     use serde::Deserialize;
     use spring_web::axum::extract::rejection::QueryRejection;
     use spring_web::axum::extract::{FromRequestParts, Query};
@@ -59,7 +60,7 @@ mod web {
         }
     }
 
-    #[derive(Debug, Clone, Deserialize)]
+    #[derive(Debug, Clone, Deserialize, JsonSchema)]
     struct OptionalPagination {
         page: Option<u64>,
         size: Option<u64>,
@@ -100,6 +101,25 @@ mod web {
             };
 
             Ok(Pagination { page, size })
+        }
+    }
+
+    #[cfg(feature = "with-web-openapi")]
+    impl spring_web::aide::OperationInput for Pagination {
+        fn operation_input(
+            ctx: &mut spring_web::aide::generate::GenContext,
+            operation: &mut spring_web::aide::openapi::Operation,
+        ) {
+            <Query<OptionalPagination> as spring_web::aide::OperationInput>::operation_input(
+                ctx, operation,
+            );
+        }
+
+        fn inferred_early_responses(
+            ctx: &mut spring_web::aide::generate::GenContext,
+            operation: &mut spring_web::aide::openapi::Operation,
+        ) -> Vec<(Option<u16>, spring_web::aide::openapi::Response)> {
+            <Query<OptionalPagination> as spring_web::aide::OperationInput>::inferred_early_responses(ctx, operation)
         }
     }
 }

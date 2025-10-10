@@ -1,7 +1,7 @@
 [package]
 name = "spring-sea-orm"
 description = "Integration of spring-rs framework and sea-orm"
-version = "0.4.6"
+version = "0.4.7"
 categories = ["database"]
 keywords = ["orm", "sql-database", "spring"]
 edition.workspace = true
@@ -15,6 +15,7 @@ mysql = ["sea-orm/sqlx-mysql"]
 sqlite = ["sea-orm/sqlx-sqlite"]
 postgres = ["sea-orm/sqlx-postgres"]
 with-web = ["spring-web"]
+with-web-openapi = ["spring-web/openapi"]
 
 [dependencies]
 spring-web = { path = "../spring-web", version = "0.4", optional = true }

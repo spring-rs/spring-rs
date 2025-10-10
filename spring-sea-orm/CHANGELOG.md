@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.7
+
+- **added**: Pagination impl `OperationInput`
+
 ## 0.4.6
 
 - **added**: pagination support JsonSchema
