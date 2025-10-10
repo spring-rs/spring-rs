@@ -341,7 +341,7 @@ impl ToTokens for Route {
                 if *openapi {
                     let fn_name = name.to_string();
                     let operation = openapi::parse_doc_attributes(doc_attributes, &fn_name);
-                    let (input_tys, output_ty) = utils::extract_fn_types(&ast);
+                    let (input_tys, output_ty) = utils::extract_fn_types(ast);
                     let gen_output = if let Some(ty) = output_ty {
                         quote! {
                             for (code, res) in <#ty as ::spring_web::aide::OperationOutput>::inferred_responses(ctx, &mut __operation) {
