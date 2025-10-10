@@ -223,10 +223,14 @@ impl Plugin for WebPlugin {
         app.add_component(router);
 
         let server_conf = config.server;
-        let openapi_conf = config.openapi;
+        #[cfg(feature = "openapi")]
+        {
+            let openapi_conf = config.openapi;
+            app.add_component(openapi_conf.clone());
+        }
 
         app.add_scheduler(move |app: Arc<App>| {
-            Box::new(Self::schedule(app, server_conf, openapi_conf))
+            Box::new(Self::schedule(app, server_conf))
         });
     }
 }
@@ -235,7 +239,6 @@ impl WebPlugin {
     async fn schedule(
         app: Arc<App>,
         config: ServerConfig,
-        openapi_conf: OpenApiConfig,
     ) -> Result<String> {
         let router = app.get_expect_component::<Router>();
 
@@ -248,7 +251,10 @@ impl WebPlugin {
 
         // 3. openapi
         #[cfg(feature = "openapi")]
-        let router = finish_openapi(&app, router, openapi_conf);
+        let router = {
+            let openapi_conf = app.get_expect_component::<OpenApiConfig>();
+            finish_openapi(&app, router, openapi_conf)
+        };
 
         // 4. axum server
         let router = router.layer(Extension(AppState { app }));

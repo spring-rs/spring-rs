@@ -1,3 +1,4 @@
+#[cfg(feature = "openapi")]
 use aide::openapi::Info;
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -33,6 +34,7 @@ pub struct ServerConfig {
     pub(crate) graceful: bool,
 }
 
+#[cfg(feature = "openapi")]
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub struct OpenApiConfig {
     #[serde(default = "default_doc_prefix")]
@@ -49,6 +51,7 @@ fn default_port() -> u16 {
     8080
 }
 
+#[cfg(feature = "openapi")]
 fn default_doc_prefix() -> String {
     "/docs".into()
 }
