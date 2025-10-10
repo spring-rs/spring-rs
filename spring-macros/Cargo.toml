@@ -12,6 +12,9 @@ repository.workspace = true
 [lib]
 proc-macro = true
 
+[features]
+socket_io = []
+
 [dependencies]
 proc-macro2 = { workspace = true }
 quote = { workspace = true }

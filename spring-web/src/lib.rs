@@ -13,6 +13,9 @@ pub mod extractor;
 pub mod handler;
 pub mod middleware;
 
+#[cfg(feature = "socket_io")]
+pub use { socketioxide, rmpv };
+
 pub use axum;
 pub use spring::async_trait;
 /////////////////web-macros/////////////////////
@@ -29,6 +32,16 @@ pub use spring_macros::put;
 pub use spring_macros::route;
 pub use spring_macros::routes;
 pub use spring_macros::trace;
+
+/// SocketIO macros re-exports
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_connection;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_disconnect;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_fallback;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::subscribe_message;
 
 /// axum::routing::MethodFilter re-export
 pub use axum::routing::MethodFilter;
@@ -51,6 +64,10 @@ use spring::{
     plugin::Plugin,
 };
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
+
+#[cfg(feature = "socket_io")]
+use config::SocketIOConfig;
+
 
 /// Routers collection
 pub type Routers = Vec<Router>;
@@ -93,6 +110,9 @@ impl Plugin for WebPlugin {
             .get_config::<WebConfig>()
             .expect("web plugin config load failed");
 
+        #[cfg(feature = "socket_io")]
+        let socketio_config = app.get_config::<SocketIOConfig>().ok();
+
         // 1. collect router
         let routers = app.get_component_ref::<Routers>();
         let mut router: Router = match routers {
@@ -107,6 +127,29 @@ impl Plugin for WebPlugin {
         };
         if let Some(middlewares) = config.middlewares {
             router = crate::middleware::apply_middleware(router, middlewares);
+        }
+
+        #[cfg(feature = "socket_io")]
+        if let Some(socketio_config) = socketio_config {
+            use spring::tracing::info;
+            
+            info!("Configuring SocketIO with namespace: {}", socketio_config.default_namespace);
+            
+            let (layer, io) = socketioxide::SocketIo::builder()
+                .build_layer();
+            
+            let ns_path = socketio_config.default_namespace.clone();
+            let ns_path_for_closure = ns_path.clone();
+            io.ns(ns_path, move |socket: socketioxide::extract::SocketRef| {
+                use spring::tracing::info;
+                
+                info!(socket_id = ?socket.id, "New socket connected to namespace: {}", ns_path_for_closure);
+                
+                crate::handler::auto_socketio_setup(&socket);
+            });
+            
+            router = router.layer(layer);
+            app.add_component(io);
         }
 
         app.add_component(router);

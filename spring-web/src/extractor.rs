@@ -108,3 +108,88 @@ where
         &mut self.0
     }
 }
+
+#[cfg(feature = "socket_io")]
+mod socketio_extractors {
+    use super::*;
+    use crate::socketioxide::adapter::LocalAdapter;
+    use crate::socketioxide::handler::connect::FromConnectParts;
+    use crate::socketioxide::handler::disconnect::FromDisconnectParts;
+    use crate::socketioxide::handler::message::FromMessageParts;
+    use crate::socketioxide::extract::HttpExtension;
+    use crate::socketioxide::socket::{DisconnectReason, Socket};
+    use socketioxide::handler::Value;
+    use std::sync::Arc;
+
+    #[derive(Debug)]
+    pub struct ComponentExtractError(pub String);
+
+    impl std::fmt::Display for ComponentExtractError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "Component extraction error: {}", self.0)
+        }
+    }
+
+    impl std::error::Error for ComponentExtractError {}
+
+    impl<T> FromConnectParts<LocalAdapter> for Component<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        type Error = ComponentExtractError;
+
+        fn from_connect_parts(
+            s: &Arc<Socket<LocalAdapter>>,
+            _auth: &Option<Value>,
+        ) -> StdResult<Self, Self::Error> {
+            let app = HttpExtension::<AppState>::from_connect_parts(s, _auth)
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
+            
+            app.app
+                .try_get_component()
+                .map(|c| Component(c))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+        }
+    }
+
+    impl<T> FromMessageParts<LocalAdapter> for Component<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        type Error = ComponentExtractError;
+
+        fn from_message_parts(
+            s: &Arc<Socket<LocalAdapter>>,
+            _data: &mut Value,
+            _ack_id: &Option<i64>,
+        ) -> StdResult<Self, Self::Error> {
+            let app = HttpExtension::<AppState>::from_message_parts(s, _data, _ack_id)
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
+            
+            app.app
+                .try_get_component()
+                .map(|c| Component(c))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+        }
+    }
+
+    impl<T> FromDisconnectParts<LocalAdapter> for Component<T>
+    where
+        T: Clone + Send + Sync + 'static,
+    {
+        type Error = ComponentExtractError;
+
+        fn from_disconnect_parts(
+            s: &Arc<Socket<LocalAdapter>>,
+            reason: DisconnectReason,
+        ) -> StdResult<Self, Self::Error> {
+            let app = HttpExtension::<AppState>::from_disconnect_parts(s, reason)
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
+            
+            app.app
+                .try_get_component()
+                .map(|c| Component(c))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+        }
+    }
+}
