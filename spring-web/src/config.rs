@@ -1,3 +1,4 @@
+use aide::openapi::Info;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::config::Configurable;
@@ -15,6 +16,8 @@ spring::submit_config_schema!("socket_io", SocketIOConfig);
 pub struct WebConfig {
     #[serde(flatten)]
     pub(crate) server: ServerConfig,
+    #[cfg(feature = "openapi")]
+    pub(crate) openapi: OpenApiConfig,
     pub(crate) middlewares: Option<Middlewares>,
 }
 
@@ -30,12 +33,24 @@ pub struct ServerConfig {
     pub(crate) graceful: bool,
 }
 
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+pub struct OpenApiConfig {
+    #[serde(default = "default_doc_prefix")]
+    pub(crate) doc_prefix: String,
+    #[serde(default)]
+    pub(crate) info: Info,
+}
+
 fn default_binding() -> IpAddr {
     IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0))
 }
 
 fn default_port() -> u16 {
     8080
+}
+
+fn default_doc_prefix() -> String {
+    "/docs".into()
 }
 
 /// Server middleware configuration structure.

@@ -1,4 +1,6 @@
-use crate::input_and_compile_error;
+mod openapi;
+
+use crate::{input_and_compile_error, utils};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
@@ -28,6 +30,12 @@ macro_rules! standard_http_method {
                 match () {
                     $(_ if method.is_ident(stringify!($lower)) => Ok(Self::$variant),)+
                     _ => Err(()),
+                }
+            }
+
+            pub(crate) fn as_lowercase_str(&self) -> &'static str {
+                match self {
+                    $(Self::$variant => stringify!($lower),)+
                 }
             }
         }
@@ -115,6 +123,7 @@ struct Args {
     path: syn::LitStr,
     methods: HashSet<Method>,
     debug: bool,
+    transform: Option<syn::ExprPath>,
 }
 
 impl Args {
@@ -126,39 +135,70 @@ impl Args {
             methods.insert(method);
         }
         let mut debug = false;
+        let mut transform = None;
         for meta in args.options {
             match meta {
                 syn::Meta::Path(path) if path.is_ident("debug") => {
                     debug = true;
                 }
-                syn::Meta::NameValue(nv) if nv.path.is_ident("method") => {
-                    if !is_route_macro {
-                        return Err(syn::Error::new_spanned(
-                            &nv,
-                            "HTTP method forbidden here; to handle multiple methods, use `route` instead",
-                        ));
-                    } else if let syn::Expr::Lit(syn::ExprLit {
-                        lit: syn::Lit::Str(lit),
-                        ..
-                    }) = nv.value.clone()
-                    {
-                        if !methods.insert(Method::try_from(&lit)?) {
+                syn::Meta::NameValue(nv) => {
+                    if nv.path.is_ident("method") {
+                        if !is_route_macro {
+                            return Err(syn::Error::new_spanned(
+                                &nv,
+                                "HTTP method forbidden here; to handle multiple methods, use `route` instead",
+                            ));
+                        } else if let syn::Expr::Lit(syn::ExprLit {
+                            lit: syn::Lit::Str(lit),
+                            ..
+                        }) = nv.value.clone()
+                        {
+                            if !methods.insert(Method::try_from(&lit)?) {
+                                return Err(syn::Error::new_spanned(
+                                    nv.value,
+                                    format!(
+                                        "HTTP method defined more than once: `{}`",
+                                        lit.value()
+                                    ),
+                                ));
+                            }
+                        } else {
                             return Err(syn::Error::new_spanned(
                                 nv.value,
-                                format!("HTTP method defined more than once: `{}`", lit.value()),
+                                "Attribute method expects literal string",
+                            ));
+                        }
+                    } else if nv.path.is_ident("transform") {
+                        if let syn::Expr::Lit(syn::ExprLit {
+                            lit: syn::Lit::Str(lit),
+                            ..
+                        }) = nv.value.clone()
+                        {
+                            let expr: syn::ExprPath = syn::parse_str(&lit.value())?;
+                            transform = Some(expr);
+                        } else {
+                            return Err(syn::Error::new_spanned(
+                                nv.value,
+                                "transform expects string literal path",
                             ));
                         }
                     } else {
+                        let attr = nv.path.to_token_stream();
                         return Err(syn::Error::new_spanned(
-                            nv.value,
-                            "Attribute method expects literal string",
+                            nv,
+                            format!(
+                                "Unknown attribute `{attr}`; allowed: `method = \"METHOD\"`, `transform = \"path::to::fn\"`, `debug`"
+                            ),
                         ));
                     }
                 }
                 other => {
+                    let attr = other.path().to_token_stream();
                     return Err(syn::Error::new_spanned(
                         other,
-                        "Unknown attribute; allowed: `method = \"METHOD\"`, `debug`",
+                        format!(
+                            "Unknown attribute `{attr}`; allowed: `method = \"METHOD\"`, `debug`"
+                        ),
                     ));
                 }
             }
@@ -168,6 +208,7 @@ impl Args {
             path: args.path,
             methods,
             debug,
+            transform,
         })
     }
 }
@@ -189,10 +230,18 @@ struct Route {
 
     /// Whether to apply `#[axum::debug_handler]`
     debug: bool,
+
+    /// Whether to enable `openapi`
+    openapi: bool,
 }
 
 impl Route {
-    pub fn new(args: RouteArgs, ast: syn::ItemFn, method: Option<Method>) -> syn::Result<Self> {
+    pub fn new(
+        args: RouteArgs,
+        ast: syn::ItemFn,
+        method: Option<Method>,
+        openapi: bool,
+    ) -> syn::Result<Self> {
         let name = ast.sig.ident.clone();
 
         // Try and pull out the doc comments so that we can reapply them to the generated struct.
@@ -234,11 +283,12 @@ impl Route {
             ast,
             doc_attributes,
             debug,
+            openapi,
         })
     }
 
     /// routers
-    fn multiple(args: Vec<Args>, ast: syn::ItemFn) -> syn::Result<Self> {
+    fn multiple(args: Vec<Args>, ast: syn::ItemFn, openapi: bool) -> syn::Result<Self> {
         let debug = args.iter().any(|a| a.debug);
         let name = ast.sig.ident.clone();
 
@@ -264,6 +314,7 @@ impl Route {
             ast,
             doc_attributes,
             debug,
+            openapi,
         })
     }
 }
@@ -276,27 +327,75 @@ impl ToTokens for Route {
             args,
             doc_attributes,
             debug,
+            openapi,
         } = self;
 
         #[allow(unused_variables)] // used when force-pub feature is disabled
         let vis = &ast.vis;
 
-        let registrations: TokenStream2 = args
+        let registrations = args
             .iter()
             .map(|args| {
-                let Args { path, methods,.. } = args;
+                let Args { path, methods, transform,.. } = args;
 
-                let method_binder = methods
-                    .iter()
-                    .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
+                if *openapi {
+                    let fn_name = name.to_string();
+                    let operation = openapi::parse_doc_attributes(doc_attributes, &fn_name);
+                    let (input_tys, output_ty) = utils::extract_fn_types(ast);
+                    let gen_output = if let Some(ty) = output_ty {
+                        quote! {
+                            for (code, res) in <#ty as ::spring_web::aide::OperationOutput>::inferred_responses(ctx, &mut __operation) {
+                                ::spring_web::openapi::set_inferred_response(ctx, &mut __operation, code, res);
+                            }
+                        }
+                    } else {
+                        quote! {}
+                    };
+                    let method_binder = methods
+                        .iter()
+                        .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
+                    let operation_binder = methods
+                        .iter()
+                        .map(|m| {
+                            let method_str = m.as_lowercase_str();
+                            quote! {
+                                let mut __operation = #operation;
+                                ::spring_web::aide::generate::in_context(|ctx| {
+                                    #(
+                                        <#input_tys as ::spring_web::aide::OperationInput>::operation_input(ctx, &mut __operation);
+                                    )*
+                                    #gen_output
+                                });
+                                __router = __router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), __transform);
+                            }
+                        });
+                    let transform_ts = if let Some(t) = transform {
+                        quote! { let __transform = #t; }
+                    } else {
+                        quote! {
+                            let __transform = ::spring_web::default_transform;
+                        }
+                    };
+                    quote! {
+                        let __method_router = ::spring_web::MethodRouter::new();
+                        #(#method_binder)*
+                        let __method_router = ::spring_web::ApiMethodRouter::from(__method_router);
+                        __router = ::spring_web::Router::api_route(__router, #path, __method_router);
+                        #transform_ts
+                        #(#operation_binder)*
+                    }
+                } else {
+                    let method_binder = methods
+                        .iter()
+                        .map(|m| quote! {let __method_router=::spring_web::MethodRouter::on(__method_router, #m, #name);});
 
-                quote! {
-                    let __method_router = ::spring_web::MethodRouter::new();
-                    #(#method_binder)*
-                    __router = ::spring_web::Router::route(__router, #path, __method_router);
+                    quote! {
+                        let __method_router = ::spring_web::MethodRouter::new();
+                        #(#method_binder)*
+                        __router = ::spring_web::Router::route(__router, #path, __method_router);
+                    }
                 }
-            })
-            .collect();
+            });
         let handler_fn = if *debug {
             let sig = &ast.sig;
             let vis = &ast.vis;
@@ -320,7 +419,7 @@ impl ToTokens for Route {
             impl ::spring_web::handler::TypedHandlerRegistrar for #name {
                 fn install_route(&self, mut __router: ::spring_web::Router) -> ::spring_web::Router{
                     #handler_fn
-                    #registrations
+                    #(#registrations)*
 
                     __router
                 }
@@ -337,6 +436,7 @@ pub(crate) fn with_method(
     method: Option<Method>,
     args: TokenStream,
     input: TokenStream,
+    openapi: bool,
 ) -> TokenStream {
     let args = match syn::parse(args) {
         Ok(args) => args,
@@ -350,14 +450,14 @@ pub(crate) fn with_method(
         Err(err) => return input_and_compile_error(input, err),
     };
 
-    match Route::new(args, ast, method) {
+    match Route::new(args, ast, method, openapi) {
         Ok(route) => route.into_token_stream().into(),
         // on macro related error, make IDEs happy; see fn docs
         Err(err) => input_and_compile_error(input, err),
     }
 }
 
-pub(crate) fn with_methods(input: TokenStream) -> TokenStream {
+pub(crate) fn with_methods(input: TokenStream, openapi: bool) -> TokenStream {
     let mut ast = match syn::parse::<syn::ItemFn>(input.clone()) {
         Ok(ast) => ast,
         // on parse error, make IDEs happy; see fn docs
@@ -397,7 +497,7 @@ pub(crate) fn with_methods(input: TokenStream) -> TokenStream {
         Err(err) => return input_and_compile_error(input, err),
     };
 
-    match Route::multiple(methods, ast) {
+    match Route::multiple(methods, ast, openapi) {
         Ok(route) => route.into_token_stream().into(),
         // on macro related error, make IDEs happy; see fn docs
         Err(err) => input_and_compile_error(input, err),

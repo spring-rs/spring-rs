@@ -59,6 +59,9 @@ where
     }
 }
 
+#[cfg(feature = "openapi")]
+impl<T: Clone> aide::OperationInput for Component<T> {}
+
 impl<T: Clone> Deref for Component<T> {
     type Target = T;
 
@@ -88,6 +91,9 @@ where
         parts.get_config().map(|c| Config(c))
     }
 }
+
+#[cfg(feature = "openapi")]
+impl<T> aide::OperationInput for Config<T> where T: serde::de::DeserializeOwned + Configurable {}
 
 impl<T> Deref for Config<T>
 where

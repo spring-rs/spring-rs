@@ -13,11 +13,12 @@ mod route;
 #[cfg(feature = "socket_io")]
 mod socketioxide;
 mod stream;
+mod utils;
 
 use proc_macro::TokenStream;
 use syn::DeriveInput;
 
-/// Creates resource handler, allowing multiple HTTP method guards.
+/// Creates resource handler.
 ///
 /// # Syntax
 /// ```plain
@@ -40,10 +41,36 @@ use syn::DeriveInput;
 /// ```
 #[proc_macro_attribute]
 pub fn route(args: TokenStream, input: TokenStream) -> TokenStream {
-    route::with_method(None, args, input)
+    route::with_method(None, args, input, false)
 }
 
-/// Creates resource handler, allowing multiple HTTP methods and paths.
+/// Creates openapi resource handler.
+///
+/// # Syntax
+/// ```plain
+/// #[api_route("path", method="HTTP_METHOD"[, attributes])]
+/// ```
+///
+/// # Attributes
+/// - `"path"`: Raw literal string with path for which to register handler.
+/// - `method = "HTTP_METHOD"`: Registers HTTP method. Upper-case string,
+///   "GET", "POST" for example.
+///
+/// # Examples
+/// ```
+/// # use spring_web::axum::response::IntoResponse;
+/// # use spring_macros::api_route;
+/// #[api_route("/test", method = "GET", method = "HEAD")]
+/// async fn example() -> impl IntoResponse {
+///     "hello world"
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn api_route(args: TokenStream, input: TokenStream) -> TokenStream {
+    route::with_method(None, args, input, true)
+}
+
+/// Creates resource handler.
 ///
 /// # Syntax
 /// ```plain
@@ -73,11 +100,44 @@ pub fn route(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 pub fn routes(_: TokenStream, input: TokenStream) -> TokenStream {
-    route::with_methods(input)
+    route::with_methods(input, false)
+}
+
+/// Creates openapi resource handler.
+///
+/// # Syntax
+/// ```plain
+/// #[api_routes]
+/// #[<method>("path", ...)]
+/// #[<method>("path", ...)]
+/// ...
+/// ```
+///
+/// # Attributes
+/// The `api_routes` macro itself has no parameters, but allows specifying the attribute macros for
+/// the multiple paths and/or methods, e.g. [`GET`](macro@get) and [`POST`](macro@post).
+///
+/// These helper attributes take the same parameters as the [single method handlers](crate#single-method-handler).
+///
+/// # Examples
+/// ```
+/// # use spring_web::axum::response::IntoResponse;
+/// # use spring_macros::api_routes;
+/// #[api_routes]
+/// #[get("/test")]
+/// #[get("/test2")]
+/// #[delete("/test")]
+/// async fn example() -> impl IntoResponse {
+///     "hello world"
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn api_routes(_: TokenStream, input: TokenStream) -> TokenStream {
+    route::with_methods(input, true)
 }
 
 macro_rules! method_macro {
-    ($variant:ident, $method:ident) => {
+    ($variant:ident, $method:ident, $openapi:expr) => {
         ///
         /// # Syntax
         /// ```plain
@@ -98,19 +158,28 @@ macro_rules! method_macro {
         /// ```
         #[proc_macro_attribute]
         pub fn $method(args: TokenStream, input: TokenStream) -> TokenStream {
-            route::with_method(Some(route::Method::$variant), args, input)
+            route::with_method(Some(route::Method::$variant), args, input, $openapi)
         }
     };
 }
 
-method_macro!(Get, get);
-method_macro!(Post, post);
-method_macro!(Put, put);
-method_macro!(Delete, delete);
-method_macro!(Head, head);
-method_macro!(Options, options);
-method_macro!(Trace, trace);
-method_macro!(Patch, patch);
+method_macro!(Get, get, false);
+method_macro!(Post, post, false);
+method_macro!(Put, put, false);
+method_macro!(Delete, delete, false);
+method_macro!(Head, head, false);
+method_macro!(Options, options, false);
+method_macro!(Trace, trace, false);
+method_macro!(Patch, patch, false);
+
+method_macro!(Get, get_api, true);
+method_macro!(Post, post_api, true);
+method_macro!(Put, put_api, true);
+method_macro!(Delete, delete_api, true);
+method_macro!(Head, head_api, true);
+method_macro!(Options, options_api, true);
+method_macro!(Trace, trace_api, true);
+method_macro!(Patch, patch_api, true);
 
 /// Prepends a path prefix to all handlers using routing macros inside the attached module.
 ///

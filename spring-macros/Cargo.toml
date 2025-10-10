@@ -23,7 +23,7 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 [dev-dependencies]
 tokio = { workspace = true }
 spring = { path = "../spring" }
-spring-web = { path = "../spring-web" }
+spring-web = { path = "../spring-web", features = ["openapi"] }
 spring-job = { path = "../spring-job" }
 spring-redis = { path = "../spring-redis" }
 serde = { workspace = true }

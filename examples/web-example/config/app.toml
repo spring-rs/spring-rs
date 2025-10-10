@@ -1,6 +1,11 @@
 [web]
 port = 8000
 graceful = true
+
+[web.openapi]
+doc_prefix = "/docs"
+info = { title = "spring-web openapi example document", version = "0.0.1" }
+
 [web.middlewares]
 static = { enable = true }
 compression = { enable = true }
