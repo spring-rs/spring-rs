@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5
+
+- **added**: export `spring::submit_config_schema` ([#173])
+
+[#173]: https://github.com/spring-rs/spring-rs/pull/173
+
 ## 0.4.4
 
 - **added**: export `spring::submit_config_schema`

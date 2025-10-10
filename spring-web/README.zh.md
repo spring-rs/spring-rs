@@ -9,7 +9,14 @@
 spring-web = { version = "<version>" }
 ```
 
-可选的**features**: `http2`、`multipart`、`ws`。
+可选的**features**: 
+* `http2`: http2
+* `multipart`: 文件上传
+* `ws`: websocket
+* `openapi`: openapi文档
+* `openapi-redoc`: redoc文档界面
+* `openapi-scalar`: scalar文档界面
+* `openapi-swagger`: swagger文档界面
 
 ## 配置项
 
@@ -88,9 +95,9 @@ async fn hello_word() -> impl IntoResponse {
 
 ## 属性宏
 
-上面例子中的[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html)是一个属性宏，`spring-web`提供了八个标准HTTP METHOD的过程宏：`get`、`post`、`patch`、`put`、`delete`、`head`、`trace`、`options`。
+上面例子中的[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html)是一个属性宏，`spring-web`提供了八个标准HTTP METHOD的过程宏：`get`、`post`、`patch`、`put`、`delete`、`head`、`trace`、`options`。另外还提供了`get_api`、`post_api`等八个用于生成openapi文档的宏。
 
-也可以使用[`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html)宏同时绑定多个method：
+也可以使用[`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html)或[`api_route`](https://docs.rs/spring-macros/latest/spring_macros/attr.api_route.html)宏同时绑定多个method：
 
 ```rust
 use spring_web::route;
