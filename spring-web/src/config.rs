@@ -37,7 +37,7 @@ pub struct OpenApiConfig {
     #[serde(default = "default_doc_prefix")]
     pub(crate) doc_prefix: String,
     #[serde(default)]
-    pub(crate) info: Info,
+    pub(crate) info: aide::openapi::Info,
 }
 
 fn default_binding() -> IpAddr {
