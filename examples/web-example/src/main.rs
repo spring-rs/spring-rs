@@ -3,7 +3,7 @@ mod jwt;
 use axum::http::StatusCode;
 use jwt::Claims;
 use schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use spring::config::Configurable;
 use spring::{auto_config, App};
 use spring_sqlx::SqlxPlugin;
@@ -13,7 +13,7 @@ use spring_web::{
     extractor::{Config, Json, Path},
     WebConfigurator, WebPlugin,
 };
-use spring_web::{get, nest, post, route, routes};
+use spring_web::{get, get_api, nest, post, route, routes};
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -75,6 +75,27 @@ async fn protected_user_info(
     format!("get user info of id#{}: {}", user_id, conf.user_info_detail)
 }
 
+#[derive(Debug, Serialize, JsonSchema)]
+struct UserInfo {
+    user_id: i64,
+    user_info: String,
+}
+
+/// Protected user info api
+/// api description detail
+/// @tag user
+#[get_api("/user-info-api")]
+async fn protected_user_info_api(
+    claims: Claims,
+    Config(conf): Config<CustomConfig>,
+) -> Json<UserInfo> {
+    let user_id = claims.uid;
+    Json(UserInfo {
+        user_id,
+        user_info: conf.user_info_detail,
+    })
+}
+
 #[nest("/sql")]
 mod sql {
     use anyhow::Context;
@@ -82,9 +103,9 @@ mod sql {
         sqlx::{self, Row},
         ConnectPool,
     };
-    use spring_web::error::Result;
     use spring_web::extractor::Component;
     use spring_web::get;
+    use spring_web::{error::Result, get_api};
     use std::ops::Deref;
 
     #[get("/version")]
@@ -97,7 +118,10 @@ mod sql {
         Ok(version)
     }
 
-    #[get("/now")]
+    /// Get the current time
+    /// api description detail
+    /// @tag sql
+    #[get_api("/now")]
     pub async fn sqlx_time_handler(pool: Component<ConnectPool>) -> Result<String> {
         let time = sqlx::query("select DATE_FORMAT(now(),'%Y-%m-%d %H:%i:%s') as time")
             .fetch_one(pool.deref())

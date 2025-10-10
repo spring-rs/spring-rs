@@ -3,7 +3,13 @@ use axum_extra::headers::Authorization;
 use axum_extra::TypedHeader;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use lazy_static::lazy_static;
+use schemars::json_schema;
 use serde::{Deserialize, Serialize};
+use spring_web::aide::generate::GenContext;
+use spring_web::aide::openapi::{
+    Operation, Parameter, ParameterData, ParameterSchemaOrContent, ReferenceOr, SchemaObject,
+};
+use spring_web::aide::OperationInput;
 use spring_web::axum::http::request::Parts;
 use spring_web::axum::RequestPartsExt;
 use spring_web::error::{KnownWebError, Result, WebError};
@@ -52,6 +58,36 @@ where
         let claims = decode(bearer.token())?;
 
         Ok(claims)
+    }
+}
+
+/// define the OpenAPI doc for Claims
+impl OperationInput for Claims {
+    fn operation_input(_ctx: &mut GenContext, operation: &mut Operation) {
+        let aide_schema = SchemaObject {
+            json_schema: json_schema!({
+                "description": "JWT Claims",
+                "type": ["string"]
+            }),
+            external_docs: None,
+            example: None,
+        };
+        operation
+            .parameters
+            .push(ReferenceOr::Item(Parameter::Header {
+                parameter_data: ParameterData {
+                    name: "Authorization".into(),
+                    description: Some("Bearer token for authentication".into()),
+                    required: true,
+                    format: ParameterSchemaOrContent::Schema(aide_schema),
+                    example: Some("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...".into()),
+                    examples: Default::default(),
+                    explode: Default::default(),
+                    extensions: Default::default(),
+                    deprecated: Default::default(),
+                },
+                style: Default::default(),
+            }));
     }
 }
 

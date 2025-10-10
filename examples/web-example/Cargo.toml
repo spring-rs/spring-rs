@@ -7,7 +7,12 @@ authors.workspace = true
 
 [dependencies]
 spring = { path = "../../spring" }
-spring-web = { path = "../../spring-web" }
+spring-web = { path = "../../spring-web", features = [
+    "openapi",
+    "openapi-redoc",
+    "openapi-scalar",
+    "openapi-swagger",
+] }
 spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
 tokio = { workspace = true, features = ["full", "tracing"] }
 anyhow = { workspace = true }

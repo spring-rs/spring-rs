@@ -34,6 +34,9 @@ macro_rules! submit_typed_handler {
 
 /// auto_config
 pub fn auto_router() -> Router {
+    #[cfg(feature = "openapi")]
+    crate::enable_openapi();
+
     let mut router = Router::new();
     for handler in inventory::iter::<&dyn TypedHandlerRegistrar> {
         router = handler.install_route(router);

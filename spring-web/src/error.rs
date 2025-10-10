@@ -266,3 +266,25 @@ impl IntoResponse for WebError {
         .into_response()
     }
 }
+
+#[cfg(feature = "openapi")]
+impl aide::OperationOutput for WebError {
+    type Inner = Self;
+
+    fn operation_response(
+        _ctx: &mut aide::generate::GenContext,
+        _op: &mut aide::openapi::Operation,
+    ) -> Option<aide::openapi::Response> {
+        Some(aide::openapi::Response {
+            description: "internal server error".to_string(),
+            ..Default::default()
+        })
+    }
+
+    fn inferred_responses(
+        ctx: &mut aide::generate::GenContext,
+        op: &mut aide::openapi::Operation,
+    ) -> Vec<(Option<u16>, aide::openapi::Response)> {
+        vec![(Some(500), Self::operation_response(ctx, op).unwrap())]
+    }
+}
