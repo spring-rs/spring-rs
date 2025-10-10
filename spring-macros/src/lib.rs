@@ -391,7 +391,7 @@ pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Examples
 /// ```
 /// # use spring_web::socketioxide::extract::{SocketRef, Data};
-/// # use spring_web::socketioxide::handler::Value;
+/// # use spring_web::rmpv::Value;
 /// # use spring_macros::on_connection;
 /// #[on_connection]
 /// async fn on_connection(socket: SocketRef, Data(data): Data<Value>) {
@@ -426,8 +426,8 @@ pub fn on_disconnect(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Examples
 /// ```
 /// # use spring_web::socketioxide::extract::{SocketRef, Data};
-/// # use spring_web::socketioxide::handler::Value;
 /// # use spring_macros::subscribe_message;
+/// # use spring_web::rmpv::Value;
 /// #[subscribe_message("message")]
 /// async fn message(socket: SocketRef, Data(data): Data<Value>) {
 ///     // Handle message
@@ -444,7 +444,7 @@ pub fn subscribe_message(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Examples
 /// ```
 /// # use spring_web::socketioxide::extract::{SocketRef, Data};
-/// # use spring_web::socketioxide::handler::Value;
+/// # use spring_web::rmpv::Value;
 /// # use spring_macros::on_fallback;
 /// #[on_fallback]
 /// async fn on_fallback(socket: SocketRef, Data(data): Data<Value>) {

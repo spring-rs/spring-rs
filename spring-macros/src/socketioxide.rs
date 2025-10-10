@@ -62,8 +62,6 @@ pub(crate) fn on_disconnect(_args: TokenStream, input: TokenStream) -> TokenStre
 
         impl ::spring_web::handler::SocketIOHandlerRegistrar for #handler_struct_name {
             fn install_socketio_handlers(&self, socket: &::spring_web::socketioxide::extract::SocketRef) {
-                ::spring::tracing::info!("Installing on_disconnect handler: {}", stringify!(#handler_name));
-                
                 socket.on_disconnect(#handler_name);
             }
         }
@@ -91,59 +89,20 @@ pub(crate) fn subscribe_message(args: TokenStream, input: TokenStream) -> TokenS
     let handler_name = &ast.sig.ident;
     let handler_struct_name = syn::Ident::new(&format!("__SocketIOMessageHandler_{}_{}", event_name.replace("-", "_"), handler_name), handler_name.span());
 
-    let has_ack_sender = ast.sig.inputs.iter().any(|arg| {
-        if let syn::FnArg::Typed(pat_type) = arg {
-            if let syn::Type::Path(type_path) = &*pat_type.ty {
-                return type_path.path.segments.iter().any(|segment| 
-                    segment.ident == "AckSender"
-                );
+    let output = quote! {
+        #ast
+
+        #[allow(non_camel_case_types)]
+        pub struct #handler_struct_name;
+
+        impl ::spring_web::handler::SocketIOHandlerRegistrar for #handler_struct_name {
+            fn install_socketio_handlers(&self, socket: &::spring_web::socketioxide::extract::SocketRef) {
+                socket.on(#event_name, #handler_name);
             }
         }
-        false
-    });
 
-    let output = if has_ack_sender {
-        quote! {
-            #ast
-
-            #[allow(non_camel_case_types)]
-            pub struct #handler_struct_name;
-
-            impl ::spring_web::handler::SocketIOHandlerRegistrar for #handler_struct_name {
-                fn install_socketio_handlers(&self, socket: &::spring_web::socketioxide::extract::SocketRef) {
-                    use ::spring_web::socketioxide;
-                    
-                    socket.on(#event_name, async |data: socketioxide::extract::Data<::spring_web::rmpv::Value>, ack: socketioxide::extract::AckSender| {
-                        #handler_name(data, ack).await
-                    });
-                }
-            }
-
-            ::spring_web::handler::submit! {
-                &(#handler_struct_name) as &dyn ::spring_web::handler::SocketIOHandlerRegistrar
-            }
-        }
-    } else {
-        quote! {
-            #ast
-
-            #[allow(non_camel_case_types)]
-            pub struct #handler_struct_name;
-
-            impl ::spring_web::handler::SocketIOHandlerRegistrar for #handler_struct_name {
-                fn install_socketio_handlers(&self, socket: &::spring_web::socketioxide::extract::SocketRef) {
-                    use ::spring_web::socketioxide;
-                    
-                    socket.on(#event_name, async |socket: socketioxide::extract::SocketRef, data: socketioxide::extract::Data<::spring_web::rmpv::Value>| {
-                        #handler_name(socket, data).await
-                    });
-                    
-                }
-            }
-
-            ::spring_web::handler::submit! {
-                &(#handler_struct_name) as &dyn ::spring_web::handler::SocketIOHandlerRegistrar
-            }
+        ::spring_web::handler::submit! {
+            &(#handler_struct_name) as &dyn ::spring_web::handler::SocketIOHandlerRegistrar
         }
     };
 
@@ -167,9 +126,7 @@ pub(crate) fn on_fallback(_args: TokenStream, input: TokenStream) -> TokenStream
 
         impl ::spring_web::handler::SocketIOHandlerRegistrar for #handler_struct_name {
             fn install_socketio_handlers(&self, socket: &::spring_web::socketioxide::extract::SocketRef) {
-                socket.on_any(|socket: ::spring_web::socketioxide::extract::SocketRef, event: ::spring_web::socketioxide::extract::Event, data: ::spring_web::socketioxide::extract::Data<::spring_web::socketioxide::handler::Value>| async move {
-                    #handler_name(socket, data).await;
-                });
+                socket.on_fallback(#handler_name);
             }
         }
 

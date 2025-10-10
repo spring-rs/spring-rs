@@ -9,7 +9,7 @@
 spring-web = { version = "<version>" }
 ```
 
-可选的**features**: `http2`、`multipart`、`ws`。
+可选的**features**: `http2`、`multipart`、`ws`, `socket_io`。
 
 ## 配置项
 
@@ -199,3 +199,20 @@ mod routes {
 完整代码参考[`web-middleware-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example)
 
 spring-web是围绕axum的一层薄薄的封装, 提供了一些宏以简化开发. [axum官方的examples](https://github.com/tokio-rs/axum/tree/main/examples)大多只要稍作修改即可运行在spring-web中。
+
+
+# SocketIO 支持
+
+你可以启用 `spring-web` 的 `socket_io` 功能，以使用与 [socketioxide](https://github.com/Totodore/socketioxide) 的集成。
+
+SocketIO 是 WebSocket 的一种实现，提供更多的定义功能：
+
+* 命名事件（例如 `chat message`、`user joined` 等），而不仅仅是普通消息
+* 连接丢失时自动重连
+* 心跳机制，用于检测失效连接
+* 房间 / 命名空间，用于对客户端进行分组
+* 如果 WebSocket 不可用，可回退到其他传输方式
+
+你可以参考 [socketio-example](https://github.com/spring-rs/spring-rs/tree/master/examples/web-socketio-example) 来查看在 spring-web 中使用 SocketIO 的示例。
+
+我们可以在 SocketIO 处理器中共享插件注册的组件，就像在普通 HTTP 处理器中一样，例如使用由 `SqlxPlugin` 插件注册的 Sqlx 连接池组件。

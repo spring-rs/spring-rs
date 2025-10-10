@@ -13,7 +13,7 @@ repository.workspace = true
 proc-macro = true
 
 [features]
-socket_io = []
+socket_io = ["spring-web/socket_io"]
 
 [dependencies]
 proc-macro2 = { workspace = true }
