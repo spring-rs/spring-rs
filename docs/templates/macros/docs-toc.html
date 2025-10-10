@@ -25,14 +25,14 @@
 							{% set_global in_h2 = false %}
 							</ul>
 						{% endif %}
-						{% set id = line | lower | replace(from="#", to="") | trim | replace(from=" ", to="-") %}
+						{% set id = line | lower | replace(from="#", to="") | trim | slugify %}
 						<li><a href="#{{ id }}">{{ line | replace(from="#", to="") | trim }}</a></li>
 					{% elif line is matching("^## ") %}
 						{% if not in_h2 %}
 							{% set_global in_h2 = true %}
 							<ul>
 						{% endif %}
-						{% set id = line | lower | replace(from="#", to="") | trim | replace(from=" ", to="-") %}
+						{% set id = line | lower | replace(from="#", to="") | trim | slugify %}
 						<li class="ml-4"><a href="#{{ id }}">{{ line | replace(from="#", to="") | trim }}</a></li>
 					{% endif %}
 				{% endfor %}
