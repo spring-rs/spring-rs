@@ -33,6 +33,7 @@ async fn main() {
 
 #[get("/users-online")]
 async fn show_users_online(Component(users): Component<Users>) -> impl IntoResponse {
+    let users = users.lock().await;
     format!("{users:?}")
 }
 
