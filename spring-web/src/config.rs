@@ -1,3 +1,5 @@
+#[cfg(feature = "openapi")]
+use aide::openapi::Info;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::config::Configurable;
@@ -46,6 +48,7 @@ fn default_port() -> u16 {
     8080
 }
 
+#[cfg(feature = "openapi")]
 fn default_doc_prefix() -> String {
     "/docs".into()
 }
