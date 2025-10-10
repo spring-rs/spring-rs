@@ -63,7 +63,7 @@ where
 
 /// define the OpenAPI doc for Claims
 impl OperationInput for Claims {
-    fn operation_input(ctx: &mut GenContext, operation: &mut Operation) {
+    fn operation_input(_ctx: &mut GenContext, operation: &mut Operation) {
         let aide_schema = SchemaObject {
             json_schema: json_schema!({
                 "description": "JWT Claims",
