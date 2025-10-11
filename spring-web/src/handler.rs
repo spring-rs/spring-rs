@@ -6,6 +6,8 @@ pub use inventory::submit;
 pub trait TypedHandlerRegistrar: Send + Sync + 'static {
     /// install route
     fn install_route(&self, router: Router) -> Router;
+
+    fn get_name(&self) -> &'static str;
 }
 
 /// Add typed routes marked with procedural macros
@@ -38,8 +40,17 @@ pub fn auto_router() -> Router {
     crate::enable_openapi();
 
     let mut router = Router::new();
+    let mut handlers_registered: Vec<&'static str> = Vec::new();
+
     for handler in inventory::iter::<&dyn TypedHandlerRegistrar> {
-        router = handler.install_route(router);
+        if handlers_registered.contains(&handler.get_name()) {
+            continue;
+        } else {
+            router = handler.install_route(router);
+            handlers_registered.push(handler.get_name());
+        }
     }
+
     router
+
 }

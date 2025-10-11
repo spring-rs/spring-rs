@@ -330,6 +330,11 @@ impl ToTokens for Route {
             openapi,
         } = self;
 
+        let uuid = uuid::Uuid::now_v7().simple().to_string();
+        let original_name = name.to_string();
+        let struct_name = format!("{}_{}", name, uuid);
+        let name = syn::Ident::new(&struct_name, Span::call_site());
+
         #[allow(unused_variables)] // used when force-pub feature is disabled
         let vis = &ast.vis;
 
@@ -408,6 +413,9 @@ impl ToTokens for Route {
                 #vis #sig #block
             }
         } else {
+            let mut ast = ast.clone();
+            ast.sig.ident = syn::Ident::new(&format!("{}", name), Span::call_site());
+
             quote! { #ast }
         };
 
@@ -422,6 +430,10 @@ impl ToTokens for Route {
                     #(#registrations)*
 
                     __router
+                }
+
+                fn get_name(&self) -> &'static str {
+                    stringify!(#original_name)
                 }
             }
 
