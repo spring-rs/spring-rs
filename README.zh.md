@@ -3,13 +3,7 @@
     <h3>spring-rs是Rust编写的应用框架，类似于java生态的SpringBoot</h3>
     <p><a href="https://spring-rs.github.io/docs/getting-started/introduction/">English</a> ｜ 中文</p>
     <p>
-        <a href="https://crates.io/crates/spring">
-            <img src="https://img.shields.io/crates/v/spring.svg" alt="crates.io"/>
-        </a>
-        <a href="https://docs.rs/spring">
-            <img src="https://docs.rs/spring/badge.svg" alt="Documentation"/>
-        </a>
-        <img src="https://img.shields.io/crates/l/spring" alt="Documentation"/>
+        <a href="https://crates.io/crates/spring"><img src="https://img.shields.io/crates/v/spring.svg" alt="crates.io"/></a> <a href="https://docs.rs/spring"><img src="https://docs.rs/spring/badge.svg" alt="Documentation"/></a> <img src="https://img.shields.io/crates/l/spring" alt="Documentation"/>
     </p>
 </div>
 
