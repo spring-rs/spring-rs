@@ -4,7 +4,7 @@ use spring::{
     async_trait,
     error::Result,
     plugin::{component::ComponentRef, ComponentRegistry, MutableComponentRegistry, Plugin},
-    tracing,
+    signal, tracing,
 };
 
 pub use apalis;
@@ -29,7 +29,7 @@ impl Plugin for ApalisPlugin {
             for build_fn in &builders {
                 monitor = build_fn(app, monitor);
             }
-            if builders.len() > 0 {
+            if !builders.is_empty() {
                 app.add_scheduler(move |_app| Box::new(Self::schedule(monitor)));
             }
         }
@@ -44,31 +44,7 @@ impl ApalisPlugin {
 }
 
 async fn shutdown_signal() -> std::io::Result<()> {
-    let ctrl_c = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    Ok(tokio::select! {
-        _ = ctrl_c => {
-            tracing::info!("Received Ctrl+C signal, waiting for apalis shutdown")
-        },
-        _ = terminate => {
-            tracing::info!("Received kill signal, waiting for apalis shutdown")
-        },
-    })
+    Ok(signal::shutdown_signal().await)
 }
 
 pub trait ApalisConfigurator {
