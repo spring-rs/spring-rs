@@ -10,7 +10,11 @@ use spring::{
 pub use apalis;
 #[cfg(feature = "redis")]
 pub use apalis_redis;
-#[cfg(feature = "sql-mysql")]
+#[cfg(any(
+    feature = "sql-postgres",
+    feature = "sql-sqlite",
+    feature = "sql-mysql"
+))]
 pub use apalis_sql;
 
 pub struct ApalisPlugin;
