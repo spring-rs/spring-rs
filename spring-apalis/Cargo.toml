@@ -1,0 +1,26 @@
+[package]
+name = "spring-apalis"
+description = "Integration of rust application framework spring-rs and apalis"
+version = "0.4.0"
+categories = ["date-and-time"]
+keywords = ["cron-scheduler", "task-scheduling", "cron-job", "spring"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[features]
+redis = ["apalis-redis"]
+sql-postgres = ["apalis-sql", "apalis-sql/postgres"]
+sql-sqlite = ["apalis-sql", "apalis-sql/sqlite"]
+sql-mysql = ["apalis-sql", "apalis-sql/mysql"]
+
+[dependencies]
+spring = { path = "../spring", version = "0.4" }
+derive_more = { version = "2", features = ["deref"] }
+tower-service = { version = "0.3" }
+tower-layer = { version = "0.3" }
+tokio = { version = "1.47" }
+apalis = { version = "0.7", features = ["limit"] }    # Limit for concurrency
+apalis-redis = { version = "0.7", optional = true }   # Use redis for persistence
+apalis-sql = { version = "0.7", optional = true }     # Use redis for persistence
