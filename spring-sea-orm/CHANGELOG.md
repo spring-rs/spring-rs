@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.7
+
+- **added**: Pagination impl `OperationInput`
+
+## 0.4.6
+
+- **added**: pagination support JsonSchema
+
 ## 0.4.5
 
 - **added**: serde derive

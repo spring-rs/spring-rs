@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.9
+
+- **added**: refactor `shutdown_signal` ([#180])
+
+[#180]: https://github.com/spring-rs/spring-rs/pull/180
+
+## 0.4.8
+
+- feat: ✨ openapi feature ([#167])
+
+[#167]: https://github.com/spring-rs/spring-rs/pull/167
+
 ## 0.4.7
 
 - feat: ✨ Enhance middleware functionality with route-specific middleware support ([#157])

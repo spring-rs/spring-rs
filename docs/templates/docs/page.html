@@ -19,7 +19,7 @@
       <main class="docs-content col-lg-11 col-xl-9">
         <h1>{{ page.title }}</h1>
         {% if page.extra.lead %}<p class="lead">{{ page.extra.lead | safe }}</p>{% endif %}
-        {{ page.content | safe }}
+        {{ page.content | markdown | safe }}
         {% if config.extra.edit_page %}
           {{ macros_edit_page::docs_edit_page(current_path=current_path) }}
         {% endif %}

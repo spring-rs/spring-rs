@@ -20,6 +20,7 @@ pub use { socketioxide, rmpv };
 
 pub use axum;
 pub use spring::async_trait;
+use spring::signal;
 /////////////////web-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-web` dependency
 pub use spring_macros::middlewares;
@@ -229,17 +230,12 @@ impl Plugin for WebPlugin {
             app.add_component(openapi_conf.clone());
         }
 
-        app.add_scheduler(move |app: Arc<App>| {
-            Box::new(Self::schedule(app, server_conf))
-        });
+        app.add_scheduler(move |app: Arc<App>| Box::new(Self::schedule(app, server_conf)));
     }
 }
 
 impl WebPlugin {
-    async fn schedule(
-        app: Arc<App>,
-        config: ServerConfig,
-    ) -> Result<String> {
+    async fn schedule(app: Arc<App>, config: ServerConfig) -> Result<String> {
         let router = app.get_expect_component::<Router>();
 
         // 2. bind tcp listener
@@ -265,7 +261,9 @@ impl WebPlugin {
             let service = router.into_make_service_with_connect_info::<SocketAddr>();
             let server = axum::serve(listener, service);
             if config.graceful {
-                server.with_graceful_shutdown(shutdown_signal()).await
+                server
+                    .with_graceful_shutdown(signal::shutdown_signal())
+                    .await
             } else {
                 server.await
             }
@@ -273,7 +271,9 @@ impl WebPlugin {
             let service = router.into_make_service();
             let server = axum::serve(listener, service);
             if config.graceful {
-                server.with_graceful_shutdown(shutdown_signal()).await
+                server
+                    .with_graceful_shutdown(signal::shutdown_signal())
+                    .await
             } else {
                 server.await
             }
@@ -355,32 +355,4 @@ pub fn default_transform<'a>(
     path_item: aide::transform::TransformPathItem<'a>,
 ) -> aide::transform::TransformPathItem<'a> {
     path_item
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {
-            tracing::info!("Received Ctrl+C signal, waiting for web server shutdown")
-        },
-        _ = terminate => {
-            tracing::info!("Received kill signal, waiting for web server shutdown")
-        },
-    }
 }

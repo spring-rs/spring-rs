@@ -9,7 +9,15 @@
 spring-web = { version = "<version>" }
 ```
 
-optional **features**: `http2`, `multipart`, `ws`, `socket_io`
+optional **features**:
+* `http2`: http2
+* `multipart`: file upload
+* `ws`: websocket
+* `socket_io`: SocketIO support
+* `openapi`: OpenAPI documentation
+* `openapi-redoc`: Redoc documentation interface
+* `openapi-scalar`: Scalar documentation interface
+* `openapi-swagger`: Swagger documentation interface
 
 ## Configuration items
 
@@ -97,9 +105,9 @@ You can also use the `auto_config` macro to implement automatic configuration. T
 
 ## Attribute macro
 
-[`get`](https://docs.rs/spring-macros/latest/spring_macros/attr.get.html) in the above example is an attribute macro. `spring-web` provides eight standard HTTP METHOD process macros: `get`, `post`, `patch`, `put`, `delete`, `head`, `trace`, `options`.
+In the example above, `get` is an attribute macro. `spring-web` provides procedural macros for eight standard HTTP methods: `get`, `post`, `patch`, `put`, `delete`, `head`, `trace`, and `options`. It also provides eight macros for generating OpenAPI documentation, such as `get_api` and `post_api`.
 
-You can also use the [`route`](https://docs.rs/spring-macros/latest/spring_macros/attr.route.html) macro to bind multiple methods at the same time:
+You can also use the `route` or `api_route` macros to bind multiple methods simultaneously:
 
 ```rust
 use spring_web::route;

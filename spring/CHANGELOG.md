@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.6
+
+- **added**: refactor `shutdown_signal` ([#180])
+
+[#180]: https://github.com/spring-rs/spring-rs/pull/180
+
+## 0.4.5
+
+- **added**: Nested and circular dependency injection ([#173])
+
+[#173]: https://github.com/spring-rs/spring-rs/pull/173
+
 ## 0.4.4
 
 - **added**: export `spring::submit_config_schema`
