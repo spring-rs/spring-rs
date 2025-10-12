@@ -1,4 +1,3 @@
-#[cfg(feature = "openapi")]
 use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::config::Configurable;

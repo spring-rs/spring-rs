@@ -51,8 +51,8 @@ tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 inventory = { workspace = true }
-socketioxide = { version = "0.17.2", optional = true, features = ["tracing"] }
-rmpv = { version = "1.3", optional = true, features = ["with-serde"] }
+socketioxide = { workspace = true, optional = true, features = ["tracing"] }
+rmpv = { workspace = true, optional = true, features = ["with-serde"] }
 aide = { workspace = true, optional = true }
 
 [dev-dependencies]

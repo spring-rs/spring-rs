@@ -200,25 +200,7 @@ impl Plugin for WebPlugin {
 
         #[cfg(feature = "socket_io")]
         if let Some(socketio_config) = socketio_config {
-            use spring::tracing::info;
-            
-            info!("Configuring SocketIO with namespace: {}", socketio_config.default_namespace);
-            
-            let (layer, io) = socketioxide::SocketIo::builder()
-                .build_layer();
-            
-            let ns_path = socketio_config.default_namespace.clone();
-            let ns_path_for_closure = ns_path.clone();
-            io.ns(ns_path, move |socket: socketioxide::extract::SocketRef| {
-                use spring::tracing::info;
-                
-                info!(socket_id = ?socket.id, "New socket connected to namespace: {}", ns_path_for_closure);
-                
-                crate::handler::auto_socketio_setup(&socket);
-            });
-            
-            router = router.layer(layer);
-            app.add_component(io);
+            router =  enable_socketio(socketio_config, app, router);
         }
 
         app.add_component(router);
@@ -290,6 +272,27 @@ pub fn enable_openapi() {
         tracing::error!("{error}");
     });
     aide::generate::extract_schemas(false);
+}
+
+#[cfg(feature = "socket_io")]
+pub fn enable_socketio(socketio_config: SocketIOConfig, app: &mut AppBuilder, router: Router) -> Router {
+    tracing::info!("Configuring SocketIO with namespace: {}", socketio_config.default_namespace);
+    
+    let (layer, io) = socketioxide::SocketIo::builder()
+        .build_layer();
+    
+    let ns_path = socketio_config.default_namespace.clone();
+    let ns_path_for_closure = ns_path.clone();
+    io.ns(ns_path, move |socket: socketioxide::extract::SocketRef| {
+        use spring::tracing::info;
+        
+        info!(socket_id = ?socket.id, "New socket connected to namespace: {}", ns_path_for_closure);
+        
+        crate::handler::auto_socketio_setup(&socket);
+    });
+    
+    app.add_component(io);
+    router.layer(layer)
 }
 
 #[cfg(feature = "openapi")]
