@@ -15,22 +15,6 @@ pub use apalis_sql;
 
 pub struct ApalisPlugin;
 
-#[cfg(feature = "redis")]
-#[derive(Debug, derive_more::Deref)]
-pub struct Storage<T>(apalis_redis::RedisStorage<T>);
-
-#[cfg(feature = "sql-mysql")]
-#[derive(Debug, derive_more::Deref)]
-pub struct Storage<T>(apalis_sql::mysql::MysqlStorage<T>);
-
-#[cfg(feature = "sql-postgres")]
-#[derive(Debug, derive_more::Deref)]
-pub struct Storage<T>(apalis_sql::postgres::PostgresStorage<T>);
-
-#[cfg(feature = "sql-sqlite")]
-#[derive(Debug, derive_more::Deref)]
-pub struct Storage<T>(apalis_sql::sqlite::SqliteStorage<T>);
-
 pub type WorkerRegister = fn(&mut AppBuilder, Monitor) -> Monitor;
 
 #[async_trait]
