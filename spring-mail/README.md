@@ -1,3 +1,4 @@
+
 [![crates.io](https://img.shields.io/crates/v/spring-mail.svg)](https://crates.io/crates/spring-mail)
 [![Documentation](https://docs.rs/spring-mail/badge.svg)](https://docs.rs/spring-mail)
 
