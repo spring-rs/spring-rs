@@ -4,7 +4,7 @@ use spring::{
     async_trait,
     error::Result,
     plugin::{component::ComponentRef, ComponentRegistry, MutableComponentRegistry, Plugin},
-    signal, tracing,
+    signal,
 };
 
 pub use apalis;
@@ -44,7 +44,8 @@ impl ApalisPlugin {
 }
 
 async fn shutdown_signal() -> std::io::Result<()> {
-    Ok(signal::shutdown_signal().await)
+    let _ = signal::shutdown_signal().await;
+    Ok(())
 }
 
 pub trait ApalisConfigurator {
