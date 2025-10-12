@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- **changed**: upgrade `tokio-cron-scheduler` 0.14 to 0.15 ([#181])
+
+[#181]: https://github.com/spring-rs/spring-rs/pull/181
+
 ## 0.4.1
 
 - **added**: serde derive

@@ -28,7 +28,7 @@ authors = ["holmofy"]
 repository = "https://github.com/spring-rs/spring-rs"
 
 [workspace.dependencies]
-aide = "0.15"
+aide = "0.15.1"
 anyhow = "1.0"
 async-trait = "0.1.81"
 axum = "0.8"
@@ -58,7 +58,7 @@ opentelemetry-zipkin = "0.31"
 pin-project = "1"
 proc-macro2 = "1.0"
 prometheus = "0.14"
-prometheus-client = "0.24"
+prometheus-client = "0.23"
 prost = "0.14"
 quote = "1.0"
 redis = "0.32"
