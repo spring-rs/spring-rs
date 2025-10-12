@@ -10,6 +10,8 @@ mod job;
 mod middlewares;
 mod nest;
 mod route;
+#[cfg(feature = "socket_io")]
+mod socketioxide;
 mod stream;
 mod utils;
 
@@ -381,4 +383,75 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn cache(args: TokenStream, input: TokenStream) -> TokenStream {
     cache::cache(args, input)
+}
+
+#[cfg(feature = "socket_io")]
+/// Marks a function as a SocketIO connection handler
+///
+/// # Examples
+/// ```
+/// # use spring_web::socketioxide::extract::{SocketRef, Data};
+/// # use spring_web::rmpv::Value;
+/// # use spring_macros::on_connection;
+/// #[on_connection]
+/// async fn on_connection(socket: SocketRef, Data(data): Data<Value>) {
+///     // Handle connection
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn on_connection(args: TokenStream, input: TokenStream) -> TokenStream {
+    socketioxide::on_connection(args, input)
+}
+
+#[cfg(feature = "socket_io")]
+/// Marks a function as a SocketIO disconnection handler
+///
+/// # Examples
+/// ```
+/// # use spring_web::socketioxide::extract::SocketRef;
+/// # use spring_macros::on_disconnect;
+/// #[on_disconnect]
+/// async fn on_disconnect(socket: SocketRef) {
+///     // Handle disconnection
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn on_disconnect(args: TokenStream, input: TokenStream) -> TokenStream {
+    socketioxide::on_disconnect(args, input)
+}
+
+#[cfg(feature = "socket_io")]
+/// Marks a function as a SocketIO message subscription handler
+///
+/// # Examples
+/// ```
+/// # use spring_web::socketioxide::extract::{SocketRef, Data};
+/// # use spring_macros::subscribe_message;
+/// # use spring_web::rmpv::Value;
+/// #[subscribe_message("message")]
+/// async fn message(socket: SocketRef, Data(data): Data<Value>) {
+///     // Handle message
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn subscribe_message(args: TokenStream, input: TokenStream) -> TokenStream {
+    socketioxide::subscribe_message(args, input)
+}
+
+#[cfg(feature = "socket_io")]
+/// Marks a function as a SocketIO fallback handler
+///
+/// # Examples
+/// ```
+/// # use spring_web::socketioxide::extract::{SocketRef, Data};
+/// # use spring_web::rmpv::Value;
+/// # use spring_macros::on_fallback;
+/// #[on_fallback]
+/// async fn on_fallback(socket: SocketRef, Data(data): Data<Value>) {
+///     // Handle fallback
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn on_fallback(args: TokenStream, input: TokenStream) -> TokenStream {
+    socketioxide::on_fallback(args, input)
 }

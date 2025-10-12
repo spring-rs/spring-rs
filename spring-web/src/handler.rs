@@ -32,6 +32,16 @@ macro_rules! submit_typed_handler {
     };
 }
 
+#[cfg(feature = "socket_io")]
+#[macro_export]
+macro_rules! submit_socketio_handler {
+    ($ty:ident) => {
+        ::spring_web::handler::submit! {
+            &$ty as &dyn ::spring_web::handler::SocketIOHandlerRegistrar
+        }
+    };
+}
+
 /// auto_config
 pub fn auto_router() -> Router {
     #[cfg(feature = "openapi")]
@@ -42,4 +52,19 @@ pub fn auto_router() -> Router {
         router = handler.install_route(router);
     }
     router
+}
+
+#[cfg(feature = "socket_io")]
+pub trait SocketIOHandlerRegistrar: Send + Sync + 'static {
+    fn install_socketio_handlers(&self, socket: &crate::socketioxide::extract::SocketRef);
+}
+
+#[cfg(feature = "socket_io")]
+inventory::collect!(&'static dyn SocketIOHandlerRegistrar);
+
+#[cfg(feature = "socket_io")]
+pub fn auto_socketio_setup(socket: &crate::socketioxide::extract::SocketRef) {
+    for handler in inventory::iter::<&dyn SocketIOHandlerRegistrar> {
+        handler.install_socketio_handlers(socket);
+    }
 }

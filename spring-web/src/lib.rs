@@ -15,6 +15,9 @@ pub mod middleware;
 #[cfg(feature = "openapi")]
 pub mod openapi;
 
+#[cfg(feature = "socket_io")]
+pub use { socketioxide, rmpv };
+
 pub use axum;
 pub use spring::async_trait;
 use spring::signal;
@@ -35,6 +38,17 @@ pub use spring_macros::route;
 pub use spring_macros::routes;
 pub use spring_macros::trace;
 
+/// SocketIO macros
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_connection;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_disconnect;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::on_fallback;
+#[cfg(feature = "socket_io")]
+pub use spring_macros::subscribe_message;
+
+/// OpenAPI macros
 #[cfg(feature = "openapi")]
 pub use spring_macros::api_route;
 #[cfg(feature = "openapi")]
@@ -91,6 +105,9 @@ use spring::{
     plugin::Plugin,
 };
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
+
+#[cfg(feature = "socket_io")]
+use config::SocketIOConfig;
 
 #[cfg(feature = "openapi")]
 use crate::config::OpenApiConfig;
@@ -162,6 +179,9 @@ impl Plugin for WebPlugin {
             .get_config::<WebConfig>()
             .expect("web plugin config load failed");
 
+        #[cfg(feature = "socket_io")]
+        let socketio_config = app.get_config::<SocketIOConfig>().ok();
+
         // 1. collect router
         let routers = app.get_component_ref::<Routers>();
         let mut router: Router = match routers {
@@ -176,6 +196,11 @@ impl Plugin for WebPlugin {
         };
         if let Some(middlewares) = config.middlewares {
             router = crate::middleware::apply_middleware(router, middlewares);
+        }
+
+        #[cfg(feature = "socket_io")]
+        if let Some(socketio_config) = socketio_config {
+            router =  enable_socketio(socketio_config, app, router);
         }
 
         app.add_component(router);
@@ -247,6 +272,27 @@ pub fn enable_openapi() {
         tracing::error!("{error}");
     });
     aide::generate::extract_schemas(false);
+}
+
+#[cfg(feature = "socket_io")]
+pub fn enable_socketio(socketio_config: SocketIOConfig, app: &mut AppBuilder, router: Router) -> Router {
+    tracing::info!("Configuring SocketIO with namespace: {}", socketio_config.default_namespace);
+    
+    let (layer, io) = socketioxide::SocketIo::builder()
+        .build_layer();
+    
+    let ns_path = socketio_config.default_namespace.clone();
+    let ns_path_for_closure = ns_path.clone();
+    io.ns(ns_path, move |socket: socketioxide::extract::SocketRef| {
+        use spring::tracing::info;
+        
+        info!(socket_id = ?socket.id, "New socket connected to namespace: {}", ns_path_for_closure);
+        
+        crate::handler::auto_socketio_setup(&socket);
+    });
+    
+    app.add_component(io);
+    router.layer(layer)
 }
 
 #[cfg(feature = "openapi")]

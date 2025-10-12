@@ -13,6 +13,7 @@ optional **features**:
 * `http2`: http2
 * `multipart`: file upload
 * `ws`: websocket
+* `socket_io`: SocketIO support
 * `openapi`: OpenAPI documentation
 * `openapi-redoc`: Redoc documentation interface
 * `openapi-scalar`: Scalar documentation interface
@@ -232,3 +233,18 @@ Complete code reference [`web-middleware-example`][web-middleware-example]
 [web-middleware-example]: https://github.com/spring-rs/spring-rs/tree/master/examples/web-middleware-example
 
 spring-web is a thin wrapper around axum, adding some macros to simplify development. [The examples of axum](https://github.com/tokio-rs/axum/tree/main/examples) can be run in spring-web.
+
+# SocketIO support
+
+You can enable the `socket_io` feature of `spring-web` to use a integration with [socketioxide](https://github.com/Totodore/socketioxide).
+
+SocketIO is a implementation of WebSocket with more definitions.
+- Named events (like `chat message`, `user joined`, etc.) instead of just plain messages
+- Automatic reconnection if the connection is lost
+- Heartbeat mechanism to detect dead connections
+- Rooms / Namespaces to group clients
+- Fallbacks to other transports if WebSocket isn't available
+
+You can refer to the [socketio-example](https://github.com/spring-rs/spring-rs/tree/master/examples/web-socketio-example) for a example of using SocketIO in spring-web.
+
+We can share components registered by plugins in SocketIO handlers, just like in normal HTTP handlers, for example, using the Sqlx connection pool component registered by the `SqlxPlugin` plugin.

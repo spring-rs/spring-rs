@@ -6,6 +6,9 @@ use tracing::Level;
 
 spring::submit_config_schema!("web", WebConfig);
 
+#[cfg(feature = "socket_io")]
+spring::submit_config_schema!("socket_io", SocketIOConfig);
+
 /// spring-web Config
 #[derive(Debug, Configurable, JsonSchema, Deserialize)]
 #[config_prefix = "web"]
@@ -187,4 +190,18 @@ fn default_assets_uri() -> String {
 
 fn default_fallback() -> String {
     "index.html".to_string()
+}
+
+/// SocketIO configuration
+#[cfg(feature = "socket_io")]
+#[derive(Debug, Configurable, JsonSchema, Deserialize)]
+#[config_prefix = "socket_io"]
+pub struct SocketIOConfig {
+    #[serde(default = "default_namespace")]
+    pub default_namespace: String,
+}
+
+#[cfg(feature = "socket_io")]
+fn default_namespace() -> String {
+    "/".to_string()
 }

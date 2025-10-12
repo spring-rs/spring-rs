@@ -12,6 +12,7 @@ repository.workspace = true
 [features]
 default = ["http2"]
 http2 = ["axum/http2"]
+socket_io = ["dep:socketioxide", "dep:rmpv", "spring-macros/socket_io"]
 multipart = ["axum/multipart", "aide/axum-multipart"]
 ws = ["axum/ws", "aide/axum-ws"]
 openapi = [
@@ -50,6 +51,8 @@ tower-http = { workspace = true, features = ["full"] }
 byte-unit = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 inventory = { workspace = true }
+socketioxide = { workspace = true, optional = true, features = ["tracing"] }
+rmpv = { workspace = true, optional = true, features = ["with-serde"] }
 aide = { workspace = true, optional = true }
 
 [dev-dependencies]
