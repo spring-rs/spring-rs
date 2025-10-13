@@ -99,10 +99,10 @@ pub fn parse_doc_attributes(attrs: &[syn::Attribute], fn_name: &str) -> Operatio
     let mut deprecated = false;
     let mut external_docs = None;
 
-    for line in extract_doc_lines(attrs) {
-        let line = line.trim();
-        if summary.is_none() && !line.is_empty() && !line.starts_with('@') {
-            summary = Some(line.to_string());
+    for (index, raw_line) in extract_doc_lines(attrs).into_iter().enumerate() {
+        let line = raw_line.trim();
+        if index == 0 && summary.is_none() && !line.is_empty() && line.starts_with("# ") {
+            summary = Some(line.trim_start_matches('#').trim_start().to_string());
         } else if let Some(stripped) = line.strip_prefix("@tag ") {
             tags.push(stripped.trim().to_string());
         } else if let Some(stripped) = line.strip_prefix("@id ") {
@@ -155,6 +155,10 @@ pub fn extract_doc_lines(attrs: &[Attribute]) -> Vec<String> {
         }
     }
 
+    while matches!(lines.first(), Some(l) if l.trim().is_empty()) {
+        lines.remove(0);
+    }
+
     lines
 }
 
@@ -165,19 +169,20 @@ mod tests {
     #[test]
     fn test_extract_doc_lines() {
         let input: syn::ItemFn = syn::parse_quote! {
-            /// 创建一个新的待办事项
+            ///
+            /// # 创建一个新的待办事项
             /// 返回创建结果
             fn create_todo() {}
         };
 
         let docs = extract_doc_lines(&input.attrs);
-        assert_eq!(docs, vec!["创建一个新的待办事项", "返回创建结果"]);
+        assert_eq!(docs, vec!["# 创建一个新的待办事项", "返回创建结果"]);
     }
 
     #[test]
     fn test_parse_doc_attributes_single_line() {
         let item: syn::ItemFn = syn::parse_quote! {
-            /// 获取任务列表
+            /// # 获取任务列表
             fn list_todos() {}
         };
 
@@ -195,7 +200,7 @@ mod tests {
     #[test]
     fn test_parse_doc_attributes() {
         let item: syn::ItemFn = syn::parse_quote! {
-            /// 创建一个新的待办事项
+            /// # 创建一个新的待办事项
             /// 此接口用于新增待办项
             fn create_todo() {}
         };
@@ -218,7 +223,7 @@ mod tests {
     #[test]
     fn test_parse_doc_with_tags_and_deprecated() {
         let item: syn::ItemFn = syn::parse_quote! {
-            /// 创建一个新的待办事项
+            /// # 创建一个新的待办事项
             /// 此接口用于新增待办项
             /// @tag todo
             /// @tag create
@@ -244,7 +249,7 @@ mod tests {
     #[test]
     fn test_parse_doc_with_single_tags() {
         let item: syn::ItemFn = syn::parse_quote! {
-            /// 获取任务列表
+            /// # 获取任务列表
             /// @tag list
             fn list_todos() {}
         };
