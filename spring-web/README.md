@@ -60,7 +60,7 @@ App implements the [WebConfigurator](https://docs.rs/spring-web/latest/spring_we
 
 ```no_run, rust, linenos, hl_lines=6 10-18
 use spring::App;
-use spring_web::get;
+use spring_web::{get, get_api};
 use spring_web::{WebPlugin, WebConfigurator, Router, axum::response::IntoResponse, handler::TypeRouter};
 use spring_sqlx::SqlxPlugin;
 
@@ -81,6 +81,16 @@ fn router() -> Router {
 #[get("/")]
 async fn hello_word() -> impl IntoResponse {
    "hello word"
+}
+
+/// # The API summary title must use the head-1 in Markdown format.
+/// description
+/// description support multi line
+/// The get_api macro automatically collects the request parameters and response schema.
+/// @tag api_tag
+#[get_api("/api")]
+async fn hello_api() -> String {
+   "hello api".to_string()
 }
 ```
 

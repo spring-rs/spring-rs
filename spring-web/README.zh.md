@@ -77,6 +77,16 @@ fn router() -> Router {
 async fn hello_word() -> impl IntoResponse {
     "hello word"
 }
+
+/// # API的标题必须用markdown格式的h1
+/// API描述信息
+/// API描述支持多行文本
+/// get_api宏会自动收集请求参数和响应的schema
+/// @tag api_tag 支持多个
+#[get_api("/api")]
+async fn hello_api() -> String {
+   "hello api".to_string()
+}
 ```
 
 你也可以使用`auto_config`宏来实现自动配置，这个过程宏会自动将被过程宏标记的路由注册进app中：
