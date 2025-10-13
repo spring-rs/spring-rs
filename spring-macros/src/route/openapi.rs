@@ -102,7 +102,7 @@ pub fn parse_doc_attributes(attrs: &[syn::Attribute], fn_name: &str) -> Operatio
     for (index, raw_line) in extract_doc_lines(attrs).into_iter().enumerate() {
         let line = raw_line.trim();
         if index == 0 && summary.is_none() && !line.is_empty() && line.starts_with("# ") {
-            summary = Some(line.trim_start_matches("# ").trim().to_string());
+            summary = Some(line.trim_start_matches('#').trim_start().to_string());
         } else if let Some(stripped) = line.strip_prefix("@tag ") {
             tags.push(stripped.trim().to_string());
         } else if let Some(stripped) = line.strip_prefix("@id ") {
@@ -176,7 +176,7 @@ mod tests {
         };
 
         let docs = extract_doc_lines(&input.attrs);
-        assert_eq!(docs, vec!["创建一个新的待办事项", "返回创建结果"]);
+        assert_eq!(docs, vec!["# 创建一个新的待办事项", "返回创建结果"]);
     }
 
     #[test]
