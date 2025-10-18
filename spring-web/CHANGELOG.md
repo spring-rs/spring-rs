@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.10
+
+- **added**: Socket io support using Socketoxide ([#176])
+
+[#176]: https://github.com/spring-rs/spring-rs/pull/176
+
 ## 0.4.9
 
 - **added**: refactor `shutdown_signal` ([#180])
