@@ -15,6 +15,12 @@ pub mod middleware;
 #[cfg(feature = "openapi")]
 pub mod openapi;
 
+pub trait HttpStatusCode {
+    fn status_code(&self) -> axum::http::StatusCode;
+}
+
+pub use spring_macros::HttpStatusCode;
+
 #[cfg(feature = "socket_io")]
 pub use { socketioxide, rmpv };
 

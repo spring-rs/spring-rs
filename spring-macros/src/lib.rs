@@ -5,6 +5,7 @@
 mod auto;
 mod cache;
 mod config;
+mod http_status_code;
 mod inject;
 mod job;
 mod middlewares;
@@ -324,6 +325,34 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input as DeriveInput);
 
     inject::expand_derive(input)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+
+/// HttpStatusCode derive macro
+///
+/// Automatically implements the `HttpStatusCode` trait for enums.
+/// Each variant must have a `#[status_code(code)]` attribute.
+///
+/// # Example
+/// ```rust
+/// use spring_web::HttpStatusCode;
+///
+/// #[derive(HttpStatusCode)]
+/// pub enum ApiError {
+///     #[status_code(401)]
+///     Unauthorized,
+///     #[status_code(403)]
+///     Forbidden,
+///     #[status_code(404)]
+///     NotFound,
+/// }
+/// ```
+#[proc_macro_derive(HttpStatusCode, attributes(status_code))]
+pub fn derive_http_status_code(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input as DeriveInput);
+
+    http_status_code::expand_derive(input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
 }

@@ -330,7 +330,6 @@ impl ToTokens for Route {
             openapi,
         } = self;
 
-        #[allow(unused_variables)] // used when force-pub feature is disabled
         let vis = &ast.vis;
 
         let registrations = args
@@ -341,6 +340,38 @@ impl ToTokens for Route {
                 if *openapi {
                     let fn_name = name.to_string();
                     let operation = openapi::parse_doc_attributes(doc_attributes, &fn_name);
+                    let status_codes = &operation.status_codes;
+                    
+                    let status_code_gen = if !status_codes.is_empty() {
+                        let registrations = status_codes.iter().map(|variant_path| {
+                            let path_parts: Vec<&str> = variant_path.split("::").collect();
+                            if path_parts.len() < 2 {
+                                panic!("Invalid status_codes format: {}. Expected format: TypeName::VariantName", variant_path);
+                            }
+                            
+                            let type_path_parts = &path_parts[..path_parts.len() - 1];
+                            let type_path_str = type_path_parts.join("::");
+                            
+                            let type_path = syn::parse_str::<syn::Path>(&type_path_str)
+                                .unwrap_or_else(|_| panic!("Invalid type path: {}", type_path_str));
+                            
+                            quote! {
+                                {
+                                    ::spring_web::openapi::register_error_response_by_variant::<#type_path>(
+                                        ctx,
+                                        &mut __operation,
+                                        #variant_path
+                                    );
+                                }
+                            }
+                        });
+                        quote! {
+                            #(#registrations)*
+                        }
+                    } else {
+                        quote! {}
+                    };
+                    
                     let (input_tys, output_ty) = utils::extract_fn_types(ast);
                     let gen_output = if let Some(ty) = output_ty {
                         quote! {
@@ -365,6 +396,7 @@ impl ToTokens for Route {
                                         <#input_tys as ::spring_web::aide::OperationInput>::operation_input(ctx, &mut __operation);
                                     )*
                                     #gen_output
+                                    #status_code_gen
                                 });
                                 __router = __router.api_route_docs_with(#path, ::spring_web::aide::axum::routing::ApiMethodDocs::new(#method_str, __operation), __transform);
                             }

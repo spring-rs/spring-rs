@@ -1,0 +1,20 @@
+[package]
+name = "web-example"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web", features = [
+    "openapi",
+    "openapi-scalar",
+] }
+tokio = { workspace = true, features = ["full", "tracing"] }
+anyhow = { workspace = true }
+serde = { workspace = true }
+schemars = { workspace = true }
+thiserror = { workspace = true }
+spring-sqlx = { path = "../../spring-sqlx", features = ["postgres"] }
+tracing = { workspace = true }
