@@ -258,3 +258,61 @@ SocketIO is a implementation of WebSocket with more definitions.
 You can refer to the [socketio-example](https://github.com/spring-rs/spring-rs/tree/master/examples/web-socketio-example) for a example of using SocketIO in spring-web.
 
 We can share components registered by plugins in SocketIO handlers, just like in normal HTTP handlers, for example, using the Sqlx connection pool component registered by the `SqlxPlugin` plugin.
+
+
+# OpenAPI support
+
+You can enable the `openapi` feature of `spring-web` to use OpenAPI documentation generation. You can refer to the [openapi-example](https://github.com/spring-rs/spring-rs/tree/master/examples/openapi-example) for more information.
+
+Besides you need to enable one of the documentation interface features: `openapi-redoc`, `openapi-scalar` or `openapi-swagger` to generate the corresponding documentation interface.
+
+```rust,ignore
+/// Always return error  
+/// 
+/// This endpoint is annotated with status_codes for Errors::B and Errors::C
+/// @tag error
+/// @status_codes Errors::B, Errors::C, Errors::SqlxError, Errors::TeaPod
+#[get_api("/error")]
+async fn error() -> Result<Json<String>, Errors> {
+    Err(Errors::B)
+}
+```
+
+To generate OpenAPI documentation, you can use the `get_api`, `post_api`, etc. macros to define your API endpoints. These macros will automatically collect request parameters and response schemas to generate OpenAPI documentation.
+
+The comments above the API function are used to provide additional information for the OpenAPI documentation, such as tags and status codes.
+
+The status_codes annotation specifies the possible error types that the API may return. This information will be included in the OpenAPI documentation, allowing users to understand the potential error responses when calling this API.
+
+In case of want to define custom error types, you must implement the `HttpStatusCode` trait for your error type, which is used to map the error to an HTTP status code in the OpenAPI documentation.
+
+We can use the derive macro `HttpStatusCode` to automatically implement the `HttpStatusCode` trait for our custom error type.
+
+In this case we are implementing `thiserror::Error` for better error handling, but it's not mandatory.
+
+```rust,ignore
+use spring_web::error::HttpStatusCode;
+use spring_web::axum::http::StatusCode;
+
+#[derive(thiserror::Error, Debug, HttpStatusCode)]
+pub enum CustomErrors {
+    #[status_code(400)]
+    #[error("A basic error occurred")]
+    ABasicError,
+
+    #[status_code(500)]
+    #[error(transparent)]
+    SqlxError(#[from] spring_sqlx::sqlx::Error),
+
+    #[status_code(418)]
+    #[error("TeaPod error occurred: {0:?}")]
+    TeaPod(CustomErrorSchema),
+}
+
+#[derive(Debug, JsonSchema)]
+pub struct CustomErrorSchema {
+    pub code: u16,
+    pub message: String,
+}
+```
+

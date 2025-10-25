@@ -335,7 +335,7 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 /// Each variant must have a `#[status_code(code)]` attribute.
 ///
 /// # Example
-/// ```rust
+/// ```rust,ignore
 /// use spring_web::HttpStatusCode;
 ///
 /// #[derive(HttpStatusCode)]

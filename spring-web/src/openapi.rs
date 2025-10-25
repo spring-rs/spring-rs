@@ -1,13 +1,5 @@
 use aide::{generate::GenContext, openapi::{MediaType, Operation, ReferenceOr, Response, SchemaObject, StatusCode}, Error};
 
-/// Helper trait to optionally get JsonSchema
-/// This is implemented for all types, but only returns Some for types that implement JsonSchema
-pub trait MaybeJsonSchema {
-    fn maybe_schema() -> Option<schemars::Schema> {
-        None
-    }
-}
-
 pub trait HttpStatusCodeVariantInfo {
     fn get_variant_info(variant_name: &str) -> Option<(u16, String, Option<schemars::Schema>)>;
 }

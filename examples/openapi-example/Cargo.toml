@@ -1,5 +1,5 @@
 [package]
-name = "web-example"
+name = "openapi-example"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,6 +9,8 @@ authors.workspace = true
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web", features = [
     "openapi",
+    # "openapi-swagger",
+    # "openapi-redoc",
     "openapi-scalar",
 ] }
 tokio = { workspace = true, features = ["full", "tracing"] }
