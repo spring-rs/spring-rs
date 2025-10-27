@@ -46,7 +46,7 @@ impl Job {
             trigger: Trigger::Cron(cron.to_string()),
         }
     }
-    pub(crate) fn build(self, app: Arc<App>) -> tokio_cron_scheduler::Job {
+    pub fn build(self, app: Arc<App>) -> tokio_cron_scheduler::Job {
         let handler = self.handler;
         match self.trigger {
             Trigger::OneShot(seconds) => tokio_cron_scheduler::Job::new_one_shot_async(
