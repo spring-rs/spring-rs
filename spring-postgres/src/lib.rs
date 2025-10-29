@@ -10,26 +10,10 @@ use spring::app::AppBuilder;
 use spring::async_trait;
 use spring::config::ConfigRegistry;
 use spring::plugin::{MutableComponentRegistry, Plugin};
-use std::ops::Deref;
 use std::sync::Arc;
 use tokio_postgres::NoTls;
 
-#[derive(Clone)]
-pub struct Postgres(Arc<tokio_postgres::Client>);
-
-impl Postgres {
-    fn new(client: tokio_postgres::Client) -> Self {
-        Self(Arc::new(client))
-    }
-}
-
-impl Deref for Postgres {
-    type Target = tokio_postgres::Client;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+pub type Postgres = Arc<tokio_postgres::Client>;
 
 pub struct PgPlugin;
 
