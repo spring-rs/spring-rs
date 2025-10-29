@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.11
+
+- **added**: AppRef extractor ([#190])
+
+[#190]: https://github.com/spring-rs/spring-rs/pull/190
+
 ## 0.4.10
 
 - **added**: Socket io support using Socketoxide ([#176])

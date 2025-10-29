@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- **added**: feat: ✨ add job in runtime ([#190])
+
+[#190]: https://github.com/spring-rs/spring-rs/pull/190
+
 ## 0.4.1
 
 - **added**: serde derive
