@@ -57,14 +57,16 @@ impl FromApp for JobScheduler {
     }
 }
 
-pub struct Data<T: DeserializeOwned>(pub Option<T>);
+pub struct Data<T: DeserializeOwned>(T);
 
 #[async_trait]
 impl<T: DeserializeOwned> FromApp for Data<T> {
     async fn from_app(job_id: &JobId, scheduler: &JobScheduler, _app: &App) -> Self {
         let mut guard = scheduler.context.metadata_storage.write().await;
         let job = guard.get(*job_id).await.expect("job get failed");
-        Self(job.map(|j| serde_json::from_slice(&j.extra).expect("job extra parse to json failed")))
+        let data =
+            job.map(|j| serde_json::from_slice(&j.extra).expect("job extra parse to json failed"));
+        Self(data.expect("job extra parse is empty"))
     }
 }
 
