@@ -57,7 +57,7 @@ impl FromApp for JobScheduler {
     }
 }
 
-pub struct Data<T: DeserializeOwned>(T);
+pub struct Data<T: DeserializeOwned>(pub T);
 
 #[async_trait]
 impl<T: DeserializeOwned> FromApp for Data<T> {

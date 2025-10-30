@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5
+
+- **changed**: feat: ✨ fix Job api ([#195])
+
+[#195]: https://github.com/spring-rs/spring-rs/pull/195
+
 ## 0.4.4
 
 - **changed**: feat: ✨ fix Job api ([#195])
