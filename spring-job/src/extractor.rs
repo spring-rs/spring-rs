@@ -1,4 +1,5 @@
 use crate::{JobId, JobScheduler};
+use serde::de::DeserializeOwned;
 use spring::async_trait;
 use spring::config::ConfigRegistry;
 use spring::plugin::ComponentRegistry;
@@ -53,6 +54,17 @@ impl FromApp for JobId {
 impl FromApp for JobScheduler {
     async fn from_app(_job_id: &JobId, scheduler: &JobScheduler, _app: &App) -> Self {
         scheduler.clone()
+    }
+}
+
+pub struct Data<T: DeserializeOwned>(Option<T>);
+
+#[async_trait]
+impl<T: DeserializeOwned> FromApp for Data<T> {
+    async fn from_app(job_id: &JobId, scheduler: &JobScheduler, _app: &App) -> Self {
+        let mut guard = scheduler.context.metadata_storage.write().await;
+        let job = guard.get(job_id.clone()).await.expect("job get failed");
+        Self(job.map(|j| serde_json::from_slice(&j.extra).expect("job extra parse to json failed")))
     }
 }
 
