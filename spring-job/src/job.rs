@@ -21,7 +21,7 @@ pub struct Job {
     extra: Option<Vec<u8>>,
 }
 
-pub struct JobBuilder<T = ()> {
+pub struct JobBuilder<T: Serialize = ()> {
     trigger: Trigger,
     data: Option<T>,
 }
@@ -50,6 +50,31 @@ impl Job {
         JobBuilder {
             trigger: Trigger::Cron(cron.to_string()),
             data: None,
+        }
+    }
+    pub fn one_shot_with_data<T: Serialize>(delay_seconds: u64, data: T) -> JobBuilder<T> {
+        JobBuilder {
+            trigger: Trigger::OneShot(delay_seconds),
+            data: Some(data),
+        }
+    }
+    /// TODO: tokio-cron-scheduler not support: <https://github.com/mvniekerk/tokio-cron-scheduler/issues/56>
+    pub fn fix_delay_with_data<T: Serialize>(seconds: u64, data: T) -> JobBuilder<T> {
+        JobBuilder {
+            trigger: Trigger::FixedDelay(seconds),
+            data: Some(data),
+        }
+    }
+    pub fn fix_rate_with_data<T: Serialize>(seconds: u64, data: T) -> JobBuilder<T> {
+        JobBuilder {
+            trigger: Trigger::FixedRate(seconds),
+            data: Some(data),
+        }
+    }
+    pub fn cron_with_data<T: Serialize>(cron: &str, data: T) -> JobBuilder<T> {
+        JobBuilder {
+            trigger: Trigger::Cron(cron.to_string()),
+            data: Some(data),
         }
     }
     pub fn build(self, app: Arc<App>) -> tokio_cron_scheduler::Job {
@@ -99,11 +124,6 @@ impl Job {
 }
 
 impl<T: Serialize> JobBuilder<T> {
-    pub fn data(mut self, data: T) -> Self {
-        self.data = Some(data);
-        self
-    }
-
     pub fn run<H, A>(self, handler: H) -> Job
     where
         H: Handler<A> + Sync,
