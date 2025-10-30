@@ -131,6 +131,9 @@ where
     }
 }
 
+#[cfg(feature = "openapi")]
+impl aide::OperationInput for AppRef {}
+
 #[cfg(feature = "socket_io")]
 mod socketio_extractors {
     use super::*;

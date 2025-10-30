@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.12
+
+- **added**: AppRef impl OperationInput ([#194])
+
+[#194]: https://github.com/spring-rs/spring-rs/pull/194
+
 ## 0.4.11
 
 - **added**: AppRef extractor ([#190])
