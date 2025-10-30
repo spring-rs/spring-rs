@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- **added**: feat: ✨ job support data ([#193])
+
+[#193]: https://github.com/spring-rs/spring-rs/pull/193
+
 ## 0.4.2
 
 - **added**: feat: ✨ add job in runtime ([#190])
