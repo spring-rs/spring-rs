@@ -1,0 +1,27 @@
+[web]
+port = 8000
+graceful = true
+
+[web.openapi]
+doc_prefix = "/docs"
+info = { title = "spring-web openapi example document", version = "0.0.1" }
+
+[web.middlewares]
+static = { enable = true }
+compression = { enable = true }
+logger = { enable = true, level = "warn" }
+catch_panic = { enable = true }
+timeout_request = { enable = true, timeout = 30000 }
+cors = { enable = true, allow_origins = [
+    "*",
+], allow_headers = [
+    "Authentication",
+], allow_methods = [
+    "GET",
+    "POST",
+], max_age = 60 }
+
+[sqlx]
+uri = "postgres://postgres:xudjf23adj213@127.0.0.1:5432"
+min_connections = 10
+
