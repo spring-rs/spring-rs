@@ -1,12 +1,7 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
 use spring::plugin::LazyComponent;
-use spring::{
-    auto_config,
-    config::Configurable,
-    plugin::service::Service,
-    App,
-};
+use spring::{auto_config, config::Configurable, plugin::service::Service, App};
 use spring_web::get;
 use spring_web::{
     axum::response::IntoResponse, error::Result, extractor::Component, WebConfigurator, WebPlugin,
@@ -16,10 +11,7 @@ use spring_web::{
 #[auto_config(WebConfigurator)] // auto config web router
 #[tokio::main]
 async fn main() {
-    App::new()
-        .add_plugin(WebPlugin)
-        .run()
-        .await
+    App::new().add_plugin(WebPlugin).run().await
 }
 
 #[derive(Clone, Configurable, JsonSchema, Deserialize)]
@@ -28,9 +20,8 @@ struct UserConfig {
     username: String,
     project: String,
     #[serde(default)]
-    init_count: i32,
+    star_count: i32,
 }
-
 
 #[derive(Clone, Service)]
 struct UserService {
@@ -58,20 +49,34 @@ struct BetterUserService {
 
 impl UserService {
     fn get_username(&self) -> String {
-        self.config.username.clone()
+        let UserConfig {
+            username,
+            project,
+            star_count,
+        } = &self.config;
+        format!("username: {username}, project: {project}, stars: {star_count}")
     }
-    
+
     fn get_better_user_info(&self) -> spring::error::Result<String> {
-        Ok(self.other_service.get()?.user_service.get()?.better_user.get()?.user_service.get_username())
+        Ok(self
+            .other_service
+            .get()?
+            .user_service
+            .get()?
+            .better_user
+            .get()?
+            .user_service
+            .get_username())
     }
 }
 
 impl BetterUserService {
     fn get_info(&self) -> String {
-        self.user_service.get_better_user_info().unwrap_or_else(|_| "Failed to get better user info".to_string())
+        self.user_service
+            .get_better_user_info()
+            .unwrap_or_else(|_| "Failed to get better user info".to_string())
     }
 }
-
 
 #[get("/")]
 async fn hello(Component(better): Component<BetterUserService>) -> Result<impl IntoResponse> {

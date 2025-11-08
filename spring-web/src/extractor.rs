@@ -168,12 +168,12 @@ mod socketio_extractors {
             _auth: &Option<Value>,
         ) -> StdResult<Self, Self::Error> {
             let app = HttpExtension::<AppState>::from_connect_parts(s, _auth)
-                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {e}")))?;
 
             app.app
                 .try_get_component()
                 .map(|c| Component(c))
-                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {e}")))
         }
     }
 
@@ -189,12 +189,12 @@ mod socketio_extractors {
             _ack_id: &Option<i64>,
         ) -> StdResult<Self, Self::Error> {
             let app = HttpExtension::<AppState>::from_message_parts(s, _data, _ack_id)
-                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {e}")))?;
 
             app.app
                 .try_get_component()
                 .map(|c| Component(c))
-                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {e}")))
         }
     }
 
@@ -209,12 +209,12 @@ mod socketio_extractors {
             reason: DisconnectReason,
         ) -> StdResult<Self, Self::Error> {
             let app = HttpExtension::<AppState>::from_disconnect_parts(s, reason)
-                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {e}")))?;
 
             app.app
                 .try_get_component()
                 .map(|c| Component(c))
-                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {e}")))
         }
     }
 }
