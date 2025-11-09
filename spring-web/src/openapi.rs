@@ -1,9 +1,13 @@
-use aide::{generate::GenContext, openapi::{Operation, ReferenceOr, Response, StatusCode}, Error};
+use aide::{
+    generate::GenContext,
+    openapi::{Operation, ReferenceOr, Response, StatusCode},
+    Error,
+};
 
 pub fn set_inferred_response(
     ctx: &mut GenContext,
     operation: &mut Operation,
-    status: Option<u16>,
+    status: Option<StatusCode>,
     res: Response,
 ) {
     if operation.responses.is_none() {
@@ -14,12 +18,10 @@ pub fn set_inferred_response(
 
     match status {
         Some(status) => {
-            if responses.responses.contains_key(&StatusCode::Code(status)) {
-                ctx.error(Error::InferredResponseConflict(status));
+            if responses.responses.contains_key(&status) {
+                ctx.error(Error::InferredResponseConflict(status.to_string()));
             } else {
-                responses
-                    .responses
-                    .insert(StatusCode::Code(status), ReferenceOr::Item(res));
+                responses.responses.insert(status, ReferenceOr::Item(res));
             }
         }
         None => {
