@@ -17,10 +17,9 @@ sql-mysql = ["apalis-sql", "apalis-sql/mysql"]
 
 [dependencies]
 spring = { path = "../spring", version = "0.4" }
-derive_more = { version = "2", features = ["deref"] }
-tower-service = { version = "0.3" }
-tower-layer = { version = "0.3" }
-tokio = { version = "1.47" }
-apalis = { version = "0.7", features = ["limit"] }    # Limit for concurrency
-apalis-redis = { version = "0.7", optional = true }   # Use redis for persistence
-apalis-sql = { version = "0.7", optional = true }     # Use redis for persistence
+tower-service = { workspace = true }
+tower-layer = { workspace = true }
+tokio = { workspace = true }
+apalis = { workspace = true, features = ["limit"] }  # Limit for concurrency
+apalis-redis = { workspace = true, optional = true } # Use redis for persistence
+apalis-sql = { workspace = true, optional = true }   # Use redis for persistence

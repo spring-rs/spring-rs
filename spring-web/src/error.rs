@@ -284,7 +284,10 @@ impl aide::OperationOutput for WebError {
     fn inferred_responses(
         ctx: &mut aide::generate::GenContext,
         op: &mut aide::openapi::Operation,
-    ) -> Vec<(Option<u16>, aide::openapi::Response)> {
-        vec![(Some(500), Self::operation_response(ctx, op).unwrap())]
+    ) -> Vec<(Option<aide::openapi::StatusCode>, aide::openapi::Response)> {
+        vec![(
+            Some(aide::openapi::StatusCode::Code(500)),
+            Self::operation_response(ctx, op).unwrap(),
+        )]
     }
 }
