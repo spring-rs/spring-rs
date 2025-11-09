@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.6
+
+- **changed**: upgrade `tokio-cron-scheduler` 0.14 to 0.15 ([#197])
+
+[#197]: https://github.com/spring-rs/spring-rs/pull/197
+
 ## 0.4.5
 
 - **changed**: feat: ✨ fix Job api ([#195])

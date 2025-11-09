@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.7
+
+- **changed**: upgrade `schemars` 0.9 to 1.1 ([#197])
+
+[#197]: https://github.com/spring-rs/spring-rs/pull/197
+
 ## 0.4.6
 
 - **added**: refactor `shutdown_signal` ([#180])
