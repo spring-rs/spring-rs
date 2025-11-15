@@ -67,7 +67,6 @@ services-all = [
     "services-vercel-artifacts",
     "services-mongodb",
     "services-gridfs",
-    "services-alluxio",
     "services-b2",
     "services-seafile",
     "services-upyun",
