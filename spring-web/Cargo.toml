@@ -57,3 +57,5 @@ aide = { workspace = true, optional = true }
 
 [dev-dependencies]
 spring-sqlx = { path = "../spring-sqlx" }
+serde_json = { workspace = true }
+tower = { workspace = true }

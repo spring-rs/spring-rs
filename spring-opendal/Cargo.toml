@@ -17,7 +17,6 @@ serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 opendal = { workspace = true }
 log = { workspace = true }
-once_cell = { workspace = true }
 
 # Optional dependencies.
 tokio = { workspace = true, optional = true }
