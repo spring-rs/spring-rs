@@ -110,7 +110,9 @@ jobs:
 
       - name: Run unit tests (Windows)
         if: matrix.os == 'windows-latest'
-        run: cargo test --lib --workspace --exclude spring-stream # rdkafka-sys is not supported on Windows
+        run: |
+          # Test all default workspace members except spring-stream (rdkafka-sys not supported on Windows)
+          cargo test --lib -p spring -p spring-macros -p spring-web -p spring-grpc -p spring-job -p spring-redis -p spring-sqlx -p spring-postgres -p spring-sea-orm -p spring-mail -p spring-opentelemetry -p spring-opendal -p spring-apalis
 
   integration-tests:
     name: Integration Tests

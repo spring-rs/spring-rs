@@ -2,8 +2,7 @@
 
 use spring::app::AppBuilder;
 use spring::async_trait;
-use spring::config::{Configurable, ConfigRegistry};
-use spring::error::Result;
+use spring::config::Configurable;
 use spring::plugin::{ComponentRegistry, MutableComponentRegistry, Plugin};
 
 // Test component
@@ -26,6 +25,7 @@ struct Database {
 
 #[derive(Clone)]
 struct ApiServer {
+    #[allow(dead_code)]
     port: u16,
 }
 

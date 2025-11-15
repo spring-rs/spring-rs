@@ -143,7 +143,6 @@ pub trait MutableComponentRegistry: ComponentRegistry {
 mod tests {
     use super::*;
     use crate::app::AppBuilder;
-    use crate::config::{ConfigRegistry, Configurable};
 
     #[derive(Clone)]
     struct TestComponent {

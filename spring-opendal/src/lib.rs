@@ -106,9 +106,16 @@ impl OpenDALPlugin {
                     Layers::AsyncBacktrace => {
                         op = op.layer(opendal::layers::AsyncBacktraceLayer);
                     }
-                    #[cfg(all(target_os = "linux", feature = "layers-dtrace"))]
+                    #[cfg(feature = "layers-dtrace")]
                     Layers::Dtrace => {
-                        op = op.layer(opendal::layers::DtraceLayer::default());
+                        #[cfg(target_os = "linux")]
+                        {
+                            op = op.layer(opendal::layers::DtraceLayer::default());
+                        }
+                        #[cfg(not(target_os = "linux"))]
+                        {
+                            log::warn!("DtraceLayer is only supported on Linux, skipping");
+                        }
                     }
                     #[allow(unreachable_patterns)]
                     _ => {
