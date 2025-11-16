@@ -19,3 +19,4 @@ schemars = { workspace = true }
 
 [dev-dependencies]
 spring-web = { path = "../spring-web" }
+toml = { workspace = true }

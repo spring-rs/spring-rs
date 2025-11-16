@@ -66,15 +66,32 @@ impl Injectable {
         Ok(Self {
             is_prototype,
             ty,
-            field_name
+            field_name,
         })
     }
 
     fn compute_type(field: &syn::Field, is_prototype: bool) -> syn::Result<InjectableType> {
         if let syn::Type::Path(path) = &field.ty {
             let ty = &path.path;
+            let inject_attr = field
+                .attrs
+                .iter()
+                .find(|attr| attr.path().is_ident("inject"));
+
+            if let Some(inject_attr) = inject_attr {
+                if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
+                    let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
+                    return attr.make_type(ty);
+                } else {
+                    Err(syn::Error::new_spanned(
+                inject_attr,
+                "invalid inject definition, expected #[inject(component|config|func(args))]",
+                    ))?;
+                }
+            }
+
             let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
-            
+
             let type_name = &last_path_segment.ident;
             if type_name == "LazyComponent" {
                 return Ok(InjectableType::LazyComponent {
@@ -93,23 +110,6 @@ impl Injectable {
             }
             if !is_prototype && last_path_segment.ident == "Option" {
                 return Ok(InjectableType::Option);
-            }
-            
-            let inject_attr = field
-                .attrs
-                .iter()
-                .find(|attr| attr.path().is_ident("inject"));
-            
-            if let Some(inject_attr) = inject_attr {
-                if let Meta::List(MetaList { tokens, .. }) = &inject_attr.meta {
-                    let attr = syn::parse::<InjectableAttr>(tokens.clone().into())?;
-                    return attr.make_type(ty);
-                } else {
-                    Err(syn::Error::new_spanned(
-                inject_attr,
-                "invalid inject definition, expected #[inject(component|config|func(args))]",
-                    ))?;
-                }
             }
         }
         if is_prototype {
@@ -155,13 +155,13 @@ impl InjectableAttr {
         Ok(match self {
             Self::Component => {
                 let last_path_segment = ty.segments.last().ok_or_else(inject_error_tip)?;
-                
+
                 let (optional, component_type) = if last_path_segment.ident == "Option" {
                     (true, get_argument_type(&last_path_segment.arguments)?)
                 } else {
                     (false, ty.clone())
                 };
-                
+
                 InjectableType::Component {
                     optional,
                     component_type,
@@ -189,7 +189,8 @@ impl ToTokens for Injectable {
             InjectableType::Component {
                 optional,
                 component_type,
-            } => {
+            } =>
+            {
                 #[allow(clippy::collapsible_else_if)]
                 if *optional {
                     if *is_prototype {

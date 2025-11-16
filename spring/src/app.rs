@@ -10,7 +10,7 @@ use crate::{
     plugin::{component::DynComponentRef, PluginRef},
 };
 use dashmap::DashMap;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use std::any::{Any, TypeId};
 use std::str::FromStr;
 use std::sync::RwLock;
@@ -80,7 +80,7 @@ impl App {
     }
 }
 
-static GLOBAL_APP: Lazy<RwLock<Arc<App>>> = Lazy::new(|| RwLock::new(Arc::new(App::default())));
+static GLOBAL_APP: LazyLock<RwLock<Arc<App>>> = LazyLock::new(|| RwLock::new(Arc::new(App::default())));
 
 unsafe impl Send for AppBuilder {}
 unsafe impl Sync for AppBuilder {}

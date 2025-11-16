@@ -17,7 +17,6 @@ serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 opendal = { workspace = true }
 log = { workspace = true }
-once_cell = { workspace = true }
 
 # Optional dependencies.
 tokio = { workspace = true, optional = true }
@@ -68,7 +67,6 @@ services-all = [
     "services-vercel-artifacts",
     "services-mongodb",
     "services-gridfs",
-    "services-alluxio",
     "services-b2",
     "services-seafile",
     "services-upyun",

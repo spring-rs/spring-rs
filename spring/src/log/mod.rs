@@ -57,11 +57,14 @@ impl Plugin for LogPlugin {
 
         let env_filter = config.build_env_filter();
 
-        tracing_subscriber::registry()
+        // try_init() instead of init() to handle cases where the global subscriber
+        // has already been set (e.g., in test environments with multiple App instances)
+        // This is the correct approach as tracing subscriber is a process-wide singleton
+        let _ = tracing_subscriber::registry()
             .with(layers)
             .with(env_filter)
             .with(ErrorLayer::default())
-            .init();
+            .try_init();
     }
 
     fn immediately(&self) -> bool {
