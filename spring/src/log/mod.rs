@@ -6,7 +6,7 @@ use crate::config::ConfigRegistry;
 use crate::plugin::Plugin;
 use config::{Format, LogLevel, LoggerConfig, TimeStyle, WithFields};
 use nu_ansi_term::Color;
-use std::sync::OnceLock;
+use std::sync::{Once, OnceLock};
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::filter::EnvFilter;
@@ -24,6 +24,9 @@ pub type BoxLayer = Box<dyn Layer<Registry> + Send + Sync + 'static>;
 
 /// Built-in Log plugin based on [tracing](https://docs.rs/tracing)
 pub(crate) struct LogPlugin;
+
+// Ensure tracing subscriber is only initialized once globally
+static INIT_TRACING: Once = Once::new();
 
 impl Plugin for LogPlugin {
     fn immediately_build(&self, app: &mut AppBuilder) {
@@ -57,11 +60,15 @@ impl Plugin for LogPlugin {
 
         let env_filter = config.build_env_filter();
 
-        tracing_subscriber::registry()
-            .with(layers)
-            .with(env_filter)
-            .with(ErrorLayer::default())
-            .init();
+        // Only initialize the tracing subscriber once, even if called multiple times
+        // This is especially important in test environments where multiple App instances may be created
+        INIT_TRACING.call_once(|| {
+            tracing_subscriber::registry()
+                .with(layers)
+                .with(env_filter)
+                .with(ErrorLayer::default())
+                .init();
+        });
     }
 
     fn immediately(&self) -> bool {
