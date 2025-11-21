@@ -38,12 +38,11 @@ timeout_request = { enable = true, timeout = 60000 }  # 请求超时时间60s
 
 # 跨域配置
 cors = { enable = true, allow_origins = [
-    "*.github.io",
+    "https://spring-rs.github.io",
 ], allow_headers = [
     "Authentication",
 ], allow_methods = [
-    "GET",
-    "POST",
+    "*",
 ], max_age = 60 }
 
 # 静态资源配置

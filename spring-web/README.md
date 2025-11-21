@@ -38,7 +38,7 @@ timeout_request = { enable = true, timeout = 60000 }   # Request timeout 60s
 
 # Cross-domain configuration
 cors = { enable = true, allow_origins = [
-    "*.github.io",
+    "https://spring-rs.github.io",
 ], allow_headers = [
     "Authentication",
 ], allow_methods = [
