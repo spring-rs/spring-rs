@@ -141,7 +141,7 @@ impl syn::parse::Parse for InjectableAttr {
         if name.is_ident("func") {
             input.parse::<Token![=]>()?;
             let func_call = input.parse::<syn::ExprCall>()?;
-            return Ok(Self::FuncCall(Box::new(func_call)));
+            return Ok(Self::FuncCall(func_call));
         }
         Err(syn::Error::new(
             Span::call_site(),
@@ -168,7 +168,7 @@ impl InjectableAttr {
                 }
             }
             Self::Config => InjectableType::Config(ty.clone()),
-            Self::FuncCall(func_call) => InjectableType::FuncCall(func_call),
+            Self::FuncCall(func_call) => InjectableType::FuncCall(Box::new(func_call)),
         })
     }
 }
