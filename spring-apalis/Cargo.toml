@@ -1,7 +1,7 @@
 [package]
 name = "spring-apalis"
 description = "Integration of rust application framework spring-rs and apalis"
-version = "0.4.1"
+version = "0.4.2"
 categories = ["date-and-time"]
 keywords = ["cron-scheduler", "task-scheduling", "cron-job", "spring"]
 edition.workspace = true
@@ -11,15 +11,21 @@ repository.workspace = true
 
 [features]
 redis = ["apalis-redis"]
-sql-postgres = ["apalis-sql", "apalis-sql/postgres"]
-sql-sqlite = ["apalis-sql", "apalis-sql/sqlite"]
-sql-mysql = ["apalis-sql", "apalis-sql/mysql"]
+sql-postgres = ["apalis-postgres"]
+sql-sqlite = ["apalis-sqlite"]
+# sql-mysql = ["apalis-mysql"]
+workflow = ["apalis-workflow"]
+board = ["apalis-board"]
 
 [dependencies]
 spring = { path = "../spring", version = "0.4" }
 tower-service = { workspace = true }
 tower-layer = { workspace = true }
 tokio = { workspace = true }
-apalis = { workspace = true, features = ["limit"] }  # Limit for concurrency
-apalis-redis = { workspace = true, optional = true } # Use redis for persistence
-apalis-sql = { workspace = true, optional = true }   # Use redis for persistence
+apalis = { workspace = true }
+apalis-redis = { workspace = true, optional = true }    # Use redis for persistence
+apalis-postgres = { workspace = true, optional = true } # Use postgres for persistence
+apalis-sqlite = { workspace = true, optional = true }   # Use sqlite for persistence
+# apalis-mysql = { workspace = true, optional = true }  # Use mysql for persistence
+apalis-workflow = { workspace = true, optional = true } # workflow
+apalis-board = { workspace = true, optional = true }    # board
