@@ -123,17 +123,19 @@ async fn fix_rate_job() {
 
 ## 支持的插件
 
-* [x] ![spring-web](https://img.shields.io/crates/v/spring-web.svg)[`spring-web`](./spring-web/README.zh.md)(基于[`axum`](https://github.com/tokio-rs/axum)实现)
-* [x] ![spring-sqlx](https://img.shields.io/crates/v/spring-sqlx.svg)[`spring-sqlx`](./spring-sqlx/README.zh.md)(整合了[`sqlx`](https://github.com/launchbadge/sqlx))
-* [x] ![spring-postgres](https://img.shields.io/crates/v/spring-postgres.svg)[`spring-postgres`](./spring-postgres/README.zh.md)(整合了[`rust-postgres`](https://github.com/sfackler/rust-postgres))
-* [x] ![spring-sea-orm](https://img.shields.io/crates/v/spring-sea-orm.svg)[`spring-sea-orm`](./spring-sea-orm/README.zh.md)(整合了[`sea-orm`](https://www.sea-ql.org/SeaORM/))
-* [x] ![spring-redis](https://img.shields.io/crates/v/spring-redis.svg)[`spring-redis`](./spring-redis/README.zh.md)(整合了[`redis`](https://github.com/redis-rs/redis-rs))
-* [x] ![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)[`spring-mail`](./spring-mail/README.zh.md)(整合了[`lettre`](https://github.com/lettre/lettre))
-* [x] ![spring-job](https://img.shields.io/crates/v/spring-job.svg)[`spring-job`](./spring-job/README.zh.md)(整合了[`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler))
-* [x] ![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)[`spring-stream`](./spring-stream/README.zh.md)(整合了[`sea-streamer`](https://github.com/SeaQL/sea-streamer)实现redis-stream、kafka等消息处理)
-* [x] ![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)[`spring-opentelemetry`](./spring-opentelemetry/README.zh.md)(整合了[`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)实现logging、metrics、tracing全套可观测性)
-* [x] ![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)[`spring-grpc`](./spring-grpc/README.zh.md)(整合了[`tonic`](https://github.com/hyperium/tonic)实现gRPC调用)
-* [x] ![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)[`spring-opendal`](https://spring-rs.github.io/docs/plugins/spring-opendal/): 整合[`opendal`](https://github.com/apache/opendal)实现统一的数据访问层
+| 插件                   | Crate                                                                                                                                                                      | 集成组件                                                                        | 说明                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------- |
+| spring-web           | [![spring-web](https://img.shields.io/crates/v/spring-web.svg)](https://spring-rs.github.io/docs/plugins/spring-web/)                                         | [`axum`](https://github.com/tokio-rs/axum)                                  | Web 框架，基于 axum              |
+| spring-sqlx          | [![spring-sqlx](https://img.shields.io/crates/v/spring-sqlx.svg)](https://spring-rs.github.io/docs/plugins/spring-sqlx/)                                     | [`sqlx`](https://github.com/launchbadge/sqlx)                               | 异步 SQL 访问                   |
+| spring-postgres      | [![spring-postgres](https://img.shields.io/crates/v/spring-postgres.svg)](https://spring-rs.github.io/docs/plugins/spring-postgres/)                     | [`rust-postgres`](https://github.com/sfackler/rust-postgres)                | PostgreSQL 客户端集成            |
+| spring-sea-orm       | [![spring-sea-orm](https://img.shields.io/crates/v/spring-sea-orm.svg)](https://spring-rs.github.io/docs/plugins/spring-sea-orm/)                         | [`sea-orm`](https://www.sea-ql.org/SeaORM/)                                 | ORM 支持                      |
+| spring-redis         | [![spring-redis](https://img.shields.io/crates/v/spring-redis.svg)](https://spring-rs.github.io/docs/plugins/spring-redis/)                                 | [`redis`](https://github.com/redis-rs/redis-rs)                             | Redis 集成                    |
+| spring-mail          | [![spring-mail](https://img.shields.io/crates/v/spring-mail.svg)](https://spring-rs.github.io/docs/plugins/spring-mail/)                                     | [`lettre`](https://github.com/lettre/lettre)                                | 邮件发送                        |
+| spring-job           | [![spring-job](https://img.shields.io/crates/v/spring-job.svg)](https://spring-rs.github.io/docs/plugins/spring-job/)                                         | [`tokio-cron-scheduler`](https://github.com/mvniekerk/tokio-cron-scheduler) | 定时任务 / Cron                 |
+| spring-stream        | [![spring-stream](https://img.shields.io/crates/v/spring-stream.svg)](https://spring-rs.github.io/docs/plugins/spring-stream/)                             | [`sea-streamer`](https://github.com/SeaQL/sea-streamer)                     | 消息流处理（Redis Stream / Kafka） |
+| spring-opentelemetry | [![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/) | [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)     | 日志 / 指标 / 链路追踪              |
+| spring-grpc          | [![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)](https://spring-rs.github.io/docs/plugins/spring-grpc/)                                     | [`tonic`](https://github.com/hyperium/tonic)                                | gRPC 服务与调用                  |
+| spring-opendal       | [![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)](https://spring-rs.github.io/docs/plugins/spring-opendal/)                         | [`opendal`](https://github.com/apache/opendal)                              | 统一对象存储 / 数据访问               |
 
 ## 生态
 
