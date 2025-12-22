@@ -10,10 +10,10 @@ authors.workspace = true
 repository.workspace = true
 
 [features]
-redis = ["apalis-redis"]
-sql-postgres = ["apalis-postgres"]
-sql-sqlite = ["apalis-sqlite"]
-sql-mysql = ["apalis-mysql"]
+redis = ["apalis-redis", "spring-redis"]
+sql-postgres = ["apalis-postgres", "spring-sqlx"]
+sql-sqlite = ["apalis-sqlite", "spring-sqlx"]
+sql-mysql = ["apalis-mysql", "spring-sqlx"]
 workflow = ["apalis-workflow"]
 board = ["apalis-board"]
 
@@ -23,10 +23,12 @@ tower-service = { workspace = true }
 tower-layer = { workspace = true }
 tokio = { workspace = true }
 apalis = { workspace = true }
-apalis-redis = { workspace = true, optional = true }    # Use redis for persistence
-apalis-amqp = { workspace = true, optional = true }    # Use amqp for persistence
-apalis-postgres = { workspace = true, optional = true } # Use postgres for persistence
-apalis-sqlite = { workspace = true, optional = true }   # Use sqlite for persistence
-apalis-mysql = { workspace = true, optional = true }  # Use mysql for persistence
-apalis-workflow = { workspace = true, optional = true } # workflow
-apalis-board = { workspace = true, optional = true }    # board
+apalis-redis = { workspace = true, optional = true }         # Use redis for persistence
+#apalis-amqp = { workspace = true, optional = true }         # Use amqp for persistence
+apalis-postgres = { workspace = true, optional = true }      # Use postgres for persistence
+apalis-sqlite = { workspace = true, optional = true }        # Use sqlite for persistence
+apalis-mysql = { workspace = true, optional = true }         # Use mysql for persistence
+apalis-workflow = { workspace = true, optional = true }      # workflow
+apalis-board = { workspace = true, optional = true }         # board
+spring-redis = { path = "../spring-redis", optional = true }
+spring-sqlx = { path = "../spring-sqlx", optional = true }

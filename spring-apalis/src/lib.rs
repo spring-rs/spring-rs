@@ -8,10 +8,12 @@ use spring::{
 };
 
 pub use apalis;
-#[cfg(feature = "redis")]
-pub use apalis_redis;
+#[cfg(feature = "sql-mysql")]
+pub use apalis_mysql;
 #[cfg(feature = "sql-postgres")]
 pub use apalis_postgres;
+#[cfg(feature = "redis")]
+pub use apalis_redis;
 #[cfg(feature = "sql-sqlite")]
 pub use apalis_sqlite;
 
@@ -31,6 +33,20 @@ impl Plugin for ApalisPlugin {
                 app.add_scheduler(move |_app| Box::new(Self::schedule(monitor)));
             }
         }
+    }
+
+    #[cfg(feature = "redis")]
+    fn dependencies(&self) -> Vec<&str> {
+        vec![std::any::type_name::<spring_redis::RedisPlugin>()]
+    }
+
+    #[cfg(any(
+        feature = "sql-postgres",
+        feature = "sql-sqlite",
+        feature = "sql-mysql"
+    ))]
+    fn dependencies(&self) -> Vec<&str> {
+        vec![std::any::type_name::<spring_sqlx::SqlxPlugin>()]
     }
 }
 
