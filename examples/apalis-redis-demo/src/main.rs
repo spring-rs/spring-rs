@@ -51,7 +51,7 @@ fn long_running_task_register(app: &mut AppBuilder, monitor: Monitor) -> Monitor
         .nest("/api/v1", api)
         .fallback_service(ServeUI::new())
         .layer(Extension(broadcaster.clone()));
-    app.add_router(router);
+    app.add_router(router.into());
 
     monitor.register(move |_| {
         let storage = storage.clone();
