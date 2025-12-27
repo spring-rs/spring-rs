@@ -5,23 +5,25 @@ use spring::{
     plugin::{ComponentRegistry, MutableComponentRegistry},
     tracing, App,
 };
-use spring_apalis::apalis::{
-    layers::{ErrorHandlingLayer, WorkerBuilderExt as _},
-    prelude::{Context, Monitor, Worker, WorkerBuilder, WorkerFactoryFn as _},
+use spring_apalis::apalis_board::axum::{
+    framework::{ApiBuilder, RegisterRoute},
+    sse::{TracingBroadcaster, TracingSubscriber},
+    ui::ServeUI,
 };
 use spring_apalis::apalis_redis::RedisStorage;
 use spring_apalis::{apalis::prelude::*, ApalisConfigurator as _, ApalisPlugin};
 use spring_redis::{Redis, RedisPlugin};
 use spring_web::{
-    axum::response::IntoResponse, extractor::Component, get, middleware::ServiceExt,
-    WebConfigurator, WebPlugin,
+    axum::{response::IntoResponse, Extension, Router},
+    extractor::Component,
+    get, WebConfigurator, WebPlugin,
 };
 use std::time::Duration;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LongRunningJob {}
 
-async fn long_running_task(_task: LongRunningJob, worker: Worker<Context>) {
+async fn long_running_task(_task: LongRunningJob, worker: WorkerContext) {
     loop {
         tracing::info!("is_shutting_down: {}", worker.is_shutting_down());
         if worker.is_shutting_down() {
@@ -38,15 +40,29 @@ fn long_running_task_register(app: &mut AppBuilder, monitor: Monitor) -> Monitor
     let storage = RedisStorage::new(redis);
     app.add_component(storage.clone());
 
-    let worker = WorkerBuilder::new("long_running")
-        .catch_panic()
-        .enable_tracing()
-        .rate_limit(5, Duration::from_secs(1))
-        .concurrency(2)
-        .backend(storage)
-        .build_fn(long_running_task);
+    let broadcaster = TracingBroadcaster::create();
+    let line_sub = TracingSubscriber::new(&broadcaster);
+    app.add_layer(line_sub.layer());
 
-    monitor.register(worker)
+    let api = ApiBuilder::new(Router::new())
+        .register(storage.clone())
+        .build();
+    let router = Router::new()
+        .nest("/api/v1", api)
+        .fallback_service(ServeUI::new())
+        .layer(Extension(broadcaster.clone()));
+    app.add_router(router);
+
+    monitor.register(move |_| {
+        let storage = storage.clone();
+        WorkerBuilder::new("long_running")
+            .backend(storage)
+            .enable_tracing()
+            .catch_panic()
+            .concurrency(2)
+            .rate_limit(5, Duration::from_secs(1))
+            .build(long_running_task)
+    })
 }
 
 #[auto_config(WebConfigurator)]

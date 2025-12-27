@@ -8,6 +8,8 @@ use spring::{
 };
 
 pub use apalis;
+#[cfg(feature = "board")]
+pub use apalis_board;
 #[cfg(feature = "sql-mysql")]
 pub use apalis_mysql;
 #[cfg(feature = "sql-postgres")]
