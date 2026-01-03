@@ -24,8 +24,8 @@ enum InjectableType {
     Config(syn::Path),
     ComponentRef(syn::Path),
     ConfigRef(syn::Path),
-    FuncCall(syn::ExprCall),
-    PrototypeArg(syn::Type),
+    FuncCall(Box<syn::ExprCall>),
+    PrototypeArg(Box<syn::Type>),
 }
 
 impl InjectableType {
@@ -113,7 +113,7 @@ impl Injectable {
             }
         }
         if is_prototype {
-            Ok(InjectableType::PrototypeArg(field.ty.clone()))
+            Ok(InjectableType::PrototypeArg(Box::new(field.ty.clone())))
         } else {
             let field_name = &field
                 .ident
@@ -168,7 +168,7 @@ impl InjectableAttr {
                 }
             }
             Self::Config => InjectableType::Config(ty.clone()),
-            Self::FuncCall(func_call) => InjectableType::FuncCall(func_call),
+            Self::FuncCall(func_call) => InjectableType::FuncCall(Box::new(func_call)),
         })
     }
 }

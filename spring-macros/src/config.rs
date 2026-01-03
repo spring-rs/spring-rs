@@ -20,8 +20,7 @@ fn get_prefix(input: &syn::DeriveInput) -> syn::Result<syn::LitStr> {
     let attr = input
         .attrs
         .iter()
-        .filter(|attr| attr.path().is_ident("config_prefix"))
-        .next_back();
+        .rfind(|attr| attr.path().is_ident("config_prefix"));
 
     if let Some(syn::Attribute {
         meta: syn::Meta::NameValue(name_value),
