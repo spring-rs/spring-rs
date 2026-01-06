@@ -72,6 +72,8 @@ struct UserService {
 当两个服务互相引用时，Rust 的类型系统会阻止直接的循环依赖。
 为了解决这个问题，你可以使用 `LazyComponent<T>` 来打破循环依赖。
 
+> spring-rs的依赖注入设计理念参照[google的Dagger](https://github.com/google/dagger)，我们不鼓励循环依赖，循环依赖往往意味着：业务职责不清、高耦合。
+
 ```rust
 use spring::plugin::LazyComponent;
 use spring::plugin::service::Service;
