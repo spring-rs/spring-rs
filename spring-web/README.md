@@ -525,17 +525,11 @@ The Problem Details response will be formatted as:
 
 ### Automatic Instance URI Capture
 
-Problem Details can automatically capture the current request URI and include it in the `instance` field. This requires adding the capture middleware:
+Problem Details automatically captures the current request URI and includes it in the `instance` field. This feature is enabled by default and requires no additional configuration:
 
 ```rust,ignore
-use spring_web::problem_details::capture_request_uri_middleware;
+// No middleware configuration needed - it's automatic!
 
-// Add the middleware to your router
-let app = Router::new()
-    .route("/users/:id", get(get_user))
-    .layer(axum::middleware::from_fn(capture_request_uri_middleware));
-
-// Your handler doesn't need to manually handle URIs
 #[get_api("/users/{id}")]
 async fn get_user(Path(id): Path<u32>) -> Result<Json<User>, ApiError> {
     if id == 999 {
@@ -551,7 +545,7 @@ This will automatically generate responses with the request URI:
 
 ```json
 {
-  "type": "https://api.myapp.com/problems/not-found",
+  "type": "about:blank",
   "title": "Resource Not Found",
   "status": 404,
   "detail": "The requested resource was not found",

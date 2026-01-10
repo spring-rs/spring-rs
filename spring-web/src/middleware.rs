@@ -26,6 +26,9 @@ use trace::DefaultOnEos;
 pub use tower_http::*;
 
 pub(crate) fn apply_middleware(mut router: Router, middleware: Middlewares) -> Router {
+    // Always apply URI capture middleware first (for Problem Details)
+    router = router.layer(axum::middleware::from_fn(crate::problem_details::capture_request_uri_middleware));
+    
     if Some(EnableMiddleware { enable: true }) == middleware.catch_panic {
         router = router.layer(CatchPanicLayer::new());
     }

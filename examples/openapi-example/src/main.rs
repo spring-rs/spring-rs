@@ -17,14 +17,6 @@ async fn main() {
     App::new()
         .add_plugin(SqlxPlugin)
         .add_plugin(WebPlugin)
-        // Add middleware to capture request URI for Problem Details
-        .add_router(
-            spring_web::Router::new()
-                .route("/user-info/:id", spring_web::axum::routing::get(user_info_api))
-                .layer(spring_web::axum::middleware::from_fn(
-                    spring_web::problem_details::capture_request_uri_middleware
-                ))
-        )
         .run()
         .await;
 }
