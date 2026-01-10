@@ -12,4 +12,6 @@ toc = true
 top = false
 +++
 
+SeaORM 是现代异步 ORM 框架，底层基于 SQLx，通过强类型实体与编译期安全的查询构建，在保持良好抽象的同时兼顾性能与可靠性。
+
 {{ include(path="../../spring-sea-orm/README.zh.md") }}

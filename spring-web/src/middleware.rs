@@ -5,6 +5,7 @@ use crate::config::{
 };
 use crate::Router;
 use anyhow::Context;
+use axum::http::StatusCode;
 use spring::error::Result;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -22,7 +23,6 @@ use tower_http::{
     trace::TraceLayer,
 };
 use trace::DefaultOnEos;
-use axum::http::StatusCode;
 
 pub use tower_http::*;
 
