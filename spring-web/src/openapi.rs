@@ -1,4 +1,4 @@
-use aide::{generate::GenContext, openapi::{MediaType, Operation, ReferenceOr, Response, SchemaObject, StatusCode}, Error};
+use aide::{generate::GenContext, openapi::{MediaType, Operation, ReferenceOr, Response, SchemaObject, StatusCode}};
 
 pub trait ProblemDetailsVariantInfo {
     fn get_variant_info(variant_name: &str) -> Option<(u16, String, Option<schemars::Schema>)>;
@@ -11,7 +11,7 @@ pub fn problem_details_schema() -> schemars::Schema {
 }
 
 pub fn register_error_response_by_variant<T>(
-    ctx: &mut GenContext,
+    _ctx: &mut GenContext,
     operation: &mut Operation,
     variant_path: &str,
 ) where
@@ -37,7 +37,7 @@ pub fn register_error_response_by_variant<T>(
     let response = Response {
         description,
         content: {
-            let mut content = std::collections::BTreeMap::new();
+            let mut content = indexmap::IndexMap::new();
             let media_type = MediaType {
                 schema: Some(SchemaObject {
                     json_schema: problem_details_schema(),

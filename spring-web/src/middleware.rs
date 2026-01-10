@@ -22,6 +22,7 @@ use tower_http::{
     trace::TraceLayer,
 };
 use trace::DefaultOnEos;
+use axum::http::StatusCode;
 
 pub use tower_http::*;
 
@@ -49,7 +50,7 @@ pub(crate) fn apply_middleware(mut router: Router, middleware: Middlewares) -> R
     }
     if let Some(TimeoutRequestMiddleware { enable, timeout }) = middleware.timeout_request {
         if enable {
-            router = router.layer(TimeoutLayer::new(Duration::from_millis(timeout)));
+            router = router.layer(TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_millis(timeout)));
         }
     }
     if let Some(LimitPayloadMiddleware { enable, body_limit }) = middleware.limit_payload {
