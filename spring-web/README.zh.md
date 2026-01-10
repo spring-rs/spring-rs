@@ -233,3 +233,59 @@ SocketIO 是 WebSocket 的一种实现，提供更多的定义功能：
 你可以参考 [socketio-example](https://github.com/spring-rs/spring-rs/tree/master/examples/web-socketio-example) 来查看在 spring-web 中使用 SocketIO 的示例。
 
 我们可以在 SocketIO 处理器中共享插件注册的组件，就像在普通 HTTP 处理器中一样，例如使用由 `SqlxPlugin` 插件注册的 Sqlx 连接池组件。
+
+# OpenAPI 支持
+
+你可以启用 `spring-web` 的 `openapi` 功能来生成 OpenAPI 文档。你可以参考 [openapi-example](https://github.com/spring-rs/spring-rs/tree/master/examples/openapi-example) 获取更多信息。
+
+此外，你需要启用以下文档界面功能之一：`openapi-redoc`、`openapi-scalar` 或 `openapi-swagger`，以生成相应的文档界面。
+
+```rust,ignore
+/// 始终返回错误  
+/// 
+/// 此端点使用 Errors::B 和 Errors::C 的 status_codes 注解
+/// @tag error
+/// @status_codes Errors::B, Errors::C, Errors::SqlxError, Errors::TeaPod
+#[get_api("/error")]
+async fn error() -> Result<Json<String>, Errors> {
+    Err(Errors::B)
+}
+```
+
+要生成 OpenAPI 文档，你可以使用 `get_api`、`post_api` 等宏来定义你的 API 端点。这些宏会自动收集请求参数和响应模式以生成 OpenAPI 文档。
+
+API 函数上方的注释用于为 OpenAPI 文档提供附加信息，例如标签（tags）和状态码（status codes）。
+
+`status_codes` 注解指定了 API 可能返回的错误类型。这些信息将包含在 OpenAPI 文档中，使用户能够了解调用此 API 时的潜在错误响应。
+
+如果你想定义自定义错误类型，必须为你的错误类型实现 `HttpStatusCode` trait，用于在 OpenAPI 文档中将错误映射到 HTTP 状态码。
+
+我们可以使用 derive 宏 `HttpStatusCode` 来自动为自定义错误类型实现该 trait。
+
+在此示例中，我们实现了 `thiserror::Error` 以获得更好的错误处理，但这不是强制的。
+
+```rust,ignore
+use spring_web::error::HttpStatusCode;
+use spring_web::axum::http::StatusCode;
+
+#[derive(thiserror::Error, Debug, HttpStatusCode)]
+pub enum CustomErrors {
+    #[status_code(400)]
+    #[error("发生了基本错误")]
+    ABasicError,
+
+    #[status_code(500)]
+    #[error(transparent)]
+    SqlxError(#[from] spring_sqlx::sqlx::Error),
+
+    #[status_code(418)]
+    #[error("TeaPod 错误发生: {0:?}")]
+    TeaPod(CustomErrorSchema),
+}
+
+#[derive(Debug, JsonSchema)]
+pub struct CustomErrorSchema {
+    pub code: u16,
+    pub message: String,
+}
+```
