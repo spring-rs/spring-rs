@@ -93,11 +93,21 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
 
         // Generate Problem Details mapping with support for custom attributes
         let problem_details_expr = generate_problem_details_for_variant(
+            ident,
+            &variant.ident,
+            &variant.fields,
             status_code_lit, 
             &variant_name, 
             &variant.attrs,
             is_transparent
         )?;
+        
+        let pattern = match &variant.fields {
+            Fields::Unit => quote! { #ident::#variant_ident },
+            Fields::Unnamed(_) => quote! { #ident::#variant_ident(ref inner) },
+            Fields::Named(_) => quote! { #ident::#variant_ident { .. } },
+        };
+        
         problem_details_arms.push(quote! {
             #pattern => #problem_details_expr
         });
@@ -198,28 +208,49 @@ fn has_transparent_attribute(attrs: &[syn::Attribute]) -> bool {
 }
 
 fn generate_problem_details_for_variant(
+    enum_ident: &syn::Ident,
+    variant_ident: &syn::Ident,
+    variant_fields: &Fields,
     status_code: u16, 
     variant_name: &str, 
     attrs: &[Attribute],
-    _is_transparent: bool
+    is_transparent: bool
 ) -> syn::Result<TokenStream> {
     // 解析自定义属性
     let problem_type = get_problem_type_from_attrs(attrs)?;
     let title = get_title_from_attrs(attrs)?;
     let detail = get_detail_from_attrs(attrs)?;
     let instance = get_instance_from_attrs(attrs)?;
+    let error_format = get_error_format_from_attrs(attrs)?;
     
     // 如果有自定义的 problem_type，使用它；否则根据状态码自动生成
     let problem_details_expr = if let Some(custom_type) = problem_type {
-        let title = title.unwrap_or_else(|| format!("{} Error", variant_name));
-        let detail = detail.unwrap_or_else(|| format!("{} occurred", variant_name));
+        let title_expr = if let Some(title_val) = title {
+            quote! { #title_val.to_string() }
+        } else if let Some(error_fmt) = &error_format {
+            // 如果有格式化的 error 属性，使用格式化后的字符串作为 title
+            generate_format_expr(enum_ident, variant_ident, variant_fields, error_fmt)?
+        } else {
+            let default_title = format!("{} Error", variant_name);
+            quote! { #default_title.to_string() }
+        };
+        
+        let detail_expr = if let Some(detail_val) = detail {
+            quote! { #detail_val.to_string() }
+        } else if let Some(error_fmt) = &error_format {
+            // 如果有格式化的 error 属性，也可以用作 detail
+            generate_format_expr(enum_ident, variant_ident, variant_fields, error_fmt)?
+        } else {
+            let default_detail = format!("{} occurred", variant_name);
+            quote! { #default_detail.to_string() }
+        };
         
         let mut builder = quote! {
             ::spring_web::problem_details::ProblemDetails::new(
                 #custom_type,
-                #title,
+                #title_expr,
                 #status_code
-            ).with_detail(#detail)
+            ).with_detail(#detail_expr)
         };
         
         if let Some(instance_val) = instance {
@@ -231,9 +262,16 @@ fn generate_problem_details_for_variant(
         // 使用默认的状态码映射，problem_type 使用 about:blank
         match status_code {
             400 => {
-                let detail = detail.unwrap_or_else(|| format!("{} occurred", variant_name));
+                let detail_expr = if let Some(detail_val) = detail {
+                    quote! { #detail_val.to_string() }
+                } else if let Some(error_fmt) = &error_format {
+                    generate_format_expr(enum_ident, variant_ident, variant_fields, error_fmt)?
+                } else {
+                    let default_detail = format!("{} occurred", variant_name);
+                    quote! { #default_detail.to_string() }
+                };
                 quote! {
-                    ::spring_web::problem_details::ProblemDetails::validation_error(#detail)
+                    ::spring_web::problem_details::ProblemDetails::validation_error(#detail_expr)
                 }
             },
             401 => quote! {
@@ -243,13 +281,27 @@ fn generate_problem_details_for_variant(
                 ::spring_web::problem_details::ProblemDetails::authorization_error()
             },
             404 => {
-                let resource = detail.unwrap_or_else(|| "resource".to_string());
+                let resource_expr = if let Some(detail_val) = detail {
+                    quote! { #detail_val.to_string() }
+                } else if let Some(error_fmt) = &error_format {
+                    generate_format_expr(enum_ident, variant_ident, variant_fields, error_fmt)?
+                } else {
+                    quote! { "resource".to_string() }
+                };
                 quote! {
-                    ::spring_web::problem_details::ProblemDetails::not_found(#resource)
+                    ::spring_web::problem_details::ProblemDetails::not_found(#resource_expr)
                 }
             },
-            500 => quote! {
-                ::spring_web::problem_details::ProblemDetails::internal_server_error()
+            500 => {
+                if is_transparent {
+                    quote! {
+                        ::spring_web::problem_details::ProblemDetails::internal_server_error()
+                    }
+                } else {
+                    quote! {
+                        ::spring_web::problem_details::ProblemDetails::internal_server_error()
+                    }
+                }
             },
             503 => quote! {
                 ::spring_web::problem_details::ProblemDetails::service_unavailable()
@@ -257,15 +309,31 @@ fn generate_problem_details_for_variant(
             _ => {
                 // 对于其他状态码，使用 about:blank 作为默认 problem_type
                 let problem_type = "about:blank".to_string();
-                let title = title.unwrap_or_else(|| format!("{} Error", variant_name));
-                let detail = detail.unwrap_or_else(|| format!("{} occurred", variant_name));
+                
+                let title_expr = if let Some(title_val) = title {
+                    quote! { #title_val.to_string() }
+                } else if let Some(error_fmt) = &error_format {
+                    generate_format_expr(enum_ident, variant_ident, variant_fields, error_fmt)?
+                } else {
+                    let default_title = format!("{} Error", variant_name);
+                    quote! { #default_title.to_string() }
+                };
+                
+                let detail_expr = if let Some(detail_val) = detail {
+                    quote! { #detail_val.to_string() }
+                } else if let Some(error_fmt) = &error_format {
+                    generate_format_expr(enum_ident, variant_ident, variant_fields, error_fmt)?
+                } else {
+                    let default_detail = format!("{} occurred", variant_name);
+                    quote! { #default_detail.to_string() }
+                };
                 
                 let mut builder = quote! {
                     ::spring_web::problem_details::ProblemDetails::new(
                         #problem_type,
-                        #title,
+                        #title_expr,
                         #status_code
-                    ).with_detail(#detail)
+                    ).with_detail(#detail_expr)
                 };
                 
                 if let Some(instance_val) = instance {
@@ -304,8 +372,14 @@ fn get_title_from_attrs(attrs: &[Attribute]) -> syn::Result<Option<String>> {
         if attr.path().is_ident("error") {
             // 解析 error 属性的内容
             if let Ok(meta) = attr.parse_args::<syn::LitStr>() {
+                let error_msg = meta.value();
+                // 检查是否包含格式化参数，如果包含则不使用作为 title
+                if error_msg.contains('{') && error_msg.contains('}') {
+                    // 包含格式化参数，不适合直接作为 title
+                    return Ok(None);
+                }
                 // 如果是简单的字符串字面量，使用它作为 title
-                return Ok(Some(meta.value()));
+                return Ok(Some(error_msg));
             }
         }
     }
@@ -331,6 +405,55 @@ fn get_instance_from_attrs(attrs: &[Attribute]) -> syn::Result<Option<String>> {
         }
     }
     Ok(None)
+}
+
+fn get_error_format_from_attrs(attrs: &[Attribute]) -> syn::Result<Option<String>> {
+    for attr in attrs {
+        if attr.path().is_ident("error") {
+            // 检查是否是 transparent
+            if let Ok(meta) = attr.parse_args::<syn::Ident>() {
+                if meta == "transparent" {
+                    return Ok(None);
+                }
+            }
+            
+            // 尝试解析为字符串字面量
+            if let Ok(meta) = attr.parse_args::<syn::LitStr>() {
+                let error_msg = meta.value();
+                // 如果包含格式化参数，返回格式化字符串
+                if error_msg.contains('{') && error_msg.contains('}') {
+                    return Ok(Some(error_msg));
+                }
+            }
+        }
+    }
+    Ok(None)
+}
+
+fn generate_format_expr(
+    _enum_ident: &syn::Ident,
+    _variant_ident: &syn::Ident,
+    variant_fields: &Fields,
+    format_str: &str,
+) -> syn::Result<TokenStream> {
+    match variant_fields {
+        Fields::Unit => {
+            // 单元变体，直接返回格式化字符串（不应该有参数）
+            Ok(quote! { #format_str.to_string() })
+        },
+        Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+            // 单个未命名字段，使用 inner 作为格式化参数
+            Ok(quote! { format!(#format_str, inner) })
+        },
+        Fields::Unnamed(_) => {
+            // 多个未命名字段，暂时不支持复杂格式化
+            Ok(quote! { #format_str.to_string() })
+        },
+        Fields::Named(_) => {
+            // 命名字段，暂时不支持复杂格式化
+            Ok(quote! { #format_str.to_string() })
+        }
+    }
 }
 
 #[cfg(test)]
@@ -401,6 +524,50 @@ mod tests {
         
         let result = get_title_from_attrs(&attrs).unwrap();
         assert_eq!(result, Some("Validation Failed".to_string()));
+    }
+
+    #[test]
+    fn test_get_title_from_error_attr_with_params() {
+        // 测试包含格式化参数的 error 属性不会被用作 title
+        let attrs: Vec<syn::Attribute> = vec![
+            syn::parse_quote! { #[error("Error occurred: {0:?}")] }
+        ];
+        
+        let result = get_title_from_attrs(&attrs).unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_get_error_format_from_attrs() {
+        // 测试提取格式化的 error 属性
+        let attrs: Vec<syn::Attribute> = vec![
+            syn::parse_quote! { #[error("TeaPod error occurred: {0:?}")] }
+        ];
+        
+        let result = get_error_format_from_attrs(&attrs).unwrap();
+        assert_eq!(result, Some("TeaPod error occurred: {0:?}".to_string()));
+    }
+
+    #[test]
+    fn test_generate_format_expr() {
+        use syn::{Fields, FieldsUnnamed, Field};
+        
+        let enum_ident = syn::parse_quote! { TestEnum };
+        let variant_ident = syn::parse_quote! { TestVariant };
+        
+        // 创建一个包含单个未命名字段的 Fields
+        let field: Field = syn::parse_quote! { CustomErrorSchema };
+        let mut unnamed = syn::punctuated::Punctuated::new();
+        unnamed.push(field);
+        let fields = Fields::Unnamed(FieldsUnnamed {
+            paren_token: Default::default(),
+            unnamed,
+        });
+        
+        let result = generate_format_expr(&enum_ident, &variant_ident, &fields, "Error: {0:?}").unwrap();
+        let expected = quote! { format!("Error: {0:?}", inner) };
+        
+        assert_eq!(result.to_string(), expected.to_string());
     }
 
     #[test]

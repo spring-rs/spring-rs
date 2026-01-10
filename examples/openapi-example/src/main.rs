@@ -80,7 +80,6 @@ pub enum ApiErrors {
     RateLimitExceeded,
 }
 
-// ToProblemDetails 现在是自动生成的！
 
 impl IntoResponse for ApiErrors {
     fn into_response(self) -> spring_web::axum::response::Response {
