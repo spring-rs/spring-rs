@@ -14,12 +14,14 @@ pub mod handler;
 pub mod middleware;
 #[cfg(feature = "openapi")]
 pub mod openapi;
+/// RFC 7807 Problem Details for HTTP APIs
+pub mod problem_details;
 
 pub trait HttpStatusCode {
     fn status_code(&self) -> axum::http::StatusCode;
 }
 
-pub use spring_macros::HttpStatusCode;
+pub use spring_macros::ProblemDetails;
 
 #[cfg(feature = "socket_io")]
 pub use { socketioxide, rmpv };

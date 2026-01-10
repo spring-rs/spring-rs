@@ -5,7 +5,7 @@
 mod auto;
 mod cache;
 mod config;
-mod http_status_code;
+mod problem_details;
 mod inject;
 mod job;
 mod middlewares;
@@ -329,30 +329,80 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// HttpStatusCode derive macro
+/// ProblemDetails derive macro
 ///
-/// Automatically implements the `HttpStatusCode` trait for enums.
+/// Derives both `HttpStatusCode` and `ToProblemDetails` traits for error enums.
+/// This macro automatically generates implementations for converting error variants
+/// to HTTP status codes and RFC 7807 Problem Details responses.
+///
 /// Each variant must have a `#[status_code(code)]` attribute.
+/// 
+/// ## Supported Attributes
+/// 
+/// - `#[status_code(code)]` - **Required**: HTTP status code (e.g., 400, 404, 500)
+/// - `#[problem_type("uri")]` - **Optional**: Custom problem type URI
+/// - `#[title("title")]` - **Optional**: Custom problem title
+/// - `#[detail("detail")]` - **Optional**: Custom problem detail message
+/// - `#[instance("uri")]` - **Optional**: Problem instance URI
 ///
-/// # Example
+/// ## Title Compatibility
+/// 
+/// The `title` field can be automatically derived from the `#[error("...")]` attribute
+/// if no explicit `#[title("...")]` is provided. This provides compatibility with
+/// `thiserror::Error` and reduces duplication.
+///
+/// ## Basic Example
 /// ```rust,ignore
-/// use spring_web::HttpStatusCode;
+/// use spring_web::ProblemDetails;
 ///
-/// #[derive(HttpStatusCode)]
+/// #[derive(ProblemDetails)]
 /// pub enum ApiError {
-///     #[status_code(401)]
-///     Unauthorized,
-///     #[status_code(403)]
-///     Forbidden,
+///     #[status_code(400)]
+///     ValidationError,
 ///     #[status_code(404)]
+///     NotFound,
+///     #[status_code(500)]
+///     InternalError,
+/// }
+/// ```
+///
+/// ## Advanced Example with Custom Attributes
+/// ```rust,ignore
+/// #[derive(ProblemDetails)]
+/// pub enum ApiError {
+///     // Explicit title
+///     #[status_code(400)]
+///     #[title("Input Validation Failed")]
+///     #[detail("The provided input data is invalid")]
+///     #[error("Validation error")]
+///     ValidationError,
+///     
+///     // Title derived from error attribute
+///     #[status_code(422)]
+///     #[detail("Request data failed validation")]
+///     #[error("Validation Failed")]  // This becomes the title
+///     ValidationFailed,
+///     
+///     // Full customization
+///     #[status_code(404)]
+///     #[problem_type("https://api.example.com/problems/not-found")]
+///     #[title("Resource Not Found")]
+///     #[detail("The requested resource could not be found")]
+///     #[instance("/users/123")]
+///     #[error("Not found")]
 ///     NotFound,
 /// }
 /// ```
-#[proc_macro_derive(HttpStatusCode, attributes(status_code))]
-pub fn derive_http_status_code(input: TokenStream) -> TokenStream {
+///
+/// This will automatically implement:
+/// - `HttpStatusCode` trait for getting HTTP status codes
+/// - `ToProblemDetails` trait for converting to Problem Details responses
+/// - OpenAPI integration for documentation generation
+#[proc_macro_derive(ProblemDetails, attributes(status_code, problem_type, title, detail, instance))]
+pub fn derive_problem_details(input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input as DeriveInput);
 
-    http_status_code::expand_derive(input)
+    problem_details::expand_derive(input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
 }

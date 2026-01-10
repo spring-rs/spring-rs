@@ -286,15 +286,15 @@ The status_codes annotation specifies the possible error types that the API may 
 
 In case of want to define custom error types, you must implement the `HttpStatusCode` trait for your error type, which is used to map the error to an HTTP status code in the OpenAPI documentation.
 
-We can use the derive macro `HttpStatusCode` to automatically implement the `HttpStatusCode` trait for our custom error type.
+We can use the derive macro `ProblemDetails` to automatically implement both the `HttpStatusCode` and `ToProblemDetails` traits for our custom error type.
 
 In this case we are implementing `thiserror::Error` for better error handling, but it's not mandatory.
 
 ```rust,ignore
-use spring_web::error::HttpStatusCode;
+use spring_web::ProblemDetails;
 use spring_web::axum::http::StatusCode;
 
-#[derive(thiserror::Error, Debug, HttpStatusCode)]
+#[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum CustomErrors {
     #[status_code(400)]
     #[error("A basic error occurred")]
@@ -313,6 +313,249 @@ pub enum CustomErrors {
 pub struct CustomErrorSchema {
     pub code: u16,
     pub message: String,
+}
+```
+
+## Simplified Error Handling with Automatic Problem Details
+
+The `ProblemDetails` derive macro automatically generates both `HttpStatusCode` and `ToProblemDetails` implementations, eliminating the need for manual mapping:
+
+```rust,ignore
+use spring_web::ProblemDetails;
+
+// Only need ProblemDetails derive - HttpStatusCode and ToProblemDetails are generated automatically!
+#[derive(thiserror::Error, Debug, ProblemDetails)]
+pub enum ApiErrors {
+    // Basic usage - uses about:blank as problem type
+    #[status_code(400)]
+    #[error("Validation failed")]
+    ValidationError,
+
+    // Custom problem type with full URI
+    #[status_code(401)]
+    #[problem_type("https://api.myapp.com/problems/authentication-required")]
+    #[error("Authentication required")]
+    AuthenticationError,
+
+    // Custom problem type with all fields
+    #[status_code(404)]
+    #[problem_type("https://api.myapp.com/problems/resource-not-found")]
+    #[title("Resource Not Found")]
+    #[detail("The requested resource could not be found")]
+    #[error("Resource not found")]
+    NotFoundError,
+}
+
+impl IntoResponse for ApiErrors {
+    fn into_response(self) -> Response {
+        // Both HttpStatusCode and ToProblemDetails are automatically implemented!
+        self.to_problem_details().into_response()
+    }
+}
+```
+
+The macro automatically maps common HTTP status codes to appropriate Problem Details:
+- `400` → `ProblemDetails::validation_error()` (uses `about:blank`)
+- `401` → `ProblemDetails::authentication_error()` (uses `about:blank`)
+- `403` → `ProblemDetails::authorization_error()` (uses `about:blank`)
+- `404` → `ProblemDetails::not_found()` (uses `about:blank`)
+- `500` → `ProblemDetails::internal_server_error()` (uses `about:blank`)
+- `503` → `ProblemDetails::service_unavailable()` (uses `about:blank`)
+- Other codes → Uses `about:blank` as problem type
+
+## Advanced Problem Details with Custom Attributes
+
+The `ProblemDetails` derive macro supports additional attributes for fine-grained control over the generated Problem Details:
+
+```rust,ignore
+use spring_web::ProblemDetails;
+
+#[derive(thiserror::Error, Debug, ProblemDetails)]
+pub enum ApiError {
+    // Basic usage - auto-generated fields
+    #[status_code(400)]
+    #[error("Validation failed")]
+    BasicValidation,
+
+    // Custom problem type and title
+    #[status_code(400)]
+    #[problem_type("https://api.myapp.com/problems/field-validation")]
+    #[title("Field Validation Error")]
+    #[error("Field validation failed")]
+    FieldValidation,
+
+    // Full customization
+    #[status_code(403)]
+    #[problem_type("https://api.myapp.com/problems/insufficient-permissions")]
+    #[title("Insufficient Permissions")]
+    #[detail("You need admin privileges to perform this action")]
+    #[instance("/admin/users")]
+    #[error("Access denied")]
+    InsufficientPermissions,
+}
+```
+
+### Supported Attributes
+
+- `#[status_code(code)]` - **Required**: HTTP status code
+- `#[problem_type("uri")]` - **Optional**: Custom problem type URI
+- `#[title("title")]` - **Optional**: Custom problem title
+- `#[detail("detail")]` - **Optional**: Custom problem detail message  
+- `#[instance("uri")]` - **Optional**: Problem instance URI
+
+### Title Compatibility
+
+The `title` field can be automatically derived from the `#[error("...")]` attribute if no explicit `#[title("...")]` is provided. This provides compatibility with `thiserror::Error` and reduces duplication:
+
+```rust,ignore
+#[derive(thiserror::Error, Debug, ProblemDetails)]
+pub enum ApiError {
+    // Title explicitly set
+    #[status_code(400)]
+    #[title("Custom Validation Error")]
+    #[error("Validation failed")]
+    ExplicitTitle,
+    
+    // Title derived from error attribute
+    #[status_code(422)]
+    #[detail("Request data is invalid")]
+    #[error("Validation Failed")]  // This becomes the title
+    ImplicitTitle,
+}
+```
+
+### Generated Response Examples
+
+**BasicValidation** (auto-generated):
+```json
+{
+  "type": "about:blank/basic-validation",
+  "title": "Basic Validation Error",
+  "status": 400,
+  "detail": "BasicValidation occurred"
+}
+```
+
+**InsufficientPermissions** (fully customized):
+```json
+{
+  "type": "https://api.myapp.com/problems/insufficient-permissions",
+  "title": "Insufficient Permissions",
+  "status": 403,
+  "detail": "You need admin privileges to perform this action",
+  "instance": "/admin/users"
+}
+```
+
+```rust,ignore
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(WebPlugin)
+        .run()
+        .await;
+}
+```
+
+Then implement error handling:
+
+```rust,ignore
+use spring_web::ProblemDetails;
+
+#[derive(thiserror::Error, Debug, ProblemDetails)]
+pub enum CustomErrors {
+    // Basic usage - uses about:blank as problem type
+    #[status_code(400)]
+    #[error("A basic error occurred")]
+    ABasicError,
+
+    // Custom problem type
+    #[status_code(500)]
+    #[problem_type("https://api.myapp.com/problems/database-error")]
+    #[error(transparent)]
+    SqlxError(#[from] spring_sqlx::sqlx::Error),
+
+    #[status_code(418)]
+    #[error("TeaPod error occurred: {0:?}")]
+    TeaPod(CustomErrorSchema),
+}
+
+// Implement Problem Details conversion
+impl ToProblemDetails for CustomErrors {
+    fn to_problem_details(&self) -> ProblemDetails {
+        match self {
+            CustomErrors::ABasicError => {
+                ProblemDetails::validation_error("A basic validation error occurred")
+            }
+            CustomErrors::SqlxError(err) => {
+                ProblemDetails::custom_problem(
+                    "database-error",
+                    "Database Error", 
+                    500,
+                ).with_detail(format!("Database operation failed: {}", err))
+            }
+            CustomErrors::TeaPod(schema) => {
+                ProblemDetails::custom_problem(
+                    "teapot-error",
+                    "I'm a teapot",
+                    418,
+                ).with_detail(format!("TeaPod error: {}", schema.message))
+            }
+        }
+    }
+}
+
+impl IntoResponse for CustomErrors {
+    fn into_response(self) -> Response {
+        self.to_problem_details().into_response()
+    }
+}
+```
+
+The Problem Details response will be formatted as:
+
+```json
+{
+  "type": "https://api.myapp.com/problems/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "A basic validation error occurred"
+}
+```
+
+### Automatic Instance URI Capture
+
+Problem Details can automatically capture the current request URI and include it in the `instance` field. This requires adding the capture middleware:
+
+```rust,ignore
+use spring_web::problem_details::capture_request_uri_middleware;
+
+// Add the middleware to your router
+let app = Router::new()
+    .route("/users/:id", get(get_user))
+    .layer(axum::middleware::from_fn(capture_request_uri_middleware));
+
+// Your handler doesn't need to manually handle URIs
+#[get_api("/users/{id}")]
+async fn get_user(Path(id): Path<u32>) -> Result<Json<User>, ApiError> {
+    if id == 999 {
+        // The instance field will automatically be set to "/users/999"
+        return Err(ApiError::NotFound);
+    }
+    
+    Ok(Json(User { id, name: "User".to_string() }))
+}
+```
+
+This will automatically generate responses with the request URI:
+
+```json
+{
+  "type": "https://api.myapp.com/problems/not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "The requested resource was not found",
+  "instance": "/users/999"
 }
 ```
 
