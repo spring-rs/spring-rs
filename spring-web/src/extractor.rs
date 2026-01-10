@@ -6,8 +6,10 @@ use anyhow::Context;
 use axum::http::request::Parts;
 use spring::config::{ConfigRegistry, Configurable};
 use spring::plugin::ComponentRegistry;
+use spring::App;
 use std::ops::{Deref, DerefMut};
 use std::result::Result as StdResult;
+use std::sync::Arc;
 
 /// Extending the functionality of RequestParts
 pub trait RequestPartsExt {
@@ -115,14 +117,31 @@ where
     }
 }
 
+/// Extract Arc<App>
+pub struct AppRef(pub Arc<App>);
+
+impl<S> FromRequestParts<S> for AppRef
+where
+    S: Sync,
+{
+    type Rejection = WebError;
+
+    async fn from_request_parts(parts: &mut Parts, _s: &S) -> StdResult<Self, Self::Rejection> {
+        Ok(Self(parts.get_app_state().app.clone()))
+    }
+}
+
+#[cfg(feature = "openapi")]
+impl aide::OperationInput for AppRef {}
+
 #[cfg(feature = "socket_io")]
 mod socketio_extractors {
     use super::*;
     use crate::socketioxide::adapter::LocalAdapter;
+    use crate::socketioxide::extract::HttpExtension;
     use crate::socketioxide::handler::connect::FromConnectParts;
     use crate::socketioxide::handler::disconnect::FromDisconnectParts;
     use crate::socketioxide::handler::message::FromMessageParts;
-    use crate::socketioxide::extract::HttpExtension;
     use crate::socketioxide::socket::{DisconnectReason, Socket};
     use socketioxide::handler::Value;
     use std::sync::Arc;
@@ -149,12 +168,12 @@ mod socketio_extractors {
             _auth: &Option<Value>,
         ) -> StdResult<Self, Self::Error> {
             let app = HttpExtension::<AppState>::from_connect_parts(s, _auth)
-                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
-            
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {e}")))?;
+
             app.app
                 .try_get_component()
                 .map(|c| Component(c))
-                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {e}")))
         }
     }
 
@@ -170,12 +189,12 @@ mod socketio_extractors {
             _ack_id: &Option<i64>,
         ) -> StdResult<Self, Self::Error> {
             let app = HttpExtension::<AppState>::from_message_parts(s, _data, _ack_id)
-                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
-            
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {e}")))?;
+
             app.app
                 .try_get_component()
                 .map(|c| Component(c))
-                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {e}")))
         }
     }
 
@@ -190,12 +209,12 @@ mod socketio_extractors {
             reason: DisconnectReason,
         ) -> StdResult<Self, Self::Error> {
             let app = HttpExtension::<AppState>::from_disconnect_parts(s, reason)
-                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {}", e)))?;
-            
+                .map_err(|e| ComponentExtractError(format!("Failed to extract AppState: {e}")))?;
+
             app.app
                 .try_get_component()
                 .map(|c| Component(c))
-                .map_err(|e| ComponentExtractError(format!("Failed to get component: {}", e)))
+                .map_err(|e| ComponentExtractError(format!("Failed to get component: {e}")))
         }
     }
 }

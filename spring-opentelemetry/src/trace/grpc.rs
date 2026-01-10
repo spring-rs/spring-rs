@@ -155,7 +155,7 @@ impl<S> GrpcService<S> {
                 let context = opentelemetry::global::get_text_map_propagator(|extractor| {
                     extractor.extract(&HeaderExtractor(request.headers()))
                 });
-                span.set_parent(context);
+                let _ = span.set_parent(context);
             }
         }
 

@@ -42,7 +42,7 @@ struct UserConfig {
     username: String,
     project: String,
     #[serde(default)]
-    init_count: i32,
+    star_count: i32,
 }
 
 #[derive(Clone)]
@@ -56,7 +56,7 @@ struct UserService {
     optional_comp: Option<OptionalComponent>, // OptionalComponent does not exist, so it is none
     #[inject(config)]
     config: UserConfig,
-    #[inject(func = Self::init_count(&config))]
+    #[inject(func = Self::init_star_count(&config))]
     count: Arc<AtomicI32>,
 }
 
@@ -99,8 +99,8 @@ impl UserService {
         ))
     }
 
-    fn init_count(config: &UserConfig) -> Arc<AtomicI32> {
-        Arc::new(AtomicI32::new(config.init_count))
+    fn init_star_count(config: &UserConfig) -> Arc<AtomicI32> {
+        Arc::new(AtomicI32::new(config.star_count))
     }
 }
 

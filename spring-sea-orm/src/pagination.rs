@@ -118,7 +118,10 @@ mod web {
         fn inferred_early_responses(
             ctx: &mut spring_web::aide::generate::GenContext,
             operation: &mut spring_web::aide::openapi::Operation,
-        ) -> Vec<(Option<u16>, spring_web::aide::openapi::Response)> {
+        ) -> Vec<(
+            Option<spring_web::aide::openapi::StatusCode>,
+            spring_web::aide::openapi::Response,
+        )> {
             <Query<OptionalPagination> as spring_web::aide::OperationInput>::inferred_early_responses(ctx, operation)
         }
     }

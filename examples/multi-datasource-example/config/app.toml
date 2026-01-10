@@ -1,0 +1,8 @@
+[multi-datasource.primary]
+uri = "${PRIMARY_DATABASE_URL}"
+enable_logging = true
+
+
+[multi-datasource.secondary]
+uri = "${SECONDARY_DATABASE_URL}"
+enable_logging = true

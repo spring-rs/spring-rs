@@ -1,27 +1,47 @@
 use anyhow::Context;
 use spring::{auto_config, App};
-use spring_job::{cron, fix_delay, fix_rate};
+use spring_job::job::Job;
+use spring_job::{cron, fix_delay, fix_rate, JobScheduler};
 use spring_job::{extractor::Component, JobConfigurator, JobPlugin};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,
 };
+use spring_web::axum::response::IntoResponse;
+use spring_web::extractor::AppRef;
+use spring_web::{
+    error::Result, extractor::Component as WebComponent, get, WebConfigurator, WebPlugin,
+};
 use std::time::{Duration, SystemTime};
 
-#[auto_config(JobConfigurator)]
+#[auto_config(JobConfigurator, WebConfigurator)]
 #[tokio::main]
 async fn main() {
     App::new()
         .add_plugin(JobPlugin)
         .add_plugin(SqlxPlugin)
-        .add_scheduler(|_| Box::new(wait_for_job()))
+        .add_plugin(WebPlugin)
         .run()
         .await;
 }
 
-async fn wait_for_job() -> spring::error::Result<String> {
-    tokio::time::sleep(Duration::from_secs(100)).await;
-    Ok("100s finished".to_string())
+#[get("/")]
+async fn new_job(
+    WebComponent(sched): WebComponent<JobScheduler>,
+    AppRef(app): AppRef,
+) -> Result<impl IntoResponse> {
+    sched
+        .add(Job::one_shot(3).run(after_3s_job).build(app))
+        .await
+        .context("register job failed")?;
+    Ok("ok")
+}
+
+async fn after_3s_job() {
+    let now = SystemTime::now();
+    let datetime: sqlx::types::chrono::DateTime<sqlx::types::chrono::Local> = now.into();
+    let formatted_time = datetime.format("%Y-%m-%d %H:%M:%S");
+    println!("one shot scheduled: {:?}", formatted_time)
 }
 
 #[cron("1/10 * * * * *")]
