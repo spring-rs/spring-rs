@@ -40,9 +40,11 @@ async fn main() {
 /// queries the database for its version. The `error_request` route demonstrates error handling.
 #[middlewares(
     middleware::from_fn(problem_middleware),
-    TimeoutLayer::new(Duration::from_secs(10))
+    TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(10))
 )]
 mod routes {
+    use spring_web::axum::http::StatusCode;
+
     use super::*;
 
     #[get("/")]
@@ -107,10 +109,12 @@ async fn problem_middleware(
 #[middlewares(
     middleware::from_fn(logging_middleware),
     middleware::from_fn(auth_middleware),
-    TimeoutLayer::new(Duration::from_secs(10)),
+    TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(10)),
     CorsLayer::permissive()
 )]
 mod protected_routes {
+    use spring_web::axum::http::StatusCode;
+
     use super::*;
 
     #[get("/protected")]
@@ -154,13 +158,13 @@ async fn auth_middleware(
 #[middlewares(
     middleware::from_fn(logging_middleware),
     middleware::from_fn(auth_middleware),
-    TimeoutLayer::new(Duration::from_secs(10)),
+    TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(10)),
     CorsLayer::permissive()
 )]
 #[nest("/api")]
 mod api {
 
-    use spring_web::extractor::Path;
+    use spring_web::{axum::http::StatusCode, extractor::Path};
 
     use super::*;
 

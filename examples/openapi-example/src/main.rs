@@ -1,14 +1,14 @@
-use std::fmt::Display;
-
 use schemars::JsonSchema;
 use serde::Serialize;
 use spring::{auto_config, App};
 use spring_sqlx::SqlxPlugin;
 use spring_web::axum::response::IntoResponse;
 use spring_web::axum::Json;
+use spring_web::extractor::Path;
 use spring_web::get_api;
 use spring_web::WebPlugin;
 use spring_web::WebConfigurator;
+use spring_web::problem_details::ToProblemDetails;
 use spring_web::ProblemDetails;
 
 #[auto_config(WebConfigurator)]
@@ -115,7 +115,7 @@ impl UserInfo {
 /// @tag User
 /// @status_codes ApiErrors::BadRequest, ApiErrors::ValidationFailed, ApiErrors::AuthenticationRequired, ApiErrors::NotFoundError, ApiErrors::RateLimitExceeded
 #[get_api("/user-info/{id}")]
-async fn user_info_api(id: u32) -> Result<Json<UserInfo>, ApiErrors> {
+async fn user_info_api(Path(id): Path<u32>) -> Result<Json<UserInfo>, ApiErrors> {
     match id {
         0 => Err(ApiErrors::BadRequest),
         1 => Err(ApiErrors::InvalidEmail),

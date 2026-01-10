@@ -127,7 +127,7 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
             fn inferred_responses(
                 _ctx: &mut ::spring_web::aide::generate::GenContext,
                 _operation: &mut ::spring_web::aide::openapi::Operation,
-            ) -> Vec<(Option<u16>, ::spring_web::aide::openapi::Response)> {
+            ) -> Vec<(Option<::spring_web::aide::openapi::StatusCode>, ::spring_web::aide::openapi::Response)> {
                 vec![]
             }
         }
