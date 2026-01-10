@@ -292,16 +292,8 @@ fn generate_problem_details_for_variant(
                     ::spring_web::problem_details::ProblemDetails::not_found(#resource_expr)
                 }
             },
-            500 => {
-                if is_transparent {
-                    quote! {
-                        ::spring_web::problem_details::ProblemDetails::internal_server_error()
-                    }
-                } else {
-                    quote! {
-                        ::spring_web::problem_details::ProblemDetails::internal_server_error()
-                    }
-                }
+            500 => quote! {
+                ::spring_web::problem_details::ProblemDetails::internal_server_error()
             },
             503 => quote! {
                 ::spring_web::problem_details::ProblemDetails::service_unavailable()
