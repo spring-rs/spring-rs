@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.4.6
+
+- **changed**: upgrade `tokio-cron-scheduler` 0.14 to 0.15 ([#197])
+
+[#197]: https://github.com/spring-rs/spring-rs/pull/197
+
+## 0.4.5
+
+- **changed**: feat: ✨ fix Job api ([#195])
+
+[#195]: https://github.com/spring-rs/spring-rs/pull/195
+
+## 0.4.4
+
+- **changed**: feat: ✨ fix Job api ([#195])
+
+[#195]: https://github.com/spring-rs/spring-rs/pull/195
+
+## 0.4.3
+
+- **added**: feat: ✨ job support data ([#193])
+
+[#193]: https://github.com/spring-rs/spring-rs/pull/193
+
+## 0.4.2
+
+- **added**: feat: ✨ add job in runtime ([#190])
+
+[#190]: https://github.com/spring-rs/spring-rs/pull/190
+
 ## 0.4.1
 
 - **added**: serde derive

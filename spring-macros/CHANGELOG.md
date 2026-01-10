@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.8
+
+- refactor: 🐛 use ATX head as summary ([#185])
+
+[#185]: https://github.com/spring-rs/spring-rs/pull/185
+
 ## 0.4.7
 
 - feat: ✨ spring-web openapi macros ([#167])

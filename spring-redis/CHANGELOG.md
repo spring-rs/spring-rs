@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4
+
+- **changed**: upgrade `schemars` 0.9 to 1.1 ([#197])
+
+[#197]: https://github.com/spring-rs/spring-rs/pull/197
+
 ## 0.4.3
 
 - **changed**: upgrade `redis-rs` 0.29 to 0.32 ([#154])

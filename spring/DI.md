@@ -68,6 +68,8 @@ For the complete code, see [`nested-dependency-inject-example`](https://github.c
 
 When two services reference each other, Rust's type system prevents direct circular dependencies. To solve this, you can use `LazyComponent<T>` to break the circular dependency.
 
+> The dependency injection philosophy of spring-rs is inspired by [Google’s Dagger](https://github.com/google/dagger). Circular dependencies are discouraged, as they usually imply unclear business responsibilities and tight coupling.
+
 ```rust
 use spring::plugin::LazyComponent;
 use spring::plugin::service::Service;

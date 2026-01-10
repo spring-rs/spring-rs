@@ -26,6 +26,7 @@ use spring::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
+use tokio_cron_scheduler::JobSchedulerError;
 use uuid::Uuid;
 
 #[derive(Clone, Default)]
@@ -107,12 +108,56 @@ pub struct JobPlugin;
 #[async_trait]
 impl Plugin for JobPlugin {
     async fn build(&self, app: &mut AppBuilder) {
-        app.add_scheduler(|app: Arc<App>| Box::new(Self::schedule(app)));
+        let sched = Self::new_scheduler().await.expect("build scheduler failed");
+        app.add_component(sched)
+            .add_scheduler(|app: Arc<App>| Box::new(Self::schedule(app)));
     }
 }
 
 impl JobPlugin {
+    async fn new_scheduler() -> std::result::Result<JobScheduler, JobSchedulerError> {
+        #[cfg(feature = "postgres_storage")]
+        {
+            let metadata_storage = Box::new(tokio_cron_scheduler::PostgresMetadataStore::default());
+            let notification_storage =
+                Box::new(tokio_cron_scheduler::PostgresNotificationStore::default());
+            let job_code = Box::new(tokio_cron_scheduler::SimpleJobCode::default());
+            let notification_code =
+                Box::new(tokio_cron_scheduler::SimpleNotificationCode::default());
+            JobScheduler::new_with_storage_and_code(
+                metadata_storage,
+                notification_storage,
+                job_code,
+                notification_code,
+                200,
+            )
+            .await
+        }
+        #[cfg(all(not(feature = "postgres_storage"), feature = "nats_storage"))]
+        {
+            let metadata_storage = Box::new(tokio_cron_scheduler::NatsMetadataStore::default());
+            let notification_storage =
+                Box::new(tokio_cron_scheduler::NatsNotificationStore::default());
+            let job_code = Box::new(tokio_cron_scheduler::SimpleJobCode::default());
+            let notification_code =
+                Box::new(tokio_cron_scheduler::SimpleNotificationCode::default());
+            JobScheduler::new_with_storage_and_code(
+                metadata_storage,
+                notification_storage,
+                job_code,
+                notification_code,
+                200,
+            )
+            .await
+        }
+        #[cfg(all(not(feature = "postgres_storage"), not(feature = "nats_storage")))]
+        {
+            JobScheduler::new().await
+        }
+    }
+
     async fn schedule(app: Arc<App>) -> Result<String> {
+        let mut sched = app.get_expect_component::<JobScheduler>();
         let jobs = app.get_component_ref::<Jobs>();
 
         let jobs = match jobs {
@@ -123,8 +168,6 @@ impl JobPlugin {
             }
             Some(jobs) => jobs,
         };
-
-        let mut sched = JobScheduler::new().await.context("job init failed")?;
 
         for job in jobs.deref().iter() {
             sched

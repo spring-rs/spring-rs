@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.13
+
+- **changed**: upgrade `schemars` 0.9 to 1.1 ([#197])
+
+[#197]: https://github.com/spring-rs/spring-rs/pull/197
+
+## 0.4.12
+
+- **added**: AppRef impl OperationInput ([#194])
+
+[#194]: https://github.com/spring-rs/spring-rs/pull/194
+
+## 0.4.11
+
+- **added**: AppRef extractor ([#190])
+
+[#190]: https://github.com/spring-rs/spring-rs/pull/190
+
+## 0.4.10
+
+- **added**: Socket io support using Socketoxide ([#176])
+
+[#176]: https://github.com/spring-rs/spring-rs/pull/176
+
 ## 0.4.9
 
 - **added**: refactor `shutdown_signal` ([#180])

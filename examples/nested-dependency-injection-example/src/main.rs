@@ -1,25 +1,16 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
-use spring::{
-    auto_config,
-    config::Configurable,
-    plugin::service::Service,
-    App,
-};
+use spring::{auto_config, config::Configurable, plugin::service::Service, App};
 use spring_web::get;
 use spring_web::{
     axum::response::IntoResponse, error::Result, extractor::Component, WebConfigurator, WebPlugin,
 };
 
-
 // Main function entry
 #[auto_config(WebConfigurator)] // auto config web router
 #[tokio::main]
 async fn main() {
-    App::new()
-        .add_plugin(WebPlugin)
-        .run()
-        .await
+    App::new().add_plugin(WebPlugin).run().await
 }
 
 #[derive(Clone, Configurable, JsonSchema, Deserialize)]
@@ -28,9 +19,8 @@ struct UserConfig {
     username: String,
     project: String,
     #[serde(default)]
-    init_count: i32,
+    star_count: i32,
 }
-
 
 #[derive(Clone, Service)]
 struct UserService {
@@ -44,12 +34,16 @@ struct BetterUserService {
     user_service: UserService,
 }
 
-impl BetterUserService{
+impl BetterUserService {
     fn get_info(&self) -> String {
-        self.user_service.config.username.clone()
+        let UserConfig {
+            username,
+            project,
+            star_count,
+        } = &self.user_service.config;
+        format!("username: {username}, project: {project}, stars: {star_count}")
     }
 }
-
 
 #[get("/")]
 async fn hello(Component(better_user): Component<BetterUserService>) -> Result<impl IntoResponse> {
