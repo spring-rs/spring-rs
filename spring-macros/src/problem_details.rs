@@ -98,8 +98,7 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
             &variant.fields,
             status_code_lit, 
             &variant_name, 
-            &variant.attrs,
-            is_transparent
+            &variant.attrs
         )?;
         
         let pattern = match &variant.fields {
@@ -213,8 +212,7 @@ fn generate_problem_details_for_variant(
     variant_fields: &Fields,
     status_code: u16, 
     variant_name: &str, 
-    attrs: &[Attribute],
-    is_transparent: bool
+    attrs: &[Attribute]
 ) -> syn::Result<TokenStream> {
     // 解析自定义属性
     let problem_type = get_problem_type_from_attrs(attrs)?;
