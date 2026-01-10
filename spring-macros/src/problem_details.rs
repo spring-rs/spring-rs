@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, Fields, Attribute, Lit, Meta, MetaNameValue, Expr, ExprLit};
+use syn::{Data, DeriveInput, Fields, Attribute};
 
 pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let ident = &input.ident;
@@ -201,7 +201,7 @@ fn generate_problem_details_for_variant(
     status_code: u16, 
     variant_name: &str, 
     attrs: &[Attribute],
-    is_transparent: bool
+    _is_transparent: bool
 ) -> syn::Result<TokenStream> {
     // 解析自定义属性
     let problem_type = get_problem_type_from_attrs(attrs)?;
