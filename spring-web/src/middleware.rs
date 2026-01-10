@@ -23,7 +23,6 @@ use tower_http::{
     trace::TraceLayer,
 };
 use trace::DefaultOnEos;
-use axum::http::StatusCode;
 
 pub use tower_http::*;
 
