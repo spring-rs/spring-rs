@@ -38,12 +38,6 @@ jobs:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Cache target directory
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
-
       - name: Run tests
         run: cargo test --workspace --verbose
 
