@@ -77,7 +77,7 @@ async fn main() {
         .await
 }
 
-#[get("/")]
+#[get("/start")]
 pub async fn start_job(
     Component(mut storage): Component<RedisStorage<LongRunningJob>>,
 ) -> impl IntoResponse {

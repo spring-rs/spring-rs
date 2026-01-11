@@ -28,7 +28,7 @@ pub struct ServerConfig {
     pub(crate) port: u16,
     #[serde(default)]
     pub(crate) connect_info: bool,
-    #[serde(default)]
+    #[serde(default = "default_true")]
     pub(crate) graceful: bool,
 }
 
@@ -47,6 +47,10 @@ fn default_binding() -> IpAddr {
 
 fn default_port() -> u16 {
     8080
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[cfg(feature = "openapi")]

@@ -19,10 +19,10 @@ pub async fn shutdown_signal() {
 
     tokio::select! {
         _ = ctrl_c => {
-            tracing::info!("Received Ctrl+C signal, waiting for web server shutdown")
+            tracing::info!("Received Ctrl+C signal, waiting for application shutdown")
         },
         _ = terminate => {
-            tracing::info!("Received kill signal, waiting for web server shutdown")
+            tracing::info!("Received kill signal, waiting for application shutdown")
         },
     }
 }
