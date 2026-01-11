@@ -20,6 +20,8 @@ pub use apalis_postgres;
 pub use apalis_redis;
 #[cfg(feature = "sql-sqlite")]
 pub use apalis_sqlite;
+#[cfg(any(feature = "sql-postgres", feature = "sql-sqlite", feature = "sql-mysql"))]
+pub use spring_sqlx;
 
 pub struct ApalisPlugin;
 
@@ -44,10 +46,9 @@ impl Plugin for ApalisPlugin {
         vec![std::any::type_name::<spring_redis::RedisPlugin>()]
     }
 
-    #[cfg(any(
-        feature = "sql-postgres",
-        feature = "sql-sqlite",
-        feature = "sql-mysql"
+    #[cfg(all(
+        any(feature = "sql-postgres", feature = "sql-sqlite", feature = "sql-mysql"),
+        not(feature = "redis")
     ))]
     fn dependencies(&self) -> Vec<&str> {
         vec![std::any::type_name::<spring_sqlx::SqlxPlugin>()]
