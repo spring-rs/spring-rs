@@ -9,7 +9,7 @@ authors.workspace = true
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
 spring-redis = { path = "../../spring-redis" }
-spring-apalis = { path = "../../spring-apalis", features = ["redis"] }
+spring-apalis = { path = "../../spring-apalis", features = ["redis", "board", "board-web"] }
 tokio = { workspace = true, features = ["full"] }
 anyhow = { workspace = true }
 serde = { workspace = true }

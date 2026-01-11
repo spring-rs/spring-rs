@@ -3,7 +3,8 @@ use spring::{auto_config, App};
 use spring_sqlx::sqlx::Row;
 use spring_sqlx::{sqlx, ConnectPool, SqlxPlugin};
 use spring_web::error::KnownWebError;
-use spring_web::{middlewares, WebConfigurator};
+use spring_web::get;
+use spring_web::nest;
 use spring_web::{
     axum::{
         body,
@@ -15,11 +16,10 @@ use spring_web::{
     extractor::Request,
     WebPlugin,
 };
+use spring_web::{middlewares, WebConfigurator};
 use std::time::Duration;
-use tower_http::timeout::TimeoutLayer;
-use spring_web::get;
 use tower_http::cors::CorsLayer;
-use spring_web::nest;
+use tower_http::timeout::TimeoutLayer;
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -66,7 +66,6 @@ mod routes {
     async fn error_request() -> Result<String> {
         Err(KnownWebError::bad_request("request error"))?
     }
-
 }
 
 /// ProblemDetail: https://www.rfc-editor.org/rfc/rfc7807
@@ -123,22 +122,19 @@ mod protected_routes {
     }
 }
 
-async fn logging_middleware(
-    request: Request,
-    next: Next,
-) -> Response {
+async fn logging_middleware(request: Request, next: Next) -> Response {
     println!("🔍 [LOGGING] {} {}", request.method(), request.uri().path());
     let response = next.run(request).await;
     println!("✅ [LOGGING] Response completed");
     response
 }
 
-async fn auth_middleware(
-    request: Request,
-    next: Next,
-) -> Response {
-    println!("🔐 [AUTH] Checking authentication for: {}", request.uri().path());
-    
+async fn auth_middleware(request: Request, next: Next) -> Response {
+    println!(
+        "🔐 [AUTH] Checking authentication for: {}",
+        request.uri().path()
+    );
+
     if request.headers().get("Authorization").is_none() {
         return Response::builder()
             .status(401)
@@ -151,8 +147,8 @@ async fn auth_middleware(
 
 /// Example #3:
 /// Middlewares can also be applied to specific routes within a module.
-/// This example demonstrates how to use the `middlewares` macro to apply 
-/// middlewares to a specific route and apply the module's middlewares to the 
+/// This example demonstrates how to use the `middlewares` macro to apply
+/// middlewares to a specific route and apply the module's middlewares to the
 /// method router too.
 
 #[middlewares(
@@ -168,9 +164,7 @@ mod api {
 
     use super::*;
 
-    #[middlewares(
-        middleware::from_fn(problem_middleware)
-    )]
+    #[middlewares(middleware::from_fn(problem_middleware))]
     #[get("/hello")]
     #[get("/hello/")]
     #[get("/hello/{user}")]
@@ -206,4 +200,3 @@ async fn another_route() -> impl IntoResponse {
 async fn goodbye_world() -> impl IntoResponse {
     "goodbye world"
 }
-

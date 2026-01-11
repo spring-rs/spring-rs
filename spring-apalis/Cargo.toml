@@ -1,7 +1,7 @@
 [package]
 name = "spring-apalis"
 description = "Integration of rust application framework spring-rs and apalis"
-version = "0.4.1"
+version = "0.4.2"
 categories = ["date-and-time"]
 keywords = ["cron-scheduler", "task-scheduling", "cron-job", "spring"]
 edition.workspace = true
@@ -10,16 +10,28 @@ authors.workspace = true
 repository.workspace = true
 
 [features]
-redis = ["apalis-redis"]
-sql-postgres = ["apalis-sql", "apalis-sql/postgres"]
-sql-sqlite = ["apalis-sql", "apalis-sql/sqlite"]
-sql-mysql = ["apalis-sql", "apalis-sql/mysql"]
+full = ["apalis/full"]
+redis = ["apalis-redis", "spring-redis"]
+amqp = ["apalis-amqp"]
+sql-postgres = ["apalis-postgres", "spring-sqlx"]
+sql-sqlite = ["apalis-sqlite", "spring-sqlx"]
+sql-mysql = ["apalis-mysql", "spring-sqlx"]
+workflow = ["apalis-workflow"]
+board = ["apalis-board"]
+board-web = ["apalis-board/web"]
 
 [dependencies]
 spring = { path = "../spring", version = "0.4" }
 tower-service = { workspace = true }
 tower-layer = { workspace = true }
 tokio = { workspace = true }
-apalis = { workspace = true, features = ["limit"] }  # Limit for concurrency
-apalis-redis = { workspace = true, optional = true } # Use redis for persistence
-apalis-sql = { workspace = true, optional = true }   # Use redis for persistence
+apalis = { workspace = true }
+apalis-redis = { workspace = true, optional = true }
+apalis-amqp = { workspace = true, optional = true }
+apalis-postgres = { workspace = true, optional = true, features = ["time"] }
+apalis-sqlite = { workspace = true, optional = true, features = ["time"] }
+apalis-mysql = { workspace = true, optional = true, features = ["time"] }
+apalis-workflow = { workspace = true, optional = true }
+apalis-board = { workspace = true, optional = true, features = ["axum"] }
+spring-redis = { path = "../spring-redis", optional = true }
+spring-sqlx = { path = "../spring-sqlx", optional = true }
