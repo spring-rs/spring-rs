@@ -33,9 +33,9 @@ anyhow = "1.0"
 apalis = "1.0.0-rc.2"
 apalis-redis = "1.0.0-rc.2"
 apalis-amqp = "1.0.0-rc.2"
-apalis-postgres = "1.0.0-rc.2"
-apalis-mysql = "1.0.0-rc.2"
-apalis-sqlite = "1.0.0-rc.2"
+apalis-postgres = { version = "1.0.0-rc.2", default-features = false }
+apalis-mysql = { version = "1.0.0-rc.2", default-features = false }
+apalis-sqlite = { version = "1.0.0-rc.2", default-features = false }
 apalis-workflow = "0.1.0-rc.2"
 apalis-cron = "1.0.0-rc.2"
 apalis-board = "1.0.0-rc.2"
