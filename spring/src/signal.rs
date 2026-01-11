@@ -1,5 +1,5 @@
 /// shutdown signal
-pub async fn shutdown_signal() {
+pub async fn shutdown_signal(plugin_name: &'static str) {
     let ctrl_c = async {
         tokio::signal::ctrl_c()
             .await
@@ -19,10 +19,10 @@ pub async fn shutdown_signal() {
 
     tokio::select! {
         _ = ctrl_c => {
-            tracing::info!("Received Ctrl+C signal, waiting for application shutdown")
+            tracing::info!("Received Ctrl+C signal, waiting for {plugin_name} shutdown")
         },
         _ = terminate => {
-            tracing::info!("Received kill signal, waiting for application shutdown")
+            tracing::info!("Received kill signal, waiting for {plugin_name} shutdown")
         },
     }
 }

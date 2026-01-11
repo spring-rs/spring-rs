@@ -252,7 +252,7 @@ impl WebPlugin {
             let server = axum::serve(listener, service);
             if config.graceful {
                 server
-                    .with_graceful_shutdown(signal::shutdown_signal())
+                    .with_graceful_shutdown(signal::shutdown_signal("axum web server"))
                     .await
             } else {
                 server.await
@@ -262,7 +262,7 @@ impl WebPlugin {
             let server = axum::serve(listener, service);
             if config.graceful {
                 server
-                    .with_graceful_shutdown(signal::shutdown_signal())
+                    .with_graceful_shutdown(signal::shutdown_signal("axum web server"))
                     .await
             } else {
                 server.await

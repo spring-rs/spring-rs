@@ -6,6 +6,7 @@ pub mod extractor;
 pub mod handler;
 pub mod job;
 
+use spring::signal;
 /////////////////job-macros/////////////////////
 /// To use these Procedural Macros, you need to add `spring-job` dependency
 pub use spring_macros::cron;
@@ -176,7 +177,15 @@ impl JobPlugin {
                 .context("add job failed")?;
         }
 
-        sched.shutdown_on_ctrl_c();
+        let mut l = sched.clone();
+        // customize shutdown signal
+        tokio::spawn(async move {
+            let _ = signal::shutdown_signal("job").await;
+
+            if let Err(err) = l.shutdown().await {
+                tracing::error!("{:?}", err);
+            }
+        });
 
         // Add code to be run during/after shutdown
         sched.set_shutdown_handler(Box::new(|| {

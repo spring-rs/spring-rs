@@ -63,7 +63,7 @@ impl ApalisPlugin {
 }
 
 async fn shutdown_signal() -> std::io::Result<()> {
-    let _ = signal::shutdown_signal().await;
+    let _ = signal::shutdown_signal("apalis").await;
     Ok(())
 }
 
