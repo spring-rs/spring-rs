@@ -118,6 +118,65 @@ pub type Routers = Vec<aide::axum::ApiRouter>;
 #[cfg(not(feature = "openapi"))]
 pub type Routers = Vec<axum::Router>;
 
+/// Router layer function type
+///
+/// Used to add layers (middleware) to the router before the server starts.
+/// This enables plugins to dynamically register middleware layers.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use spring_web::{Router, LayerConfigurator};
+///
+/// // In your plugin's build method:
+/// app.add_router_layer(|router: Router| {
+///     router.layer(MyMiddlewareLayer::new())
+/// });
+/// ```
+pub type RouterLayer = Arc<dyn Fn(Router) -> Router + Send + Sync>;
+
+/// Collection of router layers
+pub type RouterLayers = Vec<RouterLayer>;
+
+/// Trait for adding layers to the web router
+pub trait LayerConfigurator {
+    /// Add a layer function that will be applied to the router before the server starts.
+    ///
+    /// Layers are applied in the order they are added.
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// use spring_web::LayerConfigurator;
+    ///
+    /// app.add_router_layer(|router| {
+    ///     router.layer(MyAuthLayer::new(state))
+    /// });
+    /// ```
+    fn add_router_layer<F>(&mut self, layer: F) -> &mut Self
+    where
+        F: Fn(Router) -> Router + Send + Sync + 'static;
+}
+
+impl LayerConfigurator for AppBuilder {
+    fn add_router_layer<F>(&mut self, layer: F) -> &mut Self
+    where
+        F: Fn(Router) -> Router + Send + Sync + 'static,
+    {
+        if let Some(layers) = self.get_component_ref::<RouterLayers>() {
+            unsafe {
+                let raw_ptr = ComponentRef::into_raw(layers);
+                let layers = &mut *(raw_ptr as *mut RouterLayers);
+                layers.push(Arc::new(layer));
+            }
+            self
+        } else {
+            let layers: RouterLayers = vec![Arc::new(layer)];
+            self.add_component(layers)
+        }
+    }
+}
+
 /// OpenAPI
 #[cfg(feature = "openapi")]
 type OpenApiTransformer = fn(TransformOpenApi) -> TransformOpenApi;
@@ -218,7 +277,16 @@ impl Plugin for WebPlugin {
 
 impl WebPlugin {
     async fn schedule(app: Arc<App>, config: ServerConfig) -> Result<String> {
-        let router = app.get_expect_component::<Router>();
+        let mut router = app.get_expect_component::<Router>();
+
+        // Apply custom router layers registered by plugins
+        // This is done in schedule() after all plugins have built,
+        // ensuring plugins that depend on other plugins can still register layers
+        if let Some(layers) = app.get_component_ref::<RouterLayers>() {
+            for layer_fn in layers.deref().iter() {
+                router = layer_fn(router);
+            }
+        }
 
         // 2. bind tcp listener
         let addr = SocketAddr::from((config.binding, config.port));

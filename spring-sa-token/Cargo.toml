@@ -1,0 +1,33 @@
+[package]
+name = "spring-sa-token"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Sa-Token authentication and authorization plugin for spring-rs"
+
+[dependencies]
+spring = { path = "../spring" }
+spring-web = { path = "../spring-web", optional = true }
+spring-macros = { path = "../spring-macros", version = "0.4", features = ["sa-token"] }
+spring-redis = { path = "../spring-redis", optional = true }
+sa-token-plugin-axum = "0.1.12"
+sa-token-core = { workspace = true }
+sa-token-adapter = { workspace = true }
+sa-token-storage-memory = { workspace = true, optional = true }
+serde = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+
+[features]
+default = ["memory", "with-web"]
+memory = ["sa-token-storage-memory"]
+with-web = ["spring-web"]
+with-spring-redis = ["spring-redis"]
+openapi = ["spring-web/openapi"]
+
+[dev-dependencies]
+tower = { workspace = true }
+toml = { workspace = true }
+tokio = { workspace = true }
