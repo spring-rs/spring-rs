@@ -8,14 +8,20 @@ use spring::{
 };
 
 pub use apalis;
+#[cfg(feature = "amqp")]
+pub use apalis_amqp;
+#[cfg(feature = "board")]
+pub use apalis_board;
+#[cfg(feature = "sql-mysql")]
+pub use apalis_mysql;
+#[cfg(feature = "sql-postgres")]
+pub use apalis_postgres;
 #[cfg(feature = "redis")]
 pub use apalis_redis;
-#[cfg(any(
-    feature = "sql-postgres",
-    feature = "sql-sqlite",
-    feature = "sql-mysql"
-))]
-pub use apalis_sql;
+#[cfg(feature = "sql-sqlite")]
+pub use apalis_sqlite;
+#[cfg(any(feature = "sql-postgres", feature = "sql-sqlite", feature = "sql-mysql"))]
+pub use spring_sqlx;
 
 pub struct ApalisPlugin;
 
@@ -34,6 +40,19 @@ impl Plugin for ApalisPlugin {
             }
         }
     }
+
+    #[cfg(feature = "redis")]
+    fn dependencies(&self) -> Vec<&str> {
+        vec![std::any::type_name::<spring_redis::RedisPlugin>()]
+    }
+
+    #[cfg(all(
+        any(feature = "sql-postgres", feature = "sql-sqlite", feature = "sql-mysql"),
+        not(feature = "redis")
+    ))]
+    fn dependencies(&self) -> Vec<&str> {
+        vec![std::any::type_name::<spring_sqlx::SqlxPlugin>()]
+    }
 }
 
 impl ApalisPlugin {
@@ -44,7 +63,7 @@ impl ApalisPlugin {
 }
 
 async fn shutdown_signal() -> std::io::Result<()> {
-    let _ = signal::shutdown_signal().await;
+    let _ = signal::shutdown_signal("apalis").await;
     Ok(())
 }
 

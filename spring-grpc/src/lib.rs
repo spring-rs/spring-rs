@@ -13,7 +13,7 @@ use spring::{
     config::ConfigRegistry,
     error::Result,
     plugin::{component::ComponentRef, ComponentRegistry, MutableComponentRegistry, Plugin},
-    App,
+    signal, App,
 };
 use std::{convert::Infallible, net::SocketAddr, sync::Arc};
 use tonic::{
@@ -127,7 +127,7 @@ impl GrpcPlugin {
         let router = server.add_routes(routes);
         if config.graceful {
             router
-                .serve_with_shutdown(addr, shutdown_signal())
+                .serve_with_shutdown(addr, signal::shutdown_signal("tonic grpc server"))
                 .await
                 .with_context(|| format!("bind tcp listener failed:{addr}"))?;
         } else {
@@ -142,33 +142,5 @@ impl GrpcPlugin {
     fn apply_middleware(_server: Server) -> Server {
         // TODO: add middleware
         _server
-    }
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {
-            tracing::info!("Received Ctrl+C signal, waiting for tonic grpc server shutdown")
-        },
-        _ = terminate => {
-            tracing::info!("Received kill signal, waiting for tonic grpc server shutdown")
-        },
     }
 }

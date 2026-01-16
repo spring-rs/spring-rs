@@ -6,9 +6,43 @@ on:
     branches:
       - main
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
 jobs:
   test:
     name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run tests
+        run: cargo test --workspace --verbose
+
+  coverage:
+    name: Code Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
@@ -38,25 +72,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: target
-          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Run tests
-        run: cargo test --workspace --verbose
-
-  coverage:
-    name: Code Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the code
-        uses: actions/checkout@v4
-
-      - name: Install protoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+          key: ${{ runner.os }}-target-coverage-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install cargo-tarpaulin
         run: cargo install cargo-tarpaulin
@@ -68,8 +84,11 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage/cobertura.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: true
+          flags: unittests
+          name: codecov-umbrella
 
       - name: Archive coverage results
         uses: actions/upload-artifact@v4

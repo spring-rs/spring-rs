@@ -137,6 +137,7 @@ async fn fix_rate_job() {
 | `spring-opentelemetry`  | [![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/) | [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)     | Logging, metrics, and distributed tracing        |
 | `spring-grpc`           | [![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)](https://spring-rs.github.io/docs/plugins/spring-grpc/)                                     | [`tonic`](https://github.com/hyperium/tonic)                                | gRPC services and clients                        |
 | `spring-opendal`        | [![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)](https://spring-rs.github.io/docs/plugins/spring-opendal/)                         | [`opendal`](https://github.com/apache/opendal)                              | Unified object storage and data access           |
+| `spring-apalis`        | [![spring-apalis](https://img.shields.io/crates/v/spring-apalis.svg)](https://spring-rs.github.io/docs/plugins/spring-apalis/)                         | [`apalis`](https://github.com/apalis-dev/apalis)                              | High-performance background processing library |
 
 ## Ecosystem
 

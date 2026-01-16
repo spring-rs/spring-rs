@@ -24,6 +24,9 @@ pub struct OperationMetadata {
     pub operation_id: Option<String>,
     /// Declares this operation to be deprecated.Default value is false.
     pub deprecated: bool,
+    /// Additional status codes that can be returned by this operation.
+    /// These will be extracted from error types that implement HttpStatusCode.
+    pub status_codes: Vec<String>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -98,10 +101,11 @@ pub fn parse_doc_attributes(attrs: &[syn::Attribute], fn_name: &str) -> Operatio
     let mut id = Some(fn_name.to_string()); // default value = fn_name
     let mut deprecated = false;
     let mut external_docs = None;
+    let mut status_codes = Vec::new();
 
     for (index, raw_line) in extract_doc_lines(attrs).into_iter().enumerate() {
         let line = raw_line.trim();
-        if index == 0 && summary.is_none() && !line.is_empty() && line.starts_with("# ") {
+        if index == 0 && summary.is_none() && !line.is_empty() {
             summary = Some(line.trim_start_matches('#').trim_start().to_string());
         } else if let Some(stripped) = line.strip_prefix("@tag ") {
             tags.push(stripped.trim().to_string());
@@ -114,6 +118,13 @@ pub fn parse_doc_attributes(attrs: &[syn::Attribute], fn_name: &str) -> Operatio
             });
         } else if line.starts_with("@deprecated") {
             deprecated = true;
+        } else if let Some(stripped) = line.strip_prefix("@status_codes ") {
+            status_codes.extend(
+                stripped
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty()),
+            );
         } else if !line.starts_with('@') {
             description.push_str(line);
             description.push('\n');
@@ -133,6 +144,7 @@ pub fn parse_doc_attributes(attrs: &[syn::Attribute], fn_name: &str) -> Operatio
         operation_id: id,
         deprecated,
         external_docs,
+        status_codes,
     }
 }
 
@@ -192,6 +204,7 @@ mod tests {
             OperationMetadata {
                 operation_id: Some("list_todos".into()),
                 summary: Some("获取任务列表".into()),
+                status_codes: Vec::new(),
                 ..Default::default()
             }
         );
@@ -215,6 +228,7 @@ mod tests {
                 operation_id: Some("create_todo".into()),
                 summary: Some("创建一个新的待办事项".into()),
                 description: Some("此接口用于新增待办项".into()),
+                status_codes: Vec::new(),
                 ..Default::default()
             }
         );
@@ -241,6 +255,7 @@ mod tests {
                 summary: Some("创建一个新的待办事项".into()),
                 description: Some("此接口用于新增待办项".into()),
                 deprecated: true,
+                status_codes: Vec::new(),
                 ..Default::default()
             }
         );
@@ -261,6 +276,52 @@ mod tests {
                 operation_id: Some("list_todos".into()),
                 tags: vec!["list".into()],
                 summary: Some("获取任务列表".into()),
+                status_codes: Vec::new(),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_doc_with_status_codes() {
+        let item: syn::ItemFn = syn::parse_quote! {
+            /// Protected user info api
+            /// api description detail
+            /// @tag user
+            /// @status_codes Errors::A
+            fn protected_user_info_api() {}
+        };
+
+        let meta = parse_doc_attributes(&item.attrs, "protected_user_info_api");
+        assert_eq!(
+            meta,
+            OperationMetadata {
+                operation_id: Some("protected_user_info_api".into()),
+                tags: vec!["user".into()],
+                summary: Some("Protected user info api".into()),
+                description: Some("api description detail".into()),
+                status_codes: vec!["Errors::A".into()],
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_doc_with_multiple_status_codes() {
+        let item: syn::ItemFn = syn::parse_quote! {
+            /// Test API
+            /// @status_codes Errors::A, Errors::B
+            /// @status_codes Errors::C
+            fn test_api() {}
+        };
+
+        let meta = parse_doc_attributes(&item.attrs, "test_api");
+        assert_eq!(
+            meta,
+            OperationMetadata {
+                operation_id: Some("test_api".into()),
+                summary: Some("Test API".into()),
+                status_codes: vec!["Errors::A".into(), "Errors::B".into(), "Errors::C".into()],
                 ..Default::default()
             }
         );

@@ -2,6 +2,10 @@ name: Clippy Lint
 
 on: [pull_request]
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
 jobs:
   clippy:
     runs-on: ubuntu-latest

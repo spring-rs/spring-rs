@@ -136,6 +136,7 @@ async fn fix_rate_job() {
 | `spring-opentelemetry` | [![spring-opentelemetry](https://img.shields.io/crates/v/spring-opentelemetry.svg)](https://spring-rs.github.io/docs/plugins/spring-opentelemetry/) | [`opentelemetry`](https://github.com/open-telemetry/opentelemetry-rust)     | 日志 / 指标 / 链路追踪              |
 | `spring-grpc`          | [![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)](https://spring-rs.github.io/docs/plugins/spring-grpc/)                                     | [`tonic`](https://github.com/hyperium/tonic)                                | gRPC 服务与调用                  |
 | `spring-opendal`       | [![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)](https://spring-rs.github.io/docs/plugins/spring-opendal/)                         | [`opendal`](https://github.com/apache/opendal)                              | 统一对象存储 / 数据访问               |
+| `spring-apalis`       | [![spring-apalis](https://img.shields.io/crates/v/spring-apalis.svg)](https://spring-rs.github.io/docs/plugins/spring-apalis/)                         | [`apalis`](https://github.com/apalis-dev/apalis)                              | 高性能后台任务处理框架 |
 
 ## 生态
 
@@ -165,7 +166,7 @@ async fn fix_rate_job() {
 <table>
 <tr>
 <td><img src="https://github.com/user-attachments/assets/f9f2abcb-8d91-4aa1-a8f6-93e789339e45" alt="QQ交流群" height="400"/></td>
-<td><img src="https://github.com/user-attachments/assets/d52abd39-be68-468f-8153-93c3e54ff72f" alt="微信交流群" height="400"/></td>
+<td><img src="https://github.com/user-attachments/assets/b2685a59-ebe3-44c6-9bba-ed4cc317f008" alt="微信交流群" height="400"/></td>
 </tr>
 </table>
 

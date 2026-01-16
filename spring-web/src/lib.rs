@@ -14,6 +14,14 @@ pub mod handler;
 pub mod middleware;
 #[cfg(feature = "openapi")]
 pub mod openapi;
+/// RFC 7807 Problem Details for HTTP APIs
+pub mod problem_details;
+
+pub trait HttpStatusCode {
+    fn status_code(&self) -> axum::http::StatusCode;
+}
+
+pub use spring_macros::ProblemDetails;
 
 #[cfg(feature = "socket_io")]
 pub use { socketioxide, rmpv };
@@ -312,7 +320,7 @@ impl WebPlugin {
             let server = axum::serve(listener, service);
             if config.graceful {
                 server
-                    .with_graceful_shutdown(signal::shutdown_signal())
+                    .with_graceful_shutdown(signal::shutdown_signal("axum web server"))
                     .await
             } else {
                 server.await
@@ -322,7 +330,7 @@ impl WebPlugin {
             let server = axum::serve(listener, service);
             if config.graceful {
                 server
-                    .with_graceful_shutdown(signal::shutdown_signal())
+                    .with_graceful_shutdown(signal::shutdown_signal("axum web server"))
                     .await
             } else {
                 server.await
