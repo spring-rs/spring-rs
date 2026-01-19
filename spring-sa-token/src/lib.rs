@@ -190,7 +190,7 @@ impl SaTokenPlugin {
             .auto_renew(config.auto_renew)
             .is_concurrent(config.is_concurrent)
             .is_share(config.is_share)
-            .token_style(config.token_style)
+            .token_style(config.token_style.into())
             .enable_nonce(config.enable_nonce)
             .nonce_timeout(config.nonce_timeout)
             .enable_refresh_token(config.enable_refresh_token)

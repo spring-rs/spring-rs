@@ -90,7 +90,11 @@ async fn main() {
 }
 ```
 
-### 2. 定义安全配置
+### 2. 配置路径认证
+
+`sa_token_auth()` 支持两种配置方式：
+
+#### 方式一：使用 SecurityConfig（推荐）
 
 创建 `src/security.rs`：
 
@@ -112,6 +116,56 @@ impl SaTokenConfigurator for SecurityConfig {
     }
 }
 ```
+
+然后在 `main.rs` 中使用：
+
+```rust
+.sa_token_auth(security::SecurityConfig)
+```
+
+#### 方式二：直接使用 PathAuthBuilder
+
+你也可以直接在 `main.rs` 中配置，无需单独的配置文件：
+
+```rust
+use spring_sa_token::PathAuthBuilder;
+
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(RedisPlugin)
+        .add_plugin(SaTokenPlugin)
+        .add_plugin(WebPlugin)
+        // 方式 2a：使用构建器模式
+        .sa_token_auth(
+            PathAuthBuilder::new()
+                .include("/user/**")
+                .include("/admin/**")
+                .include("/api/**")
+                .exclude("/login")
+                .exclude("/public/**")
+                .exclude("/api/health"),
+        )
+        // 方式 2b：使用结构体字面量
+        // .sa_token_auth(PathAuthBuilder {
+        //     include: vec![
+        //         "/user/**".to_string(),
+        //         "/admin/**".to_string(),
+        //     ],
+        //     exclude: vec![
+        //         "/login".to_string(),
+        //         "/public/**".to_string(),
+        //     ],
+        // })
+        .run()
+        .await
+}
+```
+
+**路径匹配规则：**
+- `**` 匹配任意多级路径，如 `/api/**` 匹配 `/api/users`、`/api/users/123` 等
+- `*` 匹配单级路径，如 `/api/*` 只匹配 `/api/users`，不匹配 `/api/users/123`
+- 精确匹配，如 `/login` 只匹配 `/login`
 
 ### 3. 实现登录接口
 

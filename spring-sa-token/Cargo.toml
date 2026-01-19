@@ -21,6 +21,7 @@ sa-token-storage-memory = { workspace = true, optional = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
+schemars = { workspace = true }
 
 [features]
 default = ["memory", "with-web"]

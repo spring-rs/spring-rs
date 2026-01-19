@@ -2,14 +2,55 @@
 //!
 //! This module defines the configuration for spring-sa-token plugin.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use spring::config::Configurable;
+use schemars::JsonSchema;
+// Re-export CoreConfig from upstream
+pub use sa_token_core::config::SaTokenConfig as CoreConfig;
 
-// Re-export TokenStyle from core
-pub use sa_token_core::config::{SaTokenConfig as CoreConfig, TokenStyle};
+spring::submit_config_schema!("sa-token", SaTokenConfig);
 
-// SaTokenConfig TokenStyle 暂时没有实现 JsonSchema
-// spring::submit_config_schema!("sa-token", SaTokenConfig);
+/// Token style for spring-sa-token
+///
+/// This is a local wrapper around the upstream TokenStyle to support JsonSchema
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "PascalCase")]
+pub enum TokenStyle {
+    /// UUID style
+    Uuid,
+    /// Simple UUID (without hyphens)
+    SimpleUuid,
+    /// 32-character random string
+    Random32,
+    /// 64-character random string
+    Random64,
+    /// 128-character random string
+    Random128,
+    /// JWT style (JSON Web Token)
+    Jwt,
+    /// Hash style (SHA256 hash)
+    Hash,
+    /// Timestamp style (millisecond timestamp + random)
+    Timestamp,
+    /// Tik style (short 8-character token)
+    Tik,
+}
+
+impl From<TokenStyle> for sa_token_core::config::TokenStyle {
+    fn from(style: TokenStyle) -> Self {
+        match style {
+            TokenStyle::Uuid => sa_token_core::config::TokenStyle::Uuid,
+            TokenStyle::SimpleUuid => sa_token_core::config::TokenStyle::SimpleUuid,
+            TokenStyle::Random32 => sa_token_core::config::TokenStyle::Random32,
+            TokenStyle::Random64 => sa_token_core::config::TokenStyle::Random64,
+            TokenStyle::Random128 => sa_token_core::config::TokenStyle::Random128,
+            TokenStyle::Jwt => sa_token_core::config::TokenStyle::Jwt,
+            TokenStyle::Hash => sa_token_core::config::TokenStyle::Hash,
+            TokenStyle::Timestamp => sa_token_core::config::TokenStyle::Timestamp,
+            TokenStyle::Tik => sa_token_core::config::TokenStyle::Tik,
+        }
+    }
+}
 
 /// Sa-Token configuration for spring-rs
 ///
@@ -23,7 +64,7 @@ pub use sa_token_core::config::{SaTokenConfig as CoreConfig, TokenStyle};
 /// timeout = 86400
 /// auto_renew = true
 /// ```
-#[derive(Debug, Configurable, Clone, Deserialize)]
+#[derive(Debug, Configurable, Clone, Deserialize, JsonSchema)]
 #[config_prefix = "sa-token"]
 pub struct SaTokenConfig {
     /// Token name (key in header or cookie)
@@ -159,7 +200,7 @@ impl From<SaTokenConfig> for CoreConfig {
             auto_renew: config.auto_renew,
             is_concurrent: config.is_concurrent,
             is_share: config.is_share,
-            token_style: config.token_style,
+            token_style: config.token_style.into(),
             is_log: config.is_log,
             is_read_cookie: config.is_read_cookie,
             is_read_header: config.is_read_header,

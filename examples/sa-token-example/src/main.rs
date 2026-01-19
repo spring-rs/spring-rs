@@ -24,11 +24,11 @@ async fn main() {
         .add_plugin(RedisPlugin)
         .add_plugin(SaTokenPlugin)
         .add_plugin(WebPlugin)
-        // .sa_token_auth(security::SecurityConfig)
-        .sa_token_auth(PathAuthBuilder {
-            include: vec![],
-            exclude: vec![],
-        })
+        .sa_token_auth(security::SecurityConfig)
+        // .sa_token_auth(PathAuthBuilder {
+        //     include: vec![],
+        //     exclude: vec![],
+        // })
         // .sa_token_auth(
         //     PathAuthBuilder::new()
         //         .include("/user/**")

@@ -89,7 +89,11 @@ async fn main() {
 }
 ```
 
-### 2. Define security configuration
+### 2. Configure path-based authentication
+
+`sa_token_auth()` supports two configuration approaches:
+
+#### Approach 1: Using SecurityConfig (Recommended)
 
 Create `src/security.rs`:
 
@@ -111,6 +115,56 @@ impl SaTokenConfigurator for SecurityConfig {
     }
 }
 ```
+
+Then use it in `main.rs`:
+
+```rust
+.sa_token_auth(security::SecurityConfig)
+```
+
+#### Approach 2: Using PathAuthBuilder directly
+
+You can also configure directly in `main.rs` without a separate config file:
+
+```rust
+use spring_sa_token::PathAuthBuilder;
+
+#[tokio::main]
+async fn main() {
+    App::new()
+        .add_plugin(RedisPlugin)
+        .add_plugin(SaTokenPlugin)
+        .add_plugin(WebPlugin)
+        // Approach 2a: Using builder pattern
+        .sa_token_auth(
+            PathAuthBuilder::new()
+                .include("/user/**")
+                .include("/admin/**")
+                .include("/api/**")
+                .exclude("/login")
+                .exclude("/public/**")
+                .exclude("/api/health"),
+        )
+        // Approach 2b: Using struct literal
+        // .sa_token_auth(PathAuthBuilder {
+        //     include: vec![
+        //         "/user/**".to_string(),
+        //         "/admin/**".to_string(),
+        //     ],
+        //     exclude: vec![
+        //         "/login".to_string(),
+        //         "/public/**".to_string(),
+        //     ],
+        // })
+        .run()
+        .await
+}
+```
+
+**Path matching rules:**
+- `**` matches any multi-level path, e.g., `/api/**` matches `/api/users`, `/api/users/123`, etc.
+- `*` matches single-level path, e.g., `/api/*` only matches `/api/users`, not `/api/users/123`
+- Exact match, e.g., `/login` only matches `/login`
 
 ### 3. Implement login endpoint
 
