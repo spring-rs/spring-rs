@@ -2,6 +2,12 @@
 //!
 //! Automatic assembly for sa-token-rust.
 //!
+//! ## Storage Backend Selection
+//!
+//! When both `memory` and `with-spring-redis` features are enabled,
+//! `with-spring-redis` takes priority. This allows `--all-features` testing
+//! while maintaining predictable behavior.
+//!
 //! ## Quick Start
 //!
 //! Add to your `Cargo.toml`:
@@ -46,16 +52,6 @@
 //!     format!("Current user: {}", user_id)
 //! }
 //! ```
-
-// ============================================================================
-// Feature mutual exclusion checks
-// Storage features are mutually exclusive: only one can be enabled at a time
-// ============================================================================
-#[cfg(all(feature = "with-spring-redis", feature = "memory"))]
-compile_error!(
-    "Features 'with-spring-redis' and 'memory' are mutually exclusive. \
-     Choose one storage backend."
-);
 
 pub mod config;
 pub mod configurator;
@@ -229,6 +225,8 @@ impl SaTokenPlugin {
     /// Priority:
     /// 1. spring-redis component (if with-spring-redis feature enabled)
     /// 2. memory storage (if memory feature enabled)
+    ///
+    /// When both features are enabled, with-spring-redis takes priority.
     #[allow(unused_variables)]
     async fn configure_storage(
         app: &AppBuilder,
@@ -249,8 +247,8 @@ impl SaTokenPlugin {
             }
         }
 
-        // Priority 2: Fall back to memory storage
-        #[cfg(feature = "memory")]
+        // Priority 2: Fall back to memory storage (only when with-spring-redis is not enabled)
+        #[cfg(all(feature = "memory", not(feature = "with-spring-redis")))]
         {
             tracing::info!("Using Memory storage");
             return Ok(Arc::new(MemoryStorage::new()));
