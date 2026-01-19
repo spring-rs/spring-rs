@@ -238,7 +238,7 @@ impl SaTokenPlugin {
             if let Some(redis) = app.get_component::<spring_redis::Redis>() {
                 tracing::info!("Using SpringRedisStorage (reusing spring-redis connection)");
                 let storage = storage::SpringRedisStorage::new(redis);
-                return Ok(Arc::new(storage));
+                Ok(Arc::new(storage))
             } else {
                 anyhow::bail!(
                     "Feature 'with-spring-redis' is enabled but RedisPlugin is not added. \
@@ -251,7 +251,7 @@ impl SaTokenPlugin {
         #[cfg(all(feature = "memory", not(feature = "with-spring-redis")))]
         {
             tracing::info!("Using Memory storage");
-            return Ok(Arc::new(MemoryStorage::new()));
+            Ok(Arc::new(MemoryStorage::new()))
         }
 
         // No storage available
