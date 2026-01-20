@@ -1,0 +1,16 @@
+[package]
+name = "sa-token-example"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+spring-redis = { path = "../../spring-redis" }
+spring-sa-token = { path = "../../spring-sa-token", default-features = false, features = ["with-spring-redis", "with-web"] }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }

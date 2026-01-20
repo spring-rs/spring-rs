@@ -15,6 +15,7 @@ members = [
     "spring-opentelemetry",
     "spring-opendal",
     "spring-apalis",
+    "spring-sa-token",
     "examples/*",
 ]
 default-members = ["spring", "spring-*"]
@@ -81,6 +82,10 @@ serde-toml-merge = "0.3.10"
 socketioxide = "0.17.2"
 sqlx = "0.8"
 syn = "2.0"
+sa-token-plugin-axum = "0.1.12"
+sa-token-core = "0.1.12"
+sa-token-adapter = "0.1.12"
+sa-token-storage-memory = "0.1.12"
 thiserror = "2.0"
 tokio = "1.47"
 tokio-cron-scheduler = "0.15"
