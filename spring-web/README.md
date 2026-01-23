@@ -27,6 +27,7 @@ binding = "172.20.10.4"  # IP address of the network interface to bind, default 
 port = 8000              # Port number to bind, default 8080
 connect_info = false     # Whether to use client connection information, default false
 graceful = true          # Whether to enable graceful shutdown, default false
+global_prefix = "api"    # Global prefix for all routes, default empty
 
 # Web middleware configuration
 [web.middlewares]

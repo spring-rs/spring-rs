@@ -311,7 +311,12 @@ impl WebPlugin {
         };
 
         // 4. axum server
-        let router = router.layer(Extension(AppState { app }));
+        let mut router = router.layer(Extension(AppState { app }));
+
+        if !config.global_prefix.is_empty() {
+            router = axum::Router::new().nest(&config.global_prefix, router)
+        };
+
 
         tracing::info!("axum server started");
         if config.connect_info {

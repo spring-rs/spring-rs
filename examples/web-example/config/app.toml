@@ -1,6 +1,7 @@
 [web]
 port = 8000
 graceful = true
+global_prefix = "/api"
 
 [web.openapi]
 doc_prefix = "/docs"
