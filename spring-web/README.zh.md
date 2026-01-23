@@ -27,6 +27,7 @@ binding = "172.20.10.4"  # 要绑定的网卡IP地址，默认0.0.0.0
 port = 8000              # 要绑定的端口号，默认8080
 connect_info = false     # 是否使用客户端连接信息，默认false
 graceful = true          # 是否开启优雅停机, 默认false
+global_prefix = "api"    # 所有路由的全局前缀，默认为空
 
 # web中间件配置
 [web.middlewares]

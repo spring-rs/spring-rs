@@ -30,6 +30,8 @@ pub struct ServerConfig {
     pub(crate) connect_info: bool,
     #[serde(default = "default_true")]
     pub(crate) graceful: bool,
+    #[serde(default)]
+    pub(crate) global_prefix: String,
 }
 
 #[cfg(feature = "openapi")]
