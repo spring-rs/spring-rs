@@ -158,9 +158,9 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl ::spring_web::problem_details::ToProblemDetails for #ident {
-            fn to_problem_details(&self) -> ::spring_web::problem_details::ProblemDetails {
-                match self {
+        impl From<#ident> for ::spring_web::problem_details::ProblemDetails {
+            fn from(error: #ident) -> Self {
+                match error {
                     #(#problem_details_arms),*
                 }
             }

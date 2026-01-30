@@ -275,10 +275,7 @@ impl ProblemDetails {
     }
 }
 
-/// Trait for converting errors to Problem Details
-pub trait ToProblemDetails {
-    fn to_problem_details(&self) -> ProblemDetails;
-}
+
 
 #[cfg(test)]
 mod tests {

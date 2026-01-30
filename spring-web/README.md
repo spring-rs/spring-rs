@@ -285,7 +285,7 @@ The comments above the API function are used to provide additional information f
 
 The status_codes annotation specifies the possible error types that the API may return. This information will be included in the OpenAPI documentation, allowing users to understand the potential error responses when calling this API.
 
-We can use the derive macro `ProblemDetails` to automatically implement the `ToProblemDetails` trait for our custom error type.
+We can use the derive macro `ProblemDetails` to automatically implement the `From<T> for ProblemDetails` trait for our custom error type.
 
 In this case we are implementing `thiserror::Error` for better error handling, but it's not mandatory.
 
@@ -317,12 +317,12 @@ pub struct CustomErrorSchema {
 
 ## Simplified Error Handling with Automatic Problem Details
 
-The `ProblemDetails` derive macro automatically generates the `ToProblemDetails` implementation, eliminating the need for manual mapping:
+The `ProblemDetails` derive macro automatically generates the `From<T> for ProblemDetails` implementation, eliminating the need for manual mapping:
 
 ```rust,ignore
 use spring_web::ProblemDetails;
 
-// Only need ProblemDetails derive - ToProblemDetails is generated automatically!
+// Only need ProblemDetails derive - From trait is generated automatically!
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum ApiErrors {
     // Basic usage - uses about:blank as problem type
@@ -347,8 +347,9 @@ pub enum ApiErrors {
 
 impl IntoResponse for ApiErrors {
     fn into_response(self) -> Response {
-        // ToProblemDetails is automatically implemented!
-        self.to_problem_details().into_response()
+        // From trait is automatically implemented!
+        let problem_details: ProblemDetails = self.into();
+        problem_details.into_response()
     }
 }
 ```
@@ -479,10 +480,10 @@ pub enum CustomErrors {
     TeaPod(CustomErrorSchema),
 }
 
-// Implement Problem Details conversion
-impl ToProblemDetails for CustomErrors {
-    fn to_problem_details(&self) -> ProblemDetails {
-        match self {
+// Implement Problem Details conversion using From trait
+impl From<CustomErrors> for ProblemDetails {
+    fn from(error: CustomErrors) -> Self {
+        match error {
             CustomErrors::ABasicError => {
                 ProblemDetails::validation_error("A basic validation error occurred")
             }
@@ -506,7 +507,8 @@ impl ToProblemDetails for CustomErrors {
 
 impl IntoResponse for CustomErrors {
     fn into_response(self) -> Response {
-        self.to_problem_details().into_response()
+        let problem_details: ProblemDetails = self.into();
+        problem_details.into_response()
     }
 }
 ```
