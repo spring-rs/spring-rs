@@ -259,17 +259,15 @@ API 函数上方的注释用于为 OpenAPI 文档提供附加信息，例如标�
 
 `status_codes` 注解指定了 API 可能返回的错误类型。这些信息将包含在 OpenAPI 文档中，使用户能够了解调用此 API 时的潜在错误响应。
 
-如果你想定义自定义错误类型，必须为你的错误类型实现 `HttpStatusCode` trait，用于在 OpenAPI 文档中将错误映射到 HTTP 状态码。
-
-我们可以使用 derive 宏 `HttpStatusCode` 来自动为自定义错误类型实现该 trait。
+如果你想定义自定义错误类型，可以使用 `ProblemDetails` 派生宏，它会自动实现 `ToProblemDetails` trait，用于在 OpenAPI 文档中将错误映射成 [RFC 7807](https://www.rfc-editor.org/rfc/rfc7807)和[RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)中定义的Problem Details标准格式。
 
 在此示例中，我们实现了 `thiserror::Error` 以获得更好的错误处理，但这不是强制的。
 
 ```rust,ignore
-use spring_web::error::HttpStatusCode;
+use spring_web::ProblemDetails;
 use spring_web::axum::http::StatusCode;
 
-#[derive(thiserror::Error, Debug, HttpStatusCode)]
+#[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum CustomErrors {
     #[status_code(400)]
     #[error("发生了基本错误")]

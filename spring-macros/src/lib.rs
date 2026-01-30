@@ -334,9 +334,9 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 
 /// ProblemDetails derive macro
 ///
-/// Derives both `HttpStatusCode` and `ToProblemDetails` traits for error enums.
+/// Derives the `ToProblemDetails` trait for error enums.
 /// This macro automatically generates implementations for converting error variants
-/// to HTTP status codes and RFC 7807 Problem Details responses.
+/// to RFC 7807 Problem Details responses.
 ///
 /// Each variant must have a `#[status_code(code)]` attribute.
 /// 
@@ -398,7 +398,6 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// This will automatically implement:
-/// - `HttpStatusCode` trait for getting HTTP status codes
 /// - `ToProblemDetails` trait for converting to Problem Details responses
 /// - OpenAPI integration for documentation generation
 #[proc_macro_derive(ProblemDetails, attributes(status_code, problem_type, title, detail, instance))]

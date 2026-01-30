@@ -285,9 +285,7 @@ The comments above the API function are used to provide additional information f
 
 The status_codes annotation specifies the possible error types that the API may return. This information will be included in the OpenAPI documentation, allowing users to understand the potential error responses when calling this API.
 
-In case of want to define custom error types, you must implement the `HttpStatusCode` trait for your error type, which is used to map the error to an HTTP status code in the OpenAPI documentation.
-
-We can use the derive macro `ProblemDetails` to automatically implement both the `HttpStatusCode` and `ToProblemDetails` traits for our custom error type.
+We can use the derive macro `ProblemDetails` to automatically implement the `ToProblemDetails` trait for our custom error type.
 
 In this case we are implementing `thiserror::Error` for better error handling, but it's not mandatory.
 
@@ -319,12 +317,12 @@ pub struct CustomErrorSchema {
 
 ## Simplified Error Handling with Automatic Problem Details
 
-The `ProblemDetails` derive macro automatically generates both `HttpStatusCode` and `ToProblemDetails` implementations, eliminating the need for manual mapping:
+The `ProblemDetails` derive macro automatically generates the `ToProblemDetails` implementation, eliminating the need for manual mapping:
 
 ```rust,ignore
 use spring_web::ProblemDetails;
 
-// Only need ProblemDetails derive - HttpStatusCode and ToProblemDetails are generated automatically!
+// Only need ProblemDetails derive - ToProblemDetails is generated automatically!
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum ApiErrors {
     // Basic usage - uses about:blank as problem type
@@ -349,7 +347,7 @@ pub enum ApiErrors {
 
 impl IntoResponse for ApiErrors {
     fn into_response(self) -> Response {
-        // Both HttpStatusCode and ToProblemDetails are automatically implemented!
+        // ToProblemDetails is automatically implemented!
         self.to_problem_details().into_response()
     }
 }

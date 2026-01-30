@@ -115,14 +115,6 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let mod_name = quote::format_ident!("__problem_details_impl_{}", ident.to_string().to_lowercase());
     
     let output = quote! {
-        impl ::spring_web::HttpStatusCode for #ident {
-            fn status_code(&self) -> ::spring_web::axum::http::StatusCode {
-                match self {
-                    #(#match_arms),*
-                }
-            }
-        }
-
         impl ::spring_web::aide::OperationOutput for #ident {
             type Inner = Self;
 
