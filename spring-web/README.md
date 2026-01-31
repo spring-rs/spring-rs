@@ -317,12 +317,12 @@ pub struct CustomErrorSchema {
 
 ## Simplified Error Handling with Automatic Problem Details
 
-The `ProblemDetails` derive macro automatically generates the `From<T> for ProblemDetails` implementation, eliminating the need for manual mapping:
+The `ProblemDetails` derive macro automatically generates both the `From<T> for ProblemDetails` and `IntoResponse` implementations, eliminating the need for manual mapping:
 
 ```rust,ignore
 use spring_web::ProblemDetails;
 
-// Only need ProblemDetails derive - From trait is generated automatically!
+// Only need ProblemDetails derive - everything is generated automatically!
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum ApiErrors {
     // Basic usage - uses about:blank as problem type
@@ -345,13 +345,8 @@ pub enum ApiErrors {
     NotFoundError,
 }
 
-impl IntoResponse for ApiErrors {
-    fn into_response(self) -> Response {
-        // From trait is automatically implemented!
-        let problem_details: ProblemDetails = self.into();
-        problem_details.into_response()
-    }
-}
+// No need to implement IntoResponse - it's automatically generated!
+// You can directly return Result<T, ApiErrors> from your handlers
 ```
 
 The macro automatically maps common HTTP status codes to appropriate Problem Details:
@@ -480,7 +475,7 @@ pub enum CustomErrors {
     TeaPod(CustomErrorSchema),
 }
 
-// Implement Problem Details conversion using From trait
+// If you need custom logic, you can manually implement From trait
 impl From<CustomErrors> for ProblemDetails {
     fn from(error: CustomErrors) -> Self {
         match error {
@@ -505,6 +500,7 @@ impl From<CustomErrors> for ProblemDetails {
     }
 }
 
+// And manually implement IntoResponse
 impl IntoResponse for CustomErrors {
     fn into_response(self) -> Response {
         let problem_details: ProblemDetails = self.into();
@@ -512,6 +508,8 @@ impl IntoResponse for CustomErrors {
     }
 }
 ```
+
+Note: When using the `ProblemDetails` derive macro, both `From` and `IntoResponse` are automatically implemented, so you don't need to write this boilerplate code.
 
 The Problem Details response will be formatted as:
 
@@ -522,9 +520,7 @@ The Problem Details response will be formatted as:
   "status": 400,
   "detail": "A basic validation error occurred"
 }
-```
-
-### Automatic Instance URI Capture
+```### Automatic Instance URI Capture
 
 Problem Details automatically captures the current request URI and includes it in the `instance` field. This feature is enabled by default and requires no additional configuration:
 

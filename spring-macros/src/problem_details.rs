@@ -115,6 +115,7 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let mod_name = quote::format_ident!("__problem_details_impl_{}", ident.to_string().to_lowercase());
     
     let output = quote! {
+        // OpenAPI integration implementations
         impl ::spring_web::aide::OperationOutput for #ident {
             type Inner = Self;
 
@@ -130,6 +131,12 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
                 _operation: &mut ::spring_web::aide::openapi::Operation,
             ) -> Vec<(Option<::spring_web::aide::openapi::StatusCode>, ::spring_web::aide::openapi::Response)> {
                 vec![]
+            }
+        }
+
+        impl ::spring_web::openapi::ProblemDetailsVariantInfo for #ident {
+            fn get_variant_info(variant_name: &str) -> Option<(u16, String, Option<::schemars::Schema>)> {
+                Self::__get_variant_info(variant_name)
             }
         }
 
@@ -152,17 +159,18 @@ pub(crate) fn expand_derive(input: DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl ::spring_web::openapi::ProblemDetailsVariantInfo for #ident {
-            fn get_variant_info(variant_name: &str) -> Option<(u16, String, Option<::schemars::Schema>)> {
-                Self::__get_variant_info(variant_name)
-            }
-        }
-
         impl From<#ident> for ::spring_web::problem_details::ProblemDetails {
             fn from(error: #ident) -> Self {
                 match error {
                     #(#problem_details_arms),*
                 }
+            }
+        }
+
+        impl ::spring_web::axum::response::IntoResponse for #ident {
+            fn into_response(self) -> ::spring_web::axum::response::Response {
+                let problem_details: ::spring_web::problem_details::ProblemDetails = self.into();
+                problem_details.into_response()
             }
         }
     };
@@ -457,6 +465,11 @@ mod tests {
         let result = expand_derive(input).unwrap();
         // Just check it compiles without panicking
         assert!(!result.is_empty());
+        
+        // Verify that the generated code includes both From and IntoResponse implementations
+        let result_str = result.to_string();
+        assert!(result_str.contains("impl From"));
+        assert!(result_str.contains("impl :: spring_web :: axum :: response :: IntoResponse"));
     }
 
     #[test]

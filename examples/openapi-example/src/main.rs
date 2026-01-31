@@ -2,13 +2,11 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use spring::{auto_config, App};
 use spring_sqlx::SqlxPlugin;
-use spring_web::axum::response::IntoResponse;
 use spring_web::axum::Json;
 use spring_web::extractor::Path;
 use spring_web::get_api;
 use spring_web::WebPlugin;
 use spring_web::WebConfigurator;
-use spring_web::problem_details::ProblemDetails;
 use spring_web::ProblemDetails as ProblemDetailsMacro;
 
 #[auto_config(WebConfigurator)]
@@ -78,15 +76,6 @@ pub enum ApiErrors {
     #[detail("You have exceeded the maximum number of requests per minute")]
     #[error("Rate Limit Exceeded")]  // 这个会自动用作 title
     RateLimitExceeded,
-}
-
-
-impl IntoResponse for ApiErrors {
-    fn into_response(self) -> spring_web::axum::response::Response {
-        // From<ApiErrors> for ProblemDetails 现在是自动生成的！
-        let problem_details: ProblemDetails = self.into();
-        problem_details.into_response()
-    }
 }
 
 #[derive(Debug, JsonSchema)]

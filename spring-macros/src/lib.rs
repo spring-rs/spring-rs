@@ -399,6 +399,7 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// This will automatically implement:
 /// - `From<T> for ProblemDetails` trait for converting to Problem Details responses
+/// - `IntoResponse` trait for direct use in Axum handlers
 /// - OpenAPI integration for documentation generation
 #[proc_macro_derive(ProblemDetails, attributes(status_code, problem_type, title, detail, instance))]
 pub fn derive_problem_details(input: TokenStream) -> TokenStream {
