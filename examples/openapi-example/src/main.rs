@@ -19,6 +19,11 @@ async fn main() {
         .await;
 }
 
+// ProblemDetails 宏会自动生成：
+// 1. From<ApiErrors> for ProblemDetails - 用于错误转换
+// 2. IntoResponse - 用于在 Axum 处理器中直接返回错误
+// 3. OpenAPI 集成 - 用于文档生成
+// 因此不需要手动实现这些 trait！
 #[derive(Debug, thiserror::Error, ProblemDetailsMacro)]
 pub enum ApiErrors {
     // 基本用法：使用 about:blank 作为默认 problem_type

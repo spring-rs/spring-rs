@@ -285,7 +285,7 @@ The comments above the API function are used to provide additional information f
 
 The status_codes annotation specifies the possible error types that the API may return. This information will be included in the OpenAPI documentation, allowing users to understand the potential error responses when calling this API.
 
-We can use the derive macro `ProblemDetails` to automatically implement the `From<T> for ProblemDetails` trait for our custom error type.
+We can use the derive macro `ProblemDetails` to automatically implement the `From<T> for ProblemDetails` and `IntoResponse` traits for our custom error type.
 
 In this case we are implementing `thiserror::Error` for better error handling, but it's not mandatory.
 
@@ -293,6 +293,7 @@ In this case we are implementing `thiserror::Error` for better error handling, b
 use spring_web::ProblemDetails;
 use spring_web::axum::http::StatusCode;
 
+// Only need ProblemDetails derive - From and IntoResponse are generated automatically!
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum CustomErrors {
     #[status_code(400)]
@@ -307,6 +308,9 @@ pub enum CustomErrors {
     #[error("TeaPod error occurred: {0:?}")]
     TeaPod(CustomErrorSchema),
 }
+
+// No need to manually implement IntoResponse!
+// You can directly return Result<T, CustomErrors> from your handlers
 
 #[derive(Debug, JsonSchema)]
 pub struct CustomErrorSchema {

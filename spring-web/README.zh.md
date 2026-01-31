@@ -259,7 +259,7 @@ API 函数上方的注释用于为 OpenAPI 文档提供附加信息，例如标�
 
 `status_codes` 注解指定了 API 可能返回的错误类型。这些信息将包含在 OpenAPI 文档中，使用户能够了解调用此 API 时的潜在错误响应。
 
-如果你想定义自定义错误类型，可以使用 `ProblemDetails` 派生宏，它会自动实现 `From<T> for ProblemDetails` trait，用于在 OpenAPI 文档中将错误映射成 [RFC 7807](https://www.rfc-editor.org/rfc/rfc7807)和[RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)中定义的Problem Details标准格式。
+如果你想定义自定义错误类型，可以使用 `ProblemDetails` 派生宏，它会自动实现 `From<T> for ProblemDetails` 和 `IntoResponse` trait，用于在 OpenAPI 文档中将错误映射成 [RFC 7807](https://www.rfc-editor.org/rfc/rfc7807)和[RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)中定义的Problem Details标准格式。
 
 在此示例中，我们实现了 `thiserror::Error` 以获得更好的错误处理，但这不是强制的。
 
@@ -267,6 +267,7 @@ API 函数上方的注释用于为 OpenAPI 文档提供附加信息，例如标�
 use spring_web::ProblemDetails;
 use spring_web::axum::http::StatusCode;
 
+// 只需要派生 ProblemDetails - From 和 IntoResponse 都会自动生成！
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum CustomErrors {
     #[status_code(400)]
@@ -281,6 +282,9 @@ pub enum CustomErrors {
     #[error("TeaPod 错误发生: {0:?}")]
     TeaPod(CustomErrorSchema),
 }
+
+// 不需要手动实现 IntoResponse！
+// 可以直接在处理器中返回 Result<T, CustomErrors>
 
 #[derive(Debug, JsonSchema)]
 pub struct CustomErrorSchema {
