@@ -25,7 +25,6 @@ pub struct OperationMetadata {
     /// Declares this operation to be deprecated.Default value is false.
     pub deprecated: bool,
     /// Additional status codes that can be returned by this operation.
-    /// These will be extracted from error types that implement HttpStatusCode.
     pub status_codes: Vec<String>,
 }
 

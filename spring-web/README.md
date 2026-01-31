@@ -285,9 +285,7 @@ The comments above the API function are used to provide additional information f
 
 The status_codes annotation specifies the possible error types that the API may return. This information will be included in the OpenAPI documentation, allowing users to understand the potential error responses when calling this API.
 
-In case of want to define custom error types, you must implement the `HttpStatusCode` trait for your error type, which is used to map the error to an HTTP status code in the OpenAPI documentation.
-
-We can use the derive macro `ProblemDetails` to automatically implement both the `HttpStatusCode` and `ToProblemDetails` traits for our custom error type.
+We can use the derive macro `ProblemDetails` to automatically implement the `From<T> for ProblemDetails` and `IntoResponse` traits for our custom error type.
 
 In this case we are implementing `thiserror::Error` for better error handling, but it's not mandatory.
 
@@ -295,6 +293,7 @@ In this case we are implementing `thiserror::Error` for better error handling, b
 use spring_web::ProblemDetails;
 use spring_web::axum::http::StatusCode;
 
+// Only need ProblemDetails derive - From and IntoResponse are generated automatically!
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum CustomErrors {
     #[status_code(400)]
@@ -310,6 +309,9 @@ pub enum CustomErrors {
     TeaPod(CustomErrorSchema),
 }
 
+// No need to manually implement IntoResponse!
+// You can directly return Result<T, CustomErrors> from your handlers
+
 #[derive(Debug, JsonSchema)]
 pub struct CustomErrorSchema {
     pub code: u16,
@@ -319,12 +321,12 @@ pub struct CustomErrorSchema {
 
 ## Simplified Error Handling with Automatic Problem Details
 
-The `ProblemDetails` derive macro automatically generates both `HttpStatusCode` and `ToProblemDetails` implementations, eliminating the need for manual mapping:
+The `ProblemDetails` derive macro automatically generates both the `From<T> for ProblemDetails` and `IntoResponse` implementations, eliminating the need for manual mapping:
 
 ```rust,ignore
 use spring_web::ProblemDetails;
 
-// Only need ProblemDetails derive - HttpStatusCode and ToProblemDetails are generated automatically!
+// Only need ProblemDetails derive - everything is generated automatically!
 #[derive(thiserror::Error, Debug, ProblemDetails)]
 pub enum ApiErrors {
     // Basic usage - uses about:blank as problem type
@@ -347,12 +349,8 @@ pub enum ApiErrors {
     NotFoundError,
 }
 
-impl IntoResponse for ApiErrors {
-    fn into_response(self) -> Response {
-        // Both HttpStatusCode and ToProblemDetails are automatically implemented!
-        self.to_problem_details().into_response()
-    }
-}
+// No need to implement IntoResponse - it's automatically generated!
+// You can directly return Result<T, ApiErrors> from your handlers
 ```
 
 The macro automatically maps common HTTP status codes to appropriate Problem Details:
@@ -481,10 +479,10 @@ pub enum CustomErrors {
     TeaPod(CustomErrorSchema),
 }
 
-// Implement Problem Details conversion
-impl ToProblemDetails for CustomErrors {
-    fn to_problem_details(&self) -> ProblemDetails {
-        match self {
+// If you need custom logic, you can manually implement From trait
+impl From<CustomErrors> for ProblemDetails {
+    fn from(error: CustomErrors) -> Self {
+        match error {
             CustomErrors::ABasicError => {
                 ProblemDetails::validation_error("A basic validation error occurred")
             }
@@ -506,12 +504,16 @@ impl ToProblemDetails for CustomErrors {
     }
 }
 
+// And manually implement IntoResponse
 impl IntoResponse for CustomErrors {
     fn into_response(self) -> Response {
-        self.to_problem_details().into_response()
+        let problem_details: ProblemDetails = self.into();
+        problem_details.into_response()
     }
 }
 ```
+
+Note: When using the `ProblemDetails` derive macro, both `From` and `IntoResponse` are automatically implemented, so you don't need to write this boilerplate code.
 
 The Problem Details response will be formatted as:
 
@@ -522,9 +524,7 @@ The Problem Details response will be formatted as:
   "status": 400,
   "detail": "A basic validation error occurred"
 }
-```
-
-### Automatic Instance URI Capture
+```### Automatic Instance URI Capture
 
 Problem Details automatically captures the current request URI and includes it in the `instance` field. This feature is enabled by default and requires no additional configuration:
 
