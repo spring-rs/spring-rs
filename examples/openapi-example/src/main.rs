@@ -2,14 +2,12 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use spring::{auto_config, App};
 use spring_sqlx::SqlxPlugin;
-use spring_web::axum::response::IntoResponse;
 use spring_web::axum::Json;
 use spring_web::extractor::Path;
 use spring_web::get_api;
 use spring_web::WebPlugin;
 use spring_web::WebConfigurator;
-use spring_web::problem_details::ToProblemDetails;
-use spring_web::ProblemDetails;
+use spring_web::ProblemDetails as ProblemDetailsMacro;
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -21,7 +19,12 @@ async fn main() {
         .await;
 }
 
-#[derive(Debug, thiserror::Error, ProblemDetails)]
+// ProblemDetails 宏会自动生成：
+// 1. From<ApiErrors> for ProblemDetails - 用于错误转换
+// 2. IntoResponse - 用于在 Axum 处理器中直接返回错误
+// 3. OpenAPI 集成 - 用于文档生成
+// 因此不需要手动实现这些 trait！
+#[derive(Debug, thiserror::Error, ProblemDetailsMacro)]
 pub enum ApiErrors {
     // 基本用法：使用 about:blank 作为默认 problem_type
     #[status_code(400)]
@@ -78,14 +81,6 @@ pub enum ApiErrors {
     #[detail("You have exceeded the maximum number of requests per minute")]
     #[error("Rate Limit Exceeded")]  // 这个会自动用作 title
     RateLimitExceeded,
-}
-
-
-impl IntoResponse for ApiErrors {
-    fn into_response(self) -> spring_web::axum::response::Response {
-        // ToProblemDetails 现在是自动生成的！
-        self.to_problem_details().into_response()
-    }
 }
 
 #[derive(Debug, JsonSchema)]
