@@ -2,10 +2,11 @@
 //!
 //! Uses AppBuilder and Plugin pattern for proper initialization
 
+use sa_token_core::token::TokenValue;
 use spring::app::AppBuilder;
-use spring::plugin::{ComponentRegistry, MutableComponentRegistry, Plugin};
 use spring::async_trait;
-use spring_sa_token::{sa_token_core::token::TokenValue, OptionalSaTokenExtractor, SaTokenLayer, SaTokenState, StpUtil};
+use spring::plugin::{ComponentRegistry, MutableComponentRegistry, Plugin};
+use spring_sa_token::{OptionalSaTokenExtractor, SaTokenLayer, SaTokenState, StpUtil};
 use spring_web::axum::{
     body::Body,
     http::{Request, StatusCode},
@@ -22,9 +23,7 @@ struct TestSaTokenPlugin;
 impl Plugin for TestSaTokenPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let state = SaTokenState::builder()
-            .storage(std::sync::Arc::new(
-                spring_sa_token::MemoryStorage::new(),
-            ))
+            .storage(std::sync::Arc::new(spring_sa_token::MemoryStorage::new()))
             .token_name("Authorization".to_string())
             .timeout(3600)
             .build();
@@ -45,7 +44,9 @@ async fn test_sa_token_integration() {
     TestSaTokenPlugin.build(&mut app).await;
 
     // Get state from app
-    let state = app.get_component::<SaTokenState>().expect("SaTokenState should be registered");
+    let state = app
+        .get_component::<SaTokenState>()
+        .expect("SaTokenState should be registered");
 
     // =========================================================================
     // Test 1: Layer creation
@@ -76,7 +77,11 @@ async fn test_sa_token_integration() {
         let token = state.manager.login("logout_user").await.unwrap();
         assert!(state.manager.is_valid(&token).await);
 
-        state.manager.logout_by_login_id("logout_user").await.unwrap();
+        state
+            .manager
+            .logout_by_login_id("logout_user")
+            .await
+            .unwrap();
         assert!(!state.manager.is_valid(&token).await);
     }
 
@@ -189,12 +194,7 @@ async fn test_sa_token_integration() {
             .layer(SaTokenLayer::new(state.clone()));
 
         let response = app
-            .oneshot(
-                Request::builder()
-                    .uri("/test")
-                    .body(Body::empty())
-                    .unwrap(),
-            )
+            .oneshot(Request::builder().uri("/test").body(Body::empty()).unwrap())
             .await
             .unwrap();
 
@@ -203,7 +203,7 @@ async fn test_sa_token_integration() {
 }
 
 mod test_config_conversion {
-    use spring_sa_token::config::{SaTokenConfig, CoreConfig};
+    use spring_sa_token::{CoreConfig, SaTokenConfig};
 
     #[test]
     fn test_config_into_core_config() {
@@ -251,8 +251,7 @@ mod test_path_auth_builder {
 
     #[test]
     fn test_path_auth_builder_include_all() {
-        let builder = PathAuthBuilder::new()
-            .include_all(["/api/**", "/admin/**", "/user/**"]);
+        let builder = PathAuthBuilder::new().include_all(["/api/**", "/admin/**", "/user/**"]);
 
         assert!(builder.is_configured());
     }

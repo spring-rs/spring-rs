@@ -75,7 +75,7 @@ use spring_redis::RedisPlugin;
 use spring_sa_token::{SaTokenPlugin, SaTokenAuthConfigurator};
 use spring_web::{WebPlugin, WebConfigurator};
 
-mod security;
+mod config;
 
 #[auto_config(WebConfigurator)]
 #[tokio::main]
@@ -84,7 +84,7 @@ async fn main() {
         .add_plugin(RedisPlugin)       // with-spring-redis feature 需要
         .add_plugin(SaTokenPlugin)
         .add_plugin(WebPlugin)
-        .sa_token_auth(security::SecurityConfig)  // 配置路径认证
+        .sa_token_configure(config::SaTokenConfig)  // 配置路径认证
         .run()
         .await
 }
@@ -92,19 +92,21 @@ async fn main() {
 
 ### 2. 配置路径认证
 
-`sa_token_auth()` 支持两种配置方式：
+`sa_token_configure()` 支持两种配置方式：
 
-#### 方式一：使用 SecurityConfig（推荐）
+#### 方式一：使用 SaTokenConfig（推荐）
 
-创建 `src/security.rs`：
+创建 `src/config.rs`：
 
 ```rust
-use spring_sa_token::{PathAuthBuilder, SaTokenConfigurator};
+use spring::app::AppBuilder;
+use spring_sa_token::{PathAuthBuilder, SaStorage, SaTokenConfigurator};
+use std::sync::Arc;
 
-pub struct SecurityConfig;
+pub struct SaTokenConfig;
 
-impl SaTokenConfigurator for SecurityConfig {
-    fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+impl SaTokenConfigurator for SaTokenConfig {
+    fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
         auth
             // 需要认证的路径
             .include("/user/**")
@@ -120,7 +122,7 @@ impl SaTokenConfigurator for SecurityConfig {
 然后在 `main.rs` 中使用：
 
 ```rust
-.sa_token_auth(security::SecurityConfig)
+.sa_token_configure(config::SaTokenConfig)
 ```
 
 #### 方式二：直接使用 PathAuthBuilder
@@ -137,7 +139,7 @@ async fn main() {
         .add_plugin(SaTokenPlugin)
         .add_plugin(WebPlugin)
         // 方式 2a：使用构建器模式
-        .sa_token_auth(
+        .sa_token_configure(
             PathAuthBuilder::new()
                 .include("/user/**")
                 .include("/admin/**")
@@ -424,6 +426,72 @@ async fn get_config(Component(state): Component<SaTokenState>) -> impl IntoRespo
     }))
 }
 ```
+
+## 自定义存储
+
+你可以使用 `lazy_storage<T>()` 实现自定义存储后端（如基于数据库）：
+
+### 步骤 1：将你的存储定义为 Service
+
+```rust
+use spring::plugin::service::Service;
+use spring_sa_token::SaStorage;
+use spring_sea_orm::DbConn;
+use sa_token_adapter::storage::{StorageResult, StorageError};
+
+#[derive(Clone, Service)]
+pub struct MyDatabaseStorage {
+    #[inject(component)]
+    conn: DbConn,  // 由 spring 框架自动注入
+}
+
+#[async_trait]
+impl SaStorage for MyDatabaseStorage {
+    async fn get(&self, key: &str) -> StorageResult<Option<String>> {
+        // 你的数据库查询逻辑
+        todo!()
+    }
+
+    async fn set(&self, key: &str, value: &str, ttl: Option<i64>) -> StorageResult<()> {
+        // 你的数据库插入/更新逻辑
+        todo!()
+    }
+
+    async fn delete(&self, key: &str) -> StorageResult<()> {
+        // 你的数据库删除逻辑
+        todo!()
+    }
+
+    // ... 实现其他必需的方法
+}
+```
+
+### 步骤 2：在配置器中使用 lazy_storage
+
+```rust
+use spring::app::AppBuilder;
+use spring_sa_token::{lazy_storage, PathAuthBuilder, SaStorage, SaTokenConfigurator};
+use std::sync::Arc;
+
+pub struct SaTokenConfig;
+
+impl SaTokenConfigurator for SaTokenConfig {
+    fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+        auth.include("/api/**").exclude("/login")
+    }
+
+    fn configure_storage(&self, _app: &AppBuilder) -> Option<Arc<dyn SaStorage>> {
+        // 使用 lazy_storage 包装你基于 Service 的存储
+        // 依赖项（如 DbConn）会在运行时自动注入
+        Some(lazy_storage::<MyDatabaseStorage>())
+    }
+}
+```
+
+`lazy_storage<T>()` 函数：
+- 使用懒加载组件解析包装你的 `#[derive(Service)]` 存储
+- 依赖项在首次使用存储时自动注入
+- 无需手动处理 `LazyComponent` - 框架会在内部处理
 
 ## 错误处理
 

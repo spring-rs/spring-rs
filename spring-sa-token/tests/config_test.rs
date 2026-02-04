@@ -1,6 +1,6 @@
 //! Configuration tests for spring-sa-token
 
-use spring_sa_token::config::{SaTokenConfig, TokenStyle};
+use spring_sa_token::{SaTokenConfig, TokenStyle};
 
 #[test]
 fn test_sa_token_config_creation() {
@@ -143,15 +143,21 @@ fn test_token_style_variants() {
         TokenStyle::Uuid
     ));
     assert!(matches!(
-        toml::from_str::<StyleOnly>(toml_random32).unwrap().token_style,
+        toml::from_str::<StyleOnly>(toml_random32)
+            .unwrap()
+            .token_style,
         TokenStyle::Random32
     ));
     assert!(matches!(
-        toml::from_str::<StyleOnly>(toml_random64).unwrap().token_style,
+        toml::from_str::<StyleOnly>(toml_random64)
+            .unwrap()
+            .token_style,
         TokenStyle::Random64
     ));
     assert!(matches!(
-        toml::from_str::<StyleOnly>(toml_random128).unwrap().token_style,
+        toml::from_str::<StyleOnly>(toml_random128)
+            .unwrap()
+            .token_style,
         TokenStyle::Random128
     ));
     assert!(matches!(
