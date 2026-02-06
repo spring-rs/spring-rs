@@ -1,0 +1,65 @@
+[package]
+name = "diesel-orm-example"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+tokio = { workspace = true }
+diesel = { workspace = true }
+diesel-async = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+spring = { path = "../../spring" }
+spring-web = { path = "../../spring-web" }
+spring-diesel-orm = { path = "../../spring-diesel-orm", features = [
+    "diesel-async-postgres-deadpool", "diesel-async-sqlite-deadpool",
+     "diesel-async-mysql-deadpool","diesel-async-postgres-bb8", "diesel-async-sqlite-bb8",
+     "diesel-async-mysql-bb8" ,"diesel-sync-postgres-r2d2", "diesel-sync-sqlite-r2d2",
+     "diesel-sync-mysql-r2d2"
+]}
+diesel_migrations = { version = "2.3.1", features = ["postgres", "sqlite"] }
+
+
+[[bin]]
+name = "diesel-orm-async-postgres-dp"
+path = "./src/main_pg_dp.rs"
+
+[[bin]]
+name = "diesel-orm-async-sqlite-dp"
+path = "./src/main_sqlite_dp.rs"
+
+[[bin]]
+name = "diesel-orm-async-mysql-dp"
+path = "./src/main_mysql_dp.rs"
+
+
+[[bin]]
+name = "diesel-orm-async-postgres-bb8"
+path = "./src/main_pg_bb8.rs"
+
+[[bin]]
+name = "diesel-orm-async-sqlite-bb8"
+path = "./src/main_sqlite_bb8.rs"
+
+[[bin]]
+name = "diesel-orm-async-mysql-bb8"
+path = "./src/main_mysql_bb8.rs"
+
+
+
+[[bin]]
+name = "diesel-orm-sync-postgres-r2d2"
+path = "./src/main_pg_r2d2.rs"
+
+
+[[bin]]
+name = "diesel-orm-sync-mysql-r2d2"
+path = "./src/main_mysql_r2d2.rs"
+
+
+[[bin]]
+name = "diesel-orm-sync-sqlite-r2d2"
+path = "./src/main_sqlite_r2d2.rs"

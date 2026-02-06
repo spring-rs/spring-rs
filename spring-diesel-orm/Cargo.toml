@@ -1,0 +1,45 @@
+[package]
+name = "spring-diesel-orm"
+description = "Integration of spring-rs framework and diesel-orm"
+version = "0.4.8"
+categories = ["database"]
+keywords = ["orm", "sql-database", "spring"]
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[features]
+default = ["diesel/postgres"]
+_mysql = ["diesel/mysql"]
+_sqlite = ["diesel/sqlite"]
+_postgres = ["diesel/postgres"]
+_diesel-async = [ "dep:diesel-async", ]
+_diesel-sync = ["diesel/r2d2"]
+_diesel-async-postgres = [ "diesel-async/postgres", "_diesel-async", "_postgres"]
+_diesel-async-mysql = [ "diesel-async/mysql", "_diesel-async", "_mysql"]
+_diesel-async-sqlite = [ "diesel-async/sqlite", "_diesel-async", "_sqlite"]
+_deadpool = ["diesel-async/deadpool", "diesel-async/tokio", "dep:deadpool"]
+_bb8 = ["diesel-async/bb8"]
+diesel-async-postgres-deadpool = ["_diesel-async-postgres", "_deadpool"]
+diesel-async-mysql-deadpool = ["_diesel-async-mysql", "_deadpool"]
+diesel-async-sqlite-deadpool = ["_diesel-async-sqlite", "_deadpool"]
+diesel-async-postgres-bb8 = ["_diesel-async-postgres", "_bb8"]
+diesel-async-mysql-bb8 = ["_diesel-async-mysql", "_bb8"]
+diesel-async-sqlite-bb8 = ["_diesel-async-sqlite", "_bb8"]
+diesel-sync-postgres-r2d2 = ["_diesel-sync", "_postgres"]
+diesel-sync-sqlite-r2d2 = ["_diesel-sync", "_sqlite"]
+diesel-sync-mysql-r2d2 = ["_diesel-sync", "_mysql"]
+
+[dependencies]
+bb8 = { workspace = true }
+deadpool = { workspace = true, optional = true, features = ["rt_tokio_1"] }
+diesel = { workspace = true }
+diesel-async = { workspace = true, optional = true, features = ["tokio"] }
+paste = { workspace = true }
+r2d2 = { workspace = true, optional = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+spring = { path = "../spring", version = "0.4" }
+
+
