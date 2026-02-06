@@ -1,9 +1,7 @@
-use diesel::r2d2::{ConnectionManager, Pool};
-
 use serde::Serialize;
 use spring::{auto_config, App};
 
-use spring_diesel_orm::diesel_sync::DieselOrmPlugin;
+use spring_diesel_orm::diesel_sync::{DieselOrmPlugin, MysqlR2d2ConnectionPool};
 use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
@@ -42,7 +40,7 @@ async fn main() {
 }
 
 #[get("/users")]
-async fn get_users(Component(db): Component<Pool<ConnectionManager<MysqlConnection>>>) -> Result<impl IntoResponse> {
+async fn get_users(Component(db): Component<MysqlR2d2ConnectionPool>) -> Result<impl IntoResponse> {
     let mut connection = db.get().context("failed to get db connection")?;    
     let rows: Vec<User> = users::table
         .filter(users::active.eq(true))

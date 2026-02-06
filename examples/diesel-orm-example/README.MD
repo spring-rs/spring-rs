@@ -40,9 +40,10 @@
             * cargo run --bin diesel-orm-sync-postgres-dp 
         * use cargo run command with --bin option as below for postgres r2d2 sync implementation 
             * cargo run --bin diesel-orm-sync-postgres-r2d2 
+        * Check cargo.toml file other options available under [[bin]]
 
         * Verify the result by doing http get 
-            * curl http://localhost:8080/users
+            * curl -v http://locahost:8080/users
 
 
     

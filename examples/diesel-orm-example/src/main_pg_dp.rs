@@ -1,8 +1,7 @@
-use diesel_async::pooled_connection::deadpool::Pool;
 use serde::Serialize;
 use spring::{auto_config, App};
 
-use spring_diesel_orm::diesel_async::DieselAsyncOrmPlugin;
+use spring_diesel_orm::diesel_async::{DieselAsyncOrmPlugin, PgDeadPoolConnectionPool};
 use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
@@ -14,11 +13,8 @@ use spring_web::{
 use anyhow::Context;
 
 use diesel::prelude::*;
-//use diesel::sqlite::{Sqlite, SqliteConnection};
-//use diesel_async::async_connection_wrapper::AsyncConnectionWrapper;
-//use diesel_async::sync_connection_wrapper::SyncConnectionWrapper;
 use crate::schema::users;
-use diesel_async::{AsyncPgConnection, RunQueryDsl};
+use diesel_async::{RunQueryDsl};
 
 
 // ordinary diesel model setup
@@ -44,7 +40,7 @@ async fn main() {
 }
 
 #[get("/users")]
-async fn get_users(Component(db): Component<Pool<AsyncPgConnection>>) -> Result<impl IntoResponse> {
+async fn get_users(Component(db): Component<PgDeadPoolConnectionPool>) -> Result<impl IntoResponse> {
     let mut connection = db.get().await.context("failed to get db connection")?;
     let connection = connection.as_mut();
     let rows: Vec<User> = users::table

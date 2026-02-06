@@ -1,8 +1,7 @@
-use diesel_async::pooled_connection::deadpool::Pool;
 use serde::Serialize;
 use spring::{auto_config, App};
 
-use spring_diesel_orm::diesel_async::{AsyncSqlLiteConnection, DieselAsyncOrmPlugin};
+use spring_diesel_orm::diesel_async::{DieselAsyncOrmPlugin, SqliteDeadPoolConnectionPool};
 
 use spring_web::get;
 use spring_web::{
@@ -42,7 +41,7 @@ async fn main() {
 }
 
 #[get("/users")]
-async fn get_users(Component(db): Component<Pool<AsyncSqlLiteConnection>>) -> Result<impl IntoResponse> {
+async fn get_users(Component(db): Component<SqliteDeadPoolConnectionPool>) -> Result<impl IntoResponse> {
     let mut connection = db.get().await.context("failed to get sqlite connection")?;
     
     //.context("failed to get db connection")?;

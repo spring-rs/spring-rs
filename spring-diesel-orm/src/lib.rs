@@ -2,6 +2,7 @@
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
+
 pub mod config;
 
 #[cfg(feature = "_diesel-async")]
@@ -9,6 +10,12 @@ pub mod diesel_async {
 
     use std::time::Duration;
 
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_sqlite",
+        feature = "_bb8"
+    ))]
+    use diesel_async::pooled_connection::bb8::Pool as Bb8Pool;
     use spring::app::AppBuilder;
     use spring::async_trait;
     use spring::config::ConfigRegistry;
@@ -33,13 +40,55 @@ pub mod diesel_async {
         feature = "_postgres",
         feature = "_deadpool"
     ))]
-    use diesel_async::pooled_connection::deadpool::{BuildError, PoolBuilder};
+    use diesel_async::pooled_connection::deadpool::{BuildError, PoolBuilder, Pool as DeadPool};
 
     #[cfg(feature = "_sqlite")]
     use diesel_async::sync_connection_wrapper::SyncConnectionWrapper;
 
     #[cfg(feature = "_mysql")]
     use diesel_async::AsyncMysqlConnection;
+
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_postgres",
+        feature = "_deadpool"
+    ))]
+    pub type  PgDeadPoolConnectionPool = DeadPool<AsyncPgConnection>;
+
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_mysql",
+        feature = "_deadpool"
+    ))]
+    pub type  MysqlDeadPoolConnectionPool = DeadPool<AsyncMysqlConnection>;
+
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_sqlite",
+        feature = "_deadpool"
+    ))]
+    pub type  SqliteDeadPoolConnectionPool = DeadPool<AsyncSqlLiteConnection>;
+
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_postgres",
+        feature = "_bb8"
+    ))]
+    pub type  PgBb8ConnectionPool = Bb8Pool<AsyncPgConnection>;
+
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_mysql",
+        feature = "_bb8"
+    ))]
+    pub type  MysqlBb8ConnectionPool = Bb8Pool<AsyncMysqlConnection>;
+
+    #[cfg(all(
+        feature = "_diesel-async",
+        feature = "_sqlite",
+        feature = "_bb8"
+    ))]
+    pub type  SqliteBb8ConnectionPool = Bb8Pool<AsyncSqlLiteConnection>;
 
     use crate::config::DieselAsyncOrmConfig;
 
@@ -346,70 +395,34 @@ pub mod diesel_sync {
     use std::time::Duration;
 
     use crate::config::DieselSyncOrmConfig;
-
-    /* #[macro_export]
-    macro_rules! configure_connections_r2d2 {
-    ($db:ident) => {
-        paste::paste!{
-            fn [<configure_connection_ $db _r2d2>](&self, config: &DieselOrmConfig, app_builder: &mut AppBuilder) {
-                let pool = [<create_pooled_connection_ $db _r2d2>](config);
-                app_builder.add_component(pool);
-            }
-        }
-    };
-
-    #[macro_export]
-    macro_rules! create_connection_pool_r2d2 {
-        ($connection:expr, $db: ident, $pool: ident) => {
-            paste::paste!{
-                async fn [<create_connection_pool_ $db _bb8>](
-                    config: &DieselAsyncOrmConfig,
-                    ) -> std::result::Result<diesel_async::pooled_connection::bb8::Pool<$connection>, PoolError> {
-                    use diesel_async::pooled_connection::AsyncDieselConnectionManager;
-                    let manager_config = create_manager_config(&config);
-                    let manager: AsyncDieselConnectionManager<_> =
-                        AsyncDieselConnectionManager::new_with_config(config.uri.clone(), manager_config);
-                    let mut pool_builder = diesel_async::pooled_connection::bb8::Pool::builder();
-                    pool_builder = [<configure_bb8_ $db >](pool_builder, config);
-                    return pool_builder.build(manager).await;
-                }
-            }
-        };
-    } */
-
-    /* macro_rules! create_async_connection_bb8 {
-        ($connection:expr, $db: ident, $pool: ident) => {
-            paste::paste!{
-                async fn [<create_async_connection_ $db _bb8>](
-                    config: &DieselAsyncOrmConfig,
-                    ) -> std::result::Result<diesel_async::pooled_connection::bb8::Pool<$connection>, PoolError> {
-                    use diesel_async::pooled_connection::AsyncDieselConnectionManager;
-                    let manager_config = create_manager_config(&config);
-                    let manager: AsyncDieselConnectionManager<_> =
-                        AsyncDieselConnectionManager::new_with_config(config.uri.clone(), manager_config);
-                    let mut pool_builder = diesel_async::pooled_connection::bb8::Pool::builder();
-                    pool_builder = [<configure_bb8_ $db >](pool_builder, config);
-                    return pool_builder.build(manager).await;
-                }
-            }
-        };
-    } */
-
-    use diesel::r2d2::{ConnectionManager, Pool, R2D2Connection};
+    use diesel::r2d2::{ConnectionManager, Pool as R2d2Pool, R2D2Connection};
+    #[cfg(feature = "_mysql")]
     use diesel::MysqlConnection;
+    #[cfg(feature = "_postgres")]
     use diesel::PgConnection;
     use diesel::SqliteConnection;
     use spring::plugin::MutableComponentRegistry;
     use diesel::r2d2::PoolError;
+    
+    #[cfg(feature = "_postgres")]
+    pub type  PgR2d2ConnectionPool = R2d2Pool<ConnectionManager<PgConnection>>;
+
+    #[cfg(feature = "_mysql")]
+    pub type  MysqlR2d2ConnectionPool = R2d2Pool<ConnectionManager<MysqlConnection>>;
+
+    #[cfg(feature = "_sqlite")]
+    pub type  SqliteR2d2ConnectionPool = R2d2Pool<ConnectionManager<SqliteConnection>>;
+
+    
 
     fn create_async_connection_r2d2<C>(
         config: &DieselSyncOrmConfig,
-    ) -> Result<Pool<ConnectionManager<C>>, PoolError>
+    ) -> Result<R2d2Pool<ConnectionManager<C>>, PoolError>
     where
         C: R2D2Connection + 'static,
     {
         let manager = ConnectionManager::<C>::new(config.uri.clone());
-        let mut builder = Pool::builder();
+        let mut builder = R2d2Pool::builder();
         let pool_config = config.pool_config.as_ref();
 
         if let Some(pool_config) = pool_config {

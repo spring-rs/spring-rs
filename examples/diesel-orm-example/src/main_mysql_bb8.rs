@@ -1,8 +1,7 @@
-use diesel_async::pooled_connection::bb8::Pool;
 use serde::Serialize;
 use spring::{auto_config, App};
 
-use spring_diesel_orm::diesel_async::DieselAsyncOrmPlugin;
+use spring_diesel_orm::diesel_async::{DieselAsyncOrmPlugin, MysqlBb8ConnectionPool};
 use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
@@ -15,7 +14,7 @@ use anyhow::Context;
 
 use diesel::prelude::*;
 use crate::schema::users;
-use diesel_async::{AsyncMysqlConnection, RunQueryDsl};
+use diesel_async::{RunQueryDsl};
 
 
 // ordinary diesel model setup
@@ -41,7 +40,7 @@ async fn main() {
 }
 
 #[get("/users")]
-async fn get_users(Component(db): Component<Pool<AsyncMysqlConnection>>) -> Result<impl IntoResponse> {
+async fn get_users(Component(db): Component<MysqlBb8ConnectionPool>) -> Result<impl IntoResponse> {
     let mut connection = db.get().await.context("failed to get db connection")?;
     
     let rows: Vec<User> = users::table

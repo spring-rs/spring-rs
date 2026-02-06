@@ -14,10 +14,6 @@
 #pool_type = "Deadpool"
 #pool_config = { Deadpool = { max_size = 16,  create_timeout_in_ms=1000, recycle_timeout_in_ms=1000, wait_timeout_in_ms = 1000 } }
 
-#min_size = 4, , 
-
-
-
 #[diesel-async]
 #uri = "postgresql://user:pass@localhost:5432/postgres"
 #pool_type = "Bb8"
