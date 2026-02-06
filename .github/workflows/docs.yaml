@@ -25,6 +25,11 @@ jobs:
         repository: spring-rs/contrib-plugins
         path: contrib-plugins
 
+    - name: Install protoc
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
 
