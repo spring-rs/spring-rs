@@ -1,7 +1,7 @@
 use serde::Serialize;
 use spring::{auto_config, App};
 
-use spring_diesel_orm::diesel_sync::{DieselOrmPlugin, SqliteR2d2ConnectionPool};
+use spring_diesel_orm::diesel_sync::{DieselSyncOrmPlugin, SqliteR2d2ConnectionPool};
 use spring_web::get;
 use spring_web::{
     axum::response::{IntoResponse, Json},
@@ -33,7 +33,7 @@ struct User {
 #[tokio::main]
 async fn main() {
     App::new()
-        .add_plugin(DieselOrmPlugin)
+        .add_plugin(DieselSyncOrmPlugin)
         .add_plugin(WebPlugin)
         .run()
         .await;

@@ -464,11 +464,11 @@ pub mod diesel_sync {
         builder.build(manager)
     }
 
-    pub struct DieselOrmPlugin;
+    pub struct DieselSyncOrmPlugin;
 
     #[cfg(feature = "_diesel-sync")]
     #[async_trait]
-    impl Plugin for DieselOrmPlugin {
+    impl Plugin for DieselSyncOrmPlugin {
         async fn build(&self, app: &mut AppBuilder) {
             use spring::config::ConfigRegistry;
 

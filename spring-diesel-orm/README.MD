@@ -1,13 +1,19 @@
 [![crates.io](https://img.shields.io/crates/v/spring-diesel-orm.svg)](https://crates.io/crates/spring-diesel-orm)
 [![Documentation](https://docs.rs/spring-diesel-orm/badge.svg)](https://docs.rs/spring-diesel-orm)
 
+[Diesel](https://docs.rs/diesel/latest/diesel/) is ORM framework that supports Mysql, Postgres and Sqlite databases using blocking connection. 
+
+[Diesel Async](https://docs.rs/diesel-async/latest/diesel_async/) is asyncrnous wrapper around Diesel.
+
+spring-diesel-orm plugin support the above two implementations.
+
 ## Dependencies
 
 ```toml
 spring-diesel-orm = { version = "<version>", features = ["..."] }
 ```
 
-*  Following features are supported depending on database type, connection pool type and async requirements
+*  Following features are available depending on database type, connection pool type and async requirements
 
     * diesel-async-postgres-deadpool
     * diesel-async-sqlite-deadpool
@@ -21,7 +27,7 @@ spring-diesel-orm = { version = "<version>", features = ["..."] }
 
 ## Configuration items
 
-### Configure postgres with async deadpool connection pooling
+### Configure postgres with async deadpool connection pooling in your app.toml
 
 ```toml
 [diesel-async]
@@ -40,17 +46,19 @@ pool_config = { R2d2 = { max_size = 16, min_idle= 4,  test_on_check_out = true, 
 ```
 
 ## Two plugins are supported
-    1. DieselOrmPlugin          - Supports r2d2 synchronous connection 
-    2. DieselAsyncOrmPlugin     - Supports deadpool and bb8 asynchrnonous connection
+    
+1. DieselSyncOrmPlugin          - Supports r2d2 synchronous connection 
+2. DieselAsyncOrmPlugin         - Supports deadpool and bb8 asynchrnonous connection
 
-    use [diesel-sync] in app.toml for DieselOrmPlugin
-    use [diesel-async] in app.toml for DieselAsyncOrmPlugin
+
+use [diesel-sync] in app.toml for DieselSyncOrmPlugin
+use [diesel-async] in app.toml for DieselAsyncOrmPlugin
 
 ## Components
 
-After configuring the above configuration items, .
+After configuring the above configuration items, 
 
-## Extract the Component registered by the plugin
+#### Extract the Component registered by the plugin
 
 The `DieselASyncOrmPlugin` plugin automatically registers a connection pool component for us. We can use `Component` to extract this connection pool from AppState. [`Component`](https://docs.rs/spring-web/latest/spring_web/extractor/struct.Component.html) is an axum [extractor](https://docs.rs/axum/latest/axum/extract/index.html).
 
@@ -81,5 +89,17 @@ async fn get_users(Component(db): Component<PgBb8ConnectionPool>) -> Result<impl
     Ok(Json(rows))
 }
 ```
+
+* The following components are registered depending on your configuration in app.toml
+
+    1.   PgDeadPoolConnectionPool
+    2.   MysqlDeadPoolConnectionPool
+    3.   SqliteDeadPoolConnectionPool
+    4.   PgBb8ConnectionPool
+    5.   MysqlBb8ConnectionPool  
+    6.   SqliteBb8ConnectionPool
+    7.   PgR2d2ConnectionPool
+    8.   MysqlR2d2ConnectionPool
+    9.   SqliteR2d2ConnectionPool
 
 For the complete code, please refer to [`diesel-orm-example`](https://github.com/spring-rs/spring-rs/tree/master/examples/diesel-orm-example)
