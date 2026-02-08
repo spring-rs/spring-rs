@@ -433,5 +433,136 @@
             },
             "cwd": "${workspaceFolder}/examples/spring-opendal-example"
         },
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'diesel-orm-example-postgres-deadpool'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=diesel-orm-async-postgres-deadpool",
+                    "--package=diesel-orm-example"
+                ],
+                "filter": {
+                    "name": "diesel-orm-async-postgres",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+                "SPRING_ENV": "sqlite",
+            },
+            "cwd": "${workspaceFolder}/examples/diesel-orm-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'diesel-orm-example-sqlite-deadpool'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=diesel-orm-async-sqlite-deadpool",
+                    "--package=diesel-orm-example"
+                ],
+                "filter": {
+                    "name": "diesel-orm-async-sqlite",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+                "SPRING_ENV": "sqlite",
+            },
+            "cwd": "${workspaceFolder}/examples/diesel-orm-example"
+        },
+        
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'diesel-orm-example-mysql-deadpool'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=diesel-orm-async-mysql",
+                    "--package=diesel-orm-example",
+                    "--verbose",
+                ],
+                "filter": {
+                    "name": "diesel-orm-async-mysql-deadpool",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/diesel-orm-example"
+        },
+
+
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'diesel-orm-example-postgres-bb8'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=diesel-orm-async-postgres-bb8",
+                    "--package=diesel-orm-example"
+                ],
+                "filter": {
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/diesel-orm-example"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'diesel-orm-example-sqlite-bb8'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=diesel-orm-async-sqlite-bb8",
+                    "--package=diesel-orm-example"
+                ],
+                "filter": {
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/diesel-orm-example"
+        },
+        
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'diesel-orm-example-mysql-bb8'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=diesel-orm-async-mysql-bb8",
+                    "--package=diesel-orm-example",
+                    "--verbose",
+                ],
+                "filter": {
+                }
+            },
+            "args": [],
+            "env": {
+                "RUST_BACKTRACE": "1",
+            },
+            "cwd": "${workspaceFolder}/examples/diesel-orm-example"
+        },
+
     ]
 }

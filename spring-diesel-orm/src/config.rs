@@ -106,8 +106,8 @@ pub(crate)struct Bb8PoolConfig{
 #[cfg(feature = "_diesel-async")]
 #[derive(Debug, Clone, JsonSchema, Deserialize)]
 pub enum QueueStrategy{
-    FIFO,
-    LIFO,
+    Fifo,
+    Lifo,
 }
 
 

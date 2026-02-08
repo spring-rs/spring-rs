@@ -186,6 +186,7 @@ pub mod diesel_async {
         ($connection:expr, $db:ident) =>{
             paste::paste! {
                 fn [<configure_bb8 _$db>](mut pool_builder: bb8::Builder<AsyncDieselConnectionManager<$connection>>, orm_config: &DieselAsyncOrmConfig) -> bb8::Builder<AsyncDieselConnectionManager<$connection>> {
+                    
                     if let Some($crate::config::PoolConfig::Bb8(config)) = &orm_config.pool_config {
                         if let Some(value) = config.max_size {
                             pool_builder = pool_builder.max_size(value);
@@ -221,10 +222,10 @@ pub mod diesel_async {
 
                         if let Some(value) = &config.queue_strategy {
                             match value{
-                                $crate::config::QueueStrategy::FIFO => {
+                                $crate::config::QueueStrategy::Fifo => {
                                     pool_builder = pool_builder.queue_strategy(bb8::QueueStrategy::Fifo);
                                 }
-                                $crate::config::QueueStrategy::LIFO => {
+                                $crate::config::QueueStrategy::Lifo => {
                                     pool_builder = pool_builder.queue_strategy(bb8::QueueStrategy::Lifo);
                                 }
                             }
