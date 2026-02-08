@@ -5,7 +5,8 @@ on:
   push:
     branches:
       - main
-
+  workflow_dispatch:
+  
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
