@@ -2,6 +2,13 @@
 #![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
+//! ## spring-diesel-orm
+//! Spring-rs component module that provides wrapper for `diesel` and `diesel-async` orm.
+//! The module provides two  plugins that registers the connection pool as spring-rs component.
+//! DieselSyncOrmPlugin provides wrapper for diesel sync implementation and supports r2d2 connection pool for postgres, mysql and sqlite
+//! DieselASyncOrmPlugin provides wrapper for diesel-async implementation and supports
+//! deadpool, bb8 connection pools for Postgres,mysql and sqlite databases.
+
 
 pub mod config;
 
