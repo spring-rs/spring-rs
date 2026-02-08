@@ -4,13 +4,6 @@
 #![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
 
-// Storage backend selection is mutually exclusive to avoid ambiguous behavior.
-#[cfg(any(all(feature = "memory", feature = "with-spring-redis"),))]
-compile_error!(
-    "storage backend features are mutually exclusive: \
-     choose only one of `memory`/`with-spring-redis`"
-);
-
 mod custom_storage;
 mod config;
 mod configurator;
