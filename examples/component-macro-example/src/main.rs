@@ -15,16 +15,19 @@ struct DbConfig {
 // Define components
 #[derive(Clone, Debug)]
 struct DbConnection {
+    #[allow(dead_code)]
     url: String,
 }
 
 #[derive(Clone, Debug)]
 struct UserRepository {
+    #[allow(dead_code)]
     db: DbConnection,
 }
 
 #[derive(Clone, Debug)]
 struct UserService {
+    #[allow(dead_code)]
     repo: UserRepository,
 }
 

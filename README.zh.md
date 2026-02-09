@@ -121,6 +121,56 @@ async fn fix_rate_job() {
 }
 ```
 
+## component宏
+
+在 `Cargo.toml` 中添加依赖：
+
+```toml
+[dependencies]
+spring = "0.4"
+tokio = { version = "1", features = ["full"] }
+```
+
+**使用 `#[component]` 宏简化组件注册：**
+
+```rust
+use spring::component;
+use spring::config::{Config, Configurable};
+use spring::App;
+use serde::Deserialize;
+
+// 定义配置
+#[derive(Clone, Configurable, Deserialize)]
+#[config_prefix = "app"]
+struct AppConfig {
+    name: String,
+}
+
+// 定义组件
+#[derive(Clone)]
+struct AppService {
+    config: AppConfig,
+}
+
+// 使用 #[component] 宏自动注册
+#[component]
+fn app_service(Config(config): Config<AppConfig>) -> AppService {
+    AppService { config }
+}
+
+#[tokio::main]
+async fn main() {
+    // 组件会自动注册
+    let app = App::new().build().await.unwrap();
+    
+    // 获取已注册的组件
+    let service = app.get_component::<AppService>().unwrap();
+    println!("应用名称: {}", service.config.name);
+}
+```
+
+`#[component]` 宏消除了样板代码 - 无需手动实现 Plugin trait！[了解更多 →](https://spring-rs.github.io/zh/docs/getting-started/component/)
+
 ## 支持的插件
 
 | 插件                   | Crate                                                                                                                                                                      | 集成组件                                                                        | 说明                          |

@@ -27,10 +27,10 @@ pub fn validate_function_signature(func: &ItemFn) -> Result<()> {
 fn validate_return_type(output: &ReturnType) -> Result<()> {
     match output {
         ReturnType::Default => {
-            return Err(syn::Error::new_spanned(
+            Err(syn::Error::new_spanned(
                 output,
                 "#[component] function must return a value (not unit type)",
-            ));
+            ))
         }
         ReturnType::Type(_, ty) => {
             // We can't check Clone trait at compile time in proc macro,
