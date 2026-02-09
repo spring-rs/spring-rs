@@ -42,5 +42,5 @@ schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 spring = { path = "../spring", version = "0.4" }
 mysqlclient-sys = {workspace = true, optional = true, features = ["bundled"]}
-pq-sys = { version = "0.7.5", features = ["bundled"], optional = true }
+pq-sys = { workspace = true, optional = true, features = ["bundled"]}
 
