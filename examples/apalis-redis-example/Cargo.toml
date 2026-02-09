@@ -1,5 +1,5 @@
 [package]
-name = "apalis-redis-demo"
+name = "apalis-redis-example"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

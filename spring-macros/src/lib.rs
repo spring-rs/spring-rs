@@ -4,6 +4,7 @@
 
 mod auto;
 mod cache;
+mod component;
 mod config;
 mod problem_details;
 mod inject;
@@ -330,6 +331,222 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
     inject::expand_derive(input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
+}
+
+/// Component macro for declarative component registration
+///
+/// This macro allows you to register components to the spring-rs application
+/// container in a declarative way, without manually implementing the Plugin trait.
+///
+/// # Syntax
+/// ```plain
+/// #[component]
+/// fn create_component(
+///     Config(config): Config<MyConfig>,
+///     Component(dep): Component<Dependency>,
+/// ) -> MyComponent {
+///     MyComponent::new(config, dep)
+/// }
+/// Declarative component registration macro for spring-rs applications.
+///
+/// The `#[component]` macro automatically generates a Plugin implementation that registers
+/// a component in the application. It handles dependency injection, configuration loading,
+/// and proper initialization order.
+///
+/// # How It Works
+///
+/// The macro transforms a component creation function into a Plugin that:
+/// 1. Extracts dependencies from function parameters
+/// 2. Generates a unique Plugin name based on the return type
+/// 3. Declares dependencies to ensure correct initialization order
+/// 4. Registers the component in the application registry
+/// 5. Automatically registers the Plugin via the `inventory` crate
+///
+/// # Syntax
+/// ```plain
+/// #[component(name = "CustomName")]  // Optional custom name
+/// fn create_component(
+///     Config(config): Config<ConfigType>,      // Configuration injection
+///     Component(dep): Component<DependencyType>, // Component injection
+/// ) -> ComponentType {
+///     // Component creation logic
+/// }
+/// ```
+///
+/// # Attributes
+/// - `name = "PluginName"` - **Optional**: Custom Plugin name. If not specified, the name
+///   is automatically generated as `__Create{TypeName}Plugin`.
+///
+/// # Parameters
+/// - `Config<T>` - Inject configuration of type `T` (must implement `Configurable`)
+/// - `Component<T>` - Inject another component of type `T`
+///   - Can use `#[inject("PluginName")]` attribute to specify explicit dependency
+///   - Without `#[inject]`, dependency is inferred as `__Create{T}Plugin`
+///
+/// # Return Type
+/// - Must implement `Clone + Send + Sync + 'static`
+/// - Can return `Result<T, E>` for fallible initialization (will panic on error)
+/// - Each component type can only be registered once
+///
+/// # Dependency Resolution
+///
+/// The macro automatically analyzes dependencies and generates a `dependencies()` method
+/// that returns the list of required Plugin names. The application will initialize plugins
+/// in the correct order based on these dependencies.
+///
+/// **Circular dependencies are not allowed** and will cause a panic at runtime.
+///
+/// # Examples
+///
+/// ## Basic Usage
+/// ```rust,ignore
+/// use spring::config::{Config, Configurable};
+/// use spring_macros::component;
+/// use serde::Deserialize;
+///
+/// #[derive(Clone, Configurable, Deserialize)]
+/// #[config_prefix = "database"]
+/// struct DbConfig {
+///     host: String,
+///     port: u16,
+/// }
+///
+/// #[derive(Clone)]
+/// struct DbConnection {
+///     url: String,
+/// }
+///
+/// #[component]
+/// fn create_db_connection(
+///     Config(config): Config<DbConfig>,
+/// ) -> DbConnection {
+///     DbConnection {
+///         url: format!("{}:{}", config.host, config.port),
+///     }
+/// }
+/// ```
+///
+/// ## With Dependencies
+/// ```rust,ignore
+/// #[derive(Clone)]
+/// struct UserRepository {
+///     db: DbConnection,
+/// }
+///
+/// #[component]
+/// fn create_user_repository(
+///     Component(db): Component<DbConnection>,
+/// ) -> UserRepository {
+///     UserRepository { db }
+/// }
+/// ```
+///
+/// ## Multi-Level Dependencies
+/// ```rust,ignore
+/// #[derive(Clone)]
+/// struct UserService {
+///     repo: UserRepository,
+/// }
+///
+/// #[component]
+/// fn create_user_service(
+///     Component(repo): Component<UserRepository>,
+/// ) -> UserService {
+///     UserService { repo }
+/// }
+/// ```
+///
+/// ## Async Initialization
+/// ```rust,ignore
+/// #[component]
+/// async fn create_db_connection(
+///     Config(config): Config<DbConfig>,
+/// ) -> Result<DbConnection, anyhow::Error> {
+///     let pool = sqlx::PgPool::connect(&config.url).await?;
+///     Ok(DbConnection { pool })
+/// }
+/// ```
+///
+/// ## Custom Plugin Name
+///
+/// Use custom names when you need multiple components of the same type (NewType pattern):
+/// ```rust,ignore
+/// #[derive(Clone)]
+/// struct PrimaryDb(DbConnection);
+///
+/// #[derive(Clone)]
+/// struct SecondaryDb(DbConnection);
+///
+/// #[component(name = "PrimaryDatabase")]
+/// fn create_primary_db(
+///     Config(config): Config<PrimaryDbConfig>,
+/// ) -> PrimaryDb {
+///     PrimaryDb(DbConnection::new(&config))
+/// }
+///
+/// #[component(name = "SecondaryDatabase")]
+/// fn create_secondary_db(
+///     Config(config): Config<SecondaryDbConfig>,
+/// ) -> SecondaryDb {
+///     SecondaryDb(DbConnection::new(&config))
+/// }
+/// ```
+///
+/// ## Explicit Dependency
+///
+/// Use `#[inject("PluginName")]` when the dependency name cannot be inferred:
+/// ```rust,ignore
+/// #[component]
+/// fn create_repository(
+///     #[inject("PrimaryDatabase")] Component(db): Component<PrimaryDb>,
+/// ) -> UserRepository {
+///     UserRepository::new(db.0)
+/// }
+/// ```
+///
+/// # Usage in Application
+///
+/// Components defined with `#[component]` are automatically registered when the app is built:
+///
+/// ```rust,ignore
+/// use spring::App;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     let app = App::new()
+///         .build()  // Auto plugins are registered automatically
+///         .await
+///         .expect("Failed to build app");
+///     
+///     // Use components
+///     let db = app.get_component::<DbConnection>().unwrap();
+/// }
+/// ```
+///
+/// # Best Practices
+///
+/// 1. **Keep component functions simple** - They should only create and configure the component
+/// 2. **Use NewType pattern for multiple instances** - Wrap the same type in different structs
+/// 3. **Prefer configuration over hardcoding** - Use `Config<T>` for all configurable values
+/// 4. **Use `Arc<T>` for large components** - Reduces clone overhead
+/// 5. **Avoid circular dependencies** - Refactor your design if you encounter them
+/// 6. **Use explicit names for clarity** - When the auto-generated name is not clear enough
+///
+/// # Limitations
+///
+/// - Each component type can only be registered once (use NewType pattern for multiple instances)
+/// - Circular dependencies are not supported
+/// - Component types must implement `Clone + Send + Sync + 'static`
+/// - Configuration types must implement `Configurable + Deserialize`
+///
+/// # See Also
+///
+/// - [`Config`](spring::config::Config) - Configuration injection wrapper
+/// - [`Component`](spring::plugin::Component) - Component injection wrapper
+/// - [`Configurable`](spring::config::Configurable) - Trait for configuration types
+#[proc_macro_attribute]
+pub fn component(attr: TokenStream, input: TokenStream) -> TokenStream {
+    component::component_macro(attr, input)
 }
 
 /// ProblemDetails derive macro
