@@ -8,13 +8,13 @@
 //! Define your security configuration in a separate file:
 //!
 //! ```rust,ignore
-//! // security.rs
+//! // config.rs
 //! use spring_sa_token::{PathAuthBuilder, SaTokenConfigurator};
 //!
-//! pub struct SecurityConfig;
+//! pub struct SaTokenConfig;
 //!
-//! impl SaTokenConfigurator for SecurityConfig {
-//!     fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+//! impl SaTokenConfigurator for SaTokenConfig {
+//!     fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
 //!         auth.include("/user/**")
 //!             .include("/admin/**")
 //!             .exclude("/login")
@@ -27,21 +27,23 @@
 //!
 //! ```rust,ignore
 //! // main.rs
-//! mod security;
+//! mod config;
 //! use spring_sa_token::SaTokenAuthConfigurator;
 //!
 //! App::new()
 //!     .add_plugin(RedisPlugin)
 //!     .add_plugin(SaTokenPlugin)
 //!     .add_plugin(WebPlugin)
-//!     .sa_token_auth(security::SecurityConfig)
+//!     .sa_token_configure(config::SaTokenConfig)
 //!     .run()
 //!     .await
 //! ```
 
+use sa_token_adapter::storage::SaStorage;
 use sa_token_core::router::PathAuthConfig;
 use spring::app::AppBuilder;
 use spring::plugin::MutableComponentRegistry;
+use std::sync::Arc;
 
 /// Trait for configuring Sa-Token path-based authentication
 ///
@@ -53,10 +55,10 @@ use spring::plugin::MutableComponentRegistry;
 /// ```rust,ignore
 /// use spring_sa_token::{PathAuthBuilder, SaTokenConfigurator};
 ///
-/// pub struct SecurityConfig;
+/// pub struct SaTokenConfig;
 ///
-/// impl SaTokenConfigurator for SecurityConfig {
-///     fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+/// impl SaTokenConfigurator for SaTokenConfig {
+///     fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
 ///         auth.include("/api/**")
 ///             .include("/user/**")
 ///             .exclude("/login")
@@ -65,10 +67,35 @@ use spring::plugin::MutableComponentRegistry;
 /// }
 /// ```
 pub trait SaTokenConfigurator: Send + Sync + 'static {
-    /// Configure path-based authentication rules
+    /// Configure path-based authentication rules (legacy).
     ///
-    /// Receives a PathAuthBuilder and should return it with your rules applied.
-    fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder;
+    /// Prefer implementing [`SaTokenConfigurator::configure_path_auth`].
+    #[deprecated(note = "use `configure_path_auth` instead")]
+    fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+        auth
+    }
+
+    /// Configure path-based authentication rules.
+    ///
+    /// Receives a [`PathAuthBuilder`] and should return it with your rules applied.
+    ///
+    /// By default, this falls back to the legacy [`SaTokenConfigurator::configure`] method,
+    /// so existing implementations keep working.
+    fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+        #[allow(deprecated)]
+        self.configure(auth)
+    }
+
+    /// Optional hook to provide a custom token storage implementation.
+    ///
+    /// If this returns `Some(storage)`, `spring-sa-token` will register it as a component
+    /// (`Arc<dyn SaStorage>`), and the Sa-Token plugin will prefer it over built-in storages
+    /// (e.g. redis/memory).
+    ///
+    /// Default: `None` (use built-in storage selection).
+    fn configure_storage(&self, _app: &AppBuilder) -> Option<Arc<dyn SaStorage>> {
+        None
+    }
 }
 
 /// Builder for path-based authentication configuration
@@ -200,13 +227,13 @@ impl PathAuthBuilder {
 /// Define your security configuration in a separate file:
 ///
 /// ```rust,ignore
-/// // security.rs
+/// // config.rs
 /// use spring_sa_token::{PathAuthBuilder, SaTokenConfigurator};
 ///
-/// pub struct SecurityConfig;
+/// pub struct SaTokenConfig;
 ///
-/// impl SaTokenConfigurator for SecurityConfig {
-///     fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+/// impl SaTokenConfigurator for SaTokenConfig {
+///     fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
 ///         auth.include("/user/**")
 ///             .include("/admin/**")
 ///             .include("/api/**")
@@ -222,14 +249,14 @@ impl PathAuthBuilder {
 ///
 /// ```rust,ignore
 /// // main.rs
-/// mod security;
+/// mod config;
 /// use spring_sa_token::SaTokenAuthConfigurator;
 ///
 /// App::new()
 ///     .add_plugin(RedisPlugin)
 ///     .add_plugin(SaTokenPlugin)
 ///     .add_plugin(WebPlugin)
-///     .sa_token_auth(security::SecurityConfig)
+///     .sa_token_configure(config::SaTokenConfig)
 ///     .run()
 ///     .await
 /// ```
@@ -239,19 +266,43 @@ pub trait SaTokenAuthConfigurator {
     /// # Example
     ///
     /// ```rust,ignore
-    /// app.sa_token_auth(SecurityConfig);
+    /// app.sa_token_configure(config::SaTokenConfig);
     /// ```
+    #[deprecated(note = "use `sa_token_configure` instead")]
     fn sa_token_auth<C>(&mut self, configurator: C) -> &mut Self
+    where
+        C: SaTokenConfigurator;
+
+    /// Configure path-based authentication rules using a SaTokenConfigurator implementation
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// app.sa_token_configure(config::SaTokenConfig);
+    /// ```
+    fn sa_token_configure<C>(&mut self, configurator: C) -> &mut Self
     where
         C: SaTokenConfigurator;
 }
 
 impl SaTokenAuthConfigurator for AppBuilder {
+    #[allow(deprecated)]
     fn sa_token_auth<C>(&mut self, configurator: C) -> &mut Self
     where
-        C: SaTokenConfigurator ,
+        C: SaTokenConfigurator,
     {
-        let builder = configurator.configure(PathAuthBuilder::new());
+        self.sa_token_configure(configurator)
+    }
+
+    fn sa_token_configure<C>(&mut self, configurator: C) -> &mut Self
+    where
+        C: SaTokenConfigurator,
+    {
+        if let Some(storage) = configurator.configure_storage(self) {
+            self.add_component(crate::custom_storage::SaTokenStorage::new(storage));
+        }
+
+        let builder = configurator.configure_path_auth(PathAuthBuilder::new());
         if builder.is_configured() {
             let config = builder.build();
             self.add_component(config)
@@ -262,7 +313,7 @@ impl SaTokenAuthConfigurator for AppBuilder {
 }
 
 impl SaTokenConfigurator for PathAuthBuilder {
-    fn configure(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
+    fn configure_path_auth(&self, auth: PathAuthBuilder) -> PathAuthBuilder {
         auth.merge(self.clone())
     }
 }

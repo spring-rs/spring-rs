@@ -8,8 +8,10 @@ authors.workspace = true
 [dependencies]
 spring = { path = "../../spring" }
 spring-web = { path = "../../spring-web" }
-spring-redis = { path = "../../spring-redis" }
-spring-sa-token = { path = "../../spring-sa-token", default-features = false, features = ["with-spring-redis", "with-web"] }
+spring-sa-token = { path = "../../spring-sa-token" }
+spring-sea-orm = { path = "../../spring-sea-orm", features = ["postgres"] }
+sea-orm = { workspace = true, features = ["macros", "sqlx-postgres", "runtime-tokio-native-tls"] }
+async-trait = { workspace = true }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

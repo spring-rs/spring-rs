@@ -1,111 +1,33 @@
-//! # spring-sa-token
-//!
-//! Automatic assembly for sa-token-rust.
-//!
-//! ## Storage Backend Selection
-//!
-//! When both `memory` and `with-spring-redis` features are enabled,
-//! `with-spring-redis` takes priority. This allows `--all-features` testing
-//! while maintaining predictable behavior.
-//!
-//! ## Quick Start
-//!
-//! Add to your `Cargo.toml`:
-//!
-//! ```toml
-//! [dependencies]
-//! spring-sa-token = { path = "../spring-sa-token" }  # Default: memory storage
-//! # Or reuse spring-redis connection (recommended for production):
-//! # spring-sa-token = { path = "../spring-sa-token", default-features = false, features = ["with-spring-redis", "with-web"] }
-//! ```
-//!
-//! Configure in `config/app.toml`:
-//!
-//! ```toml
-//! [sa-token]
-//! token_name = "Authorization"
-//! timeout = 86400
-//! auto_renew = true
-//! token_style = "uuid"
-//! is_concurrent = true
-//! ```
-//!
-//! Use in your application:
-//!
-//! ```rust,ignore
-//! use spring::{auto_config, App};
-//! use spring_web::{get, WebConfigurator, WebPlugin};
-//! use spring_sa_token::{SaTokenPlugin, LoginIdExtractor, StpUtil};
-//!
-//! #[auto_config(WebConfigurator)]
-//! #[tokio::main]
-//! async fn main() {
-//!     App::new()
-//!         .add_plugin(SaTokenPlugin)
-//!         .add_plugin(WebPlugin)
-//!         .run()
-//!         .await
-//! }
-//!
-//! #[get("/user/info")]
-//! async fn user_info(LoginIdExtractor(user_id): LoginIdExtractor) -> String {
-//!     format!("Current user: {}", user_id)
-//! }
-//! ```
+//! [![spring-rs](https://img.shields.io/github/stars/spring-rs/spring-rs)](https://spring-rs.github.io/docs/plugins/spring-sa-token)
+#![doc = include_str!("../README.md")]
+#![doc(html_favicon_url = "https://spring-rs.github.io/favicon.ico")]
+#![doc(html_logo_url = "https://spring-rs.github.io/logo.svg")]
 
-pub mod config;
-pub mod configurator;
+
+mod custom_storage;
+mod config;
+mod configurator;
+mod prelude;
 #[cfg(feature = "with-spring-redis")]
 pub mod storage;
 
-use crate::config::SaTokenConfig;
-use sa_token_adapter::SaStorage;
+use crate::config::SaTokenConfig as SpringSaTokenConfig;
 use spring::app::AppBuilder;
 use spring::async_trait;
 use spring::config::ConfigRegistry;
+#[cfg(feature = "with-web")]
 use spring::plugin::ComponentRegistry;
 use spring::plugin::{MutableComponentRegistry, Plugin};
 #[cfg(feature = "with-web")]
 use spring_web::LayerConfigurator;
-use std::sync::Arc;
 
 // ============================================================================
 // Re-exports: Users only need to import spring-sa-token
 // ============================================================================
+pub use prelude::*;
 
-// Re-export entire crates for full access
-pub use sa_token_adapter;
-pub use sa_token_core;
-pub use sa_token_plugin_axum;
-
-// Re-export config types to root
-pub use crate::config::{CoreConfig, TokenStyle};
-
-// Re-export commonly used types to root for convenience
-pub use sa_token_core::{SaTokenManager, StpUtil};
-pub use sa_token_plugin_axum::{LoginIdExtractor, OptionalSaTokenExtractor, SaTokenExtractor};
-pub use sa_token_plugin_axum::{SaTokenLayer, SaTokenMiddleware, SaTokenState};
-
-// Re-export procedural macros from spring-macros (WebError compatible)
-pub use spring_macros::sa_check_login;
-pub use spring_macros::sa_check_permission;
-pub use spring_macros::sa_check_permissions_and;
-pub use spring_macros::sa_check_permissions_or;
-pub use spring_macros::sa_check_role;
-pub use spring_macros::sa_check_roles_and;
-pub use spring_macros::sa_check_roles_or;
-pub use spring_macros::sa_ignore;
-
-// Re-export storage implementations
-#[cfg(feature = "memory")]
-pub use sa_token_storage_memory::MemoryStorage;
-
-// Re-export configurator types
-pub use crate::configurator::{PathAuthBuilder, SaTokenAuthConfigurator, SaTokenConfigurator};
-
-// Re-export error types
-pub use sa_token_core::error::SaTokenError;
-use sa_token_core::PathAuthConfig;
+#[cfg(feature = "with-web")]
+use sa_token_core::PathAuthConfig as CorePathAuthConfig;
 
 /// Sa-Token plugin for spring-rs
 ///
@@ -117,7 +39,7 @@ pub struct SaTokenPlugin;
 impl Plugin for SaTokenPlugin {
     async fn build(&self, app: &mut AppBuilder) {
         let config = app
-            .get_config::<SaTokenConfig>()
+            .get_config::<SpringSaTokenConfig>()
             .expect("sa-token plugin config load failed");
 
         tracing::info!("Initializing Sa-Token plugin...");
@@ -141,7 +63,7 @@ impl Plugin for SaTokenPlugin {
         #[cfg(feature = "with-web")]
         {
             // Get path-based authentication configuration from component
-            if let Some(config) = app.get_component::<PathAuthConfig>() {
+            if let Some(config) = app.get_component::<CorePathAuthConfig>() {
                 tracing::info!("Registering SaTokenLayer with path-based authentication");
                 app.add_router_layer(move |router| {
                     router.layer(SaTokenLayer::with_path_auth(state.clone(), config.clone()))
@@ -171,7 +93,10 @@ impl SaTokenPlugin {
     ///
     /// Note: The following fields are not supported by the builder (using defaults):
     /// - is_log, is_read_cookie, is_read_header, is_read_body
-    async fn create_state(app: &AppBuilder, config: SaTokenConfig) -> anyhow::Result<SaTokenState> {
+    async fn create_state(
+        app: &AppBuilder,
+        config: SpringSaTokenConfig,
+    ) -> anyhow::Result<SaTokenState> {
         // Configure storage based on features
         let storage = Self::configure_storage(app, &config).await?;
 
@@ -223,6 +148,7 @@ impl SaTokenPlugin {
     /// Configure storage backend based on features and configuration
     ///
     /// Priority:
+    /// 0. user-provided [`SaTokenStorage`] component (if present)
     /// 1. spring-redis component (if with-spring-redis feature enabled)
     /// 2. memory storage (if memory feature enabled)
     ///
@@ -230,15 +156,22 @@ impl SaTokenPlugin {
     #[allow(unused_variables)]
     async fn configure_storage(
         app: &AppBuilder,
-        config: &SaTokenConfig,
-    ) -> anyhow::Result<Arc<dyn SaStorage>> {
+        config: &SpringSaTokenConfig,
+    ) -> anyhow::Result<std::sync::Arc<dyn SaStorage>> {
+        // Priority 0: user-provided storage component (registered via `sa_token_configure(...)`
+        // or manually with `app.add_component(SaTokenStorage::new(storage))`).
+        if let Some(storage) = app.get_component::<custom_storage::SaTokenStorage>() {
+            tracing::info!("Using custom SaStorage component");
+            return Ok(storage.into());
+        }
+
         // Priority 1: Use spring-redis component if available
         #[cfg(feature = "with-spring-redis")]
         {
             if let Some(redis) = app.get_component::<spring_redis::Redis>() {
                 tracing::info!("Using SpringRedisStorage (reusing spring-redis connection)");
                 let storage = storage::SpringRedisStorage::new(redis);
-                Ok(Arc::new(storage))
+                Ok(std::sync::Arc::new(storage))
             } else {
                 anyhow::bail!(
                     "Feature 'with-spring-redis' is enabled but RedisPlugin is not added. \
@@ -251,7 +184,7 @@ impl SaTokenPlugin {
         #[cfg(all(feature = "memory", not(feature = "with-spring-redis")))]
         {
             tracing::info!("Using Memory storage");
-            Ok(Arc::new(MemoryStorage::new()))
+            Ok(std::sync::Arc::new(MemoryStorage::new()))
         }
 
         // No storage available

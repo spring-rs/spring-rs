@@ -1,19 +1,20 @@
 use anyhow::Context;
 use spring::{auto_config, App};
-use spring_redis::RedisPlugin;
 use spring_sa_token::{
     sa_check_login, sa_check_permission, sa_check_permissions_and, sa_check_permissions_or,
     sa_check_role, sa_check_roles_and, sa_check_roles_or, sa_ignore, LoginIdExtractor,
-    PathAuthBuilder, SaTokenAuthConfigurator, SaTokenPlugin, SaTokenState, StpUtil,
+    SaTokenAuthConfigurator, SaTokenPlugin, SaTokenState, StpUtil,
 };
+use spring_sea_orm::SeaOrmPlugin;
 use spring_web::extractor::Component;
+use spring_web::WebConfigurator;
 use spring_web::{
-    axum::response::IntoResponse, error::Result, extractor::Json, get, post, WebConfigurator,
-    WebPlugin,
+    axum::response::IntoResponse, error::Result, extractor::Json, get, post, WebPlugin,
 };
 
+mod config;
 mod models;
-mod security;
+mod sea_orm_storage;
 
 use models::*;
 
@@ -21,24 +22,10 @@ use models::*;
 #[tokio::main]
 async fn main() {
     App::new()
-        .add_plugin(RedisPlugin)
         .add_plugin(SaTokenPlugin)
         .add_plugin(WebPlugin)
-        .sa_token_auth(security::SecurityConfig)
-        // .sa_token_auth(PathAuthBuilder {
-        //     include: vec![],
-        //     exclude: vec![],
-        // })
-        // .sa_token_auth(
-        //     PathAuthBuilder::new()
-        //         .include("/user/**")
-        //         .include("/admin/**")
-        //         .include("/api/**")
-        //         .exclude("/")
-        //         .exclude("/login")
-        //         .exclude("/public/**")
-        //         .exclude("/api/health"),
-        // )
+        .add_plugin(SeaOrmPlugin)
+        .sa_token_configure(config::SaTokenConfig)
         .run()
         .await
 }

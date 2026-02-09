@@ -3,11 +3,11 @@
 //! This module provides a storage implementation that reuses the Redis connection
 //! from `spring-redis` plugin, avoiding duplicate connections.
 
-use spring_redis::redis::AsyncCommands;
 use sa_token_adapter::storage::{SaStorage, StorageError, StorageResult};
+use spring::async_trait;
+use spring_redis::redis::AsyncCommands;
 use spring_redis::Redis;
 use std::time::Duration;
-use spring::async_trait;
 
 /// Redis storage implementation using spring-redis connection
 ///

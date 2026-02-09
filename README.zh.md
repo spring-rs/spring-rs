@@ -188,10 +188,12 @@ async fn main() {
 | `spring-grpc`          | [![spring-grpc](https://img.shields.io/crates/v/spring-grpc.svg)](https://spring-rs.github.io/docs/plugins/spring-grpc/)                                     | [`tonic`](https://github.com/hyperium/tonic)                                | gRPC 服务与调用                  |
 | `spring-opendal`       | [![spring-opendal](https://img.shields.io/crates/v/spring-opendal.svg)](https://spring-rs.github.io/docs/plugins/spring-opendal/)                         | [`opendal`](https://github.com/apache/opendal)                              | 统一对象存储 / 数据访问               |
 | `spring-apalis`       | [![spring-apalis](https://img.shields.io/crates/v/spring-apalis.svg)](https://spring-rs.github.io/docs/plugins/spring-apalis/)                         | [`apalis`](https://github.com/apalis-dev/apalis)                              | 高性能后台任务处理框架 |
+| `spring-sa-token`     | [![spring-sa-token](https://img.shields.io/crates/v/spring-sa-token.svg)](https://spring-rs.github.io/docs/plugins/spring-sa-token/)               | [`sa-token-rust`](https://github.com/click33/sa-token-rust)                   | Sa-Token 权限认证框架 |
 
 ## 生态
 
 * ![spring-sqlx-migration-plugin](https://img.shields.io/crates/v/spring-sqlx-migration-plugin.svg) [`spring-sqlx-migration-plugin`](https://github.com/Phosphorus-M/spring-sqlx-migration-plugin)
+* [![JetBrains Plugin](https://img.shields.io/badge/JetBrains-Plugin-orange)](https://plugins.jetbrains.com/plugin/30040-spring-rs) [`intellij-spring-rs`](https://github.com/ouywm/intellij-spring-rs) - RustRover / IntelliJ IDEA 插件支持
 
 [更多>>](https://crates.io/crates/spring/reverse_dependencies)
 
