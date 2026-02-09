@@ -193,7 +193,7 @@ async fn main() {
 ## 生态
 
 * ![spring-sqlx-migration-plugin](https://img.shields.io/crates/v/spring-sqlx-migration-plugin.svg) [`spring-sqlx-migration-plugin`](https://github.com/Phosphorus-M/spring-sqlx-migration-plugin)
-* [![Version](https://img.shields.io/visual-studio-marketplace/v/holmofy.spring-rs)](https://marketplace.visualstudio.com/items?itemName=spring-rs.spring-rs)[`spring-lsp`](https://github.com/spring-rs/spring-lsp) - VSCode插件 / 其他兼容LSP协议编辑器
+* [![Version](https://img.shields.io/visual-studio-marketplace/v/holmofy.spring-rs)](https://marketplace.visualstudio.com/items?itemName=holmofy.spring-rs)[`spring-lsp`](https://github.com/spring-rs/spring-lsp) - VSCode插件 / 其他兼容LSP协议编辑器
 * [![JetBrains Plugin](https://img.shields.io/badge/JetBrains-Plugin-orange)](https://plugins.jetbrains.com/plugin/30040-spring-rs) [`intellij-spring-rs`](https://github.com/ouywm/intellij-spring-rs) - RustRover / IntelliJ IDEA 插件支持
 
 [更多>>](https://crates.io/crates/spring/reverse_dependencies)

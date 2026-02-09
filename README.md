@@ -194,7 +194,7 @@ The `#[component]` macro eliminates boilerplate code - no need to manually imple
 ## Ecosystem
 
 * ![spring-sqlx-migration-plugin](https://img.shields.io/crates/v/spring-sqlx-migration-plugin.svg) [`spring-sqlx-migration-plugin`](https://github.com/Phosphorus-M/spring-sqlx-migration-plugin)
-* [![Version](https://img.shields.io/visual-studio-marketplace/v/holmofy.spring-rs)](https://marketplace.visualstudio.com/items?itemName=spring-rs.spring-rs)[`spring-lsp`](https://github.com/spring-rs/spring-lsp) - IDE support for VSCode / compatible editor with LSP
+* [![Version](https://img.shields.io/visual-studio-marketplace/v/holmofy.spring-rs)](https://marketplace.visualstudio.com/items?itemName=holmofy.spring-rs)[`spring-lsp`](https://github.com/spring-rs/spring-lsp) - IDE support for VSCode / compatible editor with LSP
 * [![JetBrains Plugin](https://img.shields.io/badge/JetBrains-Plugin-orange)](https://plugins.jetbrains.com/plugin/30040-spring-rs) [`intellij-spring-rs`](https://github.com/ouywm/intellij-spring-rs) - IDE support for RustRover / IntelliJ IDEA
 
 [more>>](https://crates.io/crates/spring/reverse_dependencies)
