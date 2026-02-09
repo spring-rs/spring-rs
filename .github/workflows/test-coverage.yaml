@@ -24,7 +24,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
-
+          
+      - name: Install rpc
+        run: |
+          sudo apt-get install libtirpc-dev
+          
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
