@@ -15,6 +15,22 @@ use crate::error::Result;
 use serde_json::json;
 use std::{ops::Deref, sync::Arc};
 
+/// Wrapper type for injecting configuration in #[component] macro
+///
+/// This is used in component function parameters to inject configuration.
+///
+/// # Example
+/// ```ignore
+/// #[component]
+/// fn create_db(
+///     Config(config): Config<DbConfig>,
+/// ) -> DbConnection {
+///     DbConnection::new(&config)
+/// }
+/// ```
+#[derive(Debug, Clone)]
+pub struct Config<T>(pub T);
+
 /// The Configurable trait marks whether the struct can read configuration from the [ConfigRegistry]
 pub trait Configurable {
     /// Prefix used to read toml configuration.

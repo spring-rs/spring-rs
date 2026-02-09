@@ -12,6 +12,4 @@ toc = true
 top = false
 +++
 
-SeaORM is a modern asynchronous ORM framework built on top of SQLx, providing strongly typed entities and compile-time safe query construction while balancing clean abstractions with performance and reliability.
-
 {{ include(path="../../spring-sea-orm/README.md") }}

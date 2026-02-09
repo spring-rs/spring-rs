@@ -22,5 +22,6 @@ pub mod signal;
 pub use app::App;
 pub use async_trait::async_trait;
 pub use spring_macros::auto_config;
+pub use spring_macros::component;
 pub use tracing;
 pub use tracing_error::SpanTrace;

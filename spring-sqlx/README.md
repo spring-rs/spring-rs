@@ -1,6 +1,8 @@
 [![crates.io](https://img.shields.io/crates/v/spring-sqlx.svg)](https://crates.io/crates/spring-sqlx)
 [![Documentation](https://docs.rs/spring-sqlx/badge.svg)](https://docs.rs/spring-sqlx)
 
+[SQLx](https://github.com/launchbadge/sqlx) is an asynchronous SQL library that provides strongly typed database access with zero runtime reflection by validating SQL statements at compile time, without relying on an ORM.
+
 ## Dependencies
 
 ```toml

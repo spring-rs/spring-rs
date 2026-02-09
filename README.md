@@ -70,7 +70,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 
 **job**
 
-```rust,no_run
+```rust,ignore
 use anyhow::Context;
 use spring::{auto_config, App};
 use spring_job::{cron, fix_delay, fix_rate};
@@ -121,6 +121,57 @@ async fn fix_rate_job() {
     println!("fix rate scheduled: {}", formatted_time)
 }
 ```
+
+## component macros
+
+Add dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+spring = "0.4"
+tokio = { version = "1", features = ["full"] }
+```
+
+**Simple component registration with `#[component]` macro:**
+
+```rust,no_run
+use spring::component;
+use spring::config::{Config, Configurable};
+use spring::plugin::ComponentRegistry;
+use spring::App;
+use serde::Deserialize;
+
+// Define configuration
+#[derive(Clone, Configurable, Deserialize)]
+#[config_prefix = "app"]
+struct AppConfig {
+    name: String,
+}
+
+// Define component
+#[derive(Clone)]
+struct AppService {
+    config: AppConfig,
+}
+
+// Use #[component] macro for automatic registration
+#[component]
+fn app_service(Config(config): Config<AppConfig>) -> AppService {
+    AppService { config }
+}
+
+#[tokio::main]
+async fn main() {
+    // Components are automatically registered
+    let app = App::new().build().await.unwrap();
+    
+    // Get registered component
+    let service = app.get_component::<AppService>().unwrap();
+    println!("App name: {}", service.config.name);
+}
+```
+
+The `#[component]` macro eliminates boilerplate code - no need to manually implement the Plugin trait! [Learn more →](https://spring-rs.github.io/docs/getting-started/component/)
 
 ## Supported plugins
 
