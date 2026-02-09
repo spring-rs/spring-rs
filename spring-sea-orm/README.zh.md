@@ -1,6 +1,8 @@
 [![crates.io](https://img.shields.io/crates/v/spring-sea-orm.svg)](https://crates.io/crates/spring-sea-orm)
 [![Documentation](https://docs.rs/spring-sea-orm/badge.svg)](https://docs.rs/spring-sea-orm)
 
+[SeaORM](https://github.com/SeaQL/sea-orm) 是现代异步 ORM 框架，底层基于 SQLx，通过强类型实体与编译期安全的查询构建，在保持良好抽象的同时兼顾性能与可靠性。
+
 ## 依赖
 
 ```toml

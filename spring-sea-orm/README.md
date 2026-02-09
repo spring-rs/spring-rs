@@ -1,6 +1,8 @@
 [![crates.io](https://img.shields.io/crates/v/spring-sea-orm.svg)](https://crates.io/crates/spring-sea-orm)
 [![Documentation](https://docs.rs/spring-sea-orm/badge.svg)](https://docs.rs/spring-sea-orm)
 
+[SeaORM](https://github.com/SeaQL/sea-orm) is a modern asynchronous ORM framework built on top of SQLx, providing strongly typed entities and compile-time safe query construction while balancing clean abstractions with performance and reliability.
+
 ## Dependencies
 
 ```toml

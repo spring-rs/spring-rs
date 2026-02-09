@@ -17,6 +17,32 @@ use std::sync::RwLock;
 use std::{collections::HashSet, future::Future, path::Path, sync::Arc};
 use tracing_subscriber::Layer;
 
+/// Wrapper for dynamically registered plugins (from inventory)
+struct DynPluginWrapper(&'static dyn Plugin);
+
+#[async_trait::async_trait]
+impl Plugin for DynPluginWrapper {
+    async fn build(&self, app: &mut AppBuilder) {
+        self.0.build(app).await
+    }
+
+    fn immediately_build(&self, app: &mut AppBuilder) {
+        self.0.immediately_build(app)
+    }
+
+    fn name(&self) -> &str {
+        self.0.name()
+    }
+
+    fn dependencies(&self) -> Vec<&str> {
+        self.0.dependencies()
+    }
+
+    fn immediately(&self) -> bool {
+        self.0.immediately()
+    }
+}
+
 type Registry<T> = DashMap<TypeId, T>;
 type Scheduler<T> = dyn FnOnce(Arc<App>) -> Box<dyn Future<Output = Result<T>> + Send>;
 
@@ -40,6 +66,8 @@ pub struct AppBuilder {
     pub(crate) layers: Vec<BoxLayer>,
     /// Plugin
     pub(crate) plugin_registry: Registry<PluginRef>,
+    /// Dynamic plugins from inventory (auto-registered via #[component] macro)
+    dynamic_plugins: Vec<&'static dyn Plugin>,
     /// Component
     components: Registry<DynComponentRef>,
     /// Configuration read from `config_path`
@@ -108,6 +136,34 @@ impl AppBuilder {
         self.plugin_registry
             .insert(plugin_id, PluginRef::new(plugin));
         self
+    }
+
+    /// Add all plugins registered via inventory (from #[component] macro)
+    ///
+    /// This method collects all plugins that were automatically registered
+    /// using the `#[component]` macro and adds them to the application.
+    ///
+    /// **Note**: This method is called automatically during `build_plugins()`,
+    /// users don't need to call it manually.
+    fn add_auto_plugins(&mut self) {
+        let plugins: Vec<_> = inventory::iter::<&dyn Plugin>.into_iter().collect();
+        log::debug!("Found {} auto plugins via inventory", plugins.len());
+        
+        for plugin in plugins {
+            log::debug!("Adding auto plugin: {}", plugin.name());
+            
+            // Check if already added by name
+            let plugin_name = plugin.name();
+            if self.dynamic_plugins.iter().any(|p| p.name() == plugin_name) {
+                panic!("Error adding plugin {plugin_name}: plugin was already added in application")
+            }
+            
+            if plugin.immediately() {
+                plugin.immediately_build(self);
+            } else {
+                self.dynamic_plugins.push(*plugin);
+            }
+        }
     }
 
     /// Returns `true` if the [`Plugin`] has already been added.
@@ -211,11 +267,22 @@ impl AppBuilder {
     async fn build_plugins(&mut self) {
         LogPlugin.immediately_build(self);
 
+        // Automatically collect plugins registered via #[component] macro
+        self.add_auto_plugins();
+
+        // Collect all plugins (both static and dynamic)
         let registry = std::mem::take(&mut self.plugin_registry);
-        let mut to_register = registry
+        let mut to_register: Vec<PluginRef> = registry
             .iter()
             .map(|e| e.value().to_owned())
-            .collect::<Vec<_>>();
+            .collect();
+        
+        // Add dynamic plugins (from inventory)
+        let dynamic_plugins = std::mem::take(&mut self.dynamic_plugins);
+        for plugin in dynamic_plugins {
+            to_register.push(PluginRef::new(DynPluginWrapper(plugin)));
+        }
+        
         let mut registered: HashSet<String> = HashSet::new();
 
         while !to_register.is_empty() {
@@ -292,6 +359,7 @@ impl Default for AppBuilder {
             config,
             layers: Default::default(),
             plugin_registry: Default::default(),
+            dynamic_plugins: Default::default(),
             components: Default::default(),
             schedulers: Default::default(),
             shutdown_hooks: Default::default(),
