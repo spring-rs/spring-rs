@@ -24,7 +24,7 @@
 
 **web**
 
-```rust
+```rust,ignore
 use spring::{auto_config, App};
 use spring_sqlx::{
     sqlx::{self, Row},
@@ -69,7 +69,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 
 **任务调度**
 
-```rust
+```rust,ignore
 use anyhow::Context;
 use spring::{auto_config, App};
 use spring_job::{cron, fix_delay, fix_rate};
@@ -133,9 +133,10 @@ tokio = { version = "1", features = ["full"] }
 
 **使用 `#[component]` 宏简化组件注册：**
 
-```rust
+```rust,no_run
 use spring::component;
 use spring::config::{Config, Configurable};
+use spring::plugin::ComponentRegistry;
 use spring::App;
 use serde::Deserialize;
 

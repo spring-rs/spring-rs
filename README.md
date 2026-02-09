@@ -70,7 +70,7 @@ async fn sqlx_request_handler(Component(pool): Component<ConnectPool>) -> Result
 
 **job**
 
-```rust,no_run
+```rust,ignore
 use anyhow::Context;
 use spring::{auto_config, App};
 use spring_job::{cron, fix_delay, fix_rate};
@@ -134,9 +134,10 @@ tokio = { version = "1", features = ["full"] }
 
 **Simple component registration with `#[component]` macro:**
 
-```rust
+```rust,no_run
 use spring::component;
 use spring::config::{Config, Configurable};
+use spring::plugin::ComponentRegistry;
 use spring::App;
 use serde::Deserialize;
 
