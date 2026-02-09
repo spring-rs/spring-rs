@@ -73,7 +73,7 @@ opentelemetry-semantic-conventions = "0.31"
 opentelemetry-zipkin = "0.31"
 paste = "1.0.15"
 pin-project = "1"
-pq-sys = { version = "0.7.0"}
+pq-sys = "0.7.0"
 proc-macro2 = "1.0"
 prometheus = "0.14"
 prometheus-client = "0.23"
