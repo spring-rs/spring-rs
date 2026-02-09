@@ -13,7 +13,7 @@ repository.workspace = true
 default = ["diesel/postgres"]
 _mysql = ["diesel/mysql", "dep:mysqlclient-sys"]
 _sqlite = ["diesel/sqlite"]
-_postgres = ["diesel/postgres"]
+_postgres = ["diesel/postgres", "dep:pq-sys"]
 _diesel-async = [ "dep:diesel-async", ]
 _diesel-sync = ["diesel/r2d2"]
 _diesel-async-postgres = [ "diesel-async/postgres", "_diesel-async", "_postgres"]
@@ -42,4 +42,5 @@ schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 spring = { path = "../spring", version = "0.4" }
 mysqlclient-sys = {workspace = true, optional = true, features = ["bundled"]}
+pq-sys = { version = "0.7.5", features = ["bundled"], optional = true }
 
