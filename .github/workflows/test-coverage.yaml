@@ -5,9 +5,7 @@ on:
   push:
     branches:
       - main
-      - run_code_coverage
-  workflow_dispatch:
-  
+
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
@@ -121,7 +119,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
-          
+
       - name: Install protoc (macOS)
         if: matrix.os == 'macos-latest'
         run: brew install protobuf

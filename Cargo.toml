@@ -17,7 +17,7 @@ members = [
     "spring-opendal",
     "spring-apalis",
     "spring-sa-token",
-    "examples/*",    
+    "examples/*",
 ]
 default-members = ["spring", "spring-*"]
 exclude = ["examples/**"]
