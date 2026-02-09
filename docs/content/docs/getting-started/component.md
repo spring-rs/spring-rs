@@ -12,4 +12,4 @@ toc = true
 top = false
 +++
 
-{{ include(path="../../COMPONENT_MACRO.md") }}
+{{ include(path="../../spring/COMPONENT_MACRO.md") }}
