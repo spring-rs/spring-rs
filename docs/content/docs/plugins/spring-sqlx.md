@@ -12,6 +12,4 @@ toc = true
 top = false
 +++
 
-SQLx is an asynchronous SQL library that provides strongly typed database access with zero runtime reflection by validating SQL statements at compile time, without relying on an ORM.
-
 {{ include(path="../../spring-sqlx/README.md") }}

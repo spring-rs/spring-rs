@@ -1,6 +1,8 @@
 [![crates.io](https://img.shields.io/crates/v/spring-sqlx.svg)](https://crates.io/crates/spring-sqlx)
 [![Documentation](https://docs.rs/spring-sqlx/badge.svg)](https://docs.rs/spring-sqlx)
 
+[SQLx](https://github.com/launchbadge/sqlx) 是一个异步 SQL 库，通过编译期校验 SQL 语句来在不使用 ORM 的情况下提供强类型、零运行时反射的数据库访问能力。
+
 ## 依赖
 
 ```toml

@@ -19,6 +19,46 @@ use std::{
 };
 pub use service::Service;
 
+// Re-export inventory::submit for use in submit_component_plugin! macro
+pub use inventory::submit;
+
+// Define inventory collection for auto-registered plugins
+inventory::collect!(&'static dyn Plugin);
+
+/// Wrapper type for injecting components in #[component] macro
+///
+/// This is used in component function parameters to inject dependencies.
+///
+/// # Example
+/// ```ignore
+/// #[component]
+/// fn create_service(
+///     Component(db): Component<DbConnection>,
+/// ) -> MyService {
+///     MyService::new(db)
+/// }
+/// ```
+#[derive(Debug, Clone)]
+pub struct Component<T>(pub T);
+
+/// Submit a component plugin for automatic registration
+///
+/// This macro wraps `inventory::submit!` to avoid users needing to
+/// directly depend on the `inventory` crate.
+///
+/// # Example
+/// ```ignore
+/// submit_component_plugin!(MyComponentPlugin);
+/// ```
+#[macro_export]
+macro_rules! submit_component_plugin {
+    ($ty:ident) => {
+        $crate::plugin::submit! {
+            &$ty as &dyn $crate::plugin::Plugin
+        }
+    };
+}
+
 /// Plugin Reference
 #[derive(Clone)]
 pub struct PluginRef(Arc<dyn Plugin>);
