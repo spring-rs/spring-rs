@@ -27,7 +27,6 @@ jobs:
           
       - name: Install rpc
         run: |
-          ld -v
           sudo apt-get install libtirpc-dev
           
       - name: Install Rust stable
