@@ -59,6 +59,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Install rpc
+        run: |
+          sudo apt-get install libtirpc-dev          
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -117,7 +121,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
-
+          
       - name: Install protoc (macOS)
         if: matrix.os == 'macos-latest'
         run: brew install protobuf
@@ -126,6 +130,18 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install protoc
 
+      - name: Install protoc (Windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install protoc
+
+      - name: Install libtirpc (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install libtirpc-dev
+          
+      - name: Install libtirpc (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install libtirpc
+        
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -175,6 +191,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Install libtirpc
+        run: sudo apt-get install libtirpc-dev
+        
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -196,6 +215,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Install libtirpc    
+        run: sudo apt-get install libtirpc-dev
+        
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
