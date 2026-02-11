@@ -74,6 +74,22 @@ where
     }
 }
 
+impl<T> FromMsg for Config<T>
+where
+    T: serde::de::DeserializeOwned + Configurable,
+{
+    fn from_msg(_msg: &SeaMessage, app: &App) -> Self {
+        match app.get_config::<T>() {
+            Ok(config) => Config(config),
+            Err(e) => panic!(
+                "get config failed for typeof {}: {}",
+                std::any::type_name::<T>(),
+                e
+            ),
+        }
+    }
+}
+
 #[cfg(feature = "json")]
 pub struct Json<T>(pub T);
 
@@ -88,21 +104,5 @@ where
             .deserialize_json()
             .expect("stream message parse as json failed");
         Json(value)
-    }
-}
-
-impl<T> FromMsg for Config<T>
-where
-    T: serde::de::DeserializeOwned + Configurable,
-{
-    fn from_msg(_msg: &SeaMessage, app: &App) -> Self {
-        match app.get_config::<T>() {
-            Ok(config) => Config(config),
-            Err(e) => panic!(
-                "get config failed for typeof {}: {}",
-                std::any::type_name::<T>(),
-                e
-            ),
-        }
     }
 }

@@ -52,7 +52,7 @@ fn create_user_repository(
 
 #[component]
 fn create_user_service(
-    spring::plugin::Component(repo): spring::plugin::Component<UserRepository>,
+    spring::extractor::Component(repo): spring::extractor::Component<UserRepository>,
 ) -> UserService {
     println!("Creating UserService with repo: {:?}", repo);
     UserService { repo }
