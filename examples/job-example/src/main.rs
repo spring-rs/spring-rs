@@ -1,8 +1,9 @@
 use anyhow::Context;
+use spring::extractor::Component;
 use spring::{auto_config, App};
 use spring_job::job::Job;
 use spring_job::{cron, fix_delay, fix_rate, JobScheduler};
-use spring_job::{extractor::Component, JobConfigurator, JobPlugin};
+use spring_job::{JobConfigurator, JobPlugin};
 use spring_sqlx::{
     sqlx::{self, Row},
     ConnectPool, SqlxPlugin,

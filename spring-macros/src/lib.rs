@@ -541,8 +541,8 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// # See Also
 ///
-/// - [`Config`](spring::config::Config) - Configuration injection wrapper
-/// - [`Component`](spring::plugin::Component) - Component injection wrapper
+/// - [`Config`](spring::extractor::Config) - Configuration injection wrapper
+/// - [`Component`](spring::extractor::Component) - Component injection wrapper
 /// - [`Configurable`](spring::config::Configurable) - Trait for configuration types
 #[proc_macro_attribute]
 pub fn component(attr: TokenStream, input: TokenStream) -> TokenStream {

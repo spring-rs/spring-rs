@@ -10,9 +10,9 @@ pub use sea_streamer::Timestamp;
 use spring::app::App;
 use spring::config::ConfigRegistry;
 use spring::config::Configurable;
+use spring::extractor::Component;
+use spring::extractor::Config;
 use spring::plugin::ComponentRegistry;
-use std::ops::Deref;
-use std::ops::DerefMut;
 
 pub trait FromMsg {
     fn from_msg(msg: &SeaMessage, app: &App) -> Self;
@@ -59,8 +59,6 @@ impl FromMsg for SharedMessage {
     }
 }
 
-pub struct Component<T>(pub T);
-
 impl<T> FromMsg for Component<T>
 where
     T: Clone + Send + Sync + 'static,
@@ -73,20 +71,6 @@ where
                 std::any::type_name::<T>()
             ),
         }
-    }
-}
-
-impl<T> Deref for Component<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T> DerefMut for Component<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 
@@ -107,10 +91,6 @@ where
     }
 }
 
-pub struct Config<T>(pub T)
-where
-    T: serde::de::DeserializeOwned + Configurable;
-
 impl<T> FromMsg for Config<T>
 where
     T: serde::de::DeserializeOwned + Configurable,
@@ -124,16 +104,5 @@ where
                 e
             ),
         }
-    }
-}
-
-impl<T> Deref for Config<T>
-where
-    T: serde::de::DeserializeOwned + Configurable,
-{
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }

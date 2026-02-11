@@ -168,7 +168,7 @@ fn generate_param_extractions(
                         let #pat = {
                             let config = app.get_config::<#config_type>()
                                 .expect(&format!("Config {} not found", stringify!(#config_type)));
-                            ::spring::config::Config(config)
+                            ::spring::extractor::Config(config)
                         };
                     });
                 }
@@ -180,7 +180,7 @@ fn generate_param_extractions(
                         let #pat = {
                             let component = app.get_component::<#component_type>()
                                 .expect(&format!("Component {} not found", stringify!(#component_type)));
-                            ::spring::plugin::Component(component)
+                            ::spring::extractor::Component(component)
                         };
                     });
                     dep_index += 1;
