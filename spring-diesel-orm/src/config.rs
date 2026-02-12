@@ -22,6 +22,13 @@ pub(crate) struct DieselSyncOrmConfig {
     //pub connection_recycle_method: Option<RecycleMethod>,
 }
 
+impl DieselSyncOrmConfig{
+    #[allow(dead_code)]
+    pub(crate) fn new(uri: String) -> Self{
+        DieselSyncOrmConfig { uri, pool_config: Default::default() }
+    }
+}
+
 
 #[cfg(feature = "_diesel-async")]
 #[derive(Debug, Configurable, Clone, JsonSchema, Deserialize)]
@@ -135,6 +142,19 @@ pub(crate)struct R2d2PoolConfig{
 
     /// The duration to wait to start a connection before giving up.
     pub connection_timeout_in_ms: Option<u64>,
+}
+
+impl Default for R2d2PoolConfig{
+     fn default() -> Self{
+        R2d2PoolConfig{
+            max_size: Some(2),
+            min_idle: Some(1),
+            test_on_check_out: Some(true),
+            max_lifetime_in_ms: Some(60000),
+            idle_timeout_in_ms: Some(60000),
+            connection_timeout_in_ms: Some(60000)
+        }
+    }
 }
 
 #[cfg(feature = "_diesel-async")]

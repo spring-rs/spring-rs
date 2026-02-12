@@ -12,6 +12,21 @@
 
 pub mod config;
 
+fn is_postgres(uri: &str) -> bool{
+    uri.starts_with("postgres")
+}
+
+fn is_mysql(uri: &str) -> bool{
+    uri.starts_with("mysql")
+}
+
+fn is_sqlite(uri: &str) -> bool{
+        uri.starts_with("file")
+            || uri.starts_with("/")
+            || uri.starts_with("sqlite")
+            || uri.starts_with("./")
+}
+
 #[cfg(feature = "_diesel-async")]
 pub mod diesel_async {
 
@@ -345,6 +360,12 @@ pub mod diesel_async {
         async fn build(&self, app: &mut AppBuilder) {
             use crate::config::DieselAsyncOrmConfig;
             use crate::config::PoolType;
+            #[cfg(all(feature = "_mysql", feature = "_deadpool"))]
+use crate::is_mysql;
+            #[cfg(all(feature = "_postgres", feature = "_bb8"))]
+use crate::is_postgres;
+            #[cfg(all(feature = "_sqlite", feature = "_deadpool"))]
+use crate::is_sqlite;
 
             let config = app
                 .get_config::<DieselAsyncOrmConfig>()
@@ -356,27 +377,25 @@ pub mod diesel_async {
             }
 
             #[cfg(all(feature = "_mysql", feature = "_deadpool"))]
-            if config.uri.starts_with("mysql") {
+            if is_mysql(&config.uri) {
                 self.configure_async_connection_mysql_deadpool(&config, app);
             }
 
             #[cfg(all(feature = "_sqlite", feature = "_deadpool"))]
-            if config.uri.starts_with("file")
-                || config.uri.starts_with("/")
-                || config.uri.starts_with("sqlite")
+            if is_sqlite(&config.uri)
             {
                 self.configure_async_connection_sqlite_deadpool(&config, app);
             }
 
             #[cfg(all(feature = "_postgres", feature = "_bb8"))]
-            if config.pool_type == PoolType::Bb8 && config.uri.starts_with("postgres") {
+            if config.pool_type == PoolType::Bb8 && is_postgres(&config.uri) {
                 self.configure_async_connection_pg_bb8(&config, app)
                     .await
                     .expect("Failed to configure PostgreSQL BB8 connection");
             }
 
             #[cfg(all(feature = "_mysql", feature = "_bb8"))]
-            if config.pool_type == PoolType::Bb8 && config.uri.starts_with("mysql") {
+            if config.pool_type == PoolType::Bb8 && is_mysql(&config.uri) {
                 self.configure_async_connection_mysql_bb8(&config, app)
                     .await
                     .expect("Failed to configure MySQL BB8 connection");
@@ -384,9 +403,7 @@ pub mod diesel_async {
 
             #[cfg(all(feature = "_sqlite", feature = "_bb8"))]
             if config.pool_type == PoolType::Bb8
-                && (config.uri.starts_with("file")
-                    || config.uri.starts_with("/")
-                    || config.uri.starts_with("sqlite"))
+                && is_sqlite(&config.uri)
             {
                 self.configure_async_connection_sqlite_bb8(&config, app)
                     .await
@@ -394,6 +411,62 @@ pub mod diesel_async {
             }
         }
     }
+
+
+#[cfg(test)]
+mod tests{
+    use crate::config::{Bb8PoolConfig, DeadPoolConfig};
+
+    use super::*;
+    fn create_deadpool_config() -> DeadPoolConfig{
+        DeadPoolConfig{ 
+                max_connections: 1, 
+                create_timeout_in_ms: Some(10000), 
+                wait_timeout_in_ms: Some(10000),  
+                reycle_timeout_in_ms: Some(10000),  
+        }
+    }
+
+    fn create_bb8_pool_config() -> Bb8PoolConfig{
+        Bb8PoolConfig{
+                max_size:  Some(1),
+                min_idle:  Some(1),
+                test_on_check_out:  Some(true),
+                max_lifetime_in_ms: Some(1000),
+                idle_timeout_in_ms: Some(1000),
+                connection_timeout_in_ms: Some(1000),
+                retry_connection: Some(false),
+                reaper_rate_in_ms: Some(1000),
+                queue_strategy: Some(crate::config::QueueStrategy::Fifo)
+            }
+    }
+    #[tokio::test]
+    async fn test_diesel_async_bb8_pool_orm_plugin(){
+
+        let async_orm_config=DieselAsyncOrmConfig{
+            uri: "./test.db".to_owned(),
+            connection_recycle_method: None,
+            pool_config: Some(crate::config::PoolConfig::Bb8(create_bb8_pool_config())),
+            pool_type: crate::config::PoolType::Bb8
+        };
+        let pool = create_async_connection_sqlite_bb8(&async_orm_config).await;
+        assert!(pool.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_diesel_async_deadpool_orm_plugin(){
+
+        let async_orm_config=DieselAsyncOrmConfig{
+            uri: "./test.db".to_owned(),
+            connection_recycle_method: None,
+            pool_config: Some(crate::config::PoolConfig::Deadpool(create_deadpool_config())),
+            pool_type: crate::config::PoolType::Deadpool
+        };
+        let pool = create_async_connection_sqlite_deadpool(&async_orm_config);
+        assert!(pool.is_ok());
+    }
+}
+
 }
 
 #[cfg(feature = "_diesel-sync")]
@@ -423,7 +496,7 @@ pub mod diesel_sync {
 
     
 
-    fn create_async_connection_r2d2<C>(
+    pub(crate) fn create_sync_connection_r2d2<C>(
         config: &DieselSyncOrmConfig,
     ) -> Result<R2d2Pool<ConnectionManager<C>>, PoolError>
     where
@@ -481,34 +554,53 @@ pub mod diesel_sync {
             use spring::config::ConfigRegistry;
 
             use crate::config::DieselSyncOrmConfig;
+            #[cfg(feature = "_mysql")]
+use crate::is_mysql;
+            #[cfg(feature = "_postgres")]
+use crate::is_postgres;
+            #[cfg(feature = "_sqlite")]
+use crate::is_sqlite;
 
             let config = app
                 .get_config::<DieselSyncOrmConfig>()
                 .expect("diesels-orm plugin config load failed");
 
             #[cfg(feature = "_postgres")]
-            if config.uri.starts_with("postgres") {
-                let connection = create_async_connection_r2d2::<PgConnection>(&config)
+            if is_postgres(&config.uri) {
+                let connection = create_sync_connection_r2d2::<PgConnection>(&config)
                     .expect("Failed to create postgres connection pool");
                 app.add_component(connection);
             }
 
             #[cfg(feature = "_mysql")]
-            if config.uri.starts_with("mysql") {
-                let connection = create_async_connection_r2d2::<MysqlConnection>(&config)
+            if is_mysql(&config.uri) {
+                let connection = create_sync_connection_r2d2::<MysqlConnection>(&config)
                     .expect("Failed to create mysql connection pool");
                 app.add_component(connection);
             }
 
             #[cfg(feature = "_sqlite")]
-            if config.uri.starts_with("file")
-                || config.uri.starts_with("/")
-                || config.uri.starts_with("sqlite")
+            if is_sqlite(&config.uri)
             {
-                let connection = create_async_connection_r2d2::<SqliteConnection>(&config)
+                let connection = create_sync_connection_r2d2::<SqliteConnection>(&config)
                     .expect("Failed to create sqlite connection pool");
                 app.add_component(connection);
             }
+        }
+    }
+
+
+    #[cfg(test)]
+    mod tests{
+        use diesel::SqliteConnection;
+        use super::*;
+        #[test]
+        fn test_diesel_sync_orm_plugin(){
+            let sync_orm_config=DieselSyncOrmConfig::new("./sqlite_1.db".to_owned());        
+            let pool = create_sync_connection_r2d2::<SqliteConnection>(&sync_orm_config);
+            assert!(pool.is_ok());
+            assert!(pool.unwrap().get().is_ok());
+            
         }
     }
 }
