@@ -135,7 +135,8 @@ tokio = { version = "1", features = ["full"] }
 
 ```rust,no_run
 use spring::component;
-use spring::config::{Config, Configurable};
+use spring::config::Configurable;
+use spring::extractor::Config;
 use spring::plugin::ComponentRegistry;
 use spring::App;
 use serde::Deserialize;
