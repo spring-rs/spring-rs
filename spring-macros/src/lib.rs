@@ -400,7 +400,8 @@ pub fn derive_service(input: TokenStream) -> TokenStream {
 ///
 /// ## Basic Usage
 /// ```rust,ignore
-/// use spring::config::{Config, Configurable};
+/// use spring::config::Configurable;
+/// use spring::extractor::Config;
 /// use spring_macros::component;
 /// use serde::Deserialize;
 ///
