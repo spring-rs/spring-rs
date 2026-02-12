@@ -22,7 +22,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
-
+          
+      - name: Install rpc
+        run: |
+          sudo apt-get install libtirpc-dev
+          
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -53,6 +57,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Install rpc
+        run: |
+          sudo apt-get install libtirpc-dev          
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -78,7 +86,7 @@ jobs:
         run: cargo install cargo-tarpaulin
 
       - name: Generate coverage
-        run: cargo tarpaulin --workspace --timeout 300 --lib "examples/*" --out Xml --output-dir ./coverage
+        run: cargo tarpaulin --workspace --timeout 300 --lib --exclude-files "examples/*" --out Xml --output-dir ./coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -120,6 +128,14 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install protoc
 
+      - name: Install libtirpc (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install libtirpc-dev
+          
+      - name: Install libtirpc (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install libtirpc
+        
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -169,6 +185,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Install libtirpc
+        run: sudo apt-get install libtirpc-dev
+        
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -190,6 +209,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Install libtirpc    
+        run: sudo apt-get install libtirpc-dev
+        
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 

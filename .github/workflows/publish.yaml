@@ -20,6 +20,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
+
+      - name: Install libtirpc
+        run: sudo apt-get install libtirpc-dev
+          
       - name: Install dependency
         run: cargo install cargo-workspaces
       - name: Build

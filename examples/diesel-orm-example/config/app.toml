@@ -1,0 +1,53 @@
+#[diesel-async]
+#uri = "postgresql://user:pass@localhost:5432/postgres"
+#pool_type = "Deadpool"
+#pool_config = { Deadpool = { max_size = 16,  create_timeout_in_ms=1000, recycle_timeout_in_ms=1000, wait_timeout_in_ms = 1000 } }
+
+#[diesel-async]
+#uri = "/tmp/data.db"
+#pool_type = "Deadpool"
+#pool_config = { Deadpool = { max_size = 16,  create_timeout_in_ms=1000, recycle_timeout_in_ms=1000, wait_timeout_in_ms = 1000 } }
+
+
+#[diesel-async]
+#uri = "mysql://user:pass@localhost:3306/mysql"
+#pool_type = "Deadpool"
+#pool_config = { Deadpool = { max_size = 16,  create_timeout_in_ms=1000, recycle_timeout_in_ms=1000, wait_timeout_in_ms = 1000, } }
+
+#[diesel-async]
+#uri = "postgresql://user:pass@localhost:5432/postgres"
+#pool_type = "Bb8"
+#pool_config = { Bb8 = { max_size = 16, min_size = 4, test_on_check_out = true, max_lifetime_in_ms = 300000, idle_timeout_in_ms = 300000, connection_timeout_in_ms = 1000, retry_connection = true , reaper_rate_in_ms = 60000, queue_strategy = "Fifo" }}
+
+
+#[diesel-async]
+#uri = "/tmp/data.db"
+#pool_type = "Bb8"
+#pool_config = { Bb8 = { max_size = 16, min_size = 4, test_on_check_out = true, max_lifetime_in_ms = 300000, idle_timeout_in_ms = 300000, connection_timeout_in_ms = 1000, retry_connection = true , reaper_rate_in_ms = 60000, queue_strategy = "Lifo" }}
+
+
+#[diesel-async]
+#uri = "mysql://user:pass@localhost:3306/mysql"
+#pool_type = "Bb8"
+#pool_config = { Bb8 = { max_size = 16, min_size = 4, test_on_check_out = true, max_lifetime_in_ms = 300000, idle_timeout_in_ms = 300000, connection_timeout_in_ms = 1000, retry_connection = true , reaper_rate_in_ms = 60000, queue_strategy = "Lifo" }}
+
+
+#[diesel-sync]
+#uri = "postgresql://user:pass@localhost:5432/postgres"
+#pool_type = "r2d2"
+#pool_config = { R2d2 = { max_size = 16, min_idle= 4,  test_on_check_out = true, max_lifetime_in_ms = 300000, idle_timeout_in_ms=300000, connection_timeout_in_ms=5000} }
+
+
+#[diesel-sync]
+#uri = "mysql://user:pass@localhost:3306/mysql"
+#pool_type = "r2d2"
+#pool_config = { R2d2 = { max_size = 16, min_idle= 4,  test_on_check_out = true, max_lifetime_in_ms = 300000, idle_timeout_in_ms=300000, connection_timeout_in_ms=5000} }
+
+
+#[diesel-sync]
+#uri = "/tmp/data.db"
+#pool_type = "r2d2"
+#pool_config = { R2d2 = { max_size = 16, min_idle= 4,  test_on_check_out = true, max_lifetime_in_ms = 300000, idle_timeout_in_ms=300000, connection_timeout_in_ms=5000} }
+
+
+
