@@ -1,8 +1,8 @@
+use serde::Deserialize;
+use spring::component;
 use spring::config::Configurable;
 use spring::plugin::ComponentRegistry;
-use spring::component;
 use spring::App;
-use serde::Deserialize;
 
 // Define configuration
 #[derive(Debug, Clone, Configurable, Deserialize)]
@@ -34,7 +34,7 @@ struct UserService {
 // Use #[component] macro to register components
 #[component]
 fn create_db_connection(
-    spring::config::Config(config): spring::config::Config<DbConfig>,
+    spring::extractor::Config(config): spring::extractor::Config<DbConfig>,
 ) -> DbConnection {
     println!("Creating DbConnection with config: {:?}", config);
     DbConnection {
@@ -44,7 +44,7 @@ fn create_db_connection(
 
 #[component]
 fn create_user_repository(
-    spring::plugin::Component(db): spring::plugin::Component<DbConnection>,
+    spring::extractor::Component(db): spring::extractor::Component<DbConnection>,
 ) -> UserRepository {
     println!("Creating UserRepository with db: {:?}", db);
     UserRepository { db }
@@ -52,7 +52,7 @@ fn create_user_repository(
 
 #[component]
 fn create_user_service(
-    spring::plugin::Component(repo): spring::plugin::Component<UserRepository>,
+    spring::extractor::Component(repo): spring::extractor::Component<UserRepository>,
 ) -> UserService {
     println!("Creating UserService with repo: {:?}", repo);
     UserService { repo }
@@ -61,21 +61,24 @@ fn create_user_service(
 #[tokio::main]
 async fn main() {
     println!("Starting component-macro-example...");
-    
-    let app = App::new()
-        .build()
-        .await
-        .expect("Failed to build app");
-    
+
+    let app = App::new().build().await.expect("Failed to build app");
+
     // Get components
-    let db = app.get_component::<DbConnection>().expect("DbConnection not found");
+    let db = app
+        .get_component::<DbConnection>()
+        .expect("DbConnection not found");
     println!("Got DbConnection: {:?}", db);
-    
-    let repo = app.get_component::<UserRepository>().expect("UserRepository not found");
+
+    let repo = app
+        .get_component::<UserRepository>()
+        .expect("UserRepository not found");
     println!("Got UserRepository: {:?}", repo);
-    
-    let service = app.get_component::<UserService>().expect("UserService not found");
+
+    let service = app
+        .get_component::<UserService>()
+        .expect("UserService not found");
     println!("Got UserService: {:?}", service);
-    
+
     println!("All components registered successfully!");
 }

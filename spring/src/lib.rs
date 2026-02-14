@@ -12,6 +12,8 @@ pub mod banner;
 pub mod config;
 /// spring-rs definition error
 pub mod error;
+/// spring-rs extractor
+pub mod extractor;
 /// The log plugin is a built-in plugin of spring-rs and is also the first plugin loaded when the application starts.
 pub mod log;
 /// Plugin system: Through the documentation of this module you will learn how to implement your own plugins

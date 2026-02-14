@@ -12,34 +12,18 @@ use crate::{app::AppBuilder, error::AppError};
 use async_trait::async_trait;
 use component::ComponentRef;
 pub use lazy::LazyComponent;
+pub use service::Service;
 use std::{
     any::{self, Any},
     ops::Deref,
     sync::Arc,
 };
-pub use service::Service;
 
 // Re-export inventory::submit for use in submit_component_plugin! macro
 pub use inventory::submit;
 
 // Define inventory collection for auto-registered plugins
 inventory::collect!(&'static dyn Plugin);
-
-/// Wrapper type for injecting components in #[component] macro
-///
-/// This is used in component function parameters to inject dependencies.
-///
-/// # Example
-/// ```ignore
-/// #[component]
-/// fn create_service(
-///     Component(db): Component<DbConnection>,
-/// ) -> MyService {
-///     MyService::new(db)
-/// }
-/// ```
-#[derive(Debug, Clone)]
-pub struct Component<T>(pub T);
 
 /// Submit a component plugin for automatic registration
 ///
@@ -197,10 +181,10 @@ mod tests {
     #[tokio::test]
     async fn test_component_registry_add_and_get() {
         let mut app = AppBuilder::default();
-        
+
         let test_comp = TestComponent { value: 42 };
         app.add_component(test_comp);
-        
+
         // Should be able to get the component
         let retrieved = app.get_component::<TestComponent>();
         assert!(retrieved.is_some());
@@ -210,7 +194,7 @@ mod tests {
     #[tokio::test]
     async fn test_component_registry_get_nonexistent() {
         let app = AppBuilder::default();
-        
+
         // Should return None for non-existent component
         let retrieved = app.get_component::<TestComponent>();
         assert!(retrieved.is_none());
@@ -219,11 +203,11 @@ mod tests {
     #[tokio::test]
     async fn test_component_registry_has_component() {
         let mut app = AppBuilder::default();
-        
+
         assert!(!app.has_component::<TestComponent>());
-        
+
         app.add_component(TestComponent { value: 100 });
-        
+
         assert!(app.has_component::<TestComponent>());
         assert!(!app.has_component::<AnotherComponent>());
     }
@@ -231,16 +215,16 @@ mod tests {
     #[tokio::test]
     async fn test_component_registry_multiple_types() {
         let mut app = AppBuilder::default();
-        
+
         app.add_component(TestComponent { value: 1 });
         app.add_component(AnotherComponent {
             name: "test".to_string(),
         });
-        
+
         // Both should be retrievable
         let test_comp = app.get_component::<TestComponent>();
         let another_comp = app.get_component::<AnotherComponent>();
-        
+
         assert!(test_comp.is_some());
         assert!(another_comp.is_some());
         assert_eq!(test_comp.unwrap().value, 1);
@@ -251,10 +235,10 @@ mod tests {
     async fn test_get_component_ref() {
         let mut app = AppBuilder::default();
         app.add_component(TestComponent { value: 999 });
-        
+
         let comp_ref = app.get_component_ref::<TestComponent>();
         assert!(comp_ref.is_some());
-        
+
         let comp_ref = comp_ref.unwrap();
         assert_eq!(comp_ref.value, 999);
     }
@@ -263,7 +247,7 @@ mod tests {
     async fn test_try_get_component_success() {
         let mut app = AppBuilder::default();
         app.add_component(TestComponent { value: 50 });
-        
+
         let result = app.try_get_component::<TestComponent>();
         assert!(result.is_ok());
         assert_eq!(result.unwrap().value, 50);
@@ -272,7 +256,7 @@ mod tests {
     #[tokio::test]
     async fn test_try_get_component_failure() {
         let app = AppBuilder::default();
-        
+
         let result = app.try_get_component::<TestComponent>();
         assert!(result.is_err());
     }
@@ -288,7 +272,7 @@ mod tests {
     async fn test_get_expect_component_success() {
         let mut app = AppBuilder::default();
         app.add_component(TestComponent { value: 777 });
-        
+
         let comp = app.get_expect_component::<TestComponent>();
         assert_eq!(comp.value, 777);
     }
@@ -301,9 +285,7 @@ mod tests {
     #[async_trait]
     impl Plugin for TestPlugin {
         async fn build(&self, app: &mut AppBuilder) {
-            app.add_component(TestComponent {
-                value: 123,
-            });
+            app.add_component(TestComponent { value: 123 });
         }
 
         fn name(&self) -> &str {
@@ -319,7 +301,7 @@ mod tests {
             // This plugin depends on TestPlugin's component
             let test_comp = app.get_component::<TestComponent>();
             assert!(test_comp.is_some());
-            
+
             app.add_component(AnotherComponent {
                 name: format!("dependent_{}", test_comp.unwrap().value),
             });
@@ -338,7 +320,7 @@ mod tests {
     async fn test_plugin_registration() {
         let mut app = AppBuilder::default();
         app.add_plugin(TestPlugin { name: "TestPlugin" });
-        
+
         assert!(app.is_plugin_added::<TestPlugin>());
     }
 
@@ -346,12 +328,12 @@ mod tests {
     async fn test_plugin_build_adds_component() {
         let mut app = AppBuilder::default();
         app.add_plugin(TestPlugin { name: "TestPlugin" });
-        
+
         // Don't call build() to avoid tracing initialization conflict
         // Instead, manually trigger plugin build
         let plugin = TestPlugin { name: "TestPlugin" };
         plugin.build(&mut app).await;
-        
+
         let comp = app.get_component::<TestComponent>();
         assert!(comp.is_some());
         assert_eq!(comp.unwrap().value, 123);
@@ -361,29 +343,29 @@ mod tests {
     async fn test_plugin_dependencies_order() {
         use std::sync::Once;
         static INIT: Once = Once::new();
-        
+
         // Only initialize tracing once for all tests
         INIT.call_once(|| {
             let _ = tracing_subscriber::fmt().try_init();
         });
-        
+
         let mut app = AppBuilder::default();
-        
+
         // Add in reverse order - dependency resolution should handle this
         app.add_plugin(DependentPlugin);
         app.add_plugin(TestPlugin { name: "TestPlugin" });
-        
+
         // Manually build plugins to test dependency order
         let test_plugin = TestPlugin { name: "TestPlugin" };
         test_plugin.build(&mut app).await;
-        
+
         let dependent_plugin = DependentPlugin;
         dependent_plugin.build(&mut app).await;
-        
+
         // Both components should exist
         assert!(app.has_component::<TestComponent>());
         assert!(app.has_component::<AnotherComponent>());
-        
+
         let another = app.get_component::<AnotherComponent>().unwrap();
         assert_eq!(another.name, "dependent_123");
     }
@@ -408,10 +390,10 @@ mod tests {
     #[tokio::test]
     async fn test_immediate_plugin() {
         let mut app = AppBuilder::default();
-        
+
         // Immediate plugin should build right away
         app.add_plugin(ImmediatePlugin);
-        
+
         // Component should be available immediately
         assert!(app.has_component::<TestComponent>());
         let comp = app.get_component::<TestComponent>().unwrap();

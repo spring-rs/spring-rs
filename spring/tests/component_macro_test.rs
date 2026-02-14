@@ -1,11 +1,12 @@
 //! Integration tests for #[component] macro
 
-use spring::app::AppBuilder;
-use spring::config::{Config, Configurable};
-use spring::plugin::{Component, ComponentRegistry};
-use spring::component;
-use spring::App;
 use serde::Deserialize;
+use spring::app::AppBuilder;
+use spring::component;
+use spring::config::Configurable;
+use spring::extractor::{Component, Config};
+use spring::plugin::ComponentRegistry;
+use spring::App;
 
 // Test configuration
 #[derive(Debug, Clone, Configurable, Deserialize)]
@@ -86,25 +87,25 @@ async fn test_component_macro_basic() {
         host = "localhost"
         port = 5432
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Verify all components are registered
     assert!(app.has_component::<TestConnection>());
     assert!(app.has_component::<TestRepository>());
     assert!(app.has_component::<TestService>());
-    
+
     // Verify component values
     let conn = app.get_component::<TestConnection>().unwrap();
     assert_eq!(conn.url, "localhost:5432");
-    
+
     let repo = app.get_component::<TestRepository>().unwrap();
     assert_eq!(repo.conn.url, "localhost:5432");
-    
+
     let service = app.get_component::<TestService>().unwrap();
     assert_eq!(service.repo.conn.url, "localhost:5432");
 }
@@ -116,16 +117,16 @@ async fn test_component_dependency_order() {
         host = "testhost"
         port = 3306
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // All components should be available
     let service = app.get_component::<TestService>().unwrap();
-    
+
     // Verify the dependency chain
     assert_eq!(service.repo.conn.url, "testhost:3306");
 }
@@ -137,13 +138,13 @@ async fn test_async_component() {
         host = "asynchost"
         port = 8080
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Async component should be registered
     let conn = app.get_component::<AsyncConnection>().unwrap();
     assert_eq!(conn.url, "async-asynchost:8080");
@@ -156,13 +157,13 @@ async fn test_result_return_type() {
         host = "resulthost"
         port = 9000
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Component with Result return type should be registered
     let conn = app.get_component::<ResultConnection>().unwrap();
     assert_eq!(conn.url, "result-resulthost:9000");
@@ -175,17 +176,17 @@ async fn test_component_clone_semantics() {
         host = "clonehost"
         port = 7000
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Get the same component multiple times
     let conn1 = app.get_component::<TestConnection>().unwrap();
     let conn2 = app.get_component::<TestConnection>().unwrap();
-    
+
     // Both should have the same value
     assert_eq!(conn1.url, conn2.url);
 }
@@ -194,45 +195,45 @@ async fn test_component_clone_semantics() {
 async fn test_mixed_manual_and_auto_plugins() {
     use spring::async_trait;
     use spring::plugin::{MutableComponentRegistry, Plugin};
-    
+
     #[derive(Clone)]
     struct ManualComponent {
         value: i32,
     }
-    
+
     struct ManualPlugin;
-    
+
     #[async_trait]
     impl Plugin for ManualPlugin {
         async fn build(&self, app: &mut AppBuilder) {
             app.add_component(ManualComponent { value: 999 });
         }
-        
+
         fn name(&self) -> &str {
             "ManualPlugin"
         }
     }
-    
+
     let toml_config = r#"
         [test-db]
         host = "mixedhost"
         port = 6000
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
-        .add_plugin(ManualPlugin)  // Manual plugin
+        .add_plugin(ManualPlugin) // Manual plugin
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Both manual and auto components should be available
     assert!(app.has_component::<ManualComponent>());
     assert!(app.has_component::<TestConnection>());
-    
+
     let manual = app.get_component::<ManualComponent>().unwrap();
     assert_eq!(manual.value, 999);
-    
+
     let conn = app.get_component::<TestConnection>().unwrap();
     assert_eq!(conn.url, "mixedhost:6000");
 }
@@ -243,26 +244,26 @@ async fn test_component_with_config_only() {
     struct ConfigOnlyComponent {
         setting: String,
     }
-    
+
     #[component]
     fn create_config_only(Config(config): Config<TestDbConfig>) -> ConfigOnlyComponent {
         ConfigOnlyComponent {
             setting: config.host,
         }
     }
-    
+
     let toml_config = r#"
         [test-db]
         host = "configonly"
         port = 5555
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     let comp = app.get_component::<ConfigOnlyComponent>().unwrap();
     assert_eq!(comp.setting, "configonly");
 }
@@ -274,17 +275,17 @@ async fn test_component_ref_usage() {
         host = "refhost"
         port = 4444
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Test get_component_ref
     let conn_ref = app.get_component_ref::<TestConnection>();
     assert!(conn_ref.is_some());
-    
+
     let conn_ref = conn_ref.unwrap();
     assert_eq!(conn_ref.url, "refhost:4444");
 }
@@ -296,21 +297,21 @@ async fn test_try_get_component() {
         host = "tryhost"
         port = 3333
     "#;
-    
+
     let app = App::new()
         .use_config_str(toml_config)
         .build()
         .await
         .expect("Failed to build app");
-    
+
     // Existing component
     let result = app.try_get_component::<TestConnection>();
     assert!(result.is_ok());
-    
+
     // Non-existent component
     #[derive(Clone)]
     struct NonExistent;
-    
+
     let result = app.try_get_component::<NonExistent>();
     assert!(result.is_err());
 }
