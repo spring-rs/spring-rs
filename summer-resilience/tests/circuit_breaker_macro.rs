@@ -24,11 +24,8 @@ async fn macro_returns_a_typed_error_when_the_circuit_is_open() {
         .use_config_str(
             r#"
             [resilience.circuit_breaker.instances.backend]
-            failure_rate_threshold = 50.0
-            sliding_window_size = 1
-            minimum_number_of_calls = 1
+            failure_threshold = 1
             wait_duration_in_open_state = 60000
-            permitted_calls_in_half_open_state = 1
             "#,
         )
         .add_plugin(ResiliencePlugin)

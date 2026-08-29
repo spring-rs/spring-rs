@@ -1,11 +1,15 @@
 use crate::config::CircuitBreakerConfig;
-use std::collections::{HashMap, VecDeque};
+use failsafe::futures::CircuitBreaker as _;
+use std::collections::HashMap;
 use std::future::Future;
+use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
-use tokio::sync::Mutex;
-use tokio::time::Instant;
+
+const CLOSED: u8 = 0;
+const OPEN: u8 = 1;
+const HALF_OPEN: u8 = 2;
 
 /// The externally visible state of a circuit breaker.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16,191 +20,96 @@ pub enum CircuitBreakerState {
 }
 
 #[derive(Debug, Clone)]
-struct CircuitBreakerPolicy {
-    failure_rate_threshold: f64,
-    sliding_window_size: usize,
-    minimum_number_of_calls: usize,
-    wait_duration_in_open_state: Duration,
-    permitted_calls_in_half_open_state: u32,
+struct CircuitInstrument {
+    name: Arc<str>,
+    state: Arc<AtomicU8>,
 }
 
-impl TryFrom<CircuitBreakerConfig> for CircuitBreakerPolicy {
-    type Error = CircuitBreakerConfigError;
+impl failsafe::Instrument for CircuitInstrument {
+    fn on_call_rejected(&self) {
+        tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker rejected a call");
+    }
 
-    fn try_from(config: CircuitBreakerConfig) -> Result<Self, Self::Error> {
-        if !(config.failure_rate_threshold.is_finite()
-            && 0.0 < config.failure_rate_threshold
-            && config.failure_rate_threshold <= 100.0)
-        {
-            return Err(CircuitBreakerConfigError::InvalidFailureRateThreshold(
-                config.failure_rate_threshold,
-            ));
+    fn on_open(&self) {
+        self.state.store(OPEN, Ordering::Release);
+        tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker opened");
+    }
+
+    fn on_half_open(&self) {
+        self.state.store(HALF_OPEN, Ordering::Release);
+        tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker entered half-open state");
+    }
+
+    fn on_closed(&self) {
+        self.state.store(CLOSED, Ordering::Release);
+        tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker closed");
+    }
+}
+
+type FailsafeCircuitBreaker = failsafe::StateMachine<
+    failsafe::failure_policy::ConsecutiveFailures<failsafe::backoff::Constant>,
+    CircuitInstrument,
+>;
+
+/// One named Failsafe circuit breaker shared between asynchronous calls.
+#[derive(Debug, Clone)]
+pub struct CircuitBreaker {
+    name: Arc<str>,
+    inner: FailsafeCircuitBreaker,
+    state: Arc<AtomicU8>,
+}
+
+impl CircuitBreaker {
+    fn try_new(
+        name: String,
+        config: CircuitBreakerConfig,
+    ) -> Result<Self, CircuitBreakerConfigError> {
+        if config.failure_threshold == 0 {
+            return Err(CircuitBreakerConfigError::ZeroFailureThreshold);
         }
-        if config.sliding_window_size == 0 {
-            return Err(CircuitBreakerConfigError::ZeroSlidingWindowSize);
-        }
-        if config.minimum_number_of_calls == 0
-            || config.minimum_number_of_calls > config.sliding_window_size
-        {
-            return Err(CircuitBreakerConfigError::InvalidMinimumNumberOfCalls);
-        }
-        if config.permitted_calls_in_half_open_state == 0 {
-            return Err(CircuitBreakerConfigError::ZeroPermittedHalfOpenCalls);
+        if config.wait_duration_in_open_state == 0 {
+            return Err(CircuitBreakerConfigError::ZeroOpenStateDuration);
         }
 
-        Ok(Self {
-            failure_rate_threshold: config.failure_rate_threshold,
-            sliding_window_size: config.sliding_window_size as usize,
-            minimum_number_of_calls: config.minimum_number_of_calls as usize,
-            wait_duration_in_open_state: Duration::from_millis(config.wait_duration_in_open_state),
-            permitted_calls_in_half_open_state: config.permitted_calls_in_half_open_state,
-        })
+        let name: Arc<str> = Arc::from(name);
+        let state = Arc::new(AtomicU8::new(CLOSED));
+        let instrument = CircuitInstrument {
+            name: name.clone(),
+            state: state.clone(),
+        };
+        let backoff =
+            failsafe::backoff::constant(Duration::from_millis(config.wait_duration_in_open_state));
+        let policy =
+            failsafe::failure_policy::consecutive_failures(config.failure_threshold, backoff);
+        let inner = failsafe::Config::new()
+            .failure_policy(policy)
+            .instrument(instrument)
+            .build();
+
+        Ok(Self { name, inner, state })
+    }
+
+    /// Returns the last state reported by Failsafe instrumentation.
+    pub async fn state(&self) -> CircuitBreakerState {
+        match self.state.load(Ordering::Acquire) {
+            CLOSED => CircuitBreakerState::Closed,
+            OPEN => CircuitBreakerState::Open,
+            HALF_OPEN => CircuitBreakerState::HalfOpen,
+            _ => unreachable!("invalid circuit breaker state"),
+        }
     }
 }
 
 /// Invalid circuit breaker policy configuration.
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum CircuitBreakerConfigError {
-    #[error("failure_rate_threshold must be finite and greater than 0 and at most 100, got {0}")]
-    InvalidFailureRateThreshold(f64),
-    #[error("sliding_window_size must be at least 1")]
-    ZeroSlidingWindowSize,
-    #[error("minimum_number_of_calls must be between 1 and sliding_window_size")]
-    InvalidMinimumNumberOfCalls,
-    #[error("permitted_calls_in_half_open_state must be at least 1")]
-    ZeroPermittedHalfOpenCalls,
+    #[error("failure_threshold must be at least 1")]
+    ZeroFailureThreshold,
+    #[error("wait_duration_in_open_state must be at least 1 millisecond")]
+    ZeroOpenStateDuration,
 }
 
-#[derive(Debug)]
-enum State {
-    Closed {
-        outcomes: VecDeque<bool>,
-    },
-    Open {
-        opened_at: Instant,
-    },
-    HalfOpen {
-        admitted: u32,
-        completed: u32,
-        failures: u32,
-    },
-}
-
-/// One configured circuit breaker, shared safely between asynchronous calls.
-#[derive(Debug, Clone)]
-pub struct CircuitBreaker {
-    name: Arc<str>,
-    policy: Arc<CircuitBreakerPolicy>,
-    state: Arc<Mutex<State>>,
-}
-
-impl CircuitBreaker {
-    fn new(name: String, policy: CircuitBreakerPolicy) -> Self {
-        Self {
-            name: Arc::from(name),
-            policy: Arc::new(policy),
-            state: Arc::new(Mutex::new(State::Closed {
-                outcomes: VecDeque::new(),
-            })),
-        }
-    }
-
-    /// Returns the current state, applying an elapsed open-state transition.
-    pub async fn state(&self) -> CircuitBreakerState {
-        let mut state = self.state.lock().await;
-        self.transition_from_open_if_ready(&mut state);
-        match *state {
-            State::Closed { .. } => CircuitBreakerState::Closed,
-            State::Open { .. } => CircuitBreakerState::Open,
-            State::HalfOpen { .. } => CircuitBreakerState::HalfOpen,
-        }
-    }
-
-    async fn acquire_permission(&self) -> Result<(), CallNotPermitted> {
-        let mut state = self.state.lock().await;
-        self.transition_from_open_if_ready(&mut state);
-        match &mut *state {
-            State::Closed { .. } => Ok(()),
-            State::Open { .. } => Err(CallNotPermitted {
-                name: self.name.to_string(),
-            }),
-            State::HalfOpen { admitted, .. }
-                if *admitted < self.policy.permitted_calls_in_half_open_state =>
-            {
-                *admitted += 1;
-                Ok(())
-            }
-            State::HalfOpen { .. } => Err(CallNotPermitted {
-                name: self.name.to_string(),
-            }),
-        }
-    }
-
-    fn transition_from_open_if_ready(&self, state: &mut State) {
-        let ready = matches!(state, State::Open { opened_at } if opened_at.elapsed() >= self.policy.wait_duration_in_open_state);
-        if ready {
-            *state = State::HalfOpen {
-                admitted: 0,
-                completed: 0,
-                failures: 0,
-            };
-            tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker entered half-open state");
-        }
-    }
-
-    async fn record(&self, failed: bool) {
-        let mut state = self.state.lock().await;
-        match &mut *state {
-            State::Closed { outcomes } => {
-                outcomes.push_back(failed);
-                if outcomes.len() > self.policy.sliding_window_size {
-                    outcomes.pop_front();
-                }
-                if outcomes.len() >= self.policy.minimum_number_of_calls
-                    && failure_rate(outcomes.iter().copied()) >= self.policy.failure_rate_threshold
-                {
-                    self.open(&mut state);
-                }
-            }
-            State::HalfOpen {
-                admitted: _,
-                completed,
-                failures,
-            } => {
-                *completed += 1;
-                *failures += u32::from(failed);
-                if *completed == self.policy.permitted_calls_in_half_open_state {
-                    let rate = (*failures as f64 / *completed as f64) * 100.0;
-                    if rate >= self.policy.failure_rate_threshold {
-                        self.open(&mut state);
-                    } else {
-                        *state = State::Closed {
-                            outcomes: VecDeque::new(),
-                        };
-                        tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker closed");
-                    }
-                }
-            }
-            State::Open { .. } => {}
-        }
-    }
-
-    fn open(&self, state: &mut State) {
-        *state = State::Open {
-            opened_at: Instant::now(),
-        };
-        tracing::debug!(circuit_breaker.name = %self.name, "circuit breaker opened");
-    }
-}
-
-fn failure_rate(outcomes: impl Iterator<Item = bool>) -> f64 {
-    let (failures, total) = outcomes.fold((0usize, 0usize), |(failures, total), failed| {
-        (failures + usize::from(failed), total + 1)
-    });
-    (failures as f64 / total as f64) * 100.0
-}
-
-/// Error returned when an open circuit rejects a call.
+/// Error returned when Failsafe rejects a call while the circuit is open.
 #[derive(Debug, Clone, Error, PartialEq, Eq)]
 #[error("circuit breaker `{name}` does not permit calls")]
 pub struct CallNotPermitted {
@@ -223,7 +132,7 @@ pub enum CircuitBreakerError<E> {
     Operation(E),
 }
 
-/// Executes one asynchronous operation through a circuit breaker.
+/// Executes one asynchronous operation through Failsafe.
 pub async fn execute<F, Fut, T, E, P>(
     circuit_breaker: CircuitBreaker,
     operation: F,
@@ -234,16 +143,17 @@ where
     Fut: Future<Output = Result<T, E>>,
     P: Fn(&E) -> bool,
 {
-    circuit_breaker.acquire_permission().await?;
-    match operation().await {
-        Ok(value) => {
-            circuit_breaker.record(false).await;
-            Ok(value)
+    match circuit_breaker
+        .inner
+        .call_with(record_failure, operation())
+        .await
+    {
+        Ok(value) => Ok(value),
+        Err(failsafe::Error::Inner(error)) => Err(CircuitBreakerError::Operation(error)),
+        Err(failsafe::Error::Rejected) => Err(CallNotPermitted {
+            name: circuit_breaker.name.to_string(),
         }
-        Err(error) => {
-            circuit_breaker.record(record_failure(&error)).await;
-            Err(CircuitBreakerError::Operation(error))
-        }
+        .into()),
     }
 }
 
@@ -260,8 +170,8 @@ impl CircuitBreakerRegistry {
         let circuit_breakers = configs
             .into_iter()
             .map(
-                |(name, config)| match CircuitBreakerPolicy::try_from(config) {
-                    Ok(policy) => Ok((name.clone(), CircuitBreaker::new(name, policy))),
+                |(name, config)| match CircuitBreaker::try_new(name.clone(), config) {
+                    Ok(circuit_breaker) => Ok((name, circuit_breaker)),
                     Err(source) => Err(NamedCircuitBreakerConfigError { name, source }),
                 },
             )
@@ -288,17 +198,13 @@ mod tests {
     use super::*;
 
     fn breaker(config: CircuitBreakerConfig) -> CircuitBreaker {
-        CircuitBreaker::new(
-            "test".into(),
-            CircuitBreakerPolicy::try_from(config).unwrap(),
-        )
+        CircuitBreaker::try_new("test".into(), config).unwrap()
     }
 
     #[tokio::test]
-    async fn opens_after_the_configured_failure_rate_is_reached() {
+    async fn opens_after_the_configured_consecutive_failures() {
         let breaker = breaker(CircuitBreakerConfig {
-            sliding_window_size: 2,
-            minimum_number_of_calls: 2,
+            failure_threshold: 2,
             ..CircuitBreakerConfig::default()
         });
 
@@ -323,14 +229,11 @@ mod tests {
         ));
     }
 
-    #[tokio::test(start_paused = true)]
+    #[tokio::test]
     async fn successful_half_open_probe_closes_the_circuit() {
         let breaker = breaker(CircuitBreakerConfig {
-            sliding_window_size: 1,
-            minimum_number_of_calls: 1,
-            wait_duration_in_open_state: 100,
-            permitted_calls_in_half_open_state: 1,
-            ..CircuitBreakerConfig::default()
+            failure_threshold: 1,
+            wait_duration_in_open_state: 1,
         });
         let _ = execute(
             breaker.clone(),
@@ -338,7 +241,7 @@ mod tests {
             |_| true,
         )
         .await;
-        tokio::time::advance(Duration::from_millis(100)).await;
+        tokio::time::sleep(Duration::from_millis(2)).await;
 
         let result = execute(breaker.clone(), || async { Ok::<_, &str>(42) }, |_| true).await;
 
@@ -346,16 +249,73 @@ mod tests {
         assert_eq!(breaker.state().await, CircuitBreakerState::Closed);
     }
 
-    #[test]
-    fn rejects_an_invalid_minimum_call_count() {
-        let result = CircuitBreakerPolicy::try_from(CircuitBreakerConfig {
-            sliding_window_size: 2,
-            minimum_number_of_calls: 3,
+    #[tokio::test]
+    async fn ignored_errors_do_not_open_the_circuit() {
+        let breaker = breaker(CircuitBreakerConfig {
+            failure_threshold: 1,
             ..CircuitBreakerConfig::default()
         });
+
+        let result = execute(
+            breaker.clone(),
+            || async { Err::<(), _>("ignored") },
+            |_| false,
+        )
+        .await;
+
+        assert!(matches!(
+            result,
+            Err(CircuitBreakerError::Operation("ignored"))
+        ));
+        assert_eq!(breaker.state().await, CircuitBreakerState::Closed);
+    }
+
+    #[tokio::test]
+    async fn cancelled_half_open_probe_does_not_block_the_next_probe() {
+        let breaker = breaker(CircuitBreakerConfig {
+            failure_threshold: 1,
+            wait_duration_in_open_state: 1,
+        });
+        let _ = execute(
+            breaker.clone(),
+            || async { Err::<(), _>("failed") },
+            |_| true,
+        )
+        .await;
+        tokio::time::sleep(Duration::from_millis(2)).await;
+
+        let cancelled = tokio::time::timeout(
+            Duration::from_millis(1),
+            execute(
+                breaker.clone(),
+                || async {
+                    tokio::time::sleep(Duration::from_secs(1)).await;
+                    Ok::<_, &str>(())
+                },
+                |_| true,
+            ),
+        )
+        .await;
+        assert!(cancelled.is_err());
+        assert_eq!(breaker.state().await, CircuitBreakerState::HalfOpen);
+
+        let result = execute(breaker.clone(), || async { Ok::<_, &str>(42) }, |_| true).await;
+        assert_eq!(result.unwrap(), 42);
+        assert_eq!(breaker.state().await, CircuitBreakerState::Closed);
+    }
+
+    #[test]
+    fn rejects_a_zero_failure_threshold() {
+        let result = CircuitBreaker::try_new(
+            "test".into(),
+            CircuitBreakerConfig {
+                failure_threshold: 0,
+                ..CircuitBreakerConfig::default()
+            },
+        );
         assert_eq!(
             result.unwrap_err(),
-            CircuitBreakerConfigError::InvalidMinimumNumberOfCalls
+            CircuitBreakerConfigError::ZeroFailureThreshold
         );
     }
 }

@@ -56,15 +56,12 @@ their own idempotency guarantees.
 
 ## Circuit breaker configuration
 
-Circuit breakers use a count-based sliding window:
+Circuit breakers use Failsafe's consecutive-failure policy and state machine:
 
 ```toml
 [resilience.circuit_breaker.instances.inventory]
-failure_rate_threshold = 50.0
-sliding_window_size = 20
-minimum_number_of_calls = 10
+failure_threshold = 5
 wait_duration_in_open_state = 30000
-permitted_calls_in_half_open_state = 5
 ```
 
 Guard an asynchronous function with the configured instance:

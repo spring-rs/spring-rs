@@ -11,13 +11,14 @@ repository.workspace = true
 
 [dependencies]
 backoff = { workspace = true }
+failsafe = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 summer = { path = "../summer", version = "0.7" }
 summer-macros = { path = "../summer-macros", version = "0.7" }
 thiserror = { workspace = true }
-tokio = { workspace = true, features = ["sync", "time"] }
+tokio = { workspace = true, features = ["time"] }
 tracing = { workspace = true }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["macros", "rt-multi-thread", "test-util"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
