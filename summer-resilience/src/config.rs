@@ -12,6 +12,10 @@ pub struct ResilienceConfig {
     /// Named retry policies.
     #[serde(default)]
     pub retry: RetryPoliciesConfig,
+
+    /// Named circuit breaker policies.
+    #[serde(default)]
+    pub circuit_breaker: CircuitBreakerPoliciesConfig,
 }
 
 /// Collection of named retry policy instances.
@@ -20,6 +24,50 @@ pub struct RetryPoliciesConfig {
     /// Policies keyed by the name used in `#[retry(name = "...")]`.
     #[serde(default)]
     pub instances: HashMap<String, RetryConfig>,
+}
+
+/// Collection of named circuit breaker policy instances.
+#[derive(Debug, Default, Clone, JsonSchema, Deserialize)]
+pub struct CircuitBreakerPoliciesConfig {
+    /// Policies keyed by the name used in `#[circuit_breaker(name = "...")]`.
+    #[serde(default)]
+    pub instances: HashMap<String, CircuitBreakerConfig>,
+}
+
+/// Configuration for one circuit breaker policy.
+#[derive(Debug, Clone, JsonSchema, Deserialize)]
+pub struct CircuitBreakerConfig {
+    /// Failure percentage that opens the circuit.
+    #[serde(default = "default_failure_rate_threshold")]
+    pub failure_rate_threshold: f64,
+
+    /// Number of recent calls retained by the count-based sliding window.
+    #[serde(default = "default_sliding_window_size")]
+    pub sliding_window_size: u32,
+
+    /// Calls required before the failure rate is evaluated.
+    #[serde(default = "default_minimum_number_of_calls")]
+    pub minimum_number_of_calls: u32,
+
+    /// Time spent open before a call can probe the dependency, in milliseconds.
+    #[serde(default = "default_wait_duration_in_open_state")]
+    pub wait_duration_in_open_state: u64,
+
+    /// Calls allowed while deciding whether a half-open circuit can close.
+    #[serde(default = "default_permitted_calls_in_half_open_state")]
+    pub permitted_calls_in_half_open_state: u32,
+}
+
+impl Default for CircuitBreakerConfig {
+    fn default() -> Self {
+        Self {
+            failure_rate_threshold: default_failure_rate_threshold(),
+            sliding_window_size: default_sliding_window_size(),
+            minimum_number_of_calls: default_minimum_number_of_calls(),
+            wait_duration_in_open_state: default_wait_duration_in_open_state(),
+            permitted_calls_in_half_open_state: default_permitted_calls_in_half_open_state(),
+        }
+    }
 }
 
 /// Configuration for one retry policy.
@@ -81,4 +129,24 @@ const fn default_exponential_backoff_multiplier() -> f64 {
 
 const fn default_randomized_wait_factor() -> f64 {
     0.5
+}
+
+const fn default_failure_rate_threshold() -> f64 {
+    50.0
+}
+
+const fn default_sliding_window_size() -> u32 {
+    100
+}
+
+const fn default_minimum_number_of_calls() -> u32 {
+    100
+}
+
+const fn default_wait_duration_in_open_state() -> u64 {
+    60_000
+}
+
+const fn default_permitted_calls_in_half_open_state() -> u32 {
+    10
 }
