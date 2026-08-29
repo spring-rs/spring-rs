@@ -1,0 +1,10 @@
+[web]
+binding = "127.0.0.1"
+port = 18082
+
+[resilience.circuit_breaker.instances.fx-quotes]
+failure_rate_threshold = 50.0
+sliding_window_size = 2
+minimum_number_of_calls = 2
+wait_duration_in_open_state = 100
+permitted_calls_in_half_open_state = 1
