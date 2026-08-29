@@ -13,6 +13,7 @@ members = [
     "summer-stream",
     "summer-mail",
     "summer-opentelemetry",
+    "summer-resilience",
     "summer-apalis",
     "summer-nacos",
     "summer-xxl-job",
@@ -39,6 +40,7 @@ repository = "https://github.com/summer-rs/summer-rs"
 [workspace.dependencies]
 aide = "0.16.0-alpha.2"
 anyhow = "1.0"
+backoff = "0.4"
 apalis = "1.0.0-rc.8"
 apalis-redis = "1.0.0-rc.8"
 apalis-amqp = "1.0.0-rc.8"
